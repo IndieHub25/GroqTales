@@ -30,6 +30,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
+import { truncateAddress } from '@/lib/utils';
 
 /**
  * WalletConnect Component
@@ -62,15 +63,6 @@ export default function WalletConnect() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [copyTooltip, setCopyTooltip] = useState('Click to copy');
 
-  /**
-   * Formats wallet address for display
-   * @param address - The wallet address to format
-   * @returns Formatted address string
-   */
-  const formatAddress = useCallback((address: string | null) => {
-    if (!address) return '';
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  }, []);
 
   /**
    * Copies wallet address to clipboard
@@ -157,7 +149,7 @@ export default function WalletConnect() {
               aria-expanded={showDropdown ? 'true' : 'false'}
             >
               <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              <span>{ensName || formatAddress(account)}</span>
+              <span>{ensName || truncateAddress(account)}</span>
               <ChevronDown className="h-4 w-4" />
             </div>
           </TooltipTrigger>
@@ -174,30 +166,32 @@ export default function WalletConnect() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
           {/* Account Info */}
-          <div className="px-3 py-2 border-b">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={`https://api.dicebear.com/7.x/identicon/svg?seed=${account}`}
-                />
-                <AvatarFallback>
-                  {account?.slice(2, 4).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+          <div className="px-4 py-3 border-b-4 border-black bg-white">
+            <div className="flex items-center gap-4">
+              <div className="border-4 border-black p-0.5 bg-white">
+                <Avatar className="h-10 w-10 rounded-none">
+                  <AvatarImage
+                    src={`https://api.dicebear.com/7.x/identicon/svg?seed=${account}`}
+                  />
+                  <AvatarFallback className="rounded-none bg-black text-white font-black text-sm">
+                    {account?.slice(2, 4).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {ensName || formatAddress(account)}
+                <p className="text-sm font-black uppercase truncate tracking-tight">
+                  {ensName || truncateAddress(account)}
                 </p>
-                <p className="text-xs text-muted-foreground">{balance} ETH</p>
+                <p className="text-xs font-bold text-primary italic uppercase">{balance} ETH</p>
               </div>
             </div>
           </div>
 
           {/* Network Info */}
-          <div className="px-3 py-2 border-b">
+          <div className="px-4 py-2 border-b-4 border-black bg-muted/30">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Network</span>
-              <span className="text-xs font-medium">
+              <span className="text-xs font-black uppercase text-muted-foreground italic">Network:</span>
+              <span className="text-xs font-black uppercase bg-yellow-400 text-black px-2 py-0.5 border border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                 {networkName || 'Ethereum'}
               </span>
             </div>

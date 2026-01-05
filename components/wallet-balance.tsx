@@ -5,6 +5,7 @@ import React from 'react';
 
 import { useWeb3 } from '@/components/providers/web3-provider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { truncateAddress } from '@/lib/utils';
 
 export function WalletBalance() {
   const { account, connected } = useWeb3();
@@ -26,7 +27,7 @@ export function WalletBalance() {
       <CardContent>
         <p className="text-2xl font-bold text-center">{mockBalance}</p>
         <p className="text-sm text-muted-foreground text-center mt-1">
-          Connected: {`${account.slice(0, 6)}...${account.slice(-4)}`}
+          Connected: {truncateAddress(account)}
         </p>
       </CardContent>
     </Card>
