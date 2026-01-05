@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
+import { truncateAddress } from '@/lib/utils';
 
 interface TextNFT {
   id: number;
@@ -189,7 +190,7 @@ export function TextNFTDetailDialog({
                     <div>
                       <span className="text-muted-foreground">Owner:</span>
                       <span className="ml-2 font-mono text-xs">
-                        {story.owner.slice(0, 6)}...{story.owner.slice(-4)}
+                        {truncateAddress(story.owner)}
                       </span>
                     </div>
                   </div>
