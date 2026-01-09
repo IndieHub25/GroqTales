@@ -60,59 +60,44 @@ export function UserNav() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        className="w-56 sm:w-64 p-0 overflow-hidden border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-white dark:bg-slate-950 z-[9999]" 
-        align="end"
-        alignOffset={-8}
-        sideOffset={8}
-      >
+      <DropdownMenuContent className="w-64 p-0 overflow-hidden border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-white dark:bg-slate-950" align="end">
+        <DropdownMenuLabel className="bg-yellow-400 dark:bg-yellow-600 text-black dark:text-white italic border-b-4 border-black py-3">User Options</DropdownMenuLabel>
 
-        {/* Header Section */}
-        <DropdownMenuLabel className="bg-yellow-400 dark:bg-yellow-600 text-black dark:text-white italic border-b-4 border-black py-3 px-4">
-          User Options
-        </DropdownMenuLabel>
-
-        {/* Menu Items Container */}
-        <div className="bg-white dark:bg-slate-950 p-2">
-          <DropdownMenuGroup className="space-y-1">
-            <DropdownMenuItem asChild className="cursor-pointer text-black dark:text-white rounded border-2 border-transparent hover:border-black dark:hover:border-white transition-all px-3 py-1.5 uppercase font-bold">
-              <Link href="/profile" className="flex items-center w-full">
-                <User className="mr-3 h-4 w-4 flex-shrink-0" />
-                Profile
+        <div className="bg-white dark:bg-slate-950 p-1">
+          <DropdownMenuGroup>
+            <DropdownMenuItem asChild className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all">
+              <Link href="/profile" className="flex items-center w-full uppercase py-2">
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
               </Link>
             </DropdownMenuItem>
-
-            <DropdownMenuItem asChild className="cursor-pointer text-black dark:text-white rounded border-2 border-transparent hover:border-black dark:hover:border-white transition-all px-3 py-1.5 uppercase font-bold">
-              <Link href="/my-stories" className="flex items-center w-full">
-                <BookOpen className="mr-3 h-4 w-4 flex-shrink-0" />
-                My Stories
+            <DropdownMenuItem asChild className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all">
+              <Link href="/my-stories" className="flex items-center w-full uppercase py-2">
+                <BookOpen className="mr-2 h-4 w-4" />
+                <span>My Stories</span>
               </Link>
             </DropdownMenuItem>
-
-            <DropdownMenuItem asChild className="cursor-pointer text-black dark:text-white rounded border-2 border-transparent hover:border-black dark:hover:border-white transition-all px-3 py-1.5 uppercase font-bold">
-              <Link href="/nft-gallery" className="flex items-center w-full">
-                <Wallet className="mr-3 h-4 w-4 flex-shrink-0" />
-                My NFTs
+            <DropdownMenuItem asChild className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all">
+              <Link href="/nft-gallery" className="flex items-center w-full uppercase py-2">
+                <Wallet className="mr-2 h-4 w-4" />
+                <span>My NFTs</span>
               </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
-          <DropdownMenuSeparator className="h-1 bg-black my-2" />
-          <DropdownMenuItem 
-            onClick={disconnectWallet} 
-            className="cursor-pointer text-red-600 focus:bg-red-600 focus:text-white rounded-none transition-all uppercase px-3 py-2 font-bold"
-          >
-            <LogOut className="mr-3 h-4 w-4 flex-shrink-0" />
-            Disconnect Wallet
+
+          <DropdownMenuSeparator className="h-1 bg-black mx-0" />
+
+          <DropdownMenuItem onClick={disconnectWallet} className="cursor-pointer text-red-600 focus:bg-red-600 focus:text-white rounded-none transition-all uppercase py-2">
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Disconnect Wallet</span>
           </DropdownMenuItem>
         </div>
 
-        <DropdownMenuSeparator />
-
-        <div className="px-4 py-3 bg-muted/20">
-          <p className="text-xs font-black uppercase text-muted-foreground italic mb-1">Authenticated Wallet:</p>
-          <p className="text-xs font-black uppercase tracking-widest bg-white border-2 border-black px-2 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+        <div className="px-4 py-3 bg-muted/20 border-t-4 border-black">
+          <p className="text-xs font-black uppercase text-muted-foreground italic mb-2">Authenticated Wallet:</p>
+          <div className="text-xs font-black uppercase tracking-widest bg-white dark:bg-slate-800 border-4 border-black px-3 py-1.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center">
             {truncateAddress(account)}
-          </p>
+          </div>
         </div>
 
       </DropdownMenuContent>

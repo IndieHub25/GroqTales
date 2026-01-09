@@ -10,17 +10,20 @@
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",
     "coverage": "npx hardhat coverage",
-    "deploy local": "npx hardhat run scripts/deploy.js --network localhost",
-    "deploy monad": "npx hardhat run scripts/deploy.js --network monad",
+    "deploy_local": "npx hardhat deploy",
+    "deploy_monad_test": "npx hardhat deploy --network monad_testnet",
+    "deploy_monad_main": "npx hardhat deploy --network monad_mainnet",
     "clean": "npx hardhat clean",
     "gas-report": "npx hardhat test --gas-report"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "@openzeppelin/contracts": "^4.9.6",
+    "dotenv": "^17.2.3",
     "hardhat": "^2.26.2",
-    "hardhat-gas-reporter": "^2.3.0"
-  },
-  "dependencies": {
-    "@openzeppelin/contracts": "^4.9.6"
+    "hardhat-deploy": "^1.0.4",
+    "hardhat-gas-reporter": "^2.3.0",
+    "hardhat-verify": "^1.0.0",
+    "solidity-coverage": "^0.8.17"
   }
 }

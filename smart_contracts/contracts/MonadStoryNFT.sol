@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
-import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
+import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 
 error Withdrawal_Failed();
@@ -52,7 +52,7 @@ contract MonadStoryNFT is ERC721URIStorage, Ownable, ReentrancyGuard {
   ) public payable returns (uint256) {
     require(msg.value >= mintPrice, 'Insufficient payment for minting');
     uint256 tokenId = _tokenIdCounter;
-    require(tokenId < MAX_SUPPLY, 'Maximum supply reached');
+    require(tokenId <= MAX_SUPPLY, 'Maximum supply reached');
 
     _tokenIdCounter++;
     _safeMint(msg.sender, tokenId);

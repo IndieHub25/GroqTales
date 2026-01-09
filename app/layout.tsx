@@ -201,9 +201,8 @@ export default function RootLayout({
           <QueryProvider>
             <ThemeProvider
               attribute="class"
-              defaultTheme="light"
-              enableSystem={false}
-              forcedTheme="light"
+              defaultTheme="system"
+              enableSystem={true}
               disableTransitionOnChange={false}
               storageKey="groqtales-theme"
             >

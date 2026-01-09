@@ -46,12 +46,12 @@ export function Footer() {
   return (
     <footer className="relative mt-20">
       {/* Comic Container */}
-      <div className="bg-white border-t-4 border-black">
+      <div className="bg-card dark:bg-slate-950 border-t-4 border-foreground dark:border-slate-800 transition-colors duration-500">
         <div className="container mx-auto px-6 pt-16 pb-8">
           {/* Product of Indie Hub Section */}
           <div className="flex flex-col items-center justify-center mb-12 text-center">
-            <div className="inline-block p-4 border-4 border-black bg-secondary mb-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all">
-              <p className="font-bold text-sm text-black tracking-widest uppercase mb-2">
+            <div className="inline-block p-4 border-4 border-foreground bg-secondary mb-4 shadow-[4px_4px_0px_0px_var(--shadow-color)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_var(--shadow-color)] transition-all">
+              <p className="font-bold text-sm text-foreground tracking-widest uppercase mb-2">
                 Architected by
               </p>
               <Link
@@ -62,16 +62,16 @@ export function Footer() {
                 <span className="text-2xl font-black tracking-tighter group-hover:text-primary transition-colors">
                   INDIE HUB
                 </span>
-                <ExternalLink className="w-4 h-4 text-black" />
+                <ExternalLink className="w-4 h-4 text-foreground" />
               </Link>
             </div>
-            <p className="text-xs font-bold text-black max-w-md uppercase">
+            <p className="text-xs font-bold text-foreground max-w-md uppercase">
               Forging digital experiences with pixel-perfect precision and comic
               soul.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 border-b-4 border-black pb-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 border-b-4 border-foreground pb-12">
             {/* Brand Section - Logo Only */}
             <div className="space-y-6">
               <div className="flex items-center justify-center md:justify-start">
@@ -80,14 +80,14 @@ export function Footer() {
                   <img
                     src="/logo.png"
                     alt="Logo"
-                    className="relative w-48 h-48 object-contain border-4 border-black bg-neutral-900 p-2 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all duration-300"
+                    className="relative w-48 h-48 object-contain border-4 border-foreground bg-neutral-900 p-2 shadow-[6px_6px_0px_0px_var(--shadow-color)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_var(--shadow-color)] transition-all duration-300"
                   />
                 </div>
               </div>
-              <p className="text-sm font-bold text-black leading-relaxed border-l-4 border-black pl-4 text-center md:text-left">
+              <p className="text-sm font-bold text-foreground leading-relaxed border-l-4 border-foreground pl-4 text-center md:text-left">
                 Empowering creators with AI-driven storytelling and Web3
                 ownership.
-                <span className="block mt-2 text-xs text-gray-700">
+                <span className="block mt-2 text-xs text-muted-foreground">
                   Create • Mint • Own • Trade
                 </span>
               </p>
@@ -97,7 +97,7 @@ export function Footer() {
                   <Link
                     key={link.url}
                     href={link.url}
-                    className="p-2 border-4 border-black rounded-none hover:bg-primary hover:text-white transition-all duration-300 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                    className="p-2 border-4 border-foreground rounded-none hover:bg-primary hover:text-white transition-all duration-300 shadow-[4px_4px_0px_0px_var(--shadow-color)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_var(--shadow-color)]"
                   >
                     {link.icon}
                     <span className="sr-only">{link.label}</span>
@@ -144,7 +144,7 @@ export function Footer() {
               },
             ].map((section) => (
               <div key={section.title}>
-                <h3 className="font-black text-lg mb-6 text-black border-b-4 border-black inline-block pb-1 uppercase">
+                <h3 className="font-black text-lg mb-6 text-foreground border-b-4 border-foreground inline-block pb-1 uppercase">
                   {section.title}
                 </h3>
                 <ul className="space-y-3">
@@ -152,9 +152,9 @@ export function Footer() {
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="group flex items-center text-sm font-bold text-black hover:text-primary transition-colors uppercase"
+                        className="group flex items-center text-sm font-bold text-foreground hover:text-primary transition-colors uppercase"
                       >
-                        <span className="w-2 h-2 bg-black mr-2 opacity-0 group-hover:opacity-100 transition-opacity border border-black" />
+                        <span className="w-2 h-2 bg-foreground mr-2 opacity-0 group-hover:opacity-100 transition-opacity border border-foreground" />
                         {link.label}
                       </Link>
                     </li>
@@ -165,7 +165,7 @@ export function Footer() {
           </div>
 
           {/* Footer Bottom */}
-          <div className="flex flex-col md:flex-row justify-between items-center font-bold text-xs text-black uppercase space-y-4 md:space-y-0">
+          <div className="flex flex-col md:flex-row justify-between items-center font-bold text-xs text-foreground uppercase space-y-4 md:space-y-0">
             <p className="flex items-center space-x-2">
               <span>&copy; {currentYear} All Rights Reserved</span>
               <span className="hidden md:inline mx-2">•</span>
@@ -178,7 +178,7 @@ export function Footer() {
             </p>
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
-                <span className="w-3 h-3 bg-green-500 border-2 border-black mr-2 animate-pulse" />
+                <span className="w-3 h-3 bg-green-500 border-2 border-foreground mr-2 animate-pulse" />
                 <span className="text-green-700">Platform Online</span>
               </div>
               <span className="hidden md:inline">•</span>
