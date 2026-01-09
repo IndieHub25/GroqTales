@@ -60,25 +60,13 @@ export function UserNav() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-<<<<<<< Updated upstream
-      <DropdownMenuContent className="x-0 y-0 w-56 bg-slate-100" align="end">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-      <DropdownMenuContent className="w-64" align="end">
-        <DropdownMenuLabel className="bg-yellow-400 text-black italic border-b-2 border-black">User Options</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild className="cursor-pointer">
-            <Link href="/profile" className="flex items-center w-full uppercase">
-              <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-            </Link>
-=======
       <DropdownMenuContent 
         className="w-56 sm:w-64 p-0 overflow-hidden border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-white dark:bg-slate-950 z-[9999]" 
         align="end"
         alignOffset={-8}
         sideOffset={8}
       >
+
         {/* Header Section */}
         <DropdownMenuLabel className="bg-yellow-400 dark:bg-yellow-600 text-black dark:text-white italic border-b-4 border-black py-3 px-4">
           User Options
@@ -87,74 +75,46 @@ export function UserNav() {
         {/* Menu Items Container */}
         <div className="bg-white dark:bg-slate-950 p-2">
           <DropdownMenuGroup className="space-y-1">
-            <DropdownMenuItem 
-              asChild 
-              className="cursor-pointer  text-black dark:text-white focus:bg-primary/10 focus:text-black rounded border-2 border-transparent hover:border-black dark:hover:border-white transition-all px-3 py-1.5"
-            >
-              <Link href="/profile" className="flex items-center w-full uppercase">
+            <DropdownMenuItem asChild className="cursor-pointer text-black dark:text-white rounded border-2 border-transparent hover:border-black dark:hover:border-white transition-all px-3 py-1.5 uppercase font-bold">
+              <Link href="/profile" className="flex items-center w-full">
                 <User className="mr-3 h-4 w-4 flex-shrink-0" />
-                <span className="text-sm font-bold">Profile</span>
+                Profile
               </Link>
             </DropdownMenuItem>
-            
-            <DropdownMenuItem 
-              asChild 
-              className="cursor-pointer  text-black dark:text-white focus:bg-primary/10 focus:text-black rounded border-2 border-transparent hover:border-black dark:hover:border-white transition-all px-3 py-1.5"
-            >
-              <Link href="/my-stories" className="flex items-center w-full uppercase">
+
+            <DropdownMenuItem asChild className="cursor-pointer text-black dark:text-white rounded border-2 border-transparent hover:border-black dark:hover:border-white transition-all px-3 py-1.5 uppercase font-bold">
+              <Link href="/my-stories" className="flex items-center w-full">
                 <BookOpen className="mr-3 h-4 w-4 flex-shrink-0" />
-                <span className="text-sm font-bold">My Stories</span>
+                My Stories
               </Link>
             </DropdownMenuItem>
-            
-            <DropdownMenuItem 
-              asChild 
-              className="cursor-pointer  text-black dark:text-white focus:bg-primary/10 focus:text-black rounded border-2 border-transparent hover:border-black dark:hover:border-white transition-all px-3 py-1.5"
-            >
-              <Link href="/nft-gallery" className="flex items-center w-full uppercase">
+
+            <DropdownMenuItem asChild className="cursor-pointer text-black dark:text-white rounded border-2 border-transparent hover:border-black dark:hover:border-white transition-all px-3 py-1.5 uppercase font-bold">
+              <Link href="/nft-gallery" className="flex items-center w-full">
                 <Wallet className="mr-3 h-4 w-4 flex-shrink-0" />
-                <span className="text-sm font-bold">My NFTs</span>
+                My NFTs
               </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
-
-          {/* Separator */}
           <DropdownMenuSeparator className="h-1 bg-black my-2" />
-
-          {/* Disconnect Button */}
           <DropdownMenuItem 
             onClick={disconnectWallet} 
-            className="cursor-pointer text-red-600 focus:bg-red-600 focus:text-white rounded-none transition-all uppercase px-3 py-2"
+            className="cursor-pointer text-red-600 focus:bg-red-600 focus:text-white rounded-none transition-all uppercase px-3 py-2 font-bold"
           >
             <LogOut className="mr-3 h-4 w-4 flex-shrink-0" />
-            <span className="text-sm font-bold">Disconnect Wallet</span>
->>>>>>> Stashed changes
+            Disconnect Wallet
           </DropdownMenuItem>
-          <DropdownMenuItem asChild className="cursor-pointer">
-            <Link href="/my-stories" className="flex items-center w-full uppercase">
-              <BookOpen className="mr-2 h-4 w-4" />
-              <span>My Stories</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="cursor-pointer">
-            <Link href="/nft-gallery" className="flex items-center w-full uppercase">
-              <Wallet className="mr-2 h-4 w-4" />
-              <span>My NFTs</span>
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
+        </div>
+
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={disconnectWallet} className="cursor-pointer text-red-600 focus:bg-red-600 focus:text-white">
-          <LogOut className="mr-2 h-4 w-4" />
-          <span className="uppercase">Disconnect Wallet</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
+
         <div className="px-4 py-3 bg-muted/20">
           <p className="text-xs font-black uppercase text-muted-foreground italic mb-1">Authenticated Wallet:</p>
           <p className="text-xs font-black uppercase tracking-widest bg-white border-2 border-black px-2 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             {truncateAddress(account)}
           </p>
         </div>
+
       </DropdownMenuContent>
     </DropdownMenu>
   );
