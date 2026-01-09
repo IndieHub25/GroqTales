@@ -28,21 +28,19 @@ const BackToTop: React.FC = () => {
   return (
     <button
       onClick={scrollToTop}
-      className={`fixed bottom-8 right-8 z-[60] p-3 rounded-full bg-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all active:translate-y-0 active:shadow-none ${
-        visible
-          ? 'opacity-100 scale-100'
-          : 'opacity-0 scale-0 pointer-events-none'
-      }`}
+      className={`fixed bottom-8 right-8 z-[60] p-4 rounded-full bg-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all active:translate-y-0 active:shadow-none ${visible
+        ? 'opacity-100 scale-100'
+        : 'opacity-0 scale-0 pointer-events-none'
+        }`}
       aria-label="Back to Top"
     >
-      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary via-blue-500 to-purple-500 opacity-10 group-hover:opacity-20 transition-opacity" />
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
         height="24"
         fill="none"
         stroke="black"
-        strokeWidth="3"
+        strokeWidth="4"
         strokeLinecap="round"
         strokeLinejoin="round"
         viewBox="0 0 24 24"

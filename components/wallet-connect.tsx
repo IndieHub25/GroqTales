@@ -23,12 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+
 import { useToast } from '@/components/ui/use-toast';
 import { truncateAddress } from '@/lib/utils';
 
@@ -112,7 +107,7 @@ export default function WalletConnect() {
       <Button
         onClick={connectWallet}
         disabled={connecting}
-        className="flex items-center gap-2 px-6 py-2 rounded-none bg-white text-black border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all duration-200 font-black uppercase tracking-wider"
+        className="flex items-center gap-2 px-3 sm:px-6 py-1.5 sm:py-2 rounded-none bg-white text-black border-2 sm:border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all duration-200 font-black uppercase tracking-wider text-xs sm:text-sm"
       >
         {connecting ? (
           <>
@@ -129,104 +124,80 @@ export default function WalletConnect() {
     );
   }
 
-  // Show connected wallet interface
   return (
-    <div className="relative">
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => setShowDropdown(!showDropdown)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  setShowDropdown(!showDropdown);
-                }
-              }}
-              className="flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              aria-haspopup="true"
-              aria-expanded={showDropdown ? 'true' : 'false'}
-            >
-              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              <span>{ensName || truncateAddress(account)}</span>
-              <ChevronDown className="h-4 w-4" />
+    <DropdownMenu open={showDropdown} onOpenChange={setShowDropdown}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+        >
+          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+          <span>{ensName || truncateAddress(account)}</span>
+          <ChevronDown className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-64 p-0 overflow-hidden border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-white dark:bg-slate-900">
+        {/* Account Info */}
+        <div className="px-4 py-3 border-b-4 border-black bg-white dark:bg-slate-900">
+          <div className="flex items-center gap-3">
+            <div className="border-4 border-black p-0.5 bg-white shrink-0">
+              <Avatar className="h-10 w-10 rounded-none">
+                <AvatarImage
+                  src={`https://api.dicebear.com/7.x/identicon/svg?seed=${account}`}
+                />
+                <AvatarFallback className="rounded-none bg-black text-white font-black text-sm">
+                  {account?.slice(2, 4).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
             </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Connected to {networkName || 'Ethereum'}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-
-      {/* Dropdown Menu */}
-      <DropdownMenu open={showDropdown} onOpenChange={setShowDropdown}>
-        <DropdownMenuTrigger className="sr-only" aria-hidden="true">
-          Open menu
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64">
-          {/* Account Info */}
-          <div className="px-4 py-3 border-b-4 border-black bg-white">
-            <div className="flex items-center gap-4">
-              <div className="border-4 border-black p-0.5 bg-white">
-                <Avatar className="h-10 w-10 rounded-none">
-                  <AvatarImage
-                    src={`https://api.dicebear.com/7.x/identicon/svg?seed=${account}`}
-                  />
-                  <AvatarFallback className="rounded-none bg-black text-white font-black text-sm">
-                    {account?.slice(2, 4).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-black uppercase truncate tracking-tight">
-                  {ensName || truncateAddress(account)}
-                </p>
-                <p className="text-xs font-bold text-primary italic uppercase">{balance} ETH</p>
-              </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-black uppercase truncate tracking-tight text-black dark:text-white">
+                {ensName || truncateAddress(account)}
+              </p>
+              <p className="text-xs font-bold text-primary italic uppercase">{balance} ETH</p>
             </div>
           </div>
+        </div>
 
-          {/* Network Info */}
-          <div className="px-4 py-2 border-b-4 border-black bg-muted/30">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase text-muted-foreground italic">Network:</span>
-              <span className="text-xs font-black uppercase bg-yellow-400 text-black px-2 py-0.5 border border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
-                {networkName || 'Ethereum'}
-              </span>
-            </div>
+        {/* Network Info */}
+        <div className="px-4 py-2 border-b-4 border-black bg-yellow-400">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black uppercase text-black italic">Network:</span>
+            <span className="text-xs font-black uppercase bg-white text-black px-2 py-0.5 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              {networkName || 'Ethereum'}
+            </span>
           </div>
+        </div>
 
-          {/* Actions */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenuItem onClick={copyAddressToClipboard}>
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copy Address
-                </DropdownMenuItem>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{copyTooltip}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        {/* Actions */}
+        <div className="p-1 bg-white dark:bg-slate-900">
+          <DropdownMenuItem
+            onClick={copyAddressToClipboard}
+            className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none border-b-2 border-transparent hover:border-black transition-all"
+          >
+            <Copy className="mr-2 h-4 w-4" />
+            Copy Address
+          </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={viewOnExplorer}>
+          <DropdownMenuItem
+            onClick={viewOnExplorer}
+            className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none border-b-2 border-transparent hover:border-black transition-all"
+          >
             <ExternalLink className="mr-2 h-4 w-4" />
             View on Explorer
           </DropdownMenuItem>
 
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="h-1 bg-black" />
 
-          <DropdownMenuItem onClick={disconnectWallet}>
-            <div className="text-red-500 flex items-center">
-              <AlertCircle className="mr-2 h-4 w-4" />
-              Disconnect
-            </div>
+          <DropdownMenuItem
+            onClick={disconnectWallet}
+            className="cursor-pointer text-red-500 focus:bg-red-500 focus:text-white rounded-none transition-all"
+          >
+            <AlertCircle className="mr-2 h-4 w-4" />
+            Disconnect
           </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
