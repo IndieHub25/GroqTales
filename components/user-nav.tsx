@@ -60,6 +60,7 @@ export function UserNav() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
+<<<<<<< Updated upstream
       <DropdownMenuContent className="x-0 y-0 w-56 bg-slate-100" align="end">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
       <DropdownMenuContent className="w-64" align="end">
@@ -71,6 +72,63 @@ export function UserNav() {
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
             </Link>
+=======
+      <DropdownMenuContent 
+        className="w-56 sm:w-64 p-0 overflow-hidden border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-white dark:bg-slate-950 z-[9999]" 
+        align="end"
+        alignOffset={-8}
+        sideOffset={8}
+      >
+        {/* Header Section */}
+        <DropdownMenuLabel className="bg-yellow-400 dark:bg-yellow-600 text-black dark:text-white italic border-b-4 border-black py-3 px-4">
+          User Options
+        </DropdownMenuLabel>
+
+        {/* Menu Items Container */}
+        <div className="bg-white dark:bg-slate-950 p-2">
+          <DropdownMenuGroup className="space-y-1">
+            <DropdownMenuItem 
+              asChild 
+              className="cursor-pointer  text-black dark:text-white focus:bg-primary/10 focus:text-black rounded border-2 border-transparent hover:border-black dark:hover:border-white transition-all px-3 py-1.5"
+            >
+              <Link href="/profile" className="flex items-center w-full uppercase">
+                <User className="mr-3 h-4 w-4 flex-shrink-0" />
+                <span className="text-sm font-bold">Profile</span>
+              </Link>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem 
+              asChild 
+              className="cursor-pointer  text-black dark:text-white focus:bg-primary/10 focus:text-black rounded border-2 border-transparent hover:border-black dark:hover:border-white transition-all px-3 py-1.5"
+            >
+              <Link href="/my-stories" className="flex items-center w-full uppercase">
+                <BookOpen className="mr-3 h-4 w-4 flex-shrink-0" />
+                <span className="text-sm font-bold">My Stories</span>
+              </Link>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem 
+              asChild 
+              className="cursor-pointer  text-black dark:text-white focus:bg-primary/10 focus:text-black rounded border-2 border-transparent hover:border-black dark:hover:border-white transition-all px-3 py-1.5"
+            >
+              <Link href="/nft-gallery" className="flex items-center w-full uppercase">
+                <Wallet className="mr-3 h-4 w-4 flex-shrink-0" />
+                <span className="text-sm font-bold">My NFTs</span>
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+
+          {/* Separator */}
+          <DropdownMenuSeparator className="h-1 bg-black my-2" />
+
+          {/* Disconnect Button */}
+          <DropdownMenuItem 
+            onClick={disconnectWallet} 
+            className="cursor-pointer text-red-600 focus:bg-red-600 focus:text-white rounded-none transition-all uppercase px-3 py-2"
+          >
+            <LogOut className="mr-3 h-4 w-4 flex-shrink-0" />
+            <span className="text-sm font-bold">Disconnect Wallet</span>
+>>>>>>> Stashed changes
           </DropdownMenuItem>
           <DropdownMenuItem asChild className="cursor-pointer">
             <Link href="/my-stories" className="flex items-center w-full uppercase">
