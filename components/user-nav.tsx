@@ -54,7 +54,7 @@ export function UserNav() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
+          <Avatar className="h-8 w-8 bg-slate-300">
             <AvatarImage src="/avatars/01.png" alt="@user" />
             <AvatarFallback>U</AvatarFallback>
           </Avatar>
@@ -99,6 +99,7 @@ export function UserNav() {
             {truncateAddress(account)}
           </div>
         </div>
+
       </DropdownMenuContent>
     </DropdownMenu>
   );
