@@ -12,13 +12,16 @@ const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const morgan = require('morgan');
 
-const connectDB = require('./config/db');
+const { connectDB, closeDB } = require('./config/db');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Connect to Database
-connectDB();
+// Connect to Database with retry configuration from env
+const DB_MAX_RETRIES = parseInt(process.env.DB_MAX_RETRIES || '5');
+const DB_RETRY_DELAY_MS = parseInt(process.env.DB_RETRY_DELAY_MS || '2000');
+
+connectDB(DB_MAX_RETRIES, DB_RETRY_DELAY_MS);
 
 // Security middleware
 app.use(
@@ -99,16 +102,26 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  process.exit(0);
-});
+// Graceful shutdown with database connection cleanup (Issue #166)
+const gracefulShutdown = async (signal) => {
+  console.log(`${signal} received, shutting down gracefully`);
+  try {
+    // Close MongoDB connection using mongoose
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState === 1) {
+      await mongoose.connection.close();
+      console.log('MongoDB connection closed');
+    }
+    console.log('Cleanup completed');
+    process.exit(0);
+  } catch (error) {
+    console.error('Error during shutdown:', error);
+    process.exit(1);
+  }
+};
 
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
-  process.exit(0);
-});
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Start server
 app.listen(PORT, () => {

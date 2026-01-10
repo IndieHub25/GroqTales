@@ -1,6 +1,8 @@
 import * as dotenv from 'dotenv';
 import { MongoClient } from 'mongodb';
 
+import { connectWithRetry, setupGracefulShutdown } from './db/connect';
+
 // Only load dotenv in non-production local dev (avoid interfering with hosting platform env injection)
 if (!process.env.VERCEL && process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: '.env.local' });
@@ -68,26 +70,48 @@ if (shouldMockDb || forceMock) {
   const finalUri =
     uri.startsWith('mongodb+srv://') && fallbackUri ? fallbackUri : uri;
 
-  const options = {
-    maxPoolSize: 10,
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-  } as any;
+  // Use retry logic if enabled (Issue #166)
+  const useRetryLogic = process.env.DB_USE_RETRY !== 'false'; // default true
 
   let client: MongoClient;
 
-  if (process.env.NODE_ENV === 'development') {
-    const globalWithMongo = global as typeof globalThis & {
-      _mongoClientPromise?: Promise<MongoClient>;
-    };
-    if (!globalWithMongo._mongoClientPromise) {
-      client = new MongoClient(finalUri, options);
-      globalWithMongo._mongoClientPromise = client.connect();
+  if (useRetryLogic) {
+    // Use new retry connection logic with exponential backoff
+    const maxRetries = parseInt(process.env.DB_MAX_RETRIES || '5');
+    const retryDelayMs = parseInt(process.env.DB_RETRY_DELAY_MS || '2000');
+
+    clientPromise = connectWithRetry({
+      uri: finalUri,
+      maxRetries,
+      retryDelayMs,
+      dbName: process.env.MONGODB_DB_NAME,
+    });
+
+    // Setup graceful shutdown handlers once
+    if (typeof window === 'undefined') {
+      setupGracefulShutdown();
     }
-    clientPromise = globalWithMongo._mongoClientPromise;
   } else {
-    client = new MongoClient(finalUri, options);
-    clientPromise = client.connect();
+    // Legacy connection logic (no retry)
+    const options = {
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    } as any;
+
+    if (process.env.NODE_ENV === 'development') {
+      const globalWithMongo = global as typeof globalThis & {
+        _mongoClientPromise?: Promise<MongoClient>;
+      };
+      if (!globalWithMongo._mongoClientPromise) {
+        client = new MongoClient(finalUri, options);
+        globalWithMongo._mongoClientPromise = client.connect();
+      }
+      clientPromise = globalWithMongo._mongoClientPromise;
+    } else {
+      client = new MongoClient(finalUri, options);
+      clientPromise = client.connect();
+    }
   }
 }
 
