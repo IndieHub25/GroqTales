@@ -13,6 +13,7 @@ const StorySchema = new mongoose.Schema({
   },
   genre: {
     type: String,
+    lowercase: true,
     required: true,
     enum: [
       'fantasy',

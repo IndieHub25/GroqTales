@@ -8,7 +8,9 @@
   "main": "index.js",
   "scripts": {
     "compile": "npx hardhat compile",
-    "test": "npx hardhat test",
+    "test_local": "npx hardhat test",
+    "test_monad_test": "npx hardhat test --network monad_testnet",
+    "test_monad_main": "npx hardhat test --network monad_mainnet",
     "coverage": "npx hardhat coverage",
     "deploy_local": "npx hardhat deploy",
     "deploy_monad_test": "npx hardhat deploy --network monad_testnet",
