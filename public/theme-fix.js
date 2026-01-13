@@ -48,6 +48,15 @@
   // Simplified system theme change handling
   if (window.matchMedia) {
     const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    colorSchemeQuery.addEventListener('change', handleThemeChange, { passive: true });
+    try {
+      if (typeof colorSchemeQuery.addEventListener === 'function') {
+        colorSchemeQuery.addEventListener('change', handleThemeChange);
+      } else if (typeof colorSchemeQuery.addListener === 'function') {
+        // Legacy Safari
+        colorSchemeQuery.addListener(handleThemeChange);
+      }
+    } catch (e) {
+      // Fail silently - this is a performance optimization, not critical functionality
+    }
   }
 })();

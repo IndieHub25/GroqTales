@@ -4,8 +4,12 @@
   try {
     // Apply theme class immediately to prevent flash of wrong theme
     const storedTheme = localStorage.getItem('groqtales-theme');
-    if (storedTheme === 'dark' ||
-       (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (
+      storedTheme === 'dark' ||
+      (storedTheme === 'system' && prefersDark) ||
+      (!storedTheme && prefersDark)
+    ) {
       document.documentElement.classList.add('dark');
     }
 

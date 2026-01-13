@@ -43,7 +43,7 @@ export default function Home() {
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <div className="lg:w-1/2 space-y-8">
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 className="inline-block bg-card border-4 border-foreground px-6 py-3 shadow-[8px_8px_0px_0px_var(--shadow-color)] transform -rotate-2"
               >
@@ -53,7 +53,7 @@ export default function Home() {
               </motion.div>
 
               <motion.h1
-                initial={{ opacity: 0, x: -50 }}
+                initial={false}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
                 className="text-6xl md:text-8xl font-black text-foreground uppercase leading-none [text-shadow:4px_4px_0px_#fff,8px_8px_0px_#000] dark:[text-shadow:0_0_15px_rgba(59,130,246,0.4),0_0_30px_rgba(139,92,246,0.2)]"
@@ -66,7 +66,7 @@ export default function Home() {
               </motion.h1>
 
               <motion.p
-                initial={{ opacity: 0 }}
+                initial={false}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
                 className="text-2xl font-bold text-foreground border-l-8 border-foreground pl-6 py-4 bg-card/80 shadow-[4px_4px_0px_0px_var(--shadow-color)]"
@@ -76,7 +76,7 @@ export default function Home() {
               </motion.p>
 
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
                 className="flex flex-wrap gap-6 pt-4"
