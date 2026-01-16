@@ -13,14 +13,24 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useWallet } from '@/hooks/use-wallet';
 
 export function CreateStoryButton() {
+  console.log('CREATE BUTTON RENDERED - SOURCE FILE');
   const [open, setOpen] = useState(false);
+  const { address, connect } = useWallet();
+
+  const handleClick = () => {
+  if (!address) {
+    return;
+  }
+  setOpen(true);
+};
 
   return (
     <>
       <Button
-        onClick={() => setOpen(true)}
+        onClick={handleClick}
         size="lg"
         className="theme-gradient-bg text-white border-0 hover:opacity-90"
       >
