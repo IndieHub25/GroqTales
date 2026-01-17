@@ -20,8 +20,9 @@ export function CreateStoryButton() {
   const [open, setOpen] = useState(false);
   const { address, connect } = useWallet();
 
-  const handleClick = () => {
+  const handleClick = async () => {
   if (!address) {
+    await connect();
     return;
   }
   setOpen(true);
