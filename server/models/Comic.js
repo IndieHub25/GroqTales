@@ -100,13 +100,6 @@ const ComicSchema = new mongoose.Schema(
         'adventure',
         'horror',
         'romance',
-        'superhero',
-        'slice-of-life',
-        'comedy',
-        'drama',
-        'action',
-        'thriller',
-        'historical',
         'other',
       ],
     },
@@ -204,7 +197,6 @@ const ComicSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
-
 // Indexes
 ComicSchema.index({ slug: 1 });
 ComicSchema.index({ creator: 1, status: 1 });
@@ -213,14 +205,12 @@ ComicSchema.index({ genres: 1 });
 ComicSchema.index({ tags: 1 });
 ComicSchema.index({ createdAt: -1 });
 ComicSchema.index({ publishedAt: -1 });
-
 // Text search index
 ComicSchema.index({
   title: 'text',
   description: 'text',
   tags: 'text',
 });
-
 // Virtual for pages
 ComicSchema.virtual('pages', {
   ref: 'ComicPage',
