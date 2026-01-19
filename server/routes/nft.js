@@ -34,21 +34,25 @@ router.get('/', async (req, res) => {
 
     // Filter on priceRange if provided (expected format "min-max", e.g. "10-100")
     if (priceRange) {
-      const [min, max] = priceRange.split('-').map(Number);
+      const [minRaw, maxRaw] = priceRange.split('-');
+      const min = minRaw !== undefined && minRaw !== '' ? Number(minRaw) : undefined;
+      const max = maxRaw !== undefined && maxRaw !== '' ? Number(maxRaw) : undefined;
       nftFilter.price = {};
+      // Validate both bounds are present, numeric, and min <= max
       if (
-        (min !== undefined && isNaN(min)) ||
-        (max !== undefined && isNaN(max))
+        (minRaw !== undefined && minRaw !== '' && isNaN(min)) ||
+        (maxRaw !== undefined && maxRaw !== '' && isNaN(max)) ||
+        (min !== undefined && max !== undefined && min > max)
       ) {
         return res
           .status(400)
           .json({
             error:
-              "Invalid priceRange format. Use 'min-max' with numeric values.",
+              "Invalid priceRange format. Use 'min-max' with numeric values, and min must be less than or equal to max.",
           });
       }
-      if (!isNaN(min)) nftFilter.price.$gte = min;
-      if (!isNaN(max)) nftFilter.price.$lte = max;
+      if (min !== undefined) nftFilter.price.$gte = min;
+      if (max !== undefined) nftFilter.price.$lte = max;
     }
 
     // If category (genre) filter provided, need to lookup Stories matching genre and filter NFTs by storyId
@@ -131,9 +135,9 @@ router.post('/mint', async (req, res) => {
       return res.status(404).json({ error: 'Story not found' });
     }
 
-    // Calculate keccak256 hash of story content (using ethers.js for example)
-    const storyHash = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(story.content)
+    // Calculate keccak256 hash of story content (using ethers v6 API)
+    const storyHash = ethers.keccak256(
+      ethers.toUtf8Bytes(story.content)
     );
 
     const nft = new Nft({
