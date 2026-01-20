@@ -168,5 +168,22 @@ export enum ActivityType {
   NFT_SOLD = 'nft_sold',
   PROFILE_UPDATED = 'profile_updated',
 }
+export interface UserProfile {
+  id: string;
+  username: string;
+  displayName: string;
+  bio?: string;
+  avatarUrl?: string;
+  primaryGenre?: string;
+  isVerified?: boolean;
+
+  stats: {
+    storiesCount: number;
+    followersCount: number;
+    totalViews: number;
+    totalLikes: number;
+  };
+}
+
 
 export default {};

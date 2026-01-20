@@ -8,12 +8,9 @@
  * Base entity interface that all domain entities extend
  */
 export interface BaseEntity {
-  /** Unique identifier */
-  id: string;
-  /** Creation timestamp */
-  createdAt: Date;
-  /** Last update timestamp */
-  updatedAt: Date;
+  id: string; // ✅ MUST be string for frontend + URLs
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 /**
