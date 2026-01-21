@@ -309,11 +309,4 @@ export enum ContractType {
   MARKETPLACE = 'marketplace',
   ROYALTY = 'royalty',
 }
-export interface NFT {
-  id: string;
-  imageUrl: string;
-  title: string;
-  mintedAt: string;
-}
-
 export default {};

@@ -1,7 +1,6 @@
 'use client';
 
 import { BookOpen, Bookmark } from 'lucide-react';
-
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import StoryCard from '@/components/profile/StoryCard';
 import ProfileActivity from '@/components/profile/ProfileActivity';
@@ -10,10 +9,14 @@ import { StoryCardData } from '@/types/story';
 
 interface Props {
   stories?: StoryCardData[];
-  saved?: StoryCardData[];
+  savedStories?: StoryCardData[];
+  isSelf?: boolean;
 }
 
-export default function ProfileTabs({ stories = [], saved = [] }: Props) {
+export default function ProfileTabs({
+  stories = [],
+  savedStories = [],
+}: Props) {
   return (
     <Tabs defaultValue="stories" className="mt-8">
       <TabsList>
@@ -28,13 +31,11 @@ export default function ProfileTabs({ stories = [], saved = [] }: Props) {
         </TabsTrigger>
 
         <TabsTrigger value="collections">Collections</TabsTrigger>
-
         <TabsTrigger value="activity">Activity</TabsTrigger>
       </TabsList>
 
-      {/* STORIES */}
       <TabsContent value="stories" className="mt-6">
-        {stories.length > 0 ? (
+        {stories.length ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {stories.map((story) => (
               <StoryCard key={story.id} story={story} />
@@ -47,11 +48,10 @@ export default function ProfileTabs({ stories = [], saved = [] }: Props) {
         )}
       </TabsContent>
 
-      {/* SAVED */}
       <TabsContent value="saved" className="mt-6">
-        {saved.length > 0 ? (
+        {savedStories.length ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {saved.map((story) => (
+            {savedStories.map((story) => (
               <StoryCard key={story.id} story={story} />
             ))}
           </div>
@@ -62,12 +62,10 @@ export default function ProfileTabs({ stories = [], saved = [] }: Props) {
         )}
       </TabsContent>
 
-      {/* COLLECTIONS */}
       <TabsContent value="collections" className="mt-6">
         <ProfileCollections />
       </TabsContent>
 
-      {/* ACTIVITY */}
       <TabsContent value="activity" className="mt-6">
         <ProfileActivity />
       </TabsContent>

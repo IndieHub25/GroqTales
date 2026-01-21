@@ -8,11 +8,10 @@
  * Base entity interface that all domain entities extend
  */
 export interface BaseEntity {
-  id: string; // ✅ MUST be string for frontend + URLs
-  createdAt?: string;
-  updatedAt?: string;
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
-
 /**
  * API response wrapper interface
  */
