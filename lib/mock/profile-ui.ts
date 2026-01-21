@@ -10,7 +10,7 @@ export const mockProfile: UserProfile = {
   isVerified: true,
   stats: {
     storiesCount: 12,
-    followers: 340,
+    followersCount: 340,
     totalViews: 1200,
     totalLikes: 560,
   },

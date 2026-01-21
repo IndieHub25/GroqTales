@@ -9,7 +9,7 @@ const mockProfile: UserProfile = {
   isVerified: true,
   stats: {
     storiesCount: 0,
-    followers: 0,
+    followersCount: 0,
     totalViews: 0,
     totalLikes: 0,
   },

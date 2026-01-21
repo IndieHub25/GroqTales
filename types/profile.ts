@@ -1,6 +1,6 @@
 export interface ProfileStats {
   storiesCount: number;
-  followers: number;
+  followersCount: number;
   totalViews: number;
   totalLikes: number;
 }
@@ -21,7 +21,7 @@ export interface UserProfile {
   username: string;
   displayName: string;
   bio?: string;
-  primaryGenre: string;
+  primaryGenre?: string;
   avatarUrl?: string;
   isVerified?: boolean;
   stats: ProfileStats;

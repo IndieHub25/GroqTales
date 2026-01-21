@@ -135,5 +135,3 @@ export interface StoryNftDetails {
   metadataUri: string;
   royaltyPercentage: number;
 }
-
-export default {};
