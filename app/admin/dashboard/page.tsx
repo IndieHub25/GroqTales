@@ -31,6 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { VerifiedBadge } from '@/components/verified-badge';
+import { CreatorAnalyticsDashboard } from '@/components/creator-analytics-dashboard';
 import { getAdminActions } from '@/lib/admin-service';
 
 export default function DashboardPage() {
@@ -349,6 +350,10 @@ function DashboardContent() {
               <Activity className="w-4 h-4 mr-2" />
               Analytics
             </TabsTrigger>
+            <TabsTrigger value="creators">
+              <Users className="w-4 h-4 mr-2" />
+              Creators
+            </TabsTrigger>
             <TabsTrigger value="transactions">
               <Wallet className="w-4 h-4 mr-2" />
               Transactions
@@ -391,6 +396,10 @@ function DashboardContent() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="creators">
+            <CreatorAnalyticsDashboard />
           </TabsContent>
 
           <TabsContent value="transactions">
