@@ -86,6 +86,11 @@ export function CreatorAnalyticsDashboard() {
       const response = await fetch(
         `/api/analytics/creators?timeframe=${timeframe}`
       );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {

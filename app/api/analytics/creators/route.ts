@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
-import { find, getCollection } from '@/lib/db';
-import { Story } from '@/types/story';
-import { NFT } from '@/types/nft';
+import { getCollection } from '@/lib/db';
 
 /**
  * GET /api/analytics/creators
@@ -10,6 +10,10 @@ import { NFT } from '@/types/nft';
  */
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     const timeframe = searchParams.get('timeframe') || '30d'; // 7d, 30d, 90d, all
     const limit = parseInt(searchParams.get('limit') || '50');
@@ -23,67 +27,82 @@ export async function GET(request: NextRequest) {
       dateFilter = { createdAt: { $gte: startDate } };
     }
 
-    // Get all stories with their stats
-    const stories = (await find('stories', dateFilter)) as Story[];
+    // Aggregate stories data by creator
+    const storyCollection = await getCollection('stories');
+    const storyAgg = await (storyCollection as any).aggregate([
+        { $match: dateFilter },
+        {
+          $group: {
+            _id: '$authorId',
+            creatorName: { $first: '$author.displayName' },
+            avatarUrl: { $first: '$author.avatarUrl' },
+            isVerified: { $first: '$author.isVerified' },
+            totalStories: { $sum: 1 },
+            totalViews: { $sum: '$stats.views' },
+            totalLikes: { $sum: '$stats.likes' },
+            totalComments: { $sum: '$stats.comments' },
+            totalShares: { $sum: '$stats.shares' },
+            totalBookmarks: { $sum: '$stats.bookmarks' },
+            averageRating: { $avg: '$stats.rating' },
+          },
+        },
+      ])
+      .toArray();
 
-    // Get all NFTs
-    const nfts = (await find('nfts', dateFilter)) as NFT[];
+    // Aggregate NFTs data by creator
+    const nftCollection = await getCollection('nfts');
+    const nftAgg = await (nftCollection as any).aggregate([
+        { $match: dateFilter },
+        {
+          $group: {
+            _id: '$creatorAddress',
+            totalNFTs: { $sum: 1 },
+            totalNFTSales: {
+              $sum: { $size: { $ifNull: ['$stats.priceHistory', []] } },
+            },
+            totalRevenue: {
+              $sum: {
+                $reduce: {
+                  input: { $ifNull: ['$stats.priceHistory', []] },
+                  initialValue: 0,
+                  in: { $add: ['$$value', '$$this.price'] },
+                },
+              },
+            },
+          },
+        },
+      ])
+      .toArray();
 
     // Aggregate data by creator
     const creatorAnalytics = new Map();
 
-    // Process stories
-    for (const story of stories) {
-      const creatorId = story.authorId;
-      if (!creatorAnalytics.has(creatorId)) {
-        creatorAnalytics.set(creatorId, {
-          creatorId,
-          creatorName: story.author.displayName || story.author.username,
-          avatarUrl: story.author.avatarUrl,
-          isVerified: story.author.isVerified,
-          totalStories: 0,
-          totalViews: 0,
-          totalLikes: 0,
-          totalComments: 0,
-          totalShares: 0,
-          totalBookmarks: 0,
-          averageRating: 0,
-          totalNFTs: 0,
-          totalNFTSales: 0,
-          totalRevenue: 0,
-          stories: [],
-          nfts: [],
-        });
-      }
-
-      const creator = creatorAnalytics.get(creatorId);
-      creator.totalStories += 1;
-      creator.totalViews += story.stats.views;
-      creator.totalLikes += story.stats.likes;
-      creator.totalComments += story.stats.comments;
-      creator.totalShares += story.stats.shares;
-      creator.totalBookmarks += story.stats.bookmarks;
-      creator.averageRating = (creator.averageRating + story.stats.rating) / 2;
-
-      creator.stories.push({
-        id: (story as any)._id.toString(),
-        title: story.title,
-        views: story.stats.views,
-        likes: story.stats.likes,
-        comments: story.stats.comments,
-        createdAt: story.createdAt,
-        isNft: story.isNft,
+    // Process aggregated stories
+    for (const agg of storyAgg) {
+      creatorAnalytics.set(agg._id, {
+        creatorId: agg._id,
+        creatorName: agg.creatorName || agg._id.slice(-6),
+        avatarUrl: agg.avatarUrl,
+        isVerified: agg.isVerified || false,
+        totalStories: agg.totalStories,
+        totalViews: agg.totalViews,
+        totalLikes: agg.totalLikes,
+        totalComments: agg.totalComments,
+        totalShares: agg.totalShares,
+        totalBookmarks: agg.totalBookmarks,
+        averageRating: agg.averageRating || 0,
+        totalNFTs: 0,
+        totalNFTSales: 0,
+        totalRevenue: 0,
       });
     }
 
-    // Process NFTs
-    for (const nft of nfts) {
-      const creatorId = nft.creatorAddress;
-      if (!creatorAnalytics.has(creatorId)) {
-        // If creator not found in stories, create basic entry
-        creatorAnalytics.set(creatorId, {
-          creatorId,
-          creatorName: `Creator ${creatorId.slice(-6)}`,
+    // Process aggregated NFTs
+    for (const agg of nftAgg) {
+      if (!creatorAnalytics.has(agg._id)) {
+        creatorAnalytics.set(agg._id, {
+          creatorId: agg._id,
+          creatorName: `Creator ${agg._id.slice(-6)}`,
           avatarUrl: null,
           isVerified: false,
           totalStories: 0,
@@ -93,36 +112,16 @@ export async function GET(request: NextRequest) {
           totalShares: 0,
           totalBookmarks: 0,
           averageRating: 0,
-          totalNFTs: 0,
-          totalNFTSales: 0,
-          totalRevenue: 0,
-          stories: [],
-          nfts: [],
+          totalNFTs: agg.totalNFTs,
+          totalNFTSales: agg.totalNFTSales,
+          totalRevenue: agg.totalRevenue,
         });
+      } else {
+        const creator = creatorAnalytics.get(agg._id);
+        creator.totalNFTs = agg.totalNFTs;
+        creator.totalNFTSales = agg.totalNFTSales;
+        creator.totalRevenue = agg.totalRevenue;
       }
-
-      const creator = creatorAnalytics.get(creatorId);
-      creator.totalNFTs += 1;
-
-      // Calculate sales from price history
-      if (nft.stats.priceHistory && nft.stats.priceHistory.length > 0) {
-        creator.totalNFTSales += nft.stats.priceHistory.length;
-        const totalRevenue = nft.stats.priceHistory.reduce(
-          (sum, sale) => sum + sale.price,
-          0
-        );
-        creator.totalRevenue += totalRevenue;
-      }
-
-      creator.nfts.push({
-        id: (nft as any)._id.toString(),
-        name: nft.name,
-        price: nft.price,
-        isForSale: nft.isForSale,
-        salesCount: nft.stats.priceHistory?.length || 0,
-        lastSalePrice: nft.stats.lastSalePrice,
-        createdAt: nft.createdAt,
-      });
     }
 
     // Convert to array and sort by total engagement (views + likes + comments)
