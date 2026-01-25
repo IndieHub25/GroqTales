@@ -9,7 +9,7 @@ const connectDB = async (maxRetries = 5, retryDelayMs = 2000) => {
   const safeMaxRetries = Math.max(1, Math.floor(maxRetries));
   const safeRetryDelayMs = Math.max(100, retryDelayMs);
 
-  if(!process.env.MONGODB_URI) {
+  if (!process.env.MONGODB_URI) {
     throw new Error('MONGODB_URI environment variable is not set');
   }
   const uri = process.env.MONGODB_URI;

@@ -38,7 +38,7 @@ function SystemThemeClassSync() {
         mediaQuery.addEventListener('change', onMediaChange);
       } else if (
         typeof (mediaQuery as unknown as MediaQueryList).addListener ===
-          'function'
+        'function'
       ) {
         (mediaQuery as unknown as MediaQueryList).addListener(onMediaChange);
       }
@@ -57,7 +57,7 @@ function SystemThemeClassSync() {
           mediaQuery.removeEventListener('change', onMediaChange);
         } else if (
           typeof (mediaQuery as unknown as MediaQueryList).removeListener ===
-            'function'
+          'function'
         ) {
           (mediaQuery as unknown as MediaQueryList).removeListener(
             onMediaChange

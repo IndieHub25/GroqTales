@@ -24,10 +24,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all stories with their stats
-    const stories = await find('stories', dateFilter) as Story[];
+    const stories = (await find('stories', dateFilter)) as Story[];
 
     // Get all NFTs
-    const nfts = await find('nfts', dateFilter) as NFT[];
+    const nfts = (await find('nfts', dateFilter)) as NFT[];
 
     // Aggregate data by creator
     const creatorAnalytics = new Map();
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
           totalNFTSales: 0,
           totalRevenue: 0,
           stories: [],
-          nfts: []
+          nfts: [],
         });
       }
 
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
         likes: story.stats.likes,
         comments: story.stats.comments,
         createdAt: story.createdAt,
-        isNft: story.isNft
+        isNft: story.isNft,
       });
     }
 
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
           totalNFTSales: 0,
           totalRevenue: 0,
           stories: [],
-          nfts: []
+          nfts: [],
         });
       }
 
@@ -107,7 +107,10 @@ export async function GET(request: NextRequest) {
       // Calculate sales from price history
       if (nft.stats.priceHistory && nft.stats.priceHistory.length > 0) {
         creator.totalNFTSales += nft.stats.priceHistory.length;
-        const totalRevenue = nft.stats.priceHistory.reduce((sum, sale) => sum + sale.price, 0);
+        const totalRevenue = nft.stats.priceHistory.reduce(
+          (sum, sale) => sum + sale.price,
+          0
+        );
         creator.totalRevenue += totalRevenue;
       }
 
@@ -118,15 +121,16 @@ export async function GET(request: NextRequest) {
         isForSale: nft.isForSale,
         salesCount: nft.stats.priceHistory?.length || 0,
         lastSalePrice: nft.stats.lastSalePrice,
-        createdAt: nft.createdAt
+        createdAt: nft.createdAt,
       });
     }
 
     // Convert to array and sort by total engagement (views + likes + comments)
     const analytics = Array.from(creatorAnalytics.values())
-      .map(creator => ({
+      .map((creator) => ({
         ...creator,
-        totalEngagement: creator.totalViews + creator.totalLikes + creator.totalComments
+        totalEngagement:
+          creator.totalViews + creator.totalLikes + creator.totalComments,
       }))
       .sort((a, b) => b.totalEngagement - a.totalEngagement)
       .slice(0, limit);
@@ -135,9 +139,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: analytics,
       timeframe,
-      totalCreators: analytics.length
+      totalCreators: analytics.length,
     });
-
   } catch (error) {
     console.error('Error fetching creator analytics:', error);
     return NextResponse.json(

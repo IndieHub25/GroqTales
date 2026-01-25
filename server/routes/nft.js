@@ -35,8 +35,10 @@ router.get('/', async (req, res) => {
     // Filter on priceRange if provided (expected format "min-max", e.g. "10-100")
     if (priceRange) {
       const [minRaw, maxRaw] = priceRange.split('-');
-      const min = minRaw !== undefined && minRaw !== '' ? Number(minRaw) : undefined;
-      const max = maxRaw !== undefined && maxRaw !== '' ? Number(maxRaw) : undefined;
+      const min =
+        minRaw !== undefined && minRaw !== '' ? Number(minRaw) : undefined;
+      const max =
+        maxRaw !== undefined && maxRaw !== '' ? Number(maxRaw) : undefined;
       nftFilter.price = {};
       // Validate both bounds are present, numeric, and min <= max
       if (
@@ -44,12 +46,10 @@ router.get('/', async (req, res) => {
         (maxRaw !== undefined && maxRaw !== '' && isNaN(max)) ||
         (min !== undefined && max !== undefined && min > max)
       ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Invalid priceRange format. Use 'min-max' with numeric values, and min must be less than or equal to max.",
-          });
+        return res.status(400).json({
+          error:
+            "Invalid priceRange format. Use 'min-max' with numeric values, and min must be less than or equal to max.",
+        });
       }
       if (min !== undefined) nftFilter.price.$gte = min;
       if (max !== undefined) nftFilter.price.$lte = max;
@@ -116,7 +116,10 @@ router.post('/mint', async (req, res) => {
         .json({ error: 'storyId and metadataURI are required' });
     }
 
-    if (metadata && (typeof metadata !== 'object' || Object.keys(metadata).length === 0)) {
+    if (
+      metadata &&
+      (typeof metadata !== 'object' || Object.keys(metadata).length === 0)
+    ) {
       return res
         .status(400)
         .json({ error: 'metadata must be a valid JSON object if provided' });
@@ -136,9 +139,7 @@ router.post('/mint', async (req, res) => {
     }
 
     // Calculate keccak256 hash of story content (using ethers v6 API)
-    const storyHash = ethers.keccak256(
-      ethers.toUtf8Bytes(story.content)
-    );
+    const storyHash = ethers.keccak256(ethers.toUtf8Bytes(story.content));
 
     const nft = new Nft({
       tokenId,

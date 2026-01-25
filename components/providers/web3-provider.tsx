@@ -108,7 +108,10 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       (window as any).ethereum.on('accountsChanged', handleAccounts);
       (window as any).ethereum.on('chainChanged', handleChain);
       return () => {
-        (window as any).ethereum.removeListener('accountsChanged', handleAccounts);
+        (window as any).ethereum.removeListener(
+          'accountsChanged',
+          handleAccounts
+        );
         (window as any).ethereum.removeListener('chainChanged', handleChain);
       };
     }

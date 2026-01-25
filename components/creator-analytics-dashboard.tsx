@@ -10,7 +10,7 @@ import {
   MessageSquare,
   DollarSign,
   Trophy,
-  Calendar
+  Calendar,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -83,7 +83,9 @@ export function CreatorAnalyticsDashboard() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/analytics/creators?timeframe=${timeframe}`);
+      const response = await fetch(
+        `/api/analytics/creators?timeframe=${timeframe}`
+      );
       const data = await response.json();
 
       if (data.success) {
@@ -193,7 +195,9 @@ export function CreatorAnalyticsDashboard() {
                 {/* Creator Details */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-semibold truncate">{creator.creatorName}</h3>
+                    <h3 className="font-semibold truncate">
+                      {creator.creatorName}
+                    </h3>
                     {creator.isVerified && <VerifiedBadge size="sm" />}
                   </div>
 
@@ -203,7 +207,9 @@ export function CreatorAnalyticsDashboard() {
                       <Eye className="w-4 h-4 text-muted-foreground" />
                       <div>
                         <p className="text-sm text-muted-foreground">Views</p>
-                        <p className="font-semibold">{formatNumber(creator.totalViews)}</p>
+                        <p className="font-semibold">
+                          {formatNumber(creator.totalViews)}
+                        </p>
                       </div>
                     </div>
 
@@ -211,15 +217,21 @@ export function CreatorAnalyticsDashboard() {
                       <Heart className="w-4 h-4 text-muted-foreground" />
                       <div>
                         <p className="text-sm text-muted-foreground">Likes</p>
-                        <p className="font-semibold">{formatNumber(creator.totalLikes)}</p>
+                        <p className="font-semibold">
+                          {formatNumber(creator.totalLikes)}
+                        </p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <MessageSquare className="w-4 h-4 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Comments</p>
-                        <p className="font-semibold">{formatNumber(creator.totalComments)}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Comments
+                        </p>
+                        <p className="font-semibold">
+                          {formatNumber(creator.totalComments)}
+                        </p>
                       </div>
                     </div>
 
@@ -227,7 +239,9 @@ export function CreatorAnalyticsDashboard() {
                       <DollarSign className="w-4 h-4 text-muted-foreground" />
                       <div>
                         <p className="text-sm text-muted-foreground">Revenue</p>
-                        <p className="font-semibold">{formatCurrency(creator.totalRevenue)}</p>
+                        <p className="font-semibold">
+                          {formatCurrency(creator.totalRevenue)}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -237,9 +251,7 @@ export function CreatorAnalyticsDashboard() {
                     <Badge variant="secondary">
                       {creator.totalStories} Stories
                     </Badge>
-                    <Badge variant="secondary">
-                      {creator.totalNFTs} NFTs
-                    </Badge>
+                    <Badge variant="secondary">{creator.totalNFTs} NFTs</Badge>
                     <Badge variant="secondary">
                       {creator.totalNFTSales} Sales
                     </Badge>
@@ -259,8 +271,13 @@ export function CreatorAnalyticsDashboard() {
                           .sort((a, b) => b.views - a.views)
                           .slice(0, 3)
                           .map((story) => (
-                            <div key={story.id} className="flex items-center justify-between text-sm">
-                              <span className="truncate flex-1 mr-2">{story.title}</span>
+                            <div
+                              key={story.id}
+                              className="flex items-center justify-between text-sm"
+                            >
+                              <span className="truncate flex-1 mr-2">
+                                {story.title}
+                              </span>
                               <div className="flex items-center gap-3 text-muted-foreground">
                                 <span className="flex items-center gap-1">
                                   <Eye className="w-3 h-3" />
