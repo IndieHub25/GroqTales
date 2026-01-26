@@ -161,6 +161,20 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     setEnsName(null);
   };
 
+  const chainConfigs: Record<number, any> = {
+    10143: {
+      chainId: `0x${(10143).toString(16)}`,
+      chainName: 'Monad Testnet',
+      nativeCurrency: {
+        name: 'MON',
+        symbol: 'MON',
+        decimals: 18,
+      },
+      rpcUrls: ['https://testnet-rpc.monad.xyz'],
+      blockExplorerUrls: ['https://testnet.monad.xyz'],
+    },
+  };
+
   const switchNetwork = async (targetChainId: number) => {
     if (typeof window !== 'undefined' && (window as any).ethereum) {
       try {
@@ -171,30 +185,23 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       } catch (error: any) {
         if (error.code === 4902) {
           // Chain not found, try to add it
-          try {
-            await (window as any).ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [
-                {
-                  chainId: `0x${targetChainId.toString(16)}`,
-                  chainName: 'Monad Testnet',
-                  nativeCurrency: {
-                    name: 'MON',
-                    symbol: 'MON',
-                    decimals: 18,
-                  },
-                  rpcUrls: ['https://testnet-rpc.monad.xyz'],
-                  blockExplorerUrls: ['https://testnet.monad.xyz'],
-                },
-              ],
-            });
-            // Retry switch after adding
-            await (window as any).ethereum.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: `0x${targetChainId.toString(16)}` }],
-            });
-          } catch (addError) {
-            console.error('Failed to add network:', addError);
+          const chainConfig = chainConfigs[targetChainId];
+          if (chainConfig) {
+            try {
+              await (window as any).ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [chainConfig],
+              });
+              // Retry switch after adding
+              await (window as any).ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: `0x${targetChainId.toString(16)}` }],
+              });
+            } catch (addError) {
+              console.error('Failed to add network:', addError);
+            }
+          } else {
+            console.error('Unsupported chain ID:', targetChainId);
           }
         } else {
           console.error('Failed to switch network:', error);

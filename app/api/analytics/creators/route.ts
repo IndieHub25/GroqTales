@@ -99,8 +99,19 @@ export async function GET(request: NextRequest) {
       .aggregate([
         { $match: dateFilter },
         {
+          $lookup: {
+            from: 'users',
+            let: { addr: '$creatorAddress' },
+            pipeline: [
+              { $match: { $expr: { $eq: ['$walletAddress', '$$addr'] } } }
+            ],
+            as: 'creator'
+          }
+        },
+        { $unwind: '$creator' },
+        {
           $group: {
-            _id: '$creatorAddress',
+            _id: '$creator._id',
             totalNFTs: { $sum: 1 },
             totalNFTSales: {
               $sum: { $size: { $ifNull: ['$stats.priceHistory', []] } },
@@ -172,20 +183,22 @@ export async function GET(request: NextRequest) {
     }
 
     // Convert to array and sort by total engagement (views + likes + comments)
-    const analytics = Array.from(creatorAnalytics.values())
+    const fullAnalytics = Array.from(creatorAnalytics.values())
       .map((creator) => ({
         ...creator,
         totalEngagement:
           creator.totalViews + creator.totalLikes + creator.totalComments,
       }))
-      .sort((a, b) => b.totalEngagement - a.totalEngagement)
-      .slice(0, limit);
+      .sort((a, b) => b.totalEngagement - a.totalEngagement);
+
+    const totalCreators = fullAnalytics.length;
+    const analytics = fullAnalytics.slice(0, limit);
 
     return NextResponse.json({
       success: true,
       data: analytics,
       timeframe,
-      totalCreators: analytics.length,
+      totalCreators,
     });
   } catch (error) {
     console.error('Error fetching creator analytics:', error);

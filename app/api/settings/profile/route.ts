@@ -10,9 +10,12 @@ export async function GET() {
     if (!session)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+    if (!session.user?.email)
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     await connectDB();
 
-    const user = await User.findOne({ email: session.user?.email } as any)
+    const user = await User.findOne({ email: session.user.email })
       .select('-password')
       .lean();
 
@@ -35,6 +38,9 @@ export async function PATCH(req: Request) {
     if (!session)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+    if (!session.user?.email)
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const body = await req.json();
     const { username, displayName, bio, primaryGenre } = body;
 
@@ -50,8 +56,8 @@ export async function PATCH(req: Request) {
     if (username) {
       const existingUser = await User.findOne({
         username,
-        email: { $ne: session.user?.email },
-      } as any);
+        email: { $ne: session.user.email },
+      });
 
       if (existingUser)
         return NextResponse.json({ error: 'Username taken' }, { status: 409 });
@@ -64,9 +70,9 @@ export async function PATCH(req: Request) {
     if (primaryGenre !== undefined) updateData.primaryGenre = primaryGenre;
 
     const updatedUser = await User.findOneAndUpdate(
-      { email: session.user?.email } as any,
+      { email: session.user.email },
       updateData,
-      { new: true } as any
+      { new: true }
     ).select('-password');
 
     if (!updatedUser) {
