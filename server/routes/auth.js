@@ -4,6 +4,7 @@ const ms = require('ms');
 const User = require('../models/User');
 const { signAccessToken, signRefreshToken } = require('../utils/jwt');
 const { refresh } = require('../middleware/auth');
+const logger = require('../utils/logger');
 
 const REFRESH_TIME_MS = ms(process.env.JWT_REFRESH_EXPIRES || '7d');
 
@@ -14,9 +15,15 @@ router.post('/signup', async (req, res) => {
       req.body;
 
     if (!email || !password || !firstName || !lastName || !role) {
+      logger.warn('Signup validation failed: missing required fields', {
+        requestId: req.id,
+      });
       return res.status(400).json({ error: 'Missing required fields' });
     }
     if (role === 'admin' && !adminSecret) {
+      logger.warn('Signup validation failed: missing admin secret for admin role', {
+        requestId: req.id,
+      });
       return res
         .status(400)
         .json({ error: 'Missing admin secret for admin role' });
@@ -24,6 +31,9 @@ router.post('/signup', async (req, res) => {
 
     const exists = await User.findOne({ email }).exec();
     if (exists) {
+      logger.warn('Signup failed: email already registered', {
+        requestId: req.id,
+      });
       return res.status(409).json({ error: 'Email already registered' });
     }
 
@@ -31,6 +41,9 @@ router.post('/signup', async (req, res) => {
 
     if (role === 'admin') {
       if (adminSecret !== process.env.ADMIN_SECRET) {
+        logger.warn('Signup failed: invalid admin secret', {
+          requestId: req.id,
+        });
         return res.status(403).json({ error: 'Invalid admin secret' });
       }
       assignedRole = 'admin';
@@ -44,6 +57,13 @@ router.post('/signup', async (req, res) => {
     });
 
     await user.save();
+
+    logger.info('User signup successful', {
+      requestId: req.id,
+      userId: user._id.toString(),
+      email: user.email,
+      role: assignedRole,
+    });
 
     const accessToken = signAccessToken({ id: user._id, role: assignedRole });
     const refreshToken = signRefreshToken({ id: user._id, role: assignedRole });
@@ -70,6 +90,11 @@ router.post('/signup', async (req, res) => {
       },
     });
   } catch (error) {
+    logger.error('Signup error', {
+      requestId: req.id,
+      error: error.message,
+      code: error.code,
+    });
     if (error.code === 11000) {
       return res.status(409).json({ error: 'Email already registered' });
     }
@@ -84,16 +109,32 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
+      logger.warn('Login validation failed: missing email or password', {
+        requestId: req.id,
+      });
       return res.status(400).json({ error: 'Missing email or password' });
     }
     const user = await User.findOne({ email });
     if (!user) {
+      logger.warn('Login failed: invalid credentials', {
+        requestId: req.id,
+      });
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     const okPw = await user.comparePassword(password);
     if (!okPw) {
+      logger.warn('Login failed: invalid credentials', {
+        requestId: req.id,
+      });
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+    logger.info('User login successful', {
+      requestId: req.id,
+      userId: user._id.toString(),
+      email: user.email,
+      role: user.role,
+    });
+
     const accessToken = signAccessToken({ id: user._id, role: user.role });
     const refreshToken = signRefreshToken({ id: user._id, role: user.role });
 
@@ -119,6 +160,10 @@ router.post('/login', async (req, res) => {
       },
     });
   } catch (error) {
+    logger.error('Login error', {
+      requestId: req.id,
+      error: error.message,
+    });
     return res
       .status(500)
       .json({ message: 'Internal Server error' });

@@ -11,6 +11,7 @@ const { ethers } = require('ethers');
 const { v4: uuidv4 } = require('uuid');
 
 const router = express.Router();
+const logger = require('../utils/logger');
 
 const Nft = require('../models/Nft');
 const Story = require('../models/Story');
@@ -102,8 +103,13 @@ router.get('/', async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching NFTs:', error);
-    return res.status(500).json({ error: error.message });
+
+    logger.error('Error fetching NFTs', {
+      requestId: req.id,
+      error: error.message,
+    });
+    res.status(500).json({ error: error.message });
+
   }
 });
 
@@ -160,8 +166,15 @@ router.post('/mint', authRequired, async (req, res) => {
 
     return res.status(201).json(nft);
   } catch (error) {
-    console.error('Error minting NFT:', error);
-    return res.status(500).json({ error: error.message });
+
+    logger.error('Error minting NFT', {
+      requestId: req.id,
+      error: error.message,
+      storyId: req.body.storyId,
+      userId: req.user?.id,
+    });
+    res.status(500).json({ error: error.message });
+
   }
 });
 
@@ -198,8 +211,15 @@ router.delete('/burn/:Id', authRequired, async (req, res) => {
       message: `NFT with tokenId ${tokenId} has been burned successfully.`,
     });
   } catch (error) {
-    console.error('Error burning NFT:', error);
-    return res.status(500).json({ error: error.message });
+
+    logger.error('Error burning NFT', {
+      requestId: req.id,
+      error: error.message,
+      tokenId: req.params.Id,
+      userId: req.user?.id,
+    });
+    res.status(500).json({ error: error.message });
+
   }
 });
 
