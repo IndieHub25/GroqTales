@@ -61,7 +61,6 @@ router.post('/signup', async (req, res) => {
     logger.info('User signup successful', {
       requestId: req.id,
       userId: user._id.toString(),
-      email: user.email,
       role: assignedRole,
     });
 
@@ -131,7 +130,6 @@ router.post('/login', async (req, res) => {
     logger.info('User login successful', {
       requestId: req.id,
       userId: user._id.toString(),
-      email: user.email,
       role: user.role,
     });
 
