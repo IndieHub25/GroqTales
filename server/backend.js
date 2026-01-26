@@ -4,6 +4,7 @@
  * Express.js server for handling API requests, SDK endpoints,
  * and backend services for the GroqTales platform.
  */
+console.log(process.env.MONGODB_URI);
 
 const express = require('express');
 const cors = require('cors');
