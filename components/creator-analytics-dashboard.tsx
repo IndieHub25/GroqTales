@@ -272,7 +272,7 @@ export function CreatorAnalyticsDashboard() {
                     <div className="border-t pt-3">
                       <p className="text-sm font-medium mb-2">Top Stories</p>
                       <div className="space-y-1">
-                        {creator.stories
+                        {[...creator.stories]
                           .sort((a, b) => b.views - a.views)
                           .slice(0, 3)
                           .map((story) => (
@@ -290,7 +290,7 @@ export function CreatorAnalyticsDashboard() {
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <Heart className="w-3 h-3" />
-                                  {story.likes}
+                                  {formatNumber(story.likes)}
                                 </span>
                               </div>
                             </div>

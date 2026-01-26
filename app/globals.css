@@ -212,13 +212,25 @@
 
   /* Comic Glow Effect for UX Polish */
   @keyframes comic-glow {
-    0% { box-shadow: 6px 6px 0px 0px var(--foreground); }
-    50% { box-shadow: 0px 0px 20px 5px var(--primary); }
-    100% { box-shadow: 6px 6px 0px 0px var(--foreground); }
+    0% {
+      box-shadow: 8px 8px 0px 0px var(--foreground);
+    }
+    50% {
+      box-shadow: 0px 0px 20px 5px var(--primary);
+    }
+    100% {
+      box-shadow: 8px 8px 0px 0px var(--foreground);
+    }
   }
 
   .comic-card:hover {
-    animation: comic-glow 2s infinite ease-in-out;
+    animation: comic-glow 2s ease-in-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .comic-card:hover {
+      animation: none;
+    }
   }
 
   /* Smooth scroll utilities */

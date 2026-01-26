@@ -21,7 +21,11 @@ export async function GET() {
 
     return NextResponse.json(user);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error fetching user profile:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -53,14 +57,28 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ error: 'Username taken' }, { status: 409 });
     }
 
+    const updateData: any = {};
+    if (username !== undefined) updateData.username = username;
+    if (displayName !== undefined) updateData.displayName = displayName;
+    if (bio !== undefined) updateData.bio = bio;
+    if (primaryGenre !== undefined) updateData.primaryGenre = primaryGenre;
+
     const updatedUser = await User.findOneAndUpdate(
       { email: session.user?.email } as any,
-      { username, displayName, bio, primaryGenre },
+      updateData,
       { new: true } as any
     ).select('-password');
 
+    if (!updatedUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
     return NextResponse.json(updatedUser);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error updating user profile:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

@@ -174,12 +174,12 @@ export function ProfileForm() {
           </div>
 
           <div className="space-y-2">
-            <Label>Preferred Genre</Label>
+            <Label htmlFor="primaryGenre">Preferred Genre</Label>
             <Select
               value={selectedGenre}
               onValueChange={(val) => setValue('primaryGenre', val)}
             >
-              <SelectTrigger>
+              <SelectTrigger id="primaryGenre">
                 <SelectValue placeholder="Select a genre" />
               </SelectTrigger>
               <SelectContent>

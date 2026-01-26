@@ -1,11 +1,10 @@
+import bcrypt from 'bcryptjs';
 import NextAuth, { NextAuthOptions } from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 
 import connectDB from '@/lib/mongoose';
-
 import { User } from '../models/User';
-import bcrypt from 'bcryptjs';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -67,18 +66,33 @@ export const authOptions: NextAuthOptions = {
 
           const existingUser = await User.findOne({ email: user.email });
 
+          let dbUser = existingUser;
           if (!existingUser) {
-            await User.create({
+            dbUser = await User.create({
               email: user.email,
               displayName: user.name || '',
               image: user.image || '',
               authProvider: 'google',
               googleId: account.providerAccountId,
             });
+          } else if (!existingUser.googleId) {
+            // Update existing user with googleId if missing
+            existingUser.googleId = account.providerAccountId;
+            await existingUser.save();
           }
+
+          // Set the DB user ID for session
+          user.id = dbUser!._id.toString();
+
           return true;
-        } catch (error) {
-          console.error('Error checking or creating user: ', error);
+        } catch (error: any) {
+          console.error('Error checking or creating user:', {
+            message: error?.message,
+            code: error?.code,
+            ...(process.env.NODE_ENV === 'development' && {
+              stack: error?.stack,
+            }),
+          });
           return false;
         }
       }
@@ -87,7 +101,7 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (token && session.user) {
-        // @ts-ignore
+        // @ts-expect-error - NextAuth types don't include id on user
         session.user.id = token.sub;
       }
       return session;

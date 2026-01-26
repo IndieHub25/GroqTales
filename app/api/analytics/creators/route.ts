@@ -1,8 +1,17 @@
+import type { Collection } from 'mongodb';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 
+import { authOptions } from '@/lib/auth';
 import { getCollection } from '@/lib/db';
+
+/**
+ * Check if the request has admin privileges
+ */
+function isAdminRequest(request: NextRequest): boolean {
+  const cookies = request.cookies;
+  return cookies.get('adminSessionActive')?.value === 'true';
+}
 
 /**
  * GET /api/analytics/creators
@@ -14,22 +23,57 @@ export async function GET(request: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Check admin privileges
+    if (!isAdminRequest(request)) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Admin access required' },
+        { status: 403 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const timeframe = searchParams.get('timeframe') || '30d'; // 7d, 30d, 90d, all
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const limitParam = searchParams.get('limit') || '50';
+
+    // Validate timeframe parameter
+    const validTimeframes = ['7d', '30d', '90d', 'all'];
+    if (!validTimeframes.includes(timeframe)) {
+      return NextResponse.json(
+        { error: 'Invalid timeframe. Must be one of: 7d, 30d, 90d, all' },
+        { status: 400 }
+      );
+    }
+
+    const parsedLimit = parseInt(limitParam, 10);
+    if (Number.isNaN(parsedLimit) || parsedLimit < 1 || parsedLimit > 1000) {
+      return NextResponse.json(
+        { error: 'Invalid limit. Must be a number between 1 and 1000' },
+        { status: 400 }
+      );
+    }
+    const limit = parsedLimit;
 
     // Calculate date filter based on timeframe
     const now = new Date();
     let dateFilter = {};
     if (timeframe !== 'all') {
-      const days = parseInt(timeframe.replace('d', ''));
-      const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-      dateFilter = { createdAt: { $gte: startDate } };
+      const timeframeMatch = timeframe.match(/^(\d+)d$/);
+      if (timeframeMatch && timeframeMatch[1]) {
+        const days = parseInt(timeframeMatch[1], 10);
+        if (Number.isFinite(days) && days > 0) {
+          const startDate = new Date(
+            now.getTime() - days * 24 * 60 * 60 * 1000
+          );
+          dateFilter = { createdAt: { $gte: startDate } };
+        }
+      }
     }
 
     // Aggregate stories data by creator
     const storyCollection = await getCollection('stories');
-    const storyAgg = await (storyCollection as any).aggregate([
+    const storyAgg = await (storyCollection as Collection)
+      .aggregate([
         { $match: dateFilter },
         {
           $group: {
@@ -51,7 +95,8 @@ export async function GET(request: NextRequest) {
 
     // Aggregate NFTs data by creator
     const nftCollection = await getCollection('nfts');
-    const nftAgg = await (nftCollection as any).aggregate([
+    const nftAgg = await (nftCollection as Collection)
+      .aggregate([
         { $match: dateFilter },
         {
           $group: {
@@ -79,9 +124,10 @@ export async function GET(request: NextRequest) {
 
     // Process aggregated stories
     for (const agg of storyAgg) {
+      const idStr = String(agg._id);
       creatorAnalytics.set(agg._id, {
-        creatorId: agg._id,
-        creatorName: agg.creatorName || agg._id.slice(-6),
+        creatorId: idStr,
+        creatorName: agg.creatorName || `Creator ${idStr.slice(-6)}`,
         avatarUrl: agg.avatarUrl,
         isVerified: agg.isVerified || false,
         totalStories: agg.totalStories,
@@ -99,10 +145,11 @@ export async function GET(request: NextRequest) {
 
     // Process aggregated NFTs
     for (const agg of nftAgg) {
+      const idStr = String(agg._id);
       if (!creatorAnalytics.has(agg._id)) {
         creatorAnalytics.set(agg._id, {
-          creatorId: agg._id,
-          creatorName: `Creator ${agg._id.slice(-6)}`,
+          creatorId: idStr,
+          creatorName: `Creator ${idStr.slice(-6)}`,
           avatarUrl: null,
           isVerified: false,
           totalStories: 0,

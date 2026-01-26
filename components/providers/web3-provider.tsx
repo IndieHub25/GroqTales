@@ -137,7 +137,12 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         setAccount(accounts[0]);
         setChainId(parseInt(chainIdHex, 16));
         setConnected(true);
-      } catch (error) {
+      } catch (error: any) {
+        if (error.code === 4001) {
+          alert('Wallet connection was rejected by the user.');
+        } else {
+          alert('Failed to connect wallet. Please try again.');
+        }
         console.error('Wallet connection failed:', error);
       } finally {
         setConnecting(false);
@@ -163,8 +168,37 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: `0x${targetChainId.toString(16)}` }],
         });
-      } catch (error) {
-        console.error('Failed to switch network:', error);
+      } catch (error: any) {
+        if (error.code === 4902) {
+          // Chain not found, try to add it
+          try {
+            await (window as any).ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: `0x${targetChainId.toString(16)}`,
+                  chainName: 'Monad Testnet',
+                  nativeCurrency: {
+                    name: 'MON',
+                    symbol: 'MON',
+                    decimals: 18,
+                  },
+                  rpcUrls: ['https://testnet-rpc.monad.xyz'],
+                  blockExplorerUrls: ['https://testnet.monad.xyz'],
+                },
+              ],
+            });
+            // Retry switch after adding
+            await (window as any).ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: `0x${targetChainId.toString(16)}` }],
+            });
+          } catch (addError) {
+            console.error('Failed to add network:', addError);
+          }
+        } else {
+          console.error('Failed to switch network:', error);
+        }
       }
     }
   };

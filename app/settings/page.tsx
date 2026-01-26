@@ -78,7 +78,9 @@ export default async function SettingsPage() {
                 </div>
                 <div className="border-t pt-4 mt-4">
                   <h3 className="font-medium mb-4">Security</h3>
-                  <Button variant="outline">Change Password</Button>
+                  <Button variant="outline" disabled aria-label="Coming soon">
+                    Change Password
+                  </Button>
                 </div>
               </div>
 
@@ -158,8 +160,14 @@ export default async function SettingsPage() {
                       placeholder="No wallet connected"
                       readOnly
                     />
-                    <Button variant="outline">Connect</Button>
+                    <Button variant="outline" disabled>
+                      Connect
+                    </Button>
                   </div>
+                  <p className="text-[0.8rem] text-muted-foreground">
+                    Wallet integration coming soon. Supported wallets: MetaMask,
+                    WalletConnect.
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -241,7 +249,12 @@ export default async function SettingsPage() {
                 <h3 className="font-medium mb-2 text-destructive">
                   Danger Zone
                 </h3>
-                <Button variant="destructive" className="w-full sm:w-auto">
+                <Button
+                  variant="destructive"
+                  className="w-full sm:w-auto"
+                  disabled
+                  aria-label="Account deletion requires confirmation modal - coming soon"
+                >
                   Delete Account
                 </Button>
               </div>

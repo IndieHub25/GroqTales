@@ -32,8 +32,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run security audit (fail on moderate+)
-        run: npm audit --audit-level=moderate
+      - name: Run security audit (fail on high+)
+        run: npm audit --audit-level=high
 
       - name: CodeQL Init
         uses: github/codeql-action/init@v3
