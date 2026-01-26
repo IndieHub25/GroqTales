@@ -41,6 +41,8 @@ router.post('/signup', async (req, res) => {
       firstName: firstName,
       lastName: lastName,
       role: assignedRole,
+      walletAddress: walletAddress || null, // Capture wallet if provided
+      username: email.split('@')[0],
     });
 
     await user.save();
@@ -75,7 +77,7 @@ router.post('/signup', async (req, res) => {
     }
     return res
       .status(500)
-      .json({ message: 'Internal Server error'});
+      .json({ message: 'Internal Server error' });
   }
 });
 

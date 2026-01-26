@@ -16,6 +16,14 @@ const UserSchema = new mongoose.Schema(
     lastName: { type: String, required: true, trim: true },
     phone: { type: String, default: null },
     walletAddress: { type: String, default: null },
+    username: { type: String, unique: true, sparse: true, trim: true },
+    bio: { type: String, maxlength: 500, default: "" },
+    //avatar: { type: String, default: "/images/default-avatar.png" },
+    //badges: [{ type: String }], // Array to store earned badges like 'Alpha Tester'
+    socialLinks: {
+      twitter: String,
+      website: String
+    },
     role: {
       type: String,
       enum: ['user', 'admin', 'moderator'],

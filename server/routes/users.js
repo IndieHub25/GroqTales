@@ -5,6 +5,7 @@
 
 const express = require('express');
 const User = require('../models/User');
+const Story = require('../models/Story');
 const router = express.Router();
 const { authRequired } = require('../middleware/auth');
 
@@ -52,6 +53,39 @@ router.patch('/update', authRequired, async (req, res) => {
       return res.status(404).json({ error: 'Profile not found' });
 
     return res.json(updatedProfile);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/v1/users/public/:walletAddress - Fetch public profile and stories
+router.get('/public/:walletAddress', async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+
+    // 1. Find user by wallet
+    const user = await User.findOne({ walletAddress })
+      .select('username bio avatar badges firstName lastName createdAt')
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ error: 'Creator not found' });
+    }
+
+    // 2. Find their stories
+    const stories = await Story.find({ author: user._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // 3. Return combined payload
+    return res.json({
+      user,
+      stories,
+      stats: {
+        storyCount: stories.length,
+        totalLikes: stories.reduce((acc, s) => acc + (s.stats?.likes || 0), 0)
+      }
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
