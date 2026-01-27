@@ -95,7 +95,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined' && (window as any).ethereum) {
       const handleAccounts = (accounts: string[]) => {
         if (accounts.length > 0) {
-          setAccount(accounts[0]);
+          setAccount(accounts[0]!);
           setConnected(true);
         } else {
           setAccount(null);
@@ -112,6 +112,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         (window as any).ethereum.removeListener('chainChanged', handleChain);
       };
     }
+    return;
   }, []);
 
   useEffect(() => {
