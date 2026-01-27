@@ -154,8 +154,19 @@ connectDB(DB_MAX_RETRIES, DB_RETRY_DELAY_MS)
   })
   .catch((err) => {
     console.error(
-      'Failed to start server due to database connection error:',
+      'Database connection failed:',
       err.message
     );
-    process.exit(1);
+
+    // In development, start server anyway without database
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Starting server in development mode without database...');
+      server = app.listen(PORT, () => {
+        console.log(`GroqTales Backend API server running on port ${PORT} (NO DATABASE)`);
+        console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`Health check: http://localhost:${PORT}/api/health`);
+      });
+    } else {
+      process.exit(1);
+    }
   });
