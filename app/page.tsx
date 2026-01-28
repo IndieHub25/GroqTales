@@ -198,12 +198,12 @@ export default function Home() {
       {/* Trending Section */}
       <section className="py-20 bg-pink-100 dark:bg-slate-900/60 dark:backdrop-blur-sm border-b-8 border-foreground transition-colors duration-500">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-12">
-            <h2 className="text-4xl font-black uppercase bg-card border-4 border-foreground px-6 py-2 shadow-[6px_6px_0px_0px_var(--shadow-color)]">
+          <div className="flex flex-col gap-4 items-start mb-12 md:flex-row md:items-center md:justify-between">
+            <h2 className="text-2xl md:text-4xl font-black uppercase bg-card border-4 border-foreground px-6 py-2 shadow-[6px_6px_0px_0px_var(--shadow-color)]">
               Trending Now
             </h2>
             <Link href="/nft-gallery">
-              <Button className="bg-black dark:bg-white dark:text-black text-white border-4 border-transparent hover:bg-gray-800 font-bold uppercase">
+              <Button className="w-full md:w-auto bg-black dark:bg-white dark:text-black text-white border-4 border-transparent hover:bg-gray-800 font-bold uppercase">
                 View All <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </Link>
@@ -215,11 +215,11 @@ export default function Home() {
       {/* CTA */}
       <section className="py-24 bg-blue-600 dark:bg-indigo-950/80 dark:backdrop-blur-md border-b-8 border-foreground text-center transition-colors duration-500">
         <div className="container mx-auto px-4">
-          <h2 className="text-6xl md:text-8xl font-black text-white uppercase mb-8 [text-shadow:6px_6px_0px_#000]">
+          <h2 className="text-4xl md:text-6xl lg:text-8xl font-black text-white uppercase mb-8 [text-shadow:6px_6px_0px_#000]">
             Ready to Start?
           </h2>
           <Link href="/create/ai-story">
-            <Button className="bg-yellow-400 dark:bg-yellow-600 text-foreground border-4 border-foreground text-2xl font-black uppercase px-12 py-8 h-auto shadow-[12px_12px_0px_0px_#000] hover:shadow-[16px_16px_0px_0px_#000] hover:-translate-y-1 transition-all rounded-none">
+            <Button className="w-full md:w-auto bg-yellow-400 dark:bg-yellow-600 text-foreground border-4 border-foreground text-lg md:text-2xl font-black uppercase px-6 md:px-12 py-4 md:py-8 h-auto shadow-[12px_12px_0px_0px_#000] hover:shadow-[16px_16px_0px_0px_#000] hover:-translate-y-1 transition-all rounded-none">
               Create Your Story
             </Button>
           </Link>

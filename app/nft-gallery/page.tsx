@@ -14,6 +14,13 @@ import {
   Users,
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 import { useWeb3 } from '@/components/providers/web3-provider';
 import { Badge } from '@/components/ui/badge';
@@ -568,37 +575,79 @@ export default function NFTGalleryPage() {
                 placeholder="Search stories or authors..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10
+                text-foreground
+                placeholder:text-muted-foreground
+                dark:text-white
+                dark:placeholder:text-gray-400
+                bg-background
+                dark:bg-muted/30
+                border
+                border-border
+                dark:border-muted"
               />
             </div>
           </div>
 
           <div className="flex gap-2">
-            <select
-              value={selectedGenre}
-              onChange={(e) => setSelectedGenre(e.target.value)}
-              className="px-3 py-2 border border-input bg-background rounded-md text-sm"
-              aria-label="Filter by genre"
-            >
-              {genres.map((genre) => (
-                <option key={genre} value={genre}>
-                  {genre === 'all' ? 'All Genres' : genre}
-                </option>
-              ))}
-            </select>
+            <Select value={selectedGenre} onValueChange={setSelectedGenre}>
+              <SelectTrigger
+                className="
+                w-[150px]
+                bg-card
+                border-4 border-foreground
+                shadow-[6px_6px_0px_0px_var(--shadow-color)]
+                font-black uppercase
+              "
+              >
+                <SelectValue placeholder="Genre" />
+              </SelectTrigger>
+              <SelectContent
+                className="
+                bg-card
+                border-4 border-foreground
+                shadow-[6px_6px_0px_0px_var(--shadow-color)]
+                font-black uppercase
+              "
+              >
+                {genres.map((genre) => (
+                  <SelectItem key={genre} value={genre}>
+                    {genre === 'all' ? 'All Genres' : genre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-            <select
+            <Select
               value={sortBy}
-              onChange={(e) =>
-                setSortBy(e.target.value as 'price' | 'likes' | 'recent')
+              onValueChange={(value) =>
+                setSortBy(value as 'price' | 'likes' | 'recent')
               }
-              className="px-3 py-2 border border-input bg-background rounded-md text-sm"
-              aria-label="Sort NFTs by"
             >
-              <option value="likes">Most Liked</option>
-              <option value="price">Highest Price</option>
-              <option value="recent">Most Recent</option>
-            </select>
+              <SelectTrigger
+                className="
+                w-[180px]
+                bg-card
+                border-4 border-foreground
+                shadow-[6px_6px_0px_0px_var(--shadow-color)]
+                font-black uppercase
+              "
+              >
+                <SelectValue placeholder="Sort NFTs" />
+              </SelectTrigger>
+              <SelectContent
+                className="
+                bg-card
+                border-4 border-foreground
+                shadow-[6px_6px_0px_0px_var(--shadow-color)]
+                font-black uppercase
+              "
+              >
+                <SelectItem value="likes">Most Liked</SelectItem>
+                <SelectItem value="price">Highest Price</SelectItem>
+                <SelectItem value="recent">Most Recent</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

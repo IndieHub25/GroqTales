@@ -69,15 +69,6 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-// Sample user data for demonstration
-const defaultValues: ProfileFormValues = {
-  username: 'alex_storyteller',
-  displayName: 'Alexandra Chen',
-  email: 'alex@example.com',
-  bio: 'Digital storyteller | AI enthusiast | Web3 explorer | Creating immersive narratives at the intersection of technology and imagination.',
-  primaryGenre: 'sci-fi',
-};
-
 export default function SettingsPage() {
   const [avatar, setAvatar] = useState<string>(
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3'
@@ -85,7 +76,6 @@ export default function SettingsPage() {
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues,
     mode: 'onChange',
   });
 

@@ -17,6 +17,7 @@ const nextConfig = {
       "@/lib": require("path").resolve(__dirname, "./lib"),
       "@/components": require("path").resolve(__dirname, "./components"),
       "@/app": require("path").resolve(__dirname, "./app"),
+      "@/models": require("path").resolve(__dirname, "./models"),
     };
     return config;
   },

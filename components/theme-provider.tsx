@@ -36,7 +36,10 @@ function SystemThemeClassSync() {
       // Support both modern and legacy MediaQueryList APIs
       if (typeof mediaQuery.addEventListener === 'function') {
         mediaQuery.addEventListener('change', onMediaChange);
-      } else if (typeof (mediaQuery as unknown as MediaQueryList).addListener === 'function') {
+      } else if (
+        typeof (mediaQuery as unknown as MediaQueryList).addListener ===
+          'function'
+      ) {
         (mediaQuery as unknown as MediaQueryList).addListener(onMediaChange);
       }
     }
@@ -53,9 +56,12 @@ function SystemThemeClassSync() {
         if (typeof mediaQuery.removeEventListener === 'function') {
           mediaQuery.removeEventListener('change', onMediaChange);
         } else if (
-          typeof (mediaQuery as unknown as MediaQueryList).removeListener === 'function'
+          typeof (mediaQuery as unknown as MediaQueryList).removeListener ===
+            'function'
         ) {
-          (mediaQuery as unknown as MediaQueryList).removeListener(onMediaChange);
+          (mediaQuery as unknown as MediaQueryList).removeListener(
+            onMediaChange
+          );
         }
       }
     };

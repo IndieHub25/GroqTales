@@ -197,6 +197,13 @@ export default function RootLayout({
       <body
         className={`${inter.className} ${comicNeue.variable} optimize-paint`}
       >
+        {/* Skip link for keyboard users to jump to main content */}
+        <a
+          href="#main-content"
+          className="skip-link sr-only focus:not-sr-only absolute left-2 top-2 z-50 px-3 py-2 bg-primary text-primary-foreground rounded-md"
+        >
+          Skip to main content
+        </a>
         <Web3Provider>
           <QueryProvider>
             <ThemeProvider
@@ -210,7 +217,11 @@ export default function RootLayout({
                 <ClientLayout>
                   <div className="min-h-screen bg-background flex flex-col">
                     <Header />
-                    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-6 flex-grow focus:outline-2 focus:outline-primary">
+                    <main
+                      id="main-content"
+                      tabIndex={-1}
+                      className="container mx-auto px-4 py-6 flex-grow focus:outline-2 focus:outline-primary"
+                    >
                       {children}
                     </main>
                     <Footer />

@@ -84,7 +84,6 @@ if (shouldMockDb || forceMock) {
       uri: finalUri,
       maxRetries,
       retryDelayMs,
-      dbName: process.env.MONGODB_DB_NAME,
     });
 
     // Setup graceful shutdown handlers once

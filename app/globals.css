@@ -210,6 +210,17 @@
     box-shadow: 4px 4px 0px 0px var(--shadow-color);
   }
 
+  /* Comic Glow Effect for UX Polish */
+  @keyframes comic-glow {
+    0% { box-shadow: 6px 6px 0px 0px var(--foreground); }
+    50% { box-shadow: 0px 0px 20px 5px var(--primary); }
+    100% { box-shadow: 6px 6px 0px 0px var(--foreground); }
+  }
+
+  .comic-card:hover {
+    animation: comic-glow 2s infinite ease-in-out;
+  }
+
   /* Smooth scroll utilities */
   .smooth-scroll {
     scroll-behavior: smooth;
@@ -374,5 +385,49 @@
         transparent 50%
       );
     background-attachment: fixed;
+  }
+
+  /* Accessibility utilities */
+  .sr-only {
+    position: absolute !important;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap;
+    border: 0;
+    padding: 0;
+    margin: -1px;
+  }
+
+  .skip-link {
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+  }
+
+  .skip-link:focus,
+  .skip-link:active,
+  .skip-link.focus-visible {
+    left: 1rem;
+    top: 1rem;
+    width: auto;
+    height: auto;
+    padding: 0.5rem 0.75rem;
+    z-index: 9999;
+  }
+
+  /* Visible focus for keyboard users compliant with WCAG */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 3px;
+    box-shadow: none;
   }
 }

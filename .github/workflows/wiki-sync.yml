@@ -4,12 +4,19 @@ on:
   push:
     paths:
       - 'wiki/**'
+    branches:
+      - main 
+
+permissions:
+  contents: write
 
 jobs:
   sync-wiki:
+    if: github.repository == 'IndieHub25/GroqTales'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      
       - name: Sync Wiki
         uses: newrelic/wiki-sync-action@v1.0.0
         with:

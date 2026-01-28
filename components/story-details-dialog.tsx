@@ -10,6 +10,7 @@ import Link from 'next/link';
 import * as React from 'react';
 
 import { useWeb3 } from '@/components/providers/web3-provider';
+import StoryCommentsDialog from '@/components/story-comments-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,8 +29,8 @@ interface StoryDetailsDialogProps {
   onClose: () => void;
   story: any;
   onPurchase?: () => void;
-  onComment?: () => void;
   onLike?: () => void;
+  isAdmin?: boolean;
 }
 
 export default function StoryDetailsDialog({
@@ -37,11 +38,15 @@ export default function StoryDetailsDialog({
   onClose,
   story,
   onPurchase,
-  onComment,
   onLike,
+  isAdmin = false,
 }: StoryDetailsDialogProps) {
   const { account } = useWeb3();
   const { toast } = useToast();
+  const [isCommentsOpen, setIsCommentsOpen] = React.useState(false);
+  const [commentCount, setCommentCount] = React.useState(
+    story.comments?.length || 0
+  );
 
   const handlePurchase = () => {
     if (!account) {
@@ -145,9 +150,13 @@ export default function StoryDetailsDialog({
                   <Heart className="w-4 h-4 mr-1" />
                   {story.likes || 0}
                 </Button>
-                <Button variant="ghost" size="sm" onClick={onComment}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsCommentsOpen(true)}
+                >
                   <MessageSquare className="w-4 h-4 mr-1" />
-                  {story.comments?.length || 0}
+                  {commentCount}
                 </Button>
                 <Button variant="ghost" size="sm">
                   <Share2 className="w-4 h-4 mr-1" />
@@ -166,6 +175,17 @@ export default function StoryDetailsDialog({
 
         <DialogClose className="absolute right-4 top-4" />
       </DialogContent>
+
+      {/* Comments Dialog */}
+      <StoryCommentsDialog
+        isOpen={isCommentsOpen}
+        onClose={() => setIsCommentsOpen(false)}
+        storyTitle={story.title}
+        storyId={story.id || story._id}
+        isWalletConnected={!!account}
+        isAdmin={isAdmin}
+        onCommentCountChange={setCommentCount}
+      />
     </Dialog>
   );
 }

@@ -268,6 +268,15 @@ Please wait for review before starting large changes.
 ---
 The following section describes the full pull request process in detail:
 
+## CI & GitHub Actions
+GroqTales uses GitHub Actions to ensure code quality and security.
+
+- **Fork Behavior:** If you are contributing from a fork, some workflows (like Deployments) will not run. This is expected security behavior.
+- **"Approve and Run":** Maintainers may need to approve your workflows if you are a first-time contributor. Note that automated PR comments (linting feedback, welcome messages) might not appear on fork PRs due to GitHub security restrictions. Please check the "Files changed" tab and the Actions logs for feedback.
+- **Failures:** If a workflow fails with a "Resource not accessible by integration" error, it is likely a permission issue with your fork. A maintainer will review the logs.
+
+---
+
 ## Testing Guidelines
 
 - Write or update tests for new features and bug fixes.

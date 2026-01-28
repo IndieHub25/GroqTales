@@ -76,9 +76,9 @@ export function TrendingStories() {
   return (
     <section className="py-12">
       <div className="container">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col gap-4 mb-8 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-3xl font-bold gradient-heading flex items-center">
+            <h2 className="text-2xl md:text-3xl font-bold gradient-heading flex items-center">
               <TrendingUp className="mr-2 h-6 w-6" />
               Trending Stories
             </h2>
@@ -86,16 +86,16 @@ export function TrendingStories() {
               Discover the most popular stories on GroqTales
             </p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 md:flex-row md:gap-4">
             <Link href="/stories">
-              <Button variant="outline">
+              <Button variant="outline" className="w-full md:w-auto">
                 <BookOpen className="mr-2 h-4 w-4" />
                 View All
               </Button>
             </Link>
             <Button
               onClick={() => handleCreateSimilar('fantasy')}
-              className="theme-gradient-bg text-white"
+              className="w-full md:w-auto theme-gradient-bg text-black dark:text-white"
             >
               <PenSquare className="mr-2 h-4 w-4" />
               Create Story

@@ -529,7 +529,7 @@ export default function ComicStoriesPage() {
                         <Avatar className="w-6 h-6">
                           <AvatarImage
                             src={comic.authorAvatar}
-                            alt={comic.author}
+                            alt={`${comic.author}'s avatar`}
                           />
                           <AvatarFallback>{comic.author[0]}</AvatarFallback>
                         </Avatar>

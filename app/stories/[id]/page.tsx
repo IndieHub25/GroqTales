@@ -529,7 +529,7 @@ export default function StoryPage({ params }: { params: { id: string } }) {
                             >
                               <div className="flex space-x-4">
                                 <Avatar>
-                                  <AvatarImage src={comment.authorAvatar} />
+                                  <AvatarImage src={comment.authorAvatar} alt={`${comment.author}'s avatar`} />
                                   <AvatarFallback>
                                     {comment.author[0]}
                                   </AvatarFallback>
@@ -587,6 +587,7 @@ export default function StoryPage({ params }: { params: { id: string } }) {
                     <Avatar className="h-16 w-16 border-2 border-primary">
                       <AvatarImage
                         src={`https://api.dicebear.com/7.x/personas/svg?seed=${story.author}`}
+                        alt={`${story.author}'s profile picture`}
                       />
                       <AvatarFallback>
                         {story.author.substring(0, 2).toUpperCase()}

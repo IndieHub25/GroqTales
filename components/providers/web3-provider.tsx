@@ -91,27 +91,61 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [networkName, setNetworkName] = useState('Unknown');
   const [ensName, setEnsName] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      const handleAccounts = (accounts: string[]) => {
+        if (accounts.length > 0) {
+          setAccount(accounts[0]!);
+          setConnected(true);
+        } else {
+          setAccount(null);
+          setConnected(false);
+        }
+      };
+      const handleChain = (chainIdHex: string) => {
+        setChainId(parseInt(chainIdHex, 16));
+      };
+      (window as any).ethereum.on('accountsChanged', handleAccounts);
+      (window as any).ethereum.on('chainChanged', handleChain);
+      return () => {
+        (window as any).ethereum.removeListener('accountsChanged', handleAccounts);
+        (window as any).ethereum.removeListener('chainChanged', handleChain);
+      };
+    }
+    return;
+  }, []);
+
+  useEffect(() => {
+    if (chainId === 10143) setNetworkName('Monad Testnet');
+    else if (chainId === 1) setNetworkName('Ethereum Mainnet');
+    else if (chainId) setNetworkName(`Chain ID: ${chainId}`);
+    else setNetworkName('Unknown');
+  }, [chainId]);
+
   const connectWallet = async () => {
-    console.log('Mock connectWallet - Web3 functionality disabled');
-    // Mock connection for development
-    setConnecting(true);
-    try {
-      // Simulate connection delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setAccount('0x1234...5678');
-      setChainId(1);
-      setBalance('1.5');
-      setConnected(true);
-      setNetworkName('Ethereum Mainnet');
-    } catch (error) {
-      console.error('Mock wallet connection failed:', error);
-    } finally {
-      setConnecting(false);
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      setConnecting(true);
+      try {
+        const accounts = await (window as any).ethereum.request({
+          method: 'eth_requestAccounts',
+        });
+        const chainIdHex = await (window as any).ethereum.request({
+          method: 'eth_chainId',
+        });
+        setAccount(accounts[0]);
+        setChainId(parseInt(chainIdHex, 16));
+        setConnected(true);
+      } catch (error) {
+        console.error('Wallet connection failed:', error);
+      } finally {
+        setConnecting(false);
+      }
+    } else {
+      alert('Please install MetaMask!');
     }
   };
 
   const disconnectWallet = () => {
-    console.log('Mock disconnectWallet - Web3 functionality disabled');
     setAccount(null);
     setChainId(null);
     setBalance(null);
@@ -121,8 +155,16 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   };
 
   const switchNetwork = async (targetChainId: number) => {
-    console.log('Mock switchNetwork - Web3 functionality disabled');
-    setChainId(targetChainId);
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      try {
+        await (window as any).ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: `0x${targetChainId.toString(16)}` }],
+        });
+      } catch (error) {
+        console.error('Failed to switch network:', error);
+      }
+    }
   };
 
   const mintNFTOnBase = async (metadata: any, recipient?: string) => {
