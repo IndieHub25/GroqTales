@@ -183,7 +183,9 @@ graph TD
 
 ## 🤝 Contributing
 
+📌 New contributors: Please read our [CONTRIBUTING.md](CONTRIBUTING.md) to understand issue labels, templates, and workflows.
 GroqTales is community-powered! We welcome all contributions—whether you're a developer, designer, writer, or blockchain enthusiast.
+
 
 **How You Can Help:**
 - Tackle issues labeled `good first issue` (great for newcomers)

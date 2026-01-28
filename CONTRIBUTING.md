@@ -57,6 +57,22 @@ For more, see [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
 
 ## How Can I Contribute?
 
+## 🏷️ How We Categorize Issues
+
+GroqTales uses labels to help contributors understand scope, difficulty, and expectations.
+
+- **Bug** 🐛 – Something is broken or behaving incorrectly
+- **Feature** ✨ – New functionality or enhancement
+- **Task** 📋 – Documentation, refactors, cleanup, or non-feature work
+- **[BIG]** 🚀 – Large, multi-step features requiring discussion
+- **Security** 🔐 – Vulnerabilities or sensitive issues (use responsible disclosure)
+
+### Difficulty Labels
+- **Easy** – Beginner friendly, good first issue  
+- **Medium** – Requires familiarity with the codebase  
+- **Hard** – Complex logic or architectural changes
+
+
 You can contribute in several ways:
 
 - **Reporting Bugs:** Use the `bug_report.md` template and provide detailed steps to reproduce.
@@ -70,7 +86,7 @@ You can contribute in several ways:
 
 ## Using Issue Templates
 
-**Before opening any issue or pull request, you must use the relevant template provided in `.github/ISSUE_TEMPLATE/`.** **Please fill out all required sections to help us triage and resolve your issue quickly.**
+**Before opening any issue or pull request, you must use the relevant template provided in `.github/ISSUE_TEMPLATE/`.**
 Templates include:
 - `bug_report.md` – For bugs or unexpected behavior
 - `feature.md` – For new features or enhancements
@@ -78,6 +94,18 @@ Templates include:
 - `security.md` – For vulnerabilities or security concerns
 - `basic.md` – For small tasks, typos, or minor requests
 - `other.md` – For anything not covered above
+
+## 🧾 When to Use Each Issue Template
+
+Please choose the correct template when opening an issue:
+
+- **Basic Issue** – Small improvements, UI tweaks, or questions
+- **Bug Report** – Crashes, broken UI, incorrect behavior
+- **Feature Request** – New features or enhancements
+- **[BIG] Feature Proposal** – Large ideas needing design discussion
+- **Security Report** – Security-related issues (do not disclose publicly)
+
+Choosing the right template helps maintainers respond faster.
 
 **Please fill out all required sections in the template to help us triage and resolve your issue quickly.**
 
@@ -167,6 +195,21 @@ GroqTales/
 
 ## Pull Request Process
 
+---
+
+## 🔄 Contribution Workflow
+
+1. Fork the repository
+2. Create a feature branch  
+   `git checkout -b feature/short-description`
+3. Make your changes
+4. Commit with a clear message  
+   Example: `docs: explain issue labels and templates`
+5. Push to your fork
+6. Open a Pull Request and link the related issue
+
+Please wait for review before starting large changes.
+
 1. **Fork the repository (do not branch from upstream directly).**
 2. **Clone your fork locally:**
    ```bash
@@ -223,6 +266,7 @@ GroqTales/
     ```
 
 ---
+The following section describes the full pull request process in detail:
 
 ## Testing Guidelines
 
@@ -255,7 +299,16 @@ To ensure your contributions are tracked for **SWOC'26**, use the following labe
 - **Discussions:** Use [GitHub Discussions](https://github.com/IndieHub25/GroqTales/discussions) for ideas and Q&A.
 - **Security:** For vulnerabilities, see [SECURITY.md](./SECURITY.md).
 
+
 ---
+
+## ✅ Checklist for Opening a High-Quality Issue
+
+- [ ] Clear title and description
+- [ ] Correct issue template used
+- [ ] Relevant labels selected
+- [ ] Screenshots/logs attached (if applicable)
+- [ ] Linked related issues or discussions
 
 Thank you for contributing to GroqTales! If you have any questions, open an issue, ask in Discord, or contact the maintainers directly.
 
