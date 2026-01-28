@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const Story = require('../models/Story');
+const { authRequired } = require('../middleware/auth');
 
 // GET /api/v1/stories - Get all stories
 router.get('/', async (req, res) => {
@@ -40,7 +41,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/v1/stories/create - Create new story
-router.post('/create', async (req, res) => {
+router.post('/create',authRequired, async (req, res) => {
   try {
     const { title, content, genre, author } = req.body;
 
@@ -75,7 +76,7 @@ router.get('/search/:id', async (req, res) => {
 });
 
 // POST /api/v1/stories/generate - Generate story with AI
-router.post('/generate', async (req, res) => {
+router.post('/generate', authRequired, async (req, res) => {
   try {
     const { prompt, genre, length, style } = req.body;
 
@@ -101,7 +102,7 @@ router.post('/generate', async (req, res) => {
 });
 
 // POST /api/v1/stories/:id/analyze - Analyze story content
-router.post('/:id/analyze', async (req, res) => {
+router.post('/:id/analyze', authRequired, async (req, res) => {
   try {
     const { id } = req.params;
 

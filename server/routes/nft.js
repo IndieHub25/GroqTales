@@ -15,6 +15,8 @@ const router = express.Router();
 const Nft = require('../models/Nft');
 const Story = require('../models/Story');
 
+const { authRequired } = require('../middleware/auth');
+
 // NFT Endpoints
 
 // GET /api/v1/nft - Get all NFTs with optional filters: category (genre), priceRange
@@ -105,7 +107,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/mint', async (req, res) => {
+router.post('/mint',authRequired, async (req, res) => {
   try {
     const { storyId, metadataURI, metadata, price = 0 } = req.body;
 
@@ -162,7 +164,7 @@ router.post('/mint', async (req, res) => {
   }
 });
 
-router.delete('/burn/:Id', async (req, res) => {
+router.delete('/burn/:Id',authRequired, async (req, res) => {
   try {
     const tokenId = req.params.Id;
 
@@ -182,9 +184,9 @@ router.delete('/burn/:Id', async (req, res) => {
     }
 
     // Optional: Add ownership check here if you have user auth
-    // if (nft.owner.toString() !== req.user.id) {
-    //   return res.status(403).json({ error: 'You are not the owner of this NFT' });
-    // }
+    if (nft.owner.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'You are not the owner of this NFT' });
+    }
 
     // Delete the NFT document (burn)
     await nft.deleteOne();
