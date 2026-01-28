@@ -8,6 +8,7 @@ import {
   TrendingUp,
   BookOpen,
   PenSquare,
+  Heart,
 } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
@@ -100,6 +101,12 @@ export function TrendingStories() {
               <PenSquare className="mr-2 h-4 w-4" />
               Create Story
             </Button>
+            <Link href="/my-library">
+              <Button variant="outline" className="w-full md:w-auto">
+                <Heart className="mr-2 h-4 w-4" />
+                My Library
+              </Button>
+            </Link>
           </div>
         </div>
 

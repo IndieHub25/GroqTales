@@ -1,6 +1,6 @@
 'use client';
 
-import { Wallet, User, Settings, LogOut, BookOpen } from 'lucide-react';
+import { Wallet, User, Settings, LogOut, BookOpen, Heart } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
@@ -91,6 +91,18 @@ export function UserNav() {
               >
                 <BookOpen className="mr-2 h-4 w-4" />
                 <span>My Stories</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              asChild
+              className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all"
+            >
+              <Link
+                href="/my-library"
+                className="flex items-center w-full uppercase py-2"
+              >
+                <Heart className="mr-2 h-4 w-4" />
+                <span>My Library</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem

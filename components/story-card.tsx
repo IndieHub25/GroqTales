@@ -12,9 +12,10 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import StoryCommentsDialog from '@/components/story-comments-dialog';
+import { useWeb3 } from '@/components/providers/web3-provider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,6 +24,7 @@ import {
   CardFooter,
   CardHeader,
 } from '@/components/ui/card';
+import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 
 interface StoryAuthor {
@@ -65,7 +67,33 @@ export function StoryCard({
   isAdmin = false,
 }: StoryCardProps) {
   const router = useRouter();
+  const { account } = useWeb3();
+  const { toast } = useToast();
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Check if story is already in user's library when component mounts
+  useEffect(() => {
+    const checkIfLiked = async () => {
+      if (!account) {
+        setIsLiked(false);
+        return;
+      }
+
+      try {
+        // This would typically fetch from localStorage or an API
+        // For now, we'll use localStorage to track liked stories
+        const likedStories = JSON.parse(localStorage.getItem(`liked-stories-${account}`) || '[]');
+        setIsLiked(likedStories.includes(story.id));
+      } catch (error) {
+        console.error('Error checking liked status:', error);
+        setIsLiked(false);
+      }
+    };
+
+    checkIfLiked();
+  }, [account, story.id]);
 
   // Extract author information
   const authorName =
@@ -79,6 +107,63 @@ export function StoryCard({
   const storyContent =
     story.content || story.description || 'No content available';
   const isGrid = viewMode === 'grid';
+
+  const handleToggleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!account) {
+      toast({
+        title: 'Not Connected',
+        description: 'Please connect your wallet to add stories to your library.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const likedStoriesKey = `liked-stories-${account}`;
+      const likedStories = JSON.parse(localStorage.getItem(likedStoriesKey) || '[]');
+
+      if (isLiked) {
+        // Remove from library
+        const updatedStories = likedStories.filter((id: string) => id !== story.id);
+        localStorage.setItem(likedStoriesKey, JSON.stringify(updatedStories));
+        setIsLiked(false);
+        toast({
+          title: 'Removed from Library',
+          description: `"${story.title}" has been removed from your library.`,
+        });
+      } else {
+        // Add to library
+        if (!likedStories.includes(story.id)) {
+          likedStories.push(story.id);
+          localStorage.setItem(likedStoriesKey, JSON.stringify(likedStories));
+        }
+        setIsLiked(true);
+        toast({
+          title: 'Added to Library',
+          description: `"${story.title}" has been added to your library.`,
+        });
+      }
+
+      // Optional: Sync with backend API when ready
+      // await fetch(`/api/users/${account}/library`, {
+      //   method: isLiked ? 'DELETE' : 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ storyId: story.id }),
+      // });
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update your library. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleViewNFT = () => {
     router.push(`/story/${story.id}`);
@@ -137,10 +222,24 @@ export function StoryCard({
         </CardContent>
         <CardFooter className="p-4 pt-0 flex flex-wrap gap-2 justify-between">
           <div className="flex space-x-4 text-sm text-gray-600 dark:text-muted-foreground">
-            <div className="flex items-center">
-              <Heart className="h-3.5 w-3.5 mr-1" />
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleToggleLike}
+              disabled={isLoading}
+              className={cn(
+                'flex items-center transition-colors cursor-pointer',
+                isLiked
+                  ? 'text-red-500 hover:text-red-600'
+                  : 'hover:text-amber-600'
+              )}
+              aria-label={isLiked ? 'Remove from library' : 'Add to library'}
+            >
+              <Heart
+                className={cn('h-3.5 w-3.5 mr-1', isLiked && 'fill-current')}
+              />
               {story.likes || 0}
-            </div>
+            </motion.button>
             {story.views && (
               <div className="flex items-center">
                 <Eye className="h-3.5 w-3.5 mr-1" />
