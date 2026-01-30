@@ -51,6 +51,61 @@ interface AIStoryGeneratorProps {
   className?: string;
 }
 
+const DRAFT_KEY = "groqtales_story_draft_v1";
+
+interface StoryDraft {
+  prompt: string;
+  storyTitle: string;
+  selectedGenres: string[];
+  storyLength: string;
+  mainCharacterName: string;
+  characterCount: string;
+  characterTraits: string[];
+  characterAge: string;
+  characterBackground: string;
+  protagonistType: string;
+  plotType: string;
+  conflictType: string;
+  storyArc: string;
+  pacing: string;
+  endingType: string;
+  plotTwists: string;
+  includeFlashbacks: boolean;
+  timePeriod: string;
+  locationType: string;
+  worldBuildingDepth: string;
+  atmosphere: string;
+  narrativeVoice: string;
+  tone: string;
+  writingStyle: string;
+  readingLevel: string;
+  mood: string;
+  dialoguePercentage: number[];
+  descriptionDetail: string;
+  primaryTheme: string;
+  secondaryThemes: string[];
+  moralComplexity: string;
+  socialCommentary: boolean;
+  socialCommentaryTopic: string;
+  violenceLevel: string;
+  romanceLevel: string;
+  languageLevel: string;
+  matureContent: boolean;
+  chapterCount: string;
+  foreshadowing: string;
+  symbolism: string;
+  multiplePOVs: boolean;
+  povCount: string;
+  similarTo: string;
+  inspiredBy: string;
+  avoidCliches: string[];
+  includeTropes: string[];
+  temperature: number[];
+  modelSelection: string;
+  updatedAt: number;
+  version: number;
+}
+
 export default function AIStoryGenerator({
   className = '',
 }: AIStoryGeneratorProps) {
@@ -131,6 +186,10 @@ export default function AIStoryGenerator({
   const [isMinting, setIsMinting] = useState(false);
   const [mintSuccess, setMintSuccess] = useState(false);
 
+  // Draft Recovery State
+  const [recoveredDraft, setRecoveredDraft] = useState<StoryDraft | null>(null);
+  const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+
   const { toast } = useToast();
   const { account, connected, connectWallet } = useWeb3();
 
@@ -149,6 +208,143 @@ export default function AIStoryGenerator({
       }
     }
   }, []);
+
+  // Draft recovery detection on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(DRAFT_KEY);
+    if (!saved) return;
+
+    try {
+      const draft = JSON.parse(saved);
+      if (draft?.prompt?.trim()) {
+        setRecoveredDraft(draft);
+        setShowRecoveryModal(true);
+      }
+    } catch (error) {
+      console.error('Error parsing draft:', error);
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch (removeError) {
+        console.warn('Draft cleanup failed:', removeError);
+      }
+    }
+  }, []);
+
+  // Autosave logic with debounce
+  useEffect(() => {
+    if (!prompt.trim()) return;
+
+    const timeout = setTimeout(() => {
+      const draft: StoryDraft = {
+        prompt,
+        storyTitle,
+        selectedGenres,
+        storyLength,
+        mainCharacterName,
+        characterCount,
+        characterTraits,
+        characterAge,
+        characterBackground,
+        protagonistType,
+        plotType,
+        conflictType,
+        storyArc,
+        pacing,
+        endingType,
+        plotTwists,
+        includeFlashbacks,
+        timePeriod,
+        locationType,
+        worldBuildingDepth,
+        atmosphere,
+        narrativeVoice,
+        tone,
+        writingStyle,
+        readingLevel,
+        mood,
+        dialoguePercentage,
+        descriptionDetail,
+        primaryTheme,
+        secondaryThemes,
+        moralComplexity,
+        socialCommentary,
+        socialCommentaryTopic,
+        violenceLevel,
+        romanceLevel,
+        languageLevel,
+        matureContent,
+        chapterCount,
+        foreshadowing,
+        symbolism,
+        multiplePOVs,
+        povCount,
+        similarTo,
+        inspiredBy,
+        avoidCliches,
+        includeTropes,
+        temperature,
+        modelSelection,
+        updatedAt: Date.now(),
+        version: 1,
+      };
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      } catch (error) {
+        console.warn('Autosave failed:', error);
+      }
+    }, 1000); // autosave every 1s after typing stops
+
+    return () => clearTimeout(timeout);
+  }, [
+    prompt,
+    storyTitle,
+    selectedGenres,
+    storyLength,
+    mainCharacterName,
+    characterCount,
+    characterTraits,
+    characterAge,
+    characterBackground,
+    protagonistType,
+    plotType,
+    conflictType,
+    storyArc,
+    pacing,
+    endingType,
+    plotTwists,
+    includeFlashbacks,
+    timePeriod,
+    locationType,
+    worldBuildingDepth,
+    atmosphere,
+    narrativeVoice,
+    tone,
+    writingStyle,
+    readingLevel,
+    mood,
+    dialoguePercentage,
+    descriptionDetail,
+    primaryTheme,
+    secondaryThemes,
+    moralComplexity,
+    socialCommentary,
+    socialCommentaryTopic,
+    violenceLevel,
+    romanceLevel,
+    languageLevel,
+    matureContent,
+    chapterCount,
+    foreshadowing,
+    symbolism,
+    multiplePOVs,
+    povCount,
+    similarTo,
+    inspiredBy,
+    avoidCliches,
+    includeTropes,
+    temperature,
+    modelSelection,
+  ]);
 
   const genres = [
     'Fantasy',
@@ -345,6 +541,12 @@ The air crackled with energy as the first shot was fired...`;
     setTimeout(() => {
       setIsMinting(false);
       setMintSuccess(true);
+      // Clear draft on successful mint
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch (error) {
+        console.warn('Draft cleanup failed:', error);
+      }
       toast({
         title: 'KAZAM! NFT MINTED!',
         description: 'Your story is now eternal on the blockchain!',
@@ -417,6 +619,131 @@ The air crackled with energy as the first shot was fired...`;
             </div>
 
             <div className="p-6 md:p-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-opacity-50">
+              {/* Draft Recovery Modal */}
+              <AnimatePresence>
+                {showRecoveryModal && recoveredDraft && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                  >
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.8, opacity: 0 }}
+                      className="bg-white border-4 border-black rounded-2xl p-8 max-w-md w-full shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="draft-recovery-title"
+                    >
+                      <div className="text-center space-y-6">
+                        <div className="inline-block bg-yellow-400 p-4 rounded-full border-4 border-black">
+                          <Save className="h-8 w-8 text-black" />
+                        </div>
+
+                        <div>
+                          <h3 id="draft-recovery-title" className="font-bangers text-2xl mb-2">
+                            DRAFT RECOVERED!
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            We found an unsaved draft from{' '}
+                            {new Date(recoveredDraft.updatedAt).toLocaleString()}.
+                            Would you like to restore it?
+                          </p>
+                        </div>
+
+                        <div className="flex gap-4">
+                          <Button
+                            onClick={() => {
+                              // Restore draft
+                              setPrompt(recoveredDraft.prompt);
+                              setStoryTitle(recoveredDraft.storyTitle);
+                              setSelectedGenres(recoveredDraft.selectedGenres);
+                              setStoryLength(recoveredDraft.storyLength);
+                              setMainCharacterName(recoveredDraft.mainCharacterName);
+                              setCharacterCount(recoveredDraft.characterCount);
+                              setCharacterTraits(recoveredDraft.characterTraits);
+                              setCharacterAge(recoveredDraft.characterAge);
+                              setCharacterBackground(recoveredDraft.characterBackground);
+                              setProtagonistType(recoveredDraft.protagonistType);
+                              setPlotType(recoveredDraft.plotType);
+                              setConflictType(recoveredDraft.conflictType);
+                              setStoryArc(recoveredDraft.storyArc);
+                              setPacing(recoveredDraft.pacing);
+                              setEndingType(recoveredDraft.endingType);
+                              setPlotTwists(recoveredDraft.plotTwists);
+                              setIncludeFlashbacks(recoveredDraft.includeFlashbacks);
+                              setTimePeriod(recoveredDraft.timePeriod);
+                              setLocationType(recoveredDraft.locationType);
+                              setWorldBuildingDepth(recoveredDraft.worldBuildingDepth);
+                              setAtmosphere(recoveredDraft.atmosphere);
+                              setNarrativeVoice(recoveredDraft.narrativeVoice);
+                              setTone(recoveredDraft.tone);
+                              setWritingStyle(recoveredDraft.writingStyle);
+                              setReadingLevel(recoveredDraft.readingLevel);
+                              setMood(recoveredDraft.mood);
+                              setDialoguePercentage(recoveredDraft.dialoguePercentage);
+                              setDescriptionDetail(recoveredDraft.descriptionDetail);
+                              setPrimaryTheme(recoveredDraft.primaryTheme);
+                              setSecondaryThemes(recoveredDraft.secondaryThemes);
+                              setMoralComplexity(recoveredDraft.moralComplexity);
+                              setSocialCommentary(recoveredDraft.socialCommentary);
+                              setSocialCommentaryTopic(recoveredDraft.socialCommentaryTopic);
+                              setViolenceLevel(recoveredDraft.violenceLevel);
+                              setRomanceLevel(recoveredDraft.romanceLevel);
+                              setLanguageLevel(recoveredDraft.languageLevel);
+                              setMatureContent(recoveredDraft.matureContent);
+                              setChapterCount(recoveredDraft.chapterCount);
+                              setForeshadowing(recoveredDraft.foreshadowing);
+                              setSymbolism(recoveredDraft.symbolism);
+                              setMultiplePOVs(recoveredDraft.multiplePOVs);
+                              setPovCount(recoveredDraft.povCount);
+                              setSimilarTo(recoveredDraft.similarTo);
+                              setInspiredBy(recoveredDraft.inspiredBy);
+                              setAvoidCliches(recoveredDraft.avoidCliches);
+                              setIncludeTropes(recoveredDraft.includeTropes);
+                              setTemperature(recoveredDraft.temperature);
+                              setModelSelection(recoveredDraft.modelSelection);
+                              setShowRecoveryModal(false);
+                              setRecoveredDraft(null);
+                              toast({
+                                title: 'DRAFT RESTORED!',
+                                description: 'Your previous work has been recovered.',
+                                className: 'font-bangers bg-green-400 text-black border-4 border-black',
+                              });
+                            }}
+                            className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bangers px-6 py-3"
+                          >
+                            RESTORE DRAFT
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              // Discard draft
+                              try {
+                                localStorage.removeItem(DRAFT_KEY);
+                              } catch (error) {
+                                console.warn('Draft discard failed:', error);
+                              }
+                              setShowRecoveryModal(false);
+                              setRecoveredDraft(null);
+                              toast({
+                                title: 'DRAFT DISCARDED',
+                                description: 'Starting fresh!',
+                                className: 'font-bangers bg-gray-400 text-black border-4 border-black',
+                              });
+                            }}
+                            className="flex-1 font-bangers border-4 border-black bg-white text-black hover:bg-gray-100"
+                          >
+                            DISCARD
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <TabsContent value="input" className="space-y-8 mt-0">
                 {/* Core Prompt Section */}
                 <div className="space-y-4">
@@ -543,6 +870,7 @@ The air crackled with energy as the first shot was fired...`;
                                 setMainCharacterName(e.target.value)
                               }
                               className="border-2 border-black"
+                              aria-label="Main Character Name"
                             />
                           </div>
                           <div>
@@ -553,7 +881,7 @@ The air crackled with energy as the first shot was fired...`;
                               value={characterCount}
                               onValueChange={setCharacterCount}
                             >
-                              <SelectTrigger className="border-2 border-black">
+                              <SelectTrigger className="border-2 border-black" aria-label="Character Count">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -597,7 +925,7 @@ The air crackled with energy as the first shot was fired...`;
                               value={characterAge}
                               onValueChange={setCharacterAge}
                             >
-                              <SelectTrigger className="border-2 border-black">
+                              <SelectTrigger className="border-2 border-black" aria-label="Character Age">
                                 <SelectValue placeholder="Select age range" />
                               </SelectTrigger>
                               <SelectContent>
@@ -616,7 +944,7 @@ The air crackled with energy as the first shot was fired...`;
                               value={protagonistType}
                               onValueChange={setProtagonistType}
                             >
-                              <SelectTrigger className="border-2 border-black">
+                              <SelectTrigger className="border-2 border-black" aria-label="Protagonist Type">
                                 <SelectValue placeholder="Select type" />
                               </SelectTrigger>
                               <SelectContent>
@@ -674,7 +1002,7 @@ The air crackled with energy as the first shot was fired...`;
                               value={plotType}
                               onValueChange={setPlotType}
                             >
-                              <SelectTrigger className="border-2 border-black">
+                              <SelectTrigger className="border-2 border-black" aria-label="Plot Type">
                                 <SelectValue placeholder="Select plot type" />
                               </SelectTrigger>
                               <SelectContent>
@@ -699,7 +1027,7 @@ The air crackled with energy as the first shot was fired...`;
                               value={conflictType}
                               onValueChange={setConflictType}
                             >
-                              <SelectTrigger className="border-2 border-black">
+                              <SelectTrigger className="border-2 border-black" aria-label="Conflict Type">
                                 <SelectValue placeholder="Select conflict" />
                               </SelectTrigger>
                               <SelectContent>
@@ -732,7 +1060,7 @@ The air crackled with energy as the first shot was fired...`;
                               value={storyArc}
                               onValueChange={setStoryArc}
                             >
-                              <SelectTrigger className="border-2 border-black">
+                              <SelectTrigger className="border-2 border-black" aria-label="Story Arc">
                                 <SelectValue placeholder="Select arc" />
                               </SelectTrigger>
                               <SelectContent>
@@ -756,7 +1084,7 @@ The air crackled with energy as the first shot was fired...`;
                               Pacing
                             </Label>
                             <Select value={pacing} onValueChange={setPacing}>
-                              <SelectTrigger className="border-2 border-black">
+                              <SelectTrigger className="border-2 border-black" aria-label="Pacing">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -1121,6 +1449,7 @@ The air crackled with energy as the first shot was fired...`;
                             max={100}
                             step={10}
                             className="w-full"
+                            aria-label="Dialogue Percentage"
                           />
                         </div>
 
@@ -1635,6 +1964,7 @@ The air crackled with energy as the first shot was fired...`;
                             max={1.0}
                             step={0.1}
                             className="w-full"
+                            aria-label="AI Creativity Temperature"
                           />
                           <div className="flex justify-between text-xs text-muted-foreground mt-1">
                             <span>More Focused</span>
@@ -1650,7 +1980,7 @@ The air crackled with energy as the first shot was fired...`;
                             value={modelSelection}
                             onValueChange={setModelSelection}
                           >
-                            <SelectTrigger className="border-2 border-black">
+                            <SelectTrigger className="border-2 border-black" aria-label="AI Model Selection">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -1677,7 +2007,6 @@ The air crackled with energy as the first shot was fired...`;
                 {/* Generate Button */}
                 <div className="flex justify-end pt-4">
                   <Button
-                    size="lg"
                     onClick={handleGenerate}
                     className="bg-red-500 hover:bg-red-600 text-white font-bangers text-3xl px-10 py-8 rounded-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all w-full md:w-auto group"
                   >
@@ -1720,7 +2049,6 @@ The air crackled with energy as the first shot was fired...`;
 
                     <div className="flex justify-between items-center">
                       <Button
-                        variant="outline"
                         onClick={() => setActiveTab('input')}
                         className="font-bangers text-xl border-4 border-black bg-white hover:bg-gray-100"
                       >
