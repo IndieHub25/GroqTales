@@ -625,10 +625,19 @@ The air crackled with energy as the first shot was fired...`;
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.8, opacity: 0 }}
                       className="bg-white border-4 border-black rounded-2xl p-8 max-w-md w-full shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="draft-recovery-title"
                     >
                       <div className="text-center space-y-6">
                         <div className="inline-block bg-yellow-400 p-4 rounded-full border-4 border-black">
                           <Save className="h-8 w-8 text-black" />
+                        </div>
+
+                        <div>
+                          <h3 id="draft-recovery-title" className="font-bangers text-2xl mb-2">
+                            DRAFT RECOVERED!
+                          </h3>                          <Save className="h-8 w-8 text-black" />
                         </div>
 
                         <div>
