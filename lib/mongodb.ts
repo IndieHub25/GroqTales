@@ -13,6 +13,7 @@ const shouldMockDb =
   process.env.NEXT_PUBLIC_BUILD_MODE === 'true' ||
   process.env.CI === 'true' ||
   process.env.VERCEL === '1' ||
+  process.env.NODE_ENV === 'test' ||
   (process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI);
 
 const forceMock = process.env.MONGO_MOCK === 'true';

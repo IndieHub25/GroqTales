@@ -23,7 +23,8 @@
       "@/hooks/*": ["./hooks/*"],
       "@/utils/*": ["./utils/*"],
       "@/app/*": ["./app/*"],
-      "@/config/*": ["./config/*"]
+      "@/config/*": ["./config/*"],
+      "@/models/*": ["./models/*"]
     },
     "plugins": [
       {
