@@ -7,6 +7,7 @@ import { ProfileStats } from "@/components/profile/profile-stats";
 import { StoryCard } from "@/components/profile/story-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useParams } from "next/navigation";
 
 
 export default function ProfilePage() {
@@ -14,13 +15,18 @@ export default function ProfilePage() {
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const params = useParams();
+
+  const walletFromUrl = typeof params?.username === "string" ? params.username : "";
+  const isOwner = connected && 
+                  account?.toLowerCase() === walletFromUrl?.toLowerCase();
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (connected && account) {
+      if (walletFromUrl) {
         try {
           setLoading(true);
-          const response = await fetch(`/api/v1/users/profile/${account}`);
+          const response = await fetch(`/api/v1/users/profile/${walletFromUrl}`);
           if (!response.ok) throw new Error("Failed to load");
           const data = await response.json();
           
@@ -36,8 +42,7 @@ export default function ProfilePage() {
     };
 
     fetchProfile();
-  }, [account, connected]);
-
+  }, [walletFromUrl]);
   // Show Loading Skeleton while fetching
   if (connecting || (connected && loading)) {
     return <div className="container mx-auto p-20"><Skeleton className="h-40 w-full" /></div>;
@@ -48,7 +53,7 @@ export default function ProfilePage() {
 
   return (
     <main className="min-h-screen bg-black text-slate-200 pb-20">
-      <ProfileHeader user={profileData?.user} isOwner={true} />
+      <ProfileHeader user={profileData?.user} isOwner={isOwner} />
       
       <div className="container mx-auto px-4">
         <ProfileStats stats={profileData?.stats} />

@@ -117,7 +117,7 @@ const nextConfig = {
   },
   async rewrites() {
   // Define the backend URL based on the environment
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   return [
     {

@@ -25,27 +25,28 @@ router.get('/profile', authRequired , async (req, res) => {
   }
 });
 
-// GET /api/v1/users//profile/:walletAddress - Get logged-in user's full profile
+// GET /api/v1/users/profile/:walletAddress - Get user profile by wallet address
 router.get('/profile/:walletAddress', async (req, res) => {
   try {
     const { walletAddress } = req.params;
     const addr = walletAddress.toLowerCase();
-
-    // 1. Find the user. If they don't exist, CREATE them.
-    let user = await User.findOne({ walletAddress: addr }).lean();
-    if (!user) {
-      user = await User.create({
-        walletAddress: addr,
-        username: `user_${addr.slice(-4)}`
-      });
-    }
-
-    // 2. Fetch their stories (linking by user._id)
+    const user = await User.findOneAndUpdate(
+      { walletAddress: addr },
+      { 
+        $setOnInsert: { 
+          walletAddress: addr, 
+          username: `user_${addr.slice(-8)}` 
+        } 
+      },
+      { 
+        upsert: true, 
+        new: true, 
+        projection: 'username bio avatar badges firstName lastName walletAddress createdAt' 
+      }
+    ).lean();
     const stories = await Story.find({ author: user._id })
       .sort({ createdAt: -1 })
       .lean();
-
-    // 3. Return the dynamic data
     return res.json({
       user,
       stories,
@@ -56,7 +57,8 @@ router.get('/profile/:walletAddress', async (req, res) => {
       }
     });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    console.error('Profile Route Error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
