@@ -115,6 +115,16 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        // This matches any request starting with /api
+        source: '/api/:path*',
+        // This forwards it to your backend port
+        destination: 'http://localhost:3001/api/:path*',
+      },
+    ];
+  },
 
   // Output configuration for static export if needed
   output: process.env.BUILD_STANDALONE === 'true' ? 'standalone' : undefined,

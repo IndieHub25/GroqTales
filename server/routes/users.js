@@ -7,9 +7,10 @@ const express = require('express');
 const User = require('../models/User');
 const Story = require('../models/Story');
 const router = express.Router();
+const { authRequired } = require('../middleware/auth');
 
 // GET /api/v1/users/profile - Get user profile
-router.get('/profile', async (req, res) => {
+router.get('/profile', authRequired , async (req, res) => {
   try {
     const profile = await User.findById(req.user.id)
       .select('-password -refreshToken')
@@ -22,8 +23,44 @@ router.get('/profile', async (req, res) => {
   }
 });
 
+// GET /api/v1/users/me - Get logged-in user's full profile
+router.get('/me', authRequired , async (req, res) => {
+  try {
+    // 1. Fetch user
+    const user = await User.findById(req.user.id)
+      .select('-password')
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // 2. Fetch authored stories
+    const stories = await Story.find({ author: user._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // 3. Aggregate stats
+    const stats = {
+      storyCount: stories.length,
+      totalLikes: stories.reduce((sum, s) => sum + (s.stats?.likes || 0), 0),
+      totalViews: stories.reduce((sum, s) => sum + (s.stats?.views || 0), 0),
+      //followerCount: user.followers?.length || 0
+    };
+
+    return res.json({
+      user,
+      stats,
+      stories
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+
 // PATCH /api/v1/users/update - Update user profile
-router.patch('/update', async (req, res) => {
+router.patch('/update', authRequired, async (req, res) => {
   try {
     const updates = req.body;
     if(updates.password || updates.role) {
@@ -50,7 +87,7 @@ router.patch('/update', async (req, res) => {
 });
 
 // GET /api/v1/users/public/:walletAddress - Fetch public profile and stories
-router.get('/public/:walletAddress', async (req, res) => {
+router.get('/public/:walletAddress',async (req, res) => {
   try {
     const { walletAddress } = req.params;
 
