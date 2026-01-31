@@ -116,14 +116,16 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:3001/api/:path*',
-      },
-    ];
-  },
+  // Define the backend URL based on the environment
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
+  return [
+    {
+      source: '/api/:path*',
+      destination: `${apiUrl}/api/:path*`,
+    },
+  ];
+},
   // Output configuration for static export if needed
   output: process.env.BUILD_STANDALONE === 'true' ? 'standalone' : undefined,
 
