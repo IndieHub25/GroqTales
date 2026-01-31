@@ -22,26 +22,35 @@ export default function ProfilePage() {
     account?.toLowerCase() === walletFromUrl?.toLowerCase();
 
   useEffect(() => {
+    // 1. Create the controller
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     const fetchProfile = async () => {
       if (walletFromUrl) {
         try {
           setLoading(true);
-          const response = await fetch(`/api/v1/users/profile/${walletFromUrl}`);
+          const response = await fetch(`/api/v1/users/profile/${walletFromUrl}`, { signal }); 
           if (!response.ok) throw new Error("Failed to load");
           const data = await response.json();
-
           setProfileData(data);
           setError(false);
-        } catch (err) {
+        } catch (err: any) {
+          if (err.name === 'AbortError') return;
           console.error(err);
           setError(true);
         } finally {
-          setLoading(false);
+          if (!signal.aborted) {
+            setLoading(false);
+          }
         }
       }
     };
 
     fetchProfile();
+    return () => {
+      controller.abort();
+    };
   }, [walletFromUrl]);
   // Show Loading Skeleton while fetching
   if (connecting || loading) {
