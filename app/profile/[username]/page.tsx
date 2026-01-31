@@ -1,34 +1,57 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useWeb3 } from "@/components/providers/web3-provider";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileStats } from "@/components/profile/profile-stats";
 import { StoryCard } from "@/components/profile/story-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const mockUser = {
-  displayName: "Alex The Creator",
-  username: "alexcodes",
-  bio: "Weaving AI dreams into Web3 reality. Sci-fi enthusiast and prompt engineer.",
-  walletAddress: "0x71C0000000000000000000000000000000009A23",
-  isOwner: true,
-};
 
-const mockStories = Array(6).fill(null).map((_, i) => ({
-  title: `The Neon Horizon ${i + 1}`,
-  excerpt: "In a world where algorithms dream of electric sheep, one droid stood apart...",
-  coverImage: "/neon-light.avif", 
-  likes: 42 + i * 5,
-  comments: 12,
-  isNFT: i % 3 === 0,
-  genre: "Sci-Fi"
-}));
+export default function ProfilePage() {
+  const { account, connected, connecting } = useWeb3();
+  const [profileData, setProfileData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-export default function ProfilePage({ params }: { params: { username: string } }) {
-  const user = { ...mockUser, username: params.username };
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (connected && account) {
+        try {
+          setLoading(true);
+          const response = await fetch(`/api/v1/users/profile/${account}`);
+          if (!response.ok) throw new Error("Failed to load");
+          const data = await response.json();
+          
+          setProfileData(data);
+          setError(false);
+        } catch (err) {
+          console.error(err);
+          setError(true);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchProfile();
+  }, [account, connected]);
+
+  // Show Loading Skeleton while fetching
+  if (connecting || (connected && loading)) {
+    return <div className="container mx-auto p-20"><Skeleton className="h-40 w-full" /></div>;
+  }
+  if (!profileData || !profileData.user) {
+  return <div className="p-20 text-white"> User not found.</div>;
+}
+
   return (
     <main className="min-h-screen bg-black text-slate-200 pb-20">
-      <ProfileHeader user={user} />
+      <ProfileHeader user={profileData?.user} isOwner={true} />
       
       <div className="container mx-auto px-4">
-        <ProfileStats />
+        <ProfileStats stats={profileData?.stats} />
         
         <div className="mt-8">
           <Tabs defaultValue="stories" className="w-full">
@@ -42,12 +65,13 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
             <TabsContent value="stories" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockStories.map((story, idx) => (
-                  <StoryCard key={idx} story={story} />
+                 {/* Map through the REAL stories from your API */}
+                {profileData?.stories?.map((story: any, idx: number) => (
+                  <StoryCard key={story._id || idx} story={story} />
                 ))}
               </div>
               
-              {mockStories.length === 0 && (
+               {profileData?.stories?.length === 0 && (
                 <div className="text-center py-20 text-slate-500">
                   <p className="text-lg">No stories told yet.</p>
                   <button className="mt-4 text-violet-400 hover:underline">Create your first story</button>

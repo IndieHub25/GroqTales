@@ -25,41 +25,40 @@ router.get('/profile', authRequired , async (req, res) => {
   }
 });
 
-// GET /api/v1/users/me - Get logged-in user's full profile
-router.get('/me', authRequired , async (req, res) => {
+// GET /api/v1/users//profile/:walletAddress - Get logged-in user's full profile
+router.get('/profile/:walletAddress', async (req, res) => {
   try {
-    // 1. Fetch user
-    const user = await User.findById(req.user.id)
-      .select('-password')
-      .lean();
+    const { walletAddress } = req.params;
+    const addr = walletAddress.toLowerCase();
 
+    // 1. Find the user. If they don't exist, CREATE them.
+    let user = await User.findOne({ walletAddress: addr }).lean();
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      user = await User.create({
+        walletAddress: addr,
+        username: `user_${addr.slice(-4)}`
+      });
     }
 
-    // 2. Fetch authored stories
+    // 2. Fetch their stories (linking by user._id)
     const stories = await Story.find({ author: user._id })
       .sort({ createdAt: -1 })
       .lean();
 
-    // 3. Aggregate stats
-    const stats = {
-      storyCount: stories.length,
-      totalLikes: stories.reduce((sum, s) => sum + (s.stats?.likes || 0), 0),
-      totalViews: stories.reduce((sum, s) => sum + (s.stats?.views || 0), 0),
-      //followerCount: user.followers?.length || 0
-    };
-
+    // 3. Return the dynamic data
     return res.json({
       user,
-      stats,
-      stories
+      stories,
+      stats: {
+        storyCount: stories.length,
+        totalLikes: stories.reduce((sum, s) => sum + (s.stats?.likes || 0), 0),
+        totalViews: stories.reduce((sum, s) => sum + (s.stats?.views || 0), 0)
+      }
     });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 });
-
 
 // PATCH /api/v1/users/update - Update user profile
 router.patch('/update', authRequired, async (req, res) => {
