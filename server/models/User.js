@@ -3,19 +3,33 @@ const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema(
   {
+    walletAddress: { 
+      type: String, 
+      required: true, 
+      unique: true, 
+      lowercase: true, 
+      trim: true 
+    },
     email: {
       type: String,
-      required: true,
       unique: true,
       lowercase: true,
+      sparse: true,
       trim: true,
       match: [/^\S+@\S+\.\S+$/, 'Invalid email address'],
     },
-    password: { type: String, required: true, select: false },
-    firstName: { type: String, required: true, trim: true },
-    lastName: { type: String, required: true, trim: true },
+    password: { type: String, required: false, select: false },
+    username: { type: String, unique: true, sparse: true },
+    firstName: { type: String, default: "Anonymous" },
+    lastName: { type: String, default: "Creator" },
     phone: { type: String, default: null },
-    walletAddress: { type: String, default: null },
+    bio: { type: String, maxlength: 500, default: "" },
+    avatar: { type: String},
+    badges: [{ type: String }], // Array to store earned badges like 'Alpha Tester'
+    socialLinks: {
+      twitter: String,
+      website: String
+    },
     role: {
       type: String,
       enum: ['user', 'admin', 'moderator'],

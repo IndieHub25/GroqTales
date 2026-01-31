@@ -15,24 +15,23 @@ const StorySchema = new mongoose.Schema({
     type: String,
     lowercase: true,
     required: true,
-    enum: [
-      'fantasy',
-      'sci-fi',
-      'mystery',
-      'adventure',
-      'horror',
-      'romance',
-      'other',
-    ],
+    enum: ['fantasy', 'sci-fi', 'mystery', 'adventure', 'horror', 'romance', 'other'],
   },
+  // REVISED: Link to your User model for dynamic profiles
   author: {
-    type: String, // Wallet address or user ID
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  // NEW: Track metrics for the profile page
+  stats: {
+    views: { type: Number, default: 0 },
+    likes: { type: Number, default: 0 },
   },
-});
+  // NEW: Web3/NFT tracking
+  isMinted: { type: Boolean, default: false },
+  nftTokenId: { type: String, default: null },
+  createdAt: { type: Date, default: Date.now },
+}, { timestamps: true }); // Automatically adds updatedAt
 
 module.exports = mongoose.model('Story', StorySchema);
