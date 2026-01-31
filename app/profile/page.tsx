@@ -15,6 +15,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import React from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -130,7 +131,61 @@ const StoryCard = ({ story }: any) => (
   </Card>
 );
 
+
+
+
 export default function ProfilePage() {
+
+  const [user, setUser] = useState<any>(null);
+  const [stats, setStats] = useState<any>(null);
+  const [stories, setStories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Inside your useEffect in app/profile/page.tsx
+    const fetchProfile = async () => {
+      try {
+        // 1. Get the token from where you stored it during login
+        const token = localStorage.getItem('accessToken');
+
+        const res = await fetch('/api/v1/users/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            // 2. THIS IS THE KEY: Match the 'Bearer ' format your middleware expects
+            'Authorization': `Bearer ${token}`
+          },
+        });
+
+        if (!res.ok) throw new Error('Failed to load profile');
+
+        const data = await res.json();
+        setUser(data.user);
+        setStats(data.stats);
+        setStories(data.stories);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  if (loading) {
+    return <div className="p-6">Loading profile...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-red-500">{error}</div>;
+  }
+
+  if (!user) {
+    return <div className="p-6">No user data found</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
       <FloatingDoodles />
@@ -141,22 +196,22 @@ export default function ProfilePage() {
         <Card className="mb-8">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              <Avatar className="w-24 h-24 border-4 border-background">
-                <AvatarImage src={userData.avatar} alt={userData.name} />
+              {/* <Avatar className="w-24 h-24 border-4 border-background">
+                <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback>AT</AvatarFallback>
-              </Avatar>
+              </Avatar> */}
 
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <h1 className="text-2xl font-bold">{userData.name}</h1>
-                  {userData.isVerified && (
+                  <h1 className="text-2xl font-bold">{user.firstName}{user.lastName}</h1>
+                  {user.isVerified && (
                     <CheckCircle2 className="w-5 h-5 text-primary" />
                   )}
                 </div>
                 <p className="text-muted-foreground mb-4">
-                  {userData.username}
+                  {user.username}
                 </p>
-                <p className="text-sm mb-4">{userData.bio}</p>
+                <p className="text-sm mb-4">{user.bio}</p>
                 <div className="flex flex-wrap gap-2">
                   {userData.badges.map((badge) => (
                     <Badge key={badge} variant="secondary">
