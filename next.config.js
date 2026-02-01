@@ -115,17 +115,19 @@ const nextConfig = {
       },
     ];
   },
-  async rewrites() {
-  // Define the backend URL based on the environment
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  async rewrites() { 
+    const envUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = (envUrl && envUrl.startsWith('http')) 
+      ? envUrl 
+      : 'http://localhost:3001';
 
-  return [
-    {
-      source: '/api/:path*',
-      destination: `${apiUrl}/api/:path*`,
-    },
-  ];
-},
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${apiUrl}/api/:path*`,
+      },
+    ];
+  },
   // Output configuration for static export if needed
   output: process.env.BUILD_STANDALONE === 'true' ? 'standalone' : undefined,
 
