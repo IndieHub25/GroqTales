@@ -51,6 +51,18 @@ export async function handleMintRequest(request: MintRequest): Promise<MintResul
         { new: true }
       );
 
+      if (!updatedRecord) {
+        // Another request already changed the state
+        const currentRecord = await StoryMint.findOne({ storyHash });
+
+        return {
+          success: false,
+          status: currentRecord?.status,
+          message: 'Mint state changed by another request',
+          existingRecord: currentRecord,
+        };
+      }
+
       return {
         success: true,
         status: 'PENDING',
@@ -61,17 +73,36 @@ export async function handleMintRequest(request: MintRequest): Promise<MintResul
   }
 
   // Create new PENDING record for new story
-  const newRecord = await StoryMint.create({
-    storyHash,
-    status: 'PENDING',
-    authorAddress,
-    title,
-  });
+  try {
+    const newRecord = await StoryMint.create({
+      storyHash,
+      status: 'PENDING',
+      authorAddress,
+      title,
+    });
 
-  return {
-    success: true,
-    status: 'PENDING',
-    message: 'Mint initiated',
-    existingRecord: newRecord,
-  };
+    return {
+      success: true,
+      status: 'PENDING',
+      message: 'Mint initiated',
+      existingRecord: newRecord,
+    };
+  } catch (err: any) {
+    // Handle duplicate key error (concurrent mint request)
+    if (err?.code === 11000) {
+      const existingRecord = await StoryMint.findOne({ storyHash });
+
+      return {
+        success: false,
+        status: existingRecord?.status,
+        message:
+          existingRecord?.status === 'MINTED'
+            ? 'Story already minted'
+            : 'Mint already in progress',
+        existingRecord,
+      };
+    }
+
+    throw err;
+  }
 }
