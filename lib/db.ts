@@ -9,8 +9,10 @@ import clientPromise from './mongodb';
  * Used by Mongoose Models (UserInteraction, Story, User)
  */
 const MONGODB_URI = process.env.MONGODB_URI;
+const IS_MOCK_DB =
+  process.env.NEXT_PUBLIC_BUILD_MODE === 'true' || process.env.CI === 'true';
 
-if (!MONGODB_URI) {
+if (!MONGODB_URI && !IS_MOCK_DB) {
   throw new Error(
     'Please define the MONGODB_URI environment variable inside .env.local'
   );
