@@ -1,5 +1,6 @@
 import { UserInteraction } from '../models/UserInteraction';
-import Story from '../models/Story';
+import { Story } from '../models/Story';
+import { connectMongoose } from '@/lib/db';
 
 const WEIGHTS = {
   FOLLOWING_CREATOR: 50,
@@ -9,9 +10,10 @@ const WEIGHTS = {
 };
 
 export async function getPersonalizedFeed(userId: string, page = 1, limit = 10) {
+  await connectMongoose();
   const skip = (page - 1) * limit;
 
-  const interactions = await UserInteraction.find({ userId })
+  const interactions = await UserInteraction.find({ userId: userId } as any)
     .sort({ createdAt: -1 })
     .limit(50)
     .populate('storyId');
@@ -21,11 +23,14 @@ export async function getPersonalizedFeed(userId: string, page = 1, limit = 10) 
   }
 
   const tagCounts: Record<string, number> = {};
+  
   interactions.forEach((int: any) => {
-    const storyTags = int.storyId?.tags || [];
-    storyTags.forEach((tag: string) => {
-      tagCounts[tag] = (tagCounts[tag] || 0) + int.value;
-    });
+    const story = int.storyId;
+    if (story && story.tags) {
+       story.tags.forEach((tag: string) => {
+         tagCounts[tag] = (tagCounts[tag] || 0) + int.value;
+       });
+    }
   });
   
   const topTags = Object.entries(tagCounts)
@@ -33,19 +38,26 @@ export async function getPersonalizedFeed(userId: string, page = 1, limit = 10) 
     .slice(0, 5)
     .map(([tag]) => tag);
 
-  const candidateStories = await Story.find({
+  if (topTags.length === 0) {
+    return getTrendingFeed(page, limit);
+  }
+
+  const query: any = {
     $or: [
       { tags: { $in: topTags } },
-    //   { authorId: { $in: user.following } }       Confusion: I am not sure whether we have a "follow" system... i have to uncomment this if we have... will do it while checking
+      // { authorWallet: { $in: user.following } } 
     ]
-  })
-  .limit(100)
-  .lean();
+  };
+
+  const candidateStories = await Story.find(query)
+    .limit(100)
+    .lean();
 
   const scoredStories = candidateStories.map((story: any) => {
     let score = 0;
 
-    const matchCount = story.tags.filter((t: string) => topTags.includes(t)).length;
+    const storyTags = Array.isArray(story.tags) ? story.tags : [];
+    const matchCount = storyTags.filter((t: string) => topTags.includes(t)).length;
     score += matchCount * WEIGHTS.TAG_MATCH;
 
     const daysOld = (Date.now() - new Date(story.createdAt).getTime()) / (1000 * 60 * 60 * 24);
@@ -62,7 +74,9 @@ export async function getPersonalizedFeed(userId: string, page = 1, limit = 10) 
 }
 
 async function getTrendingFeed(page: number, limit: number) {
+  await connectMongoose();
   const skip = (page - 1) * limit;
+  
   return Story.find({})
     .sort({ likesCount: -1, viewsCount: -1 })
     .skip(skip)

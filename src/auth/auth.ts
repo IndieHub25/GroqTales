@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import { clientPromise } from "@/lib/db";
+import { clientPromise, connectMongoose } from "@/lib/db";
 import { User } from "../../models/User";
 import bcrypt from "bcryptjs";
 import { MongoClient } from "mongodb";
@@ -29,14 +29,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
+        await connectMongoose();
         const user = await User.findOne({ email: credentials.email }).select("+password");
 
-        if (!user) {
-          throw new Error("User not found");
-        }
-
-        if (!user.password) {
-           throw new Error("Please login with Google");
+        if (!user || !user.password) {
+          throw new Error("Invalid credentials");
         }
 
         const isValid = await bcrypt.compare(
@@ -45,7 +42,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
 
         if (!isValid) {
-          throw new Error("Invalid password");
+          throw new Error("Invalid credentials");
         }
 
         return { 

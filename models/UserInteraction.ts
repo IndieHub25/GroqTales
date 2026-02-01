@@ -1,6 +1,14 @@
-import { Schema, model, models } from 'mongoose';
+import mongoose, { Schema, model, models, Document } from 'mongoose';
 
-const UserInteractionSchema = new Schema({
+export interface IUserInteraction extends Document {
+  userId: mongoose.Types.ObjectId;
+  storyId: mongoose.Types.ObjectId;
+  type: 'VIEW' | 'LIKE' | 'BOOKMARK' | 'SHARE' | 'TIME_SPENT';
+  value: number;
+  createdAt: Date;
+}
+
+const UserInteractionSchema = new Schema<IUserInteraction>({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   storyId: { type: Schema.Types.ObjectId, ref: 'Story', required: true },
   type: { 
@@ -14,4 +22,4 @@ const UserInteractionSchema = new Schema({
 
 UserInteractionSchema.index({ userId: 1, createdAt: -1 });
 
-export const UserInteraction = models.UserInteraction || model('UserInteraction', UserInteractionSchema);
+export const UserInteraction = models.UserInteraction || model<IUserInteraction>('UserInteraction', UserInteractionSchema);
