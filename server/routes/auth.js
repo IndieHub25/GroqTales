@@ -89,9 +89,9 @@ router.post('/signup', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('Signup error', {
+    logger.error('Signup failed', {
       requestId: req.id,
-      error: error.message,
+      component: 'auth/signup',
       code: error.code,
     });
     if (error.code === 11000) {
@@ -158,9 +158,9 @@ router.post('/login', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('Login error', {
+    logger.error('Login failed', {
       requestId: req.id,
-      error: error.message,
+      component: 'auth/login',
     });
     return res
       .status(500)
