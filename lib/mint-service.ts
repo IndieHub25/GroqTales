@@ -57,7 +57,7 @@ export async function handleMintRequest(request: MintRequest): Promise<MintResul
 
         return {
           success: false,
-          status: currentRecord?.status,
+          status: currentRecord?.status ?? 'PENDING',
           message: 'Mint state changed by another request',
           existingRecord: currentRecord,
         };
@@ -94,9 +94,9 @@ export async function handleMintRequest(request: MintRequest): Promise<MintResul
 
       return {
         success: false,
-        status: existingRecord?.status,
+        status: existingRecord?.status ?? 'PENDING',
         message:
-          existingRecord?.status === 'MINTED'
+          (existingRecord?.status ?? 'PENDING') === 'MINTED'
             ? 'Story already minted'
             : 'Mint already in progress',
         existingRecord,
