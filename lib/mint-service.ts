@@ -1,4 +1,4 @@
-import StoryMint from '@/models/StoryMint';
+import StoryMint, { IStoryMint } from '@/models/StoryMint';
 
 export interface MintRequest {
   storyHash: string;
@@ -10,7 +10,7 @@ export interface MintResult {
   success: boolean;
   status: 'PENDING' | 'MINTED' | 'FAILED';
   message: string;
-  existingRecord?: any;
+  existingRecord?: IStoryMint | null;
 }
 
 export async function handleMintRequest(request: MintRequest): Promise<MintResult> {
