@@ -1,38 +1,6 @@
-// Mock mongoose before any imports
-jest.mock('mongoose', () => ({
-  connect: jest.fn(),
-  connection: {
-    readyState: 1,
-  },
-  models: {},
-  model: jest.fn().mockReturnValue({
-    create: jest.fn().mockResolvedValue({}),
-    findOne: jest.fn().mockResolvedValue(null),
-    findOneAndUpdate: jest.fn().mockResolvedValue(null),
-    deleteMany: jest.fn().mockResolvedValue({}),
-  }),
-  Schema: jest.fn().mockImplementation(() => ({
-    index: jest.fn(),
-  })),
-}));
-
-// Mock the MongoDB connection before any imports
-jest.mock('@/lib/mongodb', () => ({
-  clientPromise: Promise.resolve({
-    db: jest.fn().mockReturnValue({
-      collection: jest.fn().mockReturnValue({
-        findOne: jest.fn(),
-        insertOne: jest.fn(),
-        updateOne: jest.fn(),
-        deleteMany: jest.fn(),
-      }),
-    }),
-  }),
-}));
-
 import { generateStoryHash, isValidStoryHash, normalizeStoryContent } from '@/lib/story-hash';
+import { handleMintRequest } from '@/lib/mint-service';
 import StoryMint from '@/models/StoryMint';
-import { clientPromise } from '@/lib/mongodb';
 
 // Mock the groq service for testing
 jest.mock('@/lib/groq-service', () => ({
@@ -49,15 +17,23 @@ jest.mock('@/lib/monad-service', () => ({
   })
 }));
 
+// Mock StoryMint model for testing idempotency logic
+jest.mock('@/models/StoryMint', () => ({
+  findOne: jest.fn(),
+  create: jest.fn(),
+  findOneAndUpdate: jest.fn(),
+  deleteMany: jest.fn(),
+}));
+
 describe('Mint Idempotency', () => {
-  beforeAll(async () => {
-    // Connect to database
-    await clientPromise;
+  beforeEach(() => {
+    // Reset all mocks before each test
+    jest.clearAllMocks();
   });
 
   afterEach(async () => {
     // Clean up test data
-    await StoryMint.deleteMany({});
+    await StoryMint.deleteMany();
   });
 
   describe('Story Hash Generation', () => {
@@ -102,40 +78,41 @@ describe('Mint Idempotency', () => {
     });
   });
 
-  describe('Mint State Machine', () => {
+  describe('Mint State Machine (Integration)', () => {
     it('should create PENDING record for new story hash', async () => {
       const storyHash = generateStoryHash('Test', 'Content', '0x123');
       const authorAddress = '0x1234567890123456789012345678901234567890';
       const title = 'Test Story';
 
-      // Mock create to return the created object
-      const mockCreate = jest.fn().mockResolvedValue({
-        storyHash,
-        status: 'PENDING',
-        authorAddress,
-        title,
-      });
-      StoryMint.create = mockCreate;
-
-      // Mock findOne to return the created record
-      const mockFindOne = jest.fn().mockResolvedValue({
-        storyHash,
-        status: 'PENDING',
-        authorAddress,
-        title,
-      });
-      StoryMint.findOne = mockFindOne;
-
-      // Create PENDING record
-      await StoryMint.create({
+      // Mock no existing record
+      (StoryMint.findOne as jest.Mock).mockResolvedValue(null);
+      // Mock create to return the created record
+      (StoryMint.create as jest.Mock).mockResolvedValue({
         storyHash,
         status: 'PENDING',
         authorAddress,
         title,
       });
 
-      const record = await StoryMint.findOne({ storyHash });
-      expect(record?.status).toBe('PENDING');
+      const result = await handleMintRequest({
+        storyHash,
+        authorAddress,
+        title,
+      });
+
+      expect(StoryMint.findOne).toHaveBeenCalledWith({ storyHash });
+      expect(StoryMint.create).toHaveBeenCalledWith({
+        storyHash,
+        status: 'PENDING',
+        authorAddress,
+        title,
+      });
+      expect(result.success).toBe(true);
+      expect(result.status).toBe('PENDING');
+      expect(result.message).toBe('Mint initiated');
+      expect(result.existingRecord?.status).toBe('PENDING');
+      expect(result.existingRecord?.authorAddress).toBe(authorAddress);
+      expect(result.existingRecord?.title).toBe(title);
     });
 
     it('should reject duplicate mint for MINTED story', async () => {
@@ -143,48 +120,58 @@ describe('Mint Idempotency', () => {
       const authorAddress = '0x1234567890123456789012345678901234567890';
       const title = 'Test Story';
 
-      // Mock create to return the created object
-      const mockCreate = jest.fn().mockResolvedValue({
+      const mintedRecord = {
         storyHash,
         status: 'MINTED',
         authorAddress,
         title,
         txHash: '0xabcdef',
-      });
-      StoryMint.create = mockCreate;
+      };
 
-      // Mock findOneAndUpdate to return existing MINTED record
-      const mockFindOneAndUpdate = jest.fn().mockResolvedValue({
+      // Mock existing MINTED record
+      (StoryMint.findOne as jest.Mock).mockResolvedValue(mintedRecord);
+
+      const result = await handleMintRequest({
         storyHash,
-        status: 'MINTED',
         authorAddress,
         title,
-        txHash: '0xabcdef',
       });
-      StoryMint.findOneAndUpdate = mockFindOneAndUpdate;
 
-      // Create MINTED record
-      await StoryMint.create({
+      expect(StoryMint.findOne).toHaveBeenCalledWith({ storyHash });
+      expect(StoryMint.create).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
+      expect(result.status).toBe('MINTED');
+      expect(result.message).toBe('Story already minted');
+      expect(result.existingRecord).toBe(mintedRecord);
+    });
+
+    it('should reject mint for PENDING story', async () => {
+      const storyHash = generateStoryHash('Test', 'Content', '0x123');
+      const authorAddress = '0x1234567890123456789012345678901234567890';
+      const title = 'Test Story';
+
+      const pendingRecord = {
         storyHash,
-        status: 'MINTED',
+        status: 'PENDING',
         authorAddress,
         title,
-        txHash: '0xabcdef',
+      };
+
+      // Mock existing PENDING record
+      (StoryMint.findOne as jest.Mock).mockResolvedValue(pendingRecord);
+
+      const result = await handleMintRequest({
+        storyHash,
+        authorAddress,
+        title,
       });
 
-      // Try to create another record
-      const duplicate = await StoryMint.findOneAndUpdate(
-        { storyHash },
-        {
-          storyHash,
-          status: 'PENDING',
-          authorAddress,
-          title,
-        },
-        { upsert: true, new: true }
-      );
-
-      expect(duplicate?.status).toBe('MINTED');
+      expect(StoryMint.findOne).toHaveBeenCalledWith({ storyHash });
+      expect(StoryMint.create).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
+      expect(result.status).toBe('PENDING');
+      expect(result.message).toBe('Mint already in progress');
+      expect(result.existingRecord).toBe(pendingRecord);
     });
 
     it('should allow retry after FAILED status', async () => {
@@ -192,45 +179,46 @@ describe('Mint Idempotency', () => {
       const authorAddress = '0x1234567890123456789012345678901234567890';
       const title = 'Test Story';
 
-      // Mock create to return the created object
-      const mockCreate = jest.fn().mockResolvedValue({
+      const failedRecord = {
         storyHash,
         status: 'FAILED',
         authorAddress,
         title,
-      });
-      StoryMint.create = mockCreate;
+      };
 
-      // Mock findOneAndUpdate to return new PENDING record
-      const mockFindOneAndUpdate = jest.fn().mockResolvedValue({
+      const updatedRecord = {
         storyHash,
         status: 'PENDING',
         authorAddress,
         title,
-      });
-      StoryMint.findOneAndUpdate = mockFindOneAndUpdate;
+      };
 
-      // Create FAILED record
-      await StoryMint.create({
+      // Mock existing FAILED record
+      (StoryMint.findOne as jest.Mock).mockResolvedValue(failedRecord);
+      // Mock update to return the updated record
+      (StoryMint.findOneAndUpdate as jest.Mock).mockResolvedValue(updatedRecord);
+
+      const result = await handleMintRequest({
         storyHash,
-        status: 'FAILED',
         authorAddress,
         title,
       });
 
-      // Should allow new PENDING record
-      const retry = await StoryMint.findOneAndUpdate(
-        { storyHash },
+      expect(StoryMint.findOne).toHaveBeenCalledWith({ storyHash });
+      expect(StoryMint.findOneAndUpdate).toHaveBeenCalledWith(
+        { storyHash, status: 'FAILED' },
         {
           storyHash,
           status: 'PENDING',
           authorAddress,
           title,
         },
-        { upsert: true, new: true }
+        { new: true }
       );
-
-      expect(retry?.status).toBe('PENDING');
+      expect(result.success).toBe(true);
+      expect(result.status).toBe('PENDING');
+      expect(result.message).toBe('Mint retry initiated');
+      expect(result.existingRecord).toBe(updatedRecord);
     });
   });
 });
