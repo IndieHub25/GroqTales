@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
 
     const count = await Story.countDocuments(query);
 
-    res.json({
+    return res.json({
       data: stories,
       pagination: {
         page: parseInt(page),
@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
@@ -54,9 +54,9 @@ router.post('/create',authRequired, async (req, res) => {
 
     await story.save();
 
-    res.status(201).json(story);
+    return res.status(201).json(story);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
@@ -69,9 +69,9 @@ router.get('/search/:id', async (req, res) => {
       return res.status(404).json({ error: 'Story not found' });
     }
 
-    res.json(story);
+    return res.json(story);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
@@ -95,9 +95,9 @@ router.post('/generate', authRequired, async (req, res) => {
       },
     };
 
-    res.json(generatedStory);
+    return res.json(generatedStory);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
@@ -116,9 +116,9 @@ router.post('/:id/analyze', authRequired, async (req, res) => {
       analyzedAt: new Date().toISOString(),
     };
 
-    res.json(analysis);
+    return res.json(analysis);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 

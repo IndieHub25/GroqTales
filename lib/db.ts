@@ -1,6 +1,54 @@
 import { ObjectId } from 'mongodb';
-
+import mongoose from 'mongoose';
 import clientPromise from './mongodb';
+
+/**
+ * ---------------------------------------------------------
+ * MONGOOSE CONNECTION (For "For You" Feed & Analytics)
+ * ---------------------------------------------------------
+ * Used by Mongoose Models (UserInteraction, Story, User)
+ */
+const MONGODB_URI = process.env.MONGODB_URI;
+const IS_MOCK_DB =
+  process.env.NEXT_PUBLIC_BUILD_MODE === 'true' || process.env.CI === 'true';
+
+if (!MONGODB_URI && !IS_MOCK_DB) {
+  throw new Error(
+    'Please define the MONGODB_URI environment variable inside .env.local'
+  );
+}
+
+let cached = (global as any).mongoose;
+
+if (!cached) {
+  cached = (global as any).mongoose = { conn: null, promise: null };
+}
+
+export async function connectMongoose() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+      dbName: process.env.MONGODB_DB_NAME,
+    };
+
+    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+      return mongoose;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn;
+}
 
 /**
  * Retrieves db data
@@ -29,11 +77,10 @@ export async function getDb() {
   const db = client.db(process.env.MONGODB_DB_NAME);
   return db;
 }
-/**
-   * Retrieves collection data
-   *
 
-   */
+/**
+ * Retrieves collection data
+ */
 export async function getCollection(collectionName: string) {
   const db = await getDb();
   return db.collection(collectionName);
@@ -118,3 +165,5 @@ export async function deleteOne(collectionName: string, query: any) {
 export function createObjectId(id: string) {
   return new ObjectId(id);
 }
+
+export { clientPromise };
