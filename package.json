@@ -91,6 +91,8 @@
     "@simplewebauthn/types": "^12.0.0",
     "@tanstack/react-query": "^5.74.3",
     "@uploadthing/react": "^7.1.0",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.36.1",
     "@web3modal/wagmi": "^4.0.0-alpha.0",
     "alchemy-sdk": "^3.5.7",
     "axios": "^1.9.0",
@@ -111,6 +113,7 @@
     "express-rate-limit": "^8.2.1",
     "express-validator": "^7.3.1",
     "framer-motion": "^11.0.5",
+    "groq-sdk": "^0.37.0",
     "helmet": "^8.1.0",
     "input-otp": "^1.4.2",
     "ipfs-http-client": "^60.0.1",
@@ -140,7 +143,7 @@
     "viem": "^2.7.9",
     "wagmi": "^2.5.7",
     "yarn": "^1.22.22",
-    "zod": "^3.22.4"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
