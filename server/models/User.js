@@ -35,6 +35,44 @@ const UserSchema = new mongoose.Schema(
       enum: ['user', 'admin', 'moderator'],
       default: 'user',
     },
+    //Notifications
+    notificationSettings: {
+      email: {
+        comments: {type: Boolean, default: true},
+        likes: {type: Boolean, default: true},
+        followers: {type: Boolean, default: true} ,
+        nftSales: {type: Boolean, default: true} ,
+        platform: {type: Boolean, default: false} ,
+      },
+      inApp: {
+        comments: {type: Boolean, default: true},
+        likes: {type: Boolean, default: true},
+        followers: {type: Boolean, default: true} ,
+        messages: {type: Boolean, default: true} ,
+      },
+    },
+    // Wallet
+    wallet: {
+      address:{type: String},
+      network: {type: String},
+      provider: {type: String},
+      verified: {type: Boolean, default: false},
+      lastConnectedAt: {type: Date},
+    },
+    //privacy settings
+    privacySettings: {
+      profilePublic: {type: Boolean, default: true},
+      allowComments: {type: Boolean, default: true},
+      showActivity: {type: Boolean, default: true},
+      showReadingHistory: {type: Boolean, default: false},
+      dataCollection: {type: Boolean, default: true},
+      personalization: {type: Boolean, default: true},
+    },
+    role : {
+      type: String,
+      enum: ['user', 'admin', 'moderator'],
+      default: 'user',
+    }
   },
   { timestamps: true }
 );
