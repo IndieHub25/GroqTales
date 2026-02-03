@@ -126,7 +126,10 @@ export default function CreateStoryForm() {
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
       // Call the Smart Contract
-      const tx = await contract.mintStory!(generatedStory, signature);
+      if (!contract.mintStory) {
+        throw new Error("Contract method mintStory not found");
+      }
+      const tx = await contract.mintStory(generatedStory, signature);
       
       setMintStatus("Transaction sent! Waiting for confirmation...");
       await tx.wait();
