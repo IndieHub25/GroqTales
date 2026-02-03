@@ -11,6 +11,7 @@ type Tone = 'dark' | 'humorous' | 'epic' | 'whimsical' | '';
 interface StoryResponse {
   success: boolean;
   story?: string;
+  storyId?: string;
   error?: string;
   details?: Record<string, any>;
 }
@@ -29,6 +30,7 @@ export default function CreateStoryForm() {
   const [isMinting, setIsMinting] = useState(false);
   const [mintStatus, setMintStatus] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [storyId, setStoryId] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +75,7 @@ export default function CreateStoryForm() {
 
       if (data.success && data.story) {
         setGeneratedStory(data.story);
+        setStoryId(data.storyId as string);
       }
     } catch (err) {
       console.error("Network error:", err);
@@ -104,7 +107,10 @@ export default function CreateStoryForm() {
 
       setMintStatus("Verifying with server...");
       
-      const storyId = ethers.id(generatedStory); 
+      if (!storyId) {
+        setError("Story ID not available");
+        return;
+      }
 
       const signRes = await fetch('/api/mint/sign', {
         method: 'POST',
