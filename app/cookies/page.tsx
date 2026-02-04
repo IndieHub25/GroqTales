@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import LegalHeader from "@/components/LegalHeader";
 
 // Floating GitHub button component
 const FloatingGithub = () => (
@@ -46,7 +47,15 @@ export default function CookiePolicyPage() {
 
       <div className="container mx-auto px-4 py-12 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent mb-4 text-center">
+          <LegalHeader />
+          <h1 className="
+            text-4xl md:text-5xl
+            font-black
+            text-center
+            mb-6
+            text-black
+            dark:text-white
+          ">
             Cookie Policy
           </h1>
           <p className="text-muted-foreground text-center mb-12">

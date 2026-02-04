@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IStory extends Document {
   title: string;
@@ -6,16 +6,14 @@ export interface IStory extends Document {
   authorWallet: string;
   ipfsHash?: string;
   coverImage?: string;
-  
   status: 'draft' | 'publishing' | 'minted' | 'failed' | 'published';
-  
   nftTxHash?: string;
   nftTokenId?: string;
-  
+  tags?: string[];
+  likesCount?: number;
+  viewsCount?: number;
   createdAt: Date;
   updatedAt: Date;
-  
-  [key: string]: any; 
 }
 
 const StorySchema = new Schema<IStory>({
@@ -30,16 +28,17 @@ const StorySchema = new Schema<IStory>({
   },
   ipfsHash: { type: String },
   coverImage: { type: String },
-  
   status: { 
     type: String, 
     enum: ['draft', 'publishing', 'minted', 'failed', 'published'], 
     default: 'draft',
     index: true 
   },
-  
   nftTxHash: { type: String },
   nftTokenId: { type: String },
+  tags: { type: [String], index: true }, 
+  likesCount: { type: Number, default: 0 },
+  viewsCount: { type: Number, default: 0 },
 }, { 
   timestamps: true,
   strict: false 
@@ -47,4 +46,5 @@ const StorySchema = new Schema<IStory>({
 
 StorySchema.index({ authorWallet: 1, status: 1 });
 
-export default mongoose.models.Story || mongoose.model<IStory>('Story', StorySchema);
+export const Story: Model<IStory> = mongoose.models.Story || mongoose.model<IStory>('Story', StorySchema);
+export default Story;

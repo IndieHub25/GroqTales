@@ -115,7 +115,7 @@ function AIStoryContent() {
                 }
               }}
             >
-              <div className="bg-white border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:translate-x-[2px] group-hover:translate-y-[2px] group-hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2 rounded-lg">
+              <div className="bg-white dark:bg-gray-900 dark:text-white border-4 border-black dark:border-white px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)] group-hover:translate-x-[2px] group-hover:translate-y-[2px] group-hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:group-hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.3)] transition-all flex items-center gap-2 rounded-lg">
                 <ArrowLeft className="h-6 w-6 stroke-[3]" />
                 <span className="font-bangers text-xl tracking-wide">
                   BACK TO {navigatedFrom === 'story' ? 'STORY' : 'BASE'}

@@ -139,10 +139,10 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] p-0 border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-white max-h-[90vh] flex flex-col overflow-hidden">
+      <DialogContent className="sm:max-w-[500px] p-0 border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-white max-h-[90vh] flex flex-col overflow-hidden" aria-describedby="create-story-description">
         <DialogHeader className="p-6 pb-2 text-left sm:text-left items-start space-y-0">
           <DialogTitle className="flex items-center gap-4 text-2xl font-black uppercase italic tracking-tight">
-            <div className="flex items-center justify-center w-10 h-10 bg-black text-white shrink-0">
+            <div className="flex items-center justify-center w-10 h-10 bg-black text-white shrink-0" aria-hidden="true">
               <PenSquare className="w-6 h-6" />
             </div>
             <span>{currentStep === 1 ? 'Create Story' : 'Story Details'}</span>
@@ -150,6 +150,7 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label="Go back to story type selection"
                 className="h-8 w-8 ml-auto border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0"
                 onClick={handleBack}
               >
@@ -161,13 +162,15 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
 
         {currentStep === 1 && (
           <div className="flex flex-col gap-4 p-6 pt-2 overflow-y-auto custom-scrollbar">
-            <p className="text-sm font-bold text-muted-foreground uppercase mb-2">
+            <p id="create-story-description" className="text-sm font-bold text-muted-foreground uppercase mb-2">
               Choose your creative path:
             </p>
             {createOptions.map((option) => (
               <Button
                 key={option.id}
                 variant="outline"
+                aria-label={`${option.title}: ${option.description}`}
+                aria-pressed={selectedOption === option.id}
                 className={`w-full h-auto p-4 justify-start gap-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none whitespace-normal text-left transition-all bg-white ${
                   selectedOption === option.id
                     ? 'bg-primary/10 border-primary ring-2 ring-primary ring-inset'
@@ -175,7 +178,7 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
                 }`}
                 onClick={() => handleOptionSelect(option)}
               >
-                <div className="flex items-center justify-center w-12 h-12 rounded-none bg-black text-white shrink-0 border-2 border-white/20 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                <div className="flex items-center justify-center w-12 h-12 rounded-none bg-black text-white shrink-0 border-2 border-white/20 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" aria-hidden="true">
                   {React.cloneElement(option.icon as React.ReactElement, {
                     className: 'w-6 h-6',
                     color: 'white',

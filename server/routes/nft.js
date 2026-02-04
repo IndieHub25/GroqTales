@@ -11,9 +11,12 @@ const { ethers } = require('ethers');
 const { v4: uuidv4 } = require('uuid');
 
 const router = express.Router();
+const logger = require('../utils/logger');
 
 const Nft = require('../models/Nft');
 const Story = require('../models/Story');
+
+const { authRequired } = require('../middleware/auth');
 
 // NFT Endpoints
 
@@ -35,8 +38,10 @@ router.get('/', async (req, res) => {
     // Filter on priceRange if provided (expected format "min-max", e.g. "10-100")
     if (priceRange) {
       const [minRaw, maxRaw] = priceRange.split('-');
-      const min = minRaw !== undefined && minRaw !== '' ? Number(minRaw) : undefined;
-      const max = maxRaw !== undefined && maxRaw !== '' ? Number(maxRaw) : undefined;
+      const min =
+        minRaw !== undefined && minRaw !== '' ? Number(minRaw) : undefined;
+      const max =
+        maxRaw !== undefined && maxRaw !== '' ? Number(maxRaw) : undefined;
       nftFilter.price = {};
       // Validate both bounds are present, numeric, and min <= max
       if (
@@ -44,12 +49,10 @@ router.get('/', async (req, res) => {
         (maxRaw !== undefined && maxRaw !== '' && isNaN(max)) ||
         (min !== undefined && max !== undefined && min > max)
       ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Invalid priceRange format. Use 'min-max' with numeric values, and min must be less than or equal to max.",
-          });
+        return res.status(400).json({
+          error:
+            "Invalid priceRange format. Use 'min-max' with numeric values, and min must be less than or equal to max.",
+        });
       }
       if (min !== undefined) nftFilter.price.$gte = min;
       if (max !== undefined) nftFilter.price.$lte = max;
@@ -90,7 +93,7 @@ router.get('/', async (req, res) => {
     // Just give me plain JavaScript objects — skip the extra Mongoose document
 
     // Build response
-    res.json({
+    return res.json({
       data: nfts,
       pagination: {
         page,
@@ -100,12 +103,17 @@ router.get('/', async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching NFTs:', error);
-    res.status(500).json({ error: error.message });
+    logger.error('Error fetching NFTs', {
+      requestId: req.id,
+      component: 'nft',
+    });
+  
+    return res.status(500).json({ error: 'Internal server error' });
   }
+  
 });
 
-router.post('/mint', async (req, res) => {
+router.post('/mint', authRequired, async (req, res) => {
   try {
     const { storyId, metadataURI, metadata, price = 0 } = req.body;
 
@@ -116,7 +124,10 @@ router.post('/mint', async (req, res) => {
         .json({ error: 'storyId and metadataURI are required' });
     }
 
-    if (metadata && (typeof metadata !== 'object' || Object.keys(metadata).length === 0)) {
+    if (
+      metadata &&
+      (typeof metadata !== 'object' || Object.keys(metadata).length === 0)
+    ) {
       return res
         .status(400)
         .json({ error: 'metadata must be a valid JSON object if provided' });
@@ -136,9 +147,7 @@ router.post('/mint', async (req, res) => {
     }
 
     // Calculate keccak256 hash of story content (using ethers v6 API)
-    const storyHash = ethers.keccak256(
-      ethers.toUtf8Bytes(story.content)
-    );
+    const storyHash = ethers.keccak256(ethers.toUtf8Bytes(story.content));
 
     const nft = new Nft({
       tokenId,
@@ -155,14 +164,21 @@ router.post('/mint', async (req, res) => {
 
     await nft.save();
 
-    res.status(201).json(nft);
+    return res.status(201).json(nft);
   } catch (error) {
-    console.error('Error minting NFT:', error);
-    res.status(500).json({ error: error.message });
+    logger.error('Error minting NFT', {
+      requestId: req.id,
+      component: 'nft',
+      storyId: req.body.storyId,
+      userId: req.user?.id,
+    });
+  
+    return res.status(500).json({ error: 'Internal server error' });
   }
+  
 });
 
-router.delete('/burn/:Id', async (req, res) => {
+router.delete('/burn/:Id', authRequired, async (req, res) => {
   try {
     const tokenId = req.params.Id;
 
@@ -182,30 +198,170 @@ router.delete('/burn/:Id', async (req, res) => {
     }
 
     // Optional: Add ownership check here if you have user auth
-    // if (nft.owner.toString() !== req.user.id) {
-    //   return res.status(403).json({ error: 'You are not the owner of this NFT' });
-    // }
+    if (nft.owner.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ error: 'You are not the owner of this NFT' });
+    }
 
     // Delete the NFT document (burn)
     await nft.deleteOne();
 
-    res.json({
+    return res.json({
       message: `NFT with tokenId ${tokenId} has been burned successfully.`,
     });
   } catch (error) {
-    console.error('Error burning NFT:', error);
-    res.status(500).json({ error: error.message });
+    logger.error('Error burning NFT', {
+      requestId: req.id,
+      component: 'nft',
+      tokenId: req.params.Id,
+      userId: req.user?.id,
+    });
+  
+    return res.status(500).json({ error: 'Internal server error' });
   }
+  
 });
 
 // NFT Marketplace Endpoints
 
-// router.patch('list/:Id', async (req, res) => {});
+router.patch('/list/:tokenId', authRequired, async (req, res) => {
+  try {
+    const price = Number(req.body.price);
+    if (!Number.isFinite(price) || price < 0) {
+      return res
+        .status(400)
+        .json({ error: 'Invalid price or price is missing' });
+    }
 
-// router.patch('remove/:Id', async (req, res) => {});
+    const tokenId = req.params.tokenId;
+    if (!tokenId) {
+      return res.status(400).json({ error: 'Token ID is required' });
+    }
 
-// router.patch('/buy/:Id', async (req, res) => {});
+    const nft = await Nft.findOne({ tokenId: tokenId });
+    if (!nft) {
+      return res.status(404).json({ error: 'NFT not found' });
+    }
+    if (nft.owner.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ error: 'You are not the owner of this NFT' });
+    }
+    if (nft.isListed) {
+      return res.status(400).json({ error: 'NFT is already listed' });
+    }
 
-// router.patch('/update-price/:Id', async (req, res) => {});
+    nft.isListed = true;
+    nft.price = price;
+    await nft.save();
+
+    return res.json({
+      message: `NFT with tokenId ${tokenId} is now listed for sale at price ${price}.`,
+      nft,
+    });
+  } catch (error) {
+    console.error('Error listing NFT:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.patch('/remove/:tokenId', authRequired, async (req, res) => {
+  try {
+    const tokenId = req.params.tokenId;
+    if (!tokenId) {
+      return res.status(400).json({ error: 'Token ID is required' });
+    }
+    const nft = await Nft.findOne({ tokenId: tokenId, isListed: true });
+    if (!nft) {
+      return res.status(404).json({ error: 'NFT not found' });
+    }
+    if (nft.owner.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ error: 'You are not the owner of this NFT' });
+    }
+    nft.isListed = false;
+    nft.price = 0;
+
+    await nft.save();
+    return res.json({
+      message: `NFT with tokenId ${tokenId} has been removed from listing.`,
+      nft,
+    });
+  } catch (error) {
+    console.error('Error removing NFT from listing:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.patch('/buy/:tokenId', authRequired, async (req, res) => {
+  try {
+    const tokenId = req.params.tokenId;
+    if (!tokenId) {
+      return res.status(400).json({ error: 'Token ID is required' });
+    }
+    const nft = await Nft.findOne({ tokenId: tokenId, isListed: true });
+    if (!nft) {
+      return res.status(404).json({ error: 'NFT not found' });
+    }
+
+    if (nft.owner.toString() === req.user.id) {
+      return res.status(400).json({ error: 'You already own this NFT' });
+    }
+
+    nft.owner = req.user.id;
+    nft.isListed = false;
+
+    await nft.save();
+
+    return res.json({
+      message: `NFT with tokenId ${tokenId} has been bought from listing.`,
+      nft,
+    });
+  } catch (error) {
+    console.error('Error buying NFT from listing:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.patch('/update-price/:tokenId', authRequired, async (req, res) => {
+  try {
+    const price = req.body.price;
+    if (price === undefined || isNaN(price) || price < 0) {
+      return res
+        .status(400)
+        .json({ error: 'Invalid price or price is missing' });
+    }
+    const tokenId = req.params.tokenId;
+    if (!tokenId) {
+      return res.status(400).json({ error: 'Token ID is required' });
+    }
+    const nft = await Nft.findOne({
+      tokenId: tokenId,
+      isListed: true,
+    });
+    if (!nft) {
+      return res.status(404).json({ error: 'NFT not found' });
+    }
+    if (nft.owner.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ error: 'You are not the owner of this NFT' });
+    }
+
+    nft.price = price;
+
+    await nft.save();
+
+    return res.json({
+      message: `NFT proce with tokenId ${tokenId} has been updated.`,
+      nft,
+    });
+  } catch (error) {
+    console.error('Error updating NFT price from listing:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;

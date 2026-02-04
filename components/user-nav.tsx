@@ -1,6 +1,8 @@
 'use client';
 
 import { Wallet, User, Settings, LogOut, BookOpen, Heart } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Wallet, User, Settings, LogOut, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
@@ -19,9 +21,28 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { truncateAddress } from '@/lib/utils';
 
+
 export function UserNav() {
   const { account, connectWallet, disconnectWallet } = useWeb3();
   const { toast } = useToast();
+  const [dbUser, setDbUser] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (account) {
+        try {
+          const res = await fetch(`/api/v1/users/profile/${account}`);
+          if (res.ok) {
+            const data = await res.json();
+            setDbUser(data.user);
+          }
+        } catch (err) {
+          console.error("Failed to fetch nav user data", err);
+        }
+      }
+    };
+    fetchUserData();
+  }, [account]);
 
   const handleConnect = async () => {
     try {
@@ -42,7 +63,8 @@ export function UserNav() {
         variant="default"
         size="sm"
         onClick={handleConnect}
-        className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium comic-pop comic-text-bold"
+        aria-label="Connect wallet to login"
+        className="flex items-center gap-2 px-3 sm:px-6 py-1.5 sm:py-2 rounded-none bg-white hover:text-white hover:border-white/50 text-black border-2 sm:border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all duration-200 font-black uppercase tracking-wider text-xs sm:text-sm"
       >
         Login
       </Button>
@@ -52,10 +74,10 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+        <Button variant="ghost" aria-label="User menu" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="/avatars/01.png" alt="@user" />
-            <AvatarFallback>U</AvatarFallback>
+             <AvatarImage src={dbUser?.avatar || "/avatars/default.png"} alt="User Avatar" />
+            <AvatarFallback>{dbUser?.username?.slice(0, 2).toUpperCase() || "U"}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -73,8 +95,8 @@ export function UserNav() {
               asChild
               className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all"
             >
-              <Link
-                href="/profile"
+               <Link
+                href={`/profile/${account}`} 
                 className="flex items-center w-full uppercase py-2"
               >
                 <User className="mr-2 h-4 w-4" />

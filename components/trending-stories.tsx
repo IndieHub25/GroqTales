@@ -96,7 +96,7 @@ export function TrendingStories() {
             </Link>
             <Button
               onClick={() => handleCreateSimilar('fantasy')}
-              className="w-full md:w-auto theme-gradient-bg text-white"
+              className="w-full md:w-auto theme-gradient-bg text-black dark:text-white"
             >
               <PenSquare className="mr-2 h-4 w-4" />
               Create Story

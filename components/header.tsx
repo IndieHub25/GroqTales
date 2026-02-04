@@ -137,6 +137,7 @@ export function Header() {
         <div className="flex items-center">
           <Link
             href="/"
+            aria-label="GroqTales home"
             className="flex items-center space-x-2 mr-2 sm:mr-6 group relative"
           >
             <motion.div
@@ -156,7 +157,7 @@ export function Header() {
             </motion.div>
           </Link>
 
-          <nav className="hidden md:flex items-center space-x-2">
+          <nav role="navigation" aria-label="Primary navigation" className="hidden md:flex items-center space-x-2">
             {navItems.map((item, index) => (
               <motion.div
                 key={
@@ -173,17 +174,36 @@ export function Header() {
                 {item.type === 'dropdown' ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger
+                      aria-haspopup="true"
                       className={`px-4 py-2 text-sm rounded-md transition-all duration-200 flex items-center text-white hover:text-white/80 hover:bg-white/10 backdrop-blur-sm comic-pop comic-text`}
                     >
                       {item.icon}
                       {item.label}
                       <ChevronDown className="ml-1 h-3 w-3" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent>
+                    <DropdownMenuContent
+                      side="bottom"
+                      align="start"
+                      sideOffset={8}
+                      collisionPadding={16}
+                      className="
+                        z-50
+                        w-[160px] sm:w-[180px]
+                        bg-white
+                        dark:bg-slate-950
+                        border-2 border-black
+                        shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+                        dark:shadow-white/40
+                        rounded-md
+                        p-2
+                        comic-text font-bold
+                      "
+                    >
                       {item.items?.map((subItem) => (
                         <DropdownMenuItem key={subItem.href} asChild>
                           <Link
                             href={subItem.href}
+                            aria-current={pathname === subItem.href ? 'page' : undefined}
                             className="flex items-center w-full text-foreground/90 hover:text-foreground hover:bg-white/5 comic-text"
                           >
                             {subItem.icon && subItem.icon}
@@ -196,6 +216,7 @@ export function Header() {
                 ) : item.href ? (
                   <Link
                     href={item.href}
+                    aria-current={pathname === item.href ? 'page' : undefined}
                     className={`px-4 py-2 text-sm rounded-md transition-all duration-200 flex items-center text-white hover:text-white/80 hover:bg-white/10 backdrop-blur-sm comic-pop comic-text`}
                   >
                     {item.icon}
@@ -214,8 +235,9 @@ export function Header() {
           <Button
             variant="outline"
             size="sm"
-            className="hidden md:flex bg-primary/20 hover:bg-primary/30 text-primary backdrop-blur-sm comic-pop comic-text-bold border-white/10"
+            className="hidden md:flex items-center gap-2 px-3 sm:px-5 py-1.5 sm:py-2 rounded-none bg-white text-black border-2 sm:border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-primary hover:text-white hover:border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all duration-200 comic-pop comic-text-bold dark:hover:border-white/50"
             onClick={handleCreateClick}
+            aria-label="Create a new story"
           >
             <PenSquare className="h-4 w-4 mr-2" />
             Create
@@ -290,8 +312,7 @@ export function Header() {
                             onClick={() => setSheetOpen(false)}
                             className={cn(
                               'px-4 py-3 text-lg hover:bg-white/10 rounded-md transition-colors comic-text flex items-center',
-                              pathname === item.href &&
-                                'bg-primary/20 text-primary'
+                              'bg-primary/20 text-primary'
                             )}
                           >
                             {item.icon}

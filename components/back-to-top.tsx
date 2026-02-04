@@ -33,7 +33,8 @@ const BackToTop: React.FC = () => {
           ? 'opacity-100 scale-100'
           : 'opacity-0 scale-0 pointer-events-none'
       }`}
-      aria-label="Back to Top"
+      aria-label="Scroll back to top"
+      aria-hidden={!visible}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -46,6 +47,7 @@ const BackToTop: React.FC = () => {
         strokeLinejoin="round"
         viewBox="0 0 24 24"
         className="relative z-10"
+        aria-hidden="true"
       >
         <path d="M12 19V5M5 12l7-7 7 7" />
       </svg>

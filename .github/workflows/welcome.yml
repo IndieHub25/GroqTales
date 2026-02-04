@@ -1,25 +1,22 @@
-name: Welcome New Contributors
+name: Welcome & Triage
 
 on:
   issues:
     types: [opened]
   pull_request_target:
     types: [opened]
-  discussion:
-    types: [created]
 
 permissions:
   issues: write
   pull-requests: write
-  discussions: write
 
 jobs:
-  welcome:
-    name: Welcome New Contributors
+  welcome-issues:
+    name: Welcome New Issue
     runs-on: ubuntu-latest
+    if: github.event_name == 'issues'
     steps:
       - name: Welcome new issue creator
-        if: github.event_name == 'issues'
         uses: actions/github-script@v7
         with:
           script: |
@@ -39,20 +36,6 @@ jobs:
                 '### Review Process',
                 '- Our team will review your issue within 24-48 hours',
                 '- We may request additional information or clarification',
-                '- For bug reports, please ensure reproduction steps are included',
-                '- For feature requests, we will discuss feasibility and implementation',
-                '',
-                '### Resources',
-                '- [Contributing Guide](./CONTRIBUTING.md)',
-                '- [Architecture Documentation](./ARCHITECTURE.md)',
-                '- [Code of Conduct](./CODE_OF_CONDUCT.md)',
-                '',
-                '### Support',
-                '- Browse existing issues and discussions',
-                '- Review our comprehensive documentation',
-                '- Ask questions as needed - our team is here to help',
-                '',
-                'Thank you for helping improve GroqTales.',
                 '',
                 '*This is an automated message. A maintainer will respond soon.*'
               ].join('\n');
@@ -65,8 +48,12 @@ jobs:
               });
             }
 
+  welcome-pr:
+    name: Welcome & Triage PR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target'
+    steps:
       - name: Welcome new PR contributor
-        if: github.event_name == 'pull_request_target'
         uses: actions/github-script@v7
         with:
           script: |
@@ -81,44 +68,13 @@ jobs:
               const welcomeMessage = [
                 '## Welcome to GroqTales Development',
                 '',
-                `Thank you @${context.payload.pull_request.user.login} for your first contribution. We appreciate you joining our development community.`,
+                `Thank you @${context.payload.pull_request.user.login} for your first contribution!`,
                 '',
-                '### Review Process',
-                '- Automated checks will run (security, linting, tests, build verification)',
-                '- AI code review will provide initial feedback',
-                '- Human review from maintainers will follow',
-                '- We may request changes or improvements',
+                '### Next Steps',
+                '- Automated checks will run (Security, Linting)',
+                '- A maintainer will review your code shortly',
                 '',
-                '### Guidelines',
-                '- Follow our style guidelines (ESLint + Prettier)',
-                '- Add tests for new functionality',
-                '- Update documentation as needed',
-                '- Keep commits atomic and well-described',
-                '- Respond to feedback promptly',
-                '',
-                '### Resources',
-                '- [Architecture Guide](./ARCHITECTURE.md)',
-                '- [Contributing Guide](./CONTRIBUTING.md)',
-                '- [Testing Guide](./docs/testing.md)',
-                '- [Deployment Guide](./docs/deployment.md)',
-                '',
-                '### Quality Checks',
-                'Automated systems will verify:',
-                '- Security: Vulnerability scanning and dependency analysis',
-                '- Code Quality: ESLint, Prettier, TypeScript compliance',
-                '- Testing: Unit tests, integration tests, coverage requirements',
-                '- Performance: Bundle size analysis and performance metrics',
-                '- Build: Vercel deployment readiness',
-                '',
-                '### Support',
-                '- Comment on this PR with questions',
-                '- Review our documentation and guides',
-                '- Reference other merged PRs for examples',
-                '- Our maintainers are available to assist',
-                '',
-                'We appreciate your contribution.',
-                '',
-                '*This is an automated message. Review process will begin shortly.*'
+                '*This is an automated message.*'
               ].join('\n');
 
               await github.rest.issues.createComment({
@@ -129,54 +85,26 @@ jobs:
               });
             }
 
-  auto-assign:
-    name: Auto-assign PR
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request_target'
-    steps:
       - name: Auto-assign reviewers and labels
         uses: actions/github-script@v7
         with:
           script: |
             const pr = context.payload.pull_request;
-            const reviewers = ['Drago-03'];
+            const reviewers = ['Drago-03']; 
             const labels = [];
             const title = pr.title.toLowerCase();
 
-            if (title.includes('fix') || title.includes('bug')) {
-              labels.push('bug', 'fix');
-            }
-            if (title.includes('feat') || title.includes('feature')) {
-              labels.push('enhancement', 'feature');
-            }
-            if (title.includes('doc') || title.includes('readme')) {
-              labels.push('documentation');
-            }
-            if (title.includes('test')) {
-              labels.push('testing');
-            }
-            if (title.includes('refactor') || title.includes('cleanup')) {
-              labels.push('refactor');
-            }
-            if (title.includes('security')) {
-              labels.push('security');
-            }
-            if (title.includes('performance') || title.includes('perf')) {
-              labels.push('performance');
-            }
+            if (title.includes('fix') || title.includes('bug')) labels.push('bug', 'fix');
+            if (title.includes('feat') || title.includes('feature')) labels.push('enhancement', 'feature');
+            if (title.includes('doc') || title.includes('readme')) labels.push('documentation');
+            if (title.includes('test')) labels.push('testing');
+            if (title.includes('refactor')) labels.push('refactor');
 
             const totalChanges = (pr.additions || 0) + (pr.deletions || 0);
-            if (totalChanges < 10) {
-              labels.push('size/XS');
-            } else if (totalChanges < 30) {
-              labels.push('size/S');
-            } else if (totalChanges < 100) {
-              labels.push('size/M');
-            } else if (totalChanges < 500) {
-              labels.push('size/L');
-            } else {
-              labels.push('size/XL');
-            }
+            if (totalChanges < 10) labels.push('size/XS');
+            else if (totalChanges < 100) labels.push('size/M');
+            else if (totalChanges < 500) labels.push('size/L');
+            else labels.push('size/XL');
 
             if (labels.length > 0) {
               await github.rest.issues.addLabels({

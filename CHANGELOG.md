@@ -11,7 +11,64 @@ Active full support: 1.1.2 (latest), 1.1.1 (previous). Security maintenance (cri
 
 ## [Unreleased]
 
-_Planned changes will appear here before the next tagged release._
+### ✨ Accessibility Improvements - WCAG 2.1 AA Compliance
+
+#### Keyboard Navigation & Focus Management
+- **Skip Link**: Added keyboard-accessible skip link to jump to main content
+  - Becomes visible on focus for screen readers and keyboard users
+  - Located in `app/layout.tsx`
+- **Focus Indicators**: Implemented visible focus outlines (3px solid) on all interactive elements
+  - Applied to links, buttons, inputs, selects, and textareas
+  - Meets WCAG 2.1 AA contrast requirements
+  - Added to `app/globals.css`
+
+#### ARIA Labels & Semantic HTML
+- **Header Navigation** (`components/header.tsx`):
+  - Added `role="navigation"` and descriptive `aria-label` attributes
+  - Implemented `aria-current="page"` for active navigation state
+  - Added `aria-haspopup` for dropdown menus
+  - Logo link and Create button have descriptive labels
+- **Footer** (`components/footer.tsx`):
+  - Added `role="contentinfo"` to footer
+  - Wrapped navigation sections in semantic `<nav>` elements with labels
+  - Social media links grouped with `role="group"`
+- **Interactive Components**:
+  - Mode Toggle: `aria-label="Toggle theme"`
+  - User Navigation: Menu trigger and login button labeled
+  - Wallet Connect: State-aware labels for connection status
+  - Create Story Dialog: Descriptive labels, `aria-pressed` states, and `aria-describedby`
+  - Back to Top: Conditional `aria-hidden` when not visible
+
+#### Image Accessibility
+- **Avatar Images**: Added descriptive alt text across all components
+  - User avatars: `"${username}'s avatar"`
+  - Profile pictures: `"${name}'s profile picture"`
+  - Wallet identicons: Includes truncated address
+- **Content Images**: Story covers and NFT images include titles
+- **Decorative Elements**: Marked with `aria-hidden="true"`
+
+#### Files Modified
+- Core: `app/layout.tsx`, `app/globals.css`
+- Components: `header.tsx`, `footer.tsx`, `mode-toggle.tsx`, `user-nav.tsx`, `wallet-connect.tsx`, `create-story-dialog.tsx`, `back-to-top.tsx`, `story-card.tsx`
+- Pages: `app/community/creators/page.tsx`, `app/stories/[id]/page.tsx`, `app/nft-marketplace/comic-stories/page.tsx`
+
+#### Documentation
+- Created comprehensive `docs/ACCESSIBILITY.md` documenting:
+  - All implemented changes
+  - WCAG 2.1 AA compliance checklist
+  - Testing recommendations (automated and manual)
+  - Impact and benefits
+  - Resources for developers
+
+#### Benefits
+- ✅ Platform accessible to users with visual, motor, and cognitive impairments
+- ✅ Improved SEO through better semantic HTML and alt text
+- ✅ Legal compliance with WCAG 2.1 AA standards
+- ✅ Enhanced UX for all users with clear focus indicators and logical navigation
+
+_See `docs/ACCESSIBILITY.md` for complete details._
+
+---
 
 ## [1.2.9] - 2025-11-24
 

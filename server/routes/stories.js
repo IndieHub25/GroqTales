@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const Story = require('../models/Story');
+const { authRequired } = require('../middleware/auth');
 
 // GET /api/v1/stories - Get all stories
 router.get('/', async (req, res) => {
@@ -25,7 +26,7 @@ router.get('/', async (req, res) => {
 
     const count = await Story.countDocuments(query);
 
-    res.json({
+    return res.json({
       data: stories,
       pagination: {
         page: parseInt(page),
@@ -35,12 +36,12 @@ router.get('/', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
 // POST /api/v1/stories/create - Create new story
-router.post('/create', async (req, res) => {
+router.post('/create',authRequired, async (req, res) => {
   try {
     const { title, content, genre, author } = req.body;
 
@@ -53,9 +54,9 @@ router.post('/create', async (req, res) => {
 
     await story.save();
 
-    res.status(201).json(story);
+    return res.status(201).json(story);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
@@ -68,14 +69,14 @@ router.get('/search/:id', async (req, res) => {
       return res.status(404).json({ error: 'Story not found' });
     }
 
-    res.json(story);
+    return res.json(story);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
 // POST /api/v1/stories/generate - Generate story with AI
-router.post('/generate', async (req, res) => {
+router.post('/generate', authRequired, async (req, res) => {
   try {
     const { prompt, genre, length, style } = req.body;
 
@@ -94,14 +95,14 @@ router.post('/generate', async (req, res) => {
       },
     };
 
-    res.json(generatedStory);
+    return res.json(generatedStory);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
 // POST /api/v1/stories/:id/analyze - Analyze story content
-router.post('/:id/analyze', async (req, res) => {
+router.post('/:id/analyze', authRequired, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -115,9 +116,9 @@ router.post('/:id/analyze', async (req, res) => {
       analyzedAt: new Date().toISOString(),
     };
 
-    res.json(analysis);
+    return res.json(analysis);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 

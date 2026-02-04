@@ -16,7 +16,6 @@ import {
   Cpu,
   VerifiedIcon,
 } from 'lucide-react';
-import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
@@ -33,13 +32,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { fetchStoryById } from '@/lib/mock-data';
+import { useStoryAnalytics } from '@/hooks/use-story-analysis';
 
 interface Comment {
   id: string;
@@ -51,6 +50,7 @@ interface Comment {
   likes: number;
   isVerified?: boolean;
 }
+
 export default function StoryPage({ params }: { params: { id: string } }) {
   // State
   const [story, setStory] = useState<any>(null);
@@ -68,6 +68,8 @@ export default function StoryPage({ params }: { params: { id: string } }) {
 
   const { toast } = useToast();
   const { account } = useWeb3();
+
+  const { trackInteraction } = useStoryAnalytics(params.id);
 
   // Fetch story data
   useEffect(() => {
@@ -145,6 +147,11 @@ export default function StoryPage({ params }: { params: { id: string } }) {
       });
       return;
     }
+
+    if (type === 'upvote' && voteStatus !== 'upvote') {
+      trackInteraction('LIKE');
+    }
+
     // If already voted the same way, remove the vote
     if (voteStatus === type) {
       setVoteStatus(null);
@@ -236,6 +243,9 @@ export default function StoryPage({ params }: { params: { id: string } }) {
   // Handle share
   const handleShare = async () => {
     setIsSharing(true);
+    
+    trackInteraction('SHARE');
+
     try {
       if (navigator.share) {
         await navigator.share({
@@ -529,7 +539,7 @@ export default function StoryPage({ params }: { params: { id: string } }) {
                             >
                               <div className="flex space-x-4">
                                 <Avatar>
-                                  <AvatarImage src={comment.authorAvatar} />
+                                  <AvatarImage src={comment.authorAvatar} alt={`${comment.author}'s avatar`} />
                                   <AvatarFallback>
                                     {comment.author[0]}
                                   </AvatarFallback>
@@ -587,6 +597,7 @@ export default function StoryPage({ params }: { params: { id: string } }) {
                     <Avatar className="h-16 w-16 border-2 border-primary">
                       <AvatarImage
                         src={`https://api.dicebear.com/7.x/personas/svg?seed=${story.author}`}
+                        alt={`${story.author}'s profile picture`}
                       />
                       <AvatarFallback>
                         {story.author.substring(0, 2).toUpperCase()}

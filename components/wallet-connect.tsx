@@ -105,7 +105,8 @@ export default function WalletConnect() {
       <Button
         onClick={connectWallet}
         disabled={connecting}
-        className="flex items-center gap-2 px-3 sm:px-6 py-1.5 sm:py-2 rounded-none bg-white text-black border-2 sm:border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all duration-200 font-black uppercase tracking-wider text-xs sm:text-sm"
+        aria-label={connecting ? "Connecting to wallet" : "Connect your wallet"}
+        className="flex items-center gap-2 px-3 sm:px-6 py-1.5 sm:py-2 rounded-none bg-white hover:text-white hover:border-white/50 text-black border-2 sm:border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all duration-200 font-black uppercase tracking-wider text-xs sm:text-sm"
       >
         {connecting ? (
           <>
@@ -127,6 +128,7 @@ export default function WalletConnect() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
+          aria-label={`Wallet connected: ${ensName || truncateAddress(account)}`}
           className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
         >
           <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
@@ -145,6 +147,7 @@ export default function WalletConnect() {
               <Avatar className="h-10 w-10 rounded-none">
                 <AvatarImage
                   src={`https://api.dicebear.com/7.x/identicon/svg?seed=${account}`}
+                  alt={`Identicon for wallet address ${truncateAddress(account)}`}
                 />
                 <AvatarFallback className="rounded-none bg-black text-white font-black text-sm">
                   {account?.slice(2, 4).toUpperCase()}

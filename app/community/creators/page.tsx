@@ -326,11 +326,11 @@ export default function CreatorsPage() {
           <div className="flex items-start space-x-4">
             <div className="relative">
               <Avatar className="w-20 h-20">
-                <AvatarImage src={creator.avatar} />
+                <AvatarImage src={creator.avatar} alt={`${creator.name}'s profile picture`} />
                 <AvatarFallback>{creator.name.charAt(0)}</AvatarFallback>
               </Avatar>
               {creator.verified && (
-                <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-0.5">
+                <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-0.5" aria-label="Verified creator">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -340,6 +340,7 @@ export default function CreatorsPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     className="h-3 w-3"
+                    aria-hidden="true"
                   >
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>

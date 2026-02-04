@@ -6,6 +6,7 @@ import {
   Sparkles,
   AlertCircle,
   ArrowLeft,
+  Save,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
@@ -100,6 +101,18 @@ const getIpfsClient = async () => {
   }
 };
 
+const DRAFT_KEY = "groqtales_text_story_draft_v1";
+
+interface StoryDraft {
+  title: string;
+  description: string;
+  genre: string;
+  content: string;
+  coverImageName?: string;
+  updatedAt: number;
+  version: number;
+}
+
 interface StoryMetadata {
   title: string;
   description: string;
@@ -127,6 +140,10 @@ export default function CreateStoryPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [storyType, setStoryType] = useState<string | null>(null);
   const [storyFormat, setStoryFormat] = useState<string | null>('free');
+
+  // Draft Recovery State
+  const [recoveredDraft, setRecoveredDraft] = useState<StoryDraft | null>(null);
+  const [showRecoveryModal, setShowRecoveryModal] = useState(false);
 
   // Check authentication on mount and load story creation data
   useEffect(() => {
@@ -220,6 +237,53 @@ export default function CreateStoryPage() {
 
     checkAuth();
   }, [account, router, toast]);
+
+  // Draft recovery detection on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(DRAFT_KEY);
+    if (!saved) return;
+
+    try {
+      const draft = JSON.parse(saved);
+      if (draft?.content?.trim()) {
+        setRecoveredDraft(draft);
+        setShowRecoveryModal(true);
+      }
+    } catch (error) {
+      console.error('Error parsing draft:', error);
+      localStorage.removeItem(DRAFT_KEY);
+    }
+  }, []);
+
+  // Autosave logic with debounce
+  useEffect(() => {
+    const hasAnyDraftData =
+      storyData.title.trim() ||
+      storyData.description.trim() ||
+      storyData.genre.trim() ||
+      storyData.content.trim() ||
+      storyData.coverImage;
+    if (!hasAnyDraftData) return;
+
+     const timeout = setTimeout(() => {
+       const draft: StoryDraft = {
+         title: storyData.title,
+         description: storyData.description,
+         genre: storyData.genre,
+         content: storyData.content,
+         coverImageName: storyData.coverImage?.name,
+         updatedAt: Date.now(),
+         version: 1,
+       };
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      } catch (error) {
+        console.warn('Autosave failed:', error);
+      }
+     }, 1000); // autosave every 1s after typing stops
+
+    return () => clearTimeout(timeout);
+  }, [storyData.title, storyData.description, storyData.genre, storyData.content, storyData.coverImage]);
 
   const handleGoBack = () => {
     router.push('/');
@@ -446,6 +510,9 @@ export default function CreateStoryPage() {
       // Clear story creation data from localStorage after successful submission
       localStorage.removeItem('storyCreationData');
 
+      // Clear draft on successful publication
+      localStorage.removeItem(DRAFT_KEY);
+
       // Finally, perform the redirect with a slight delay to allow toasts to be seen
       setTimeout(() => {
         console.log('Redirecting to:', redirectPath);
@@ -543,6 +610,72 @@ export default function CreateStoryPage() {
               </div>
             </div>
           </CardHeader>
+
+          {/* Draft Recovery Modal */}
+          {showRecoveryModal && recoveredDraft && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white border-4 border-black rounded-2xl p-8 max-w-md w-full shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
+                <div className="text-center space-y-6">
+                  <div className="inline-block bg-yellow-400 p-4 rounded-full border-4 border-black">
+                    <Save className="h-8 w-8 text-black" />
+                  </div>
+
+                  <div>
+                    <h3 className="font-bangers text-2xl mb-2">
+                      DRAFT RECOVERED!
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      We found an unsaved draft from{' '}
+                      {new Date(recoveredDraft.updatedAt).toLocaleString()}.
+                      Would you like to restore it?
+                    </p>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <Button
+                      onClick={() => {
+                        // Restore draft
+                        setStoryData({
+                          title: recoveredDraft.title,
+                          description: recoveredDraft.description,
+                          genre: recoveredDraft.genre,
+                          content: recoveredDraft.content,
+                          coverImage: null, // Can't restore file objects
+                        });
+                        setShowRecoveryModal(false);
+                        setRecoveredDraft(null);
+                        toast({
+                          title: 'DRAFT RESTORED!',
+                          description: 'Your previous work has been recovered.',
+                          className: 'font-bangers bg-green-400 text-black border-4 border-black',
+                        });
+                      }}
+                      className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bangers px-6 py-3"
+                    >
+                      RESTORE DRAFT
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        // Discard draft
+                        localStorage.removeItem(DRAFT_KEY);
+                        setShowRecoveryModal(false);
+                        setRecoveredDraft(null);
+                        toast({
+                          title: 'DRAFT DISCARDED',
+                          description: 'Starting fresh!',
+                          className: 'font-bangers bg-gray-400 text-black border-4 border-black',
+                        });
+                      }}
+                      className="flex-1 font-bangers border-4 border-black bg-white text-black hover:bg-gray-100"
+                    >
+                      DISCARD
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
