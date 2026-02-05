@@ -1,5 +1,5 @@
 "use client";
-
+import {toast} from "sonner";
 import {useEffect, useState} from "react";
 import {Switch} from "@/components/ui/switch";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
@@ -24,16 +24,29 @@ export default function NotificationsSettings() {
     const [notifications, setNotifications] = useState<NotificationSettings>(DEFAULTS);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
-        fetch("/api/settings/notifications")
-        .then((res)=>res.json())
-        .then(setNotifications)
-        .finally(()=>setLoading(false));         
+        const load = async() => {
+            try {
+                const res = await fetch("/api/v1/settings/notifications");
+                if(!res.ok) {
+                    throw new Error("Failed to load notification settings");
+                }
+                const data = await res.json();
+                setNotifications(data);
+            } catch(err) {
+                toast.error("Could not load notification settings");
+            } finally {
+                setLoading(false);
+            }
+        };
+        load();
     }, []);
     const toggle = async(
         key: keyof NotificationSettings["email"],
         value: boolean  
     ) => {
-        const next = {
+        const prev = notifications;
+
+        const next : NotificationSettings = {
             ...notifications,
             email: {
                 ...notifications.email,
@@ -41,33 +54,34 @@ export default function NotificationsSettings() {
             },
         };
         setNotifications(next);
-        fetch("/api/settings/notifications", {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(next),
-        });
+        try {
+            const res = await fetch("/api/v1/settings/notifications", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(next),
+            });
+            if(!res.ok) {
+                throw new Error("Update failed");
+            } 
+        } catch(err) {
+            setNotifications(prev);
+            toast.error("Failed to update notification settings");
+        }
     };
-    if(loading) return <p>Loading...</p>;
-
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Notification Preferences</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                {(Object.entries({
-                    "comments":"Story Comments",
-                    "followers":"New Followers",
-                    "likes":"Story Likes",
-                    "nftPurchases":"NFT Purchases",
-                })as [keyof NotificationSettings["email"], string][]).map(([key, label]) => (
+                {Object.keys(notifications.email).map((key) => (
                     <div key={key} className="flex items-center justify-between">
-                        <span>{label}</span>
+                        <span className="capitalize">{key.replace(/([A-Z])/g, " $1")}</span>
                         <Switch
-                            checked={notifications.email[key]}
-                            onCheckedChange={(v) => toggle(key, v)}
+                            checked={notifications.email[key as keyof NotificationSettings["email"]]}
+                            onCheckedChange={(v) => toggle(key as keyof NotificationSettings["email"], v)}
                         />
                     </div>
                 ))}

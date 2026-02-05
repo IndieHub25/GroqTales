@@ -4,10 +4,15 @@ import { useEffect, useState } from "react";
 import { useWeb3 } from "@/components/providers/web3-provider";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileStats } from "@/components/profile/profile-stats";
+
 import { StoryCard } from "@/components/profile/story-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParams } from "next/navigation";
+
+//import { StoryCard } from "@/components/profile/story-card";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 
 export default function ProfilePage() {
@@ -68,10 +73,17 @@ export default function ProfilePage() {
       <ProfileHeader user={profileData?.user} isOwner={isOwner} />
 
       <div className="container mx-auto px-4">
+
         <ProfileStats stats={profileData?.stats} />
 
-        <div className="mt-8">
-          <Tabs defaultValue="stories" className="w-full">
+        {/* <div className="mt-8">
+          <Tabs defaultValue="stories" className="w-full"> */}
+
+        {/* <ProfileStats /> */}
+        
+         <div className="mt-8">  
+           <Tabs defaultValue="stories" className="w-full">
+
             <div className="flex justify-center md:justify-start mb-6">
               <TabsList className="bg-slate-900 border border-slate-800">
                 <TabsTrigger value="stories">Stories</TabsTrigger>
@@ -107,9 +119,9 @@ export default function ProfilePage() {
                 Activity feed coming soon.
               </div>
             </TabsContent>
-          </Tabs>
+          </Tabs> 
         </div>
-      </div>
-    </main>
+      </div> 
+     </main> 
   );
 }
