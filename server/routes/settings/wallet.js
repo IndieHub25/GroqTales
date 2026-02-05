@@ -6,16 +6,26 @@ router.get("/", requireAuth, async (req, res) => {
 });
 
 router.put("/", requireAuth, async(req,res)=>{
-    const {address, network, provider} = req.body;
+    try {
+        const {address, network, provider} = req.body;
+
+        if (!address || !network || !provider) {
+            return res
+            .status(400)
+            .json({error: "address, network, and provider are required"});
+        }
     req.user.wallet = {
         address,
         network,
         provider,
-        verified: true,
+        verified: false,
         lastConnectedAt: new Date(),
     };
     await req.user.save();
     res.json(req.user.wallet);
+    } catch(err){
+        console.error("Wallet update failed:", err);
+        res.status(500).json({error: "Failed to update wallet"});
+    }
+    
 });
-
-module.exports = router;
