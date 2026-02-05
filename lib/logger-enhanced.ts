@@ -1,3 +1,8 @@
+/**
+ * Enhanced Professional Logger Implementation
+ * Provides comprehensive logging capabilities with file, console, and remote logging support
+ */
+
 export enum LogLevel {
   ERROR = 0,
   WARN = 1,
@@ -5,16 +10,18 @@ export enum LogLevel {
   HTTP = 3,
   DEBUG = 4,
 }
+
 export interface LogEntry {
   level: LogLevel;
   message: string;
   timestamp: Date;
-  context?: string | undefined;
-  metadata?: Record<string, unknown> | undefined;
-  error?: Error | undefined;
-  requestId?: string | undefined;
-  userId?: string | undefined;
+  context?: string;
+  metadata?: Record<string, unknown>;
+  error?: Error;
+  requestId?: string;
+  userId?: string;
 }
+
 export interface LoggerConfig {
   level: LogLevel;
   enableConsole: boolean;
@@ -26,8 +33,9 @@ export interface LoggerConfig {
   includeStackTrace: boolean;
   enablePerformanceLogging: boolean;
 }
+
 /**
- * Professional logger implementation
+ * Professional logger implementation with enhanced features
  */
 export class Logger {
   private config: LoggerConfig;
@@ -46,6 +54,7 @@ export class Logger {
     };
     this.context = context;
   }
+
   /**
    * Create a child logger with additional context
    */
@@ -61,46 +70,51 @@ export class Logger {
    */
   error(
     message: string,
-    error?: Error | undefined,
-    metadata?: Record<string, unknown> | undefined
+    error?: Error,
+    metadata?: Record<string, unknown>
   ): void {
     const options: any = {};
     if (error !== undefined) options.error = error;
     if (metadata !== undefined) options.metadata = metadata;
     this.log(LogLevel.ERROR, message, options);
   }
+
   /**
    * Log a warning message
    */
-  warn(message: string, metadata?: Record<string, unknown> | undefined): void {
+  warn(message: string, metadata?: Record<string, unknown>): void {
     const options: any = {};
     if (metadata !== undefined) options.metadata = metadata;
     this.log(LogLevel.WARN, message, options);
   }
+
   /**
    * Log an info message
    */
-  info(message: string, metadata?: Record<string, unknown> | undefined): void {
+  info(message: string, metadata?: Record<string, unknown>): void {
     const options: any = {};
     if (metadata !== undefined) options.metadata = metadata;
     this.log(LogLevel.INFO, message, options);
   }
+
   /**
    * Log an HTTP request/response
    */
-  http(message: string, metadata?: Record<string, unknown> | undefined): void {
+  http(message: string, metadata?: Record<string, unknown>): void {
     const options: any = {};
     if (metadata !== undefined) options.metadata = metadata;
     this.log(LogLevel.HTTP, message, options);
   }
+
   /**
    * Log a debug message
    */
-  debug(message: string, metadata?: Record<string, unknown> | undefined): void {
+  debug(message: string, metadata?: Record<string, unknown>): void {
     const options: any = {};
     if (metadata !== undefined) options.metadata = metadata;
     this.log(LogLevel.DEBUG, message, options);
   }
+
   /**
    * Log performance metrics
    */
@@ -117,6 +131,7 @@ export class Logger {
       });
     }
   }
+
   /**
    * Time an operation
    */
@@ -145,6 +160,7 @@ export class Logger {
       throw error;
     }
   }
+
   /**
    * Core logging method
    */
@@ -161,6 +177,7 @@ export class Logger {
     if (level > this.config.level) {
       return;
     }
+
     const entry: LogEntry = {
       level,
       message,
@@ -172,13 +189,16 @@ export class Logger {
     if (this.config.enableConsole) {
       this.logToConsole(entry);
     }
+
     if (this.config.enableFile) {
       this.logToFile(entry);
     }
+
     if (this.config.enableRemote) {
       this.logToRemote(entry);
     }
   }
+
   /**
    * Log to console with proper formatting
    */
@@ -222,6 +242,7 @@ export class Logger {
         }
       }
     }
+
     // Use appropriate console method based on log level
     switch (entry.level) {
       case LogLevel.ERROR:
@@ -237,15 +258,25 @@ export class Logger {
         console.log(output);
     }
   }
+
   /**
    * Log to file (in Node.js environment)
    */
   private logToFile(entry: LogEntry): void {
+    // Only available in Node.js environment
     if (typeof window !== 'undefined') {
       return; // Skip file logging in browser
     }
+
     try {
+      // Dynamic import to avoid build issues
+      if (typeof require === 'undefined') {
+        return;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const fs = require('fs');
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const path = require('path');
 
       const filename = this.config.filename || 'app.log';
@@ -255,6 +286,7 @@ export class Logger {
       if (!fs.existsSync(logDir)) {
         fs.mkdirSync(logDir, { recursive: true });
       }
+
       const logLine =
         JSON.stringify({
           level: LogLevel[entry.level],
@@ -276,6 +308,7 @@ export class Logger {
       console.error('Failed to write to log file:', error);
     }
   }
+
   /**
    * Log to remote endpoint
    */
@@ -283,8 +316,7 @@ export class Logger {
     if (!this.config.remoteEndpoint) {
       return;
     }
-    // In a real implementation, you would send this to your logging service
-    // This is a placeholder for demonstration
+
     const payload = {
       level: LogLevel[entry.level],
       timestamp: entry.timestamp.toISOString(),
@@ -300,20 +332,23 @@ export class Logger {
       }),
     };
 
-    // Example: Send to remote logging service
-    fetch(this.config.remoteEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    }).catch((error) => {
-      console.error('Failed to send log to remote endpoint:', error);
-    });
+    // Send to remote logging service (non-blocking)
+    if (typeof fetch !== 'undefined') {
+      fetch(this.config.remoteEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      }).catch((error) => {
+        console.error('Failed to send log to remote endpoint:', error);
+      });
+    }
   }
 }
+
 /**
- * Request logging middleware
+ * Request logging middleware for Express/Next.js
  */
 export class RequestLogger {
   private logger: Logger;
@@ -323,7 +358,7 @@ export class RequestLogger {
   }
 
   /**
-   * Express.js middleware for request logging
+   * Express.js/Next.js middleware for request logging
    */
   middleware() {
     return (req: any, res: any, next: any) => {
@@ -359,35 +394,55 @@ export class RequestLogger {
     };
   }
 }
-/**
- * Create application loggers
 
-export const createLogger = (context?: string, config?: Partial<LoggerConfig>): Logger => {
+/**
+ * Create application loggers with environment-based configuration
+ */
+export const createLogger = (
+  context?: string,
+  config?: Partial<LoggerConfig>
+): Logger => {
+  // Safe access to process.env
+  const nodeEnv =
+    typeof process !== 'undefined' ? process.env?.NODE_ENV : 'production';
+  const logLevel =
+    typeof process !== 'undefined' ? process.env?.LOG_LEVEL : undefined;
+  const logFile =
+    typeof process !== 'undefined' ? process.env?.LOG_FILE : undefined;
+  const logFormat =
+    typeof process !== 'undefined' ? process.env?.LOG_FORMAT : undefined;
+  const remoteEndpoint =
+    typeof process !== 'undefined' ? process.env?.REMOTE_LOG_ENDPOINT : undefined;
+  const enablePerfLogging =
+    typeof process !== 'undefined'
+      ? process.env?.ENABLE_PERFORMANCE_LOGGING
+      : undefined;
+
   const defaultConfig: Partial<LoggerConfig> = {
-    level: process.env.NODE_ENV === 'development' ? LogLevel.DEBUG : LogLevel.INFO,
+    level: nodeEnv === 'development' ? LogLevel.DEBUG : LogLevel.INFO,
     enableConsole: true,
-    enableFile: process.env.NODE_ENV === 'production',
-    enableRemote: process.env.NODE_ENV === 'production' && Boolean(process.env.REMOTE_LOG_ENDPOINT),
-    filename: process.env.LOG_FILE || './logs/app.log',
-    format: process.env.LOG_FORMAT as 'json' | 'text' || 'json',
-    includeStackTrace: process.env.NODE_ENV === 'development',
-    enablePerformanceLogging: process.env.ENABLE_PERFORMANCE_LOGGING === 'true',
+    enableFile: nodeEnv === 'production',
+    enableRemote: nodeEnv === 'production' && Boolean(remoteEndpoint),
+    filename: logFile || './logs/app.log',
+    format: (logFormat as 'json' | 'text') || 'json',
+    includeStackTrace: nodeEnv === 'development',
+    enablePerformanceLogging: enablePerfLogging === 'true',
   };
 
-  if (process.env.REMOTE_LOG_ENDPOINT) {
-    (defaultConfig as any).remoteEndpoint = process.env.REMOTE_LOG_ENDPOINT;
-}
+  if (remoteEndpoint) {
+    defaultConfig.remoteEndpoint = remoteEndpoint;
+  }
+
   return new Logger({ ...defaultConfig, ...config }, context);
 };
 
 // Default application logger
 export const logger = createLogger('GroqTales');
 
-// Specialized loggers
+// Specialized loggers for different parts of the application
 export const apiLogger = createLogger('API');
 export const dbLogger = createLogger('Database');
 export const blockchainLogger = createLogger('Blockchain');
 export const aiLogger = createLogger('AI');
 
 export default logger;
-*/

@@ -144,6 +144,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
+    "@testing-library/jest-dom": "^6.9.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^20.17.30",
@@ -175,6 +176,7 @@
     "prettier": "^3.2.5",
     "style-loader": "^4.0.0",
     "tailwindcss": "^3.3.0",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
