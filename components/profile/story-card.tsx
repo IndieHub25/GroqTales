@@ -1,3 +1,5 @@
+"use client";
+import { useState } from "react";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heart, MessageCircle } from "lucide-react";
@@ -14,6 +16,17 @@ interface StoryProps {
 }
 
 export function StoryCard({ story }: { story: StoryProps }) {
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(story.likes);
+
+  const handleLike = () => {
+  setLiked((prevLiked) => {
+    setLikeCount((prevCount) =>
+      prevLiked ? prevCount - 1 : prevCount + 1
+    );
+    return !prevLiked;
+  });
+};
   return (
     <Card className="group overflow-hidden border-slate-800 bg-slate-950 hover:border-slate-600 transition-all duration-300 hover:shadow-2xl hover:shadow-violet-900/10">
       <div className="relative h-48 w-full overflow-hidden">
@@ -46,9 +59,18 @@ export function StoryCard({ story }: { story: StoryProps }) {
       
       <CardFooter className="p-4 pt-2 flex justify-between items-center text-slate-500 text-sm">
         <div className="flex gap-4">
-          <span className="flex items-center gap-1 hover:text-pink-500 transition-colors cursor-pointer">
-            <Heart className="w-4 h-4" /> {story.likes}
-          </span>
+          <button type="button"
+                  onClick={handleLike}
+                  className={`flex items-center gap-1 transition-colors ${
+                  liked ? "text-pink-500" : "text-slate-500 hover:text-pink-400"}`} aria-label="Like story">
+  <Heart
+    aria-hidden="true"
+    className={`w-4 h-4 transition ${
+      liked ? "fill-pink-500" : ""
+    }`}
+  />
+  {likeCount}
+</button>
           <span className="flex items-center gap-1 hover:text-blue-400 transition-colors cursor-pointer">
             <MessageCircle className="w-4 h-4" /> {story.comments}
           </span>
