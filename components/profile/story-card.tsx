@@ -20,12 +20,9 @@ export function StoryCard({ story }: { story: StoryProps }) {
   const [likeCount, setLikeCount] = useState(story.likes);
 
   const handleLike = () => {
-  setLiked((prevLiked) => {
-    setLikeCount((prevCount) =>
-      prevLiked ? prevCount - 1 : prevCount + 1
-    );
-    return !prevLiked;
-  });
+  const nextLiked = !liked;
+  setLiked(nextLiked);
+  setLikeCount((prev) => prev + (nextLiked ? 1 : -1));
 };
   return (
     <Card className="group overflow-hidden border-slate-800 bg-slate-950 hover:border-slate-600 transition-all duration-300 hover:shadow-2xl hover:shadow-violet-900/10">
@@ -59,10 +56,13 @@ export function StoryCard({ story }: { story: StoryProps }) {
       
       <CardFooter className="p-4 pt-2 flex justify-between items-center text-slate-500 text-sm">
         <div className="flex gap-4">
-          <button type="button"
-                  onClick={handleLike}
-                  className={`flex items-center gap-1 transition-colors ${
-                  liked ? "text-pink-500" : "text-slate-500 hover:text-pink-400"}`} aria-label="Like story">
+         <button
+    type="button"
+    onClick={handleLike}
+    aria-label={liked ? "Unlike story" : "Like story"}
+    aria-pressed={liked}
+    className={`flex items-center gap-1 transition-colors ${
+    liked ? "text-pink-500" : "text-slate-500 hover:text-pink-400"}`}>
   <Heart
     aria-hidden="true"
     className={`w-4 h-4 transition ${
