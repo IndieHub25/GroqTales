@@ -22,41 +22,41 @@ export async function POST(req: NextRequest) {
   const ip = headerStore.get("x-forwarded-for") ?? "unknown";
 
   try {
-    if (!ADMIN_PRIVATE_KEY) {
-      console.error("CRITICAL: ADMIN_PRIVATE_KEY is missing");
+    if (!ADMIN_PRIVATE_KEY || !ADMIN_PRIVATE_KEY.startsWith("0x") || ADMIN_PRIVATE_KEY.length !== 66) {
+      console.error("CRITICAL: Server Key Misconfiguration");
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
-    }
-    
-    if (!ADMIN_PRIVATE_KEY.startsWith("0x") || ADMIN_PRIVATE_KEY.length !== 66) {
-      console.error("CRITICAL: ADMIN_PRIVATE_KEY is invalid (must be 0x-prefixed hex)");
-      return NextResponse.json({ error: "Server key configuration error" }, { status: 500 });
     }
 
     const session = await getServerSession(authOptions);
-    if (!session) {
-      logAudit('MINT_SIGNATURE_REQUEST', 'FAILURE', { reason: "Unauthorized", ip });
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session || !session.user) {
+      logAudit('MINT_SIGNATURE_REQUEST', 'FAILURE', { reason: "No active session", ip });
+      return NextResponse.json({ error: "Unauthorized: Please sign in" }, { status: 401 });
     }
 
     let body;
-    try {
-      body = await req.json();
-    } catch (e) {
-      logAudit('MINT_SIGNATURE_REQUEST', 'FAILURE', { reason: "Invalid JSON Body", ip });
+    try { body = await req.json(); } catch (e) {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
     const parseResult = mintRequestSchema.safeParse(body);
     if (!parseResult.success) {
-      logAudit('MINT_SIGNATURE_REQUEST', 'FAILURE', { 
-        reason: "Invalid Input Schema", 
-        errors: parseResult.error.flatten(),
-        ip 
-      });
       return NextResponse.json({ error: parseResult.error.flatten() }, { status: 400 });
     }
 
     const { userWallet, storyId } = parseResult.data;
+ 
+    // If you wanna use email-based auth, ensure the database links the user to their wallet.
+    const sessionWallet = (session.user as any).address; 
+    
+    if (sessionWallet && sessionWallet.toLowerCase() !== userWallet.toLowerCase()) {
+      logAudit('MINT_SIGNATURE_REQUEST', 'FAILURE', { 
+        reason: "Identity Mismatch", 
+        sessionWallet, 
+        requestedWallet: userWallet,
+        ip 
+      });
+      return NextResponse.json({ error: "Forbidden: Wallet address does not match session" }, { status: 403 });
+    }
 
     const story = await prisma.story.findUnique({
       where: { id: storyId },
@@ -72,35 +72,23 @@ export async function POST(req: NextRequest) {
     }
 
     if (story.authorWallet && story.authorWallet.toLowerCase() !== userWallet.toLowerCase()) {
-      return NextResponse.json({ error: "Wallet mismatch" }, { status: 403 });
+      return NextResponse.json({ error: "Forbidden: You are not the author of this story" }, { status: 403 });
     }
 
     const wallet = new ethers.Wallet(ADMIN_PRIVATE_KEY);
-    
     const messageHash = ethers.solidityPackedKeccak256(
       ["address", "string"], 
       [userWallet, storyId]
     );
-    
     const signature = await wallet.signMessage(ethers.getBytes(messageHash));
 
     logAudit('MINT_SIGNATURE_GENERATED', 'SUCCESS', { userWallet, storyId, ip });
     
-    return NextResponse.json({ 
-      signature, 
-      userWallet, 
-      storyId 
-    });
+    return NextResponse.json({ signature, userWallet, storyId });
 
   } catch (error) {
-    console.error("Mint Signing Critical Error:", error);
-    
-    logAudit('MINT_SIGNATURE_REQUEST', 'FAILURE', { 
-      reason: "Critical Exception", 
-      error: error instanceof Error ? error.message : "Unknown",
-      ip 
-    });
-
+    console.error("Mint Signing Error:", error);
+    logAudit('MINT_SIGNATURE_REQUEST', 'FAILURE', { reason: "Critical Exception", ip });
     return NextResponse.json({ error: "Internal processing failed" }, { status: 500 });
   }
 }
