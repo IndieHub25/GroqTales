@@ -123,6 +123,7 @@ const getIpfsClient = async () => {
 
 const AUTOSAVE_INTERVAL_MS = 8000;
 const MAX_DRAFT_VERSIONS = 5;
+const DRAFT_SYNC_TIMEOUT_MS = 10000;
 const DRAFT_SYNC_ENDPOINT = '/api/v1/drafts';
 
 interface StoryFormData {
@@ -172,6 +173,16 @@ export default function CreateStoryPage() {
   );
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
   const latestSignatureRef = useRef('');
+  const storyDataRef = useRef(storyData);
+  const draftSyncErrorRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    storyDataRef.current = storyData;
+  }, [storyData]);
+
+  useEffect(() => {
+    draftSyncErrorRef.current = draftSyncError;
+  }, [draftSyncError]);
 
   const hasAnyStoryData = useCallback((formData: StoryFormData) => {
     return Boolean(
@@ -222,23 +233,34 @@ export default function CreateStoryPage() {
       try {
         setIsSyncingDraft(true);
         setDraftSyncError(null);
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => {
+          controller.abort();
+        }, DRAFT_SYNC_TIMEOUT_MS);
 
-        const response = await fetch(DRAFT_SYNC_ENDPOINT, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            draftKey,
-            storyType: storyType || 'text',
-            storyFormat: storyFormat || 'free',
-            ownerWallet: account || null,
-            ownerRole: account ? 'wallet' : 'admin',
-            snapshot,
-            saveReason: reason,
-            maxVersions: MAX_DRAFT_VERSIONS,
-          }),
-        });
+        const response = await (async () => {
+          try {
+            return await fetch(DRAFT_SYNC_ENDPOINT, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              signal: controller.signal,
+              body: JSON.stringify({
+                draftKey,
+                storyType: storyType || 'text',
+                storyFormat: storyFormat || 'free',
+                ownerWallet: account || null,
+                ownerRole: account ? 'wallet' : 'admin',
+                snapshot,
+                saveReason: reason,
+                maxVersions: MAX_DRAFT_VERSIONS,
+              }),
+            });
+          } finally {
+            window.clearTimeout(timeoutId);
+          }
+        })();
 
         if (!response.ok) {
           throw new Error('Backend sync failed');
@@ -273,7 +295,7 @@ export default function CreateStoryPage() {
         return;
       }
 
-      const sourceData = formDataOverride || storyData;
+      const sourceData = formDataOverride || storyDataRef.current;
       if (!hasAnyStoryData(sourceData)) {
         return;
       }
@@ -292,7 +314,7 @@ export default function CreateStoryPage() {
         reason === 'autosave' &&
         signature === latestSignatureRef.current
       ) {
-        if (draftSyncError) {
+        if (draftSyncErrorRef.current) {
           await syncDraftToBackend(snapshot, reason);
         }
         return;
@@ -317,9 +339,7 @@ export default function CreateStoryPage() {
     [
       createSnapshot,
       draftKey,
-      draftSyncError,
       hasAnyStoryData,
-      storyData,
       storyFormat,
       storyType,
       syncDraftToBackend,

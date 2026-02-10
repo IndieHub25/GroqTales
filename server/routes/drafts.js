@@ -25,13 +25,21 @@ function cleanText(value, maxLength) {
 
 function normalizeSnapshot(rawSnapshot, existingVersion) {
   const now = new Date();
+  const parsedUpdatedAt = rawSnapshot?.updatedAt
+    ? new Date(rawSnapshot.updatedAt)
+    : null;
+  const normalizedUpdatedAt =
+    parsedUpdatedAt && !Number.isNaN(parsedUpdatedAt.getTime())
+      ? parsedUpdatedAt
+      : now;
+
   return {
     title: cleanText(rawSnapshot?.title, 140),
     description: cleanText(rawSnapshot?.description, 2000),
     genre: cleanText(rawSnapshot?.genre, 80),
     content: cleanText(rawSnapshot?.content, 100000),
     coverImageName: cleanText(rawSnapshot?.coverImageName, 260),
-    updatedAt: rawSnapshot?.updatedAt ? new Date(rawSnapshot.updatedAt) : now,
+    updatedAt: normalizedUpdatedAt,
     version:
       Number(rawSnapshot?.version) > 0
         ? Number(rawSnapshot.version)

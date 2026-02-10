@@ -13,23 +13,20 @@ const CurrentSnapshotSchema = new mongoose.Schema(
   { _id: false }
 );
 
-const VersionSnapshotSchema = new mongoose.Schema(
-  {
-    title: { type: String, default: '' },
-    description: { type: String, default: '' },
-    genre: { type: String, default: '' },
-    content: { type: String, default: '' },
-    coverImageName: { type: String, default: '' },
-    updatedAt: { type: Date, default: Date.now },
-    version: { type: Number, default: 1 },
-    reason: {
-      type: String,
-      enum: ['autosave', 'blur', 'manual', 'restore'],
-      default: 'autosave',
-    },
+const VersionSnapshotSchema = new mongoose.Schema({
+  title: { type: String, default: '' },
+  description: { type: String, default: '' },
+  genre: { type: String, default: '' },
+  content: { type: String, default: '' },
+  coverImageName: { type: String, default: '' },
+  updatedAt: { type: Date, default: Date.now },
+  version: { type: Number, default: 1 },
+  reason: {
+    type: String,
+    enum: ['autosave', 'blur', 'manual', 'restore'],
+    default: 'autosave',
   },
-  { timestamps: true }
-);
+});
 
 const DraftSchema = new mongoose.Schema(
   {

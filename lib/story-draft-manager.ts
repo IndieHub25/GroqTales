@@ -76,7 +76,11 @@ function writeStore(store: StoryDraftStore): void {
     return;
   }
 
-  localStorage.setItem(DRAFT_STORE_KEY, JSON.stringify(store));
+  try {
+    localStorage.setItem(DRAFT_STORE_KEY, JSON.stringify(store));
+  } catch (error) {
+    console.warn('[story-draft-manager] Failed to persist draft store:', error);
+  }
 }
 
 function hasMeaningfulContent(snapshot: StoryDraftSnapshot): boolean {
