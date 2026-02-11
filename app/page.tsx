@@ -20,6 +20,7 @@ import { FeaturedCreators } from '@/components/featured-creators';
 import { useWeb3 } from '@/components/providers/web3-provider';
 import { TrendingStories } from '@/components/trending-stories';
 import { Button } from '@/components/ui/button';
+import { ContinueReadingWidget } from '@/components/continue-reading-widget';
 
 export default function Home() {
   const { account, connectWallet } = useWeb3();
@@ -144,6 +145,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Pick Up Where You Left Off */}
+      <ContinueReadingWidget />
 
       {/* Features Grid */}
       <section className="py-20 bg-card dark:bg-slate-900/40 dark:backdrop-blur-md border-b-8 border-foreground transition-colors duration-500">

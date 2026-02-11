@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { getGenreBySlug } from '@/components/genre-selector';
 import { useWeb3 } from '@/components/providers/web3-provider';
@@ -39,6 +39,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { fetchStoryById } from '@/lib/mock-data';
 import { useStoryAnalytics } from '@/hooks/use-story-analysis';
+import { useReadingProgress } from '@/hooks/use-reading-progress';
+import { ReadingProgressBar } from '@/components/reading-progress-bar';
+import { BookmarkPanel } from '@/components/bookmark-panel';
+import { Bookmark as BookmarkIcon, Plus, List } from 'lucide-react';
 
 interface Comment {
   id: string;
@@ -70,6 +74,68 @@ export default function StoryPage({ params }: { params: { id: string } }) {
   const { account } = useWeb3();
 
   const { trackInteraction } = useStoryAnalytics(params.id);
+
+  const paragraphs = story?.description?.split('\n\n') || [];
+  const { progress, percentage, addBookmark, removeBookmark: originalRemoveBookmark, activeParagraph, saveProgress } = useReadingProgress(params.id, paragraphs.length);
+  const [isBookmarkPanelOpen, setIsBookmarkPanelOpen] = useState(false);
+
+  const removeBookmark = useCallback((bookmarkId: string) => {
+    const updatedBookmarks = (progress?.bookmarks || []).filter(b => b.id !== bookmarkId);
+    saveProgress(activeParagraph, updatedBookmarks);
+  }, [progress?.bookmarks, activeParagraph, saveProgress]);
+
+  const clearAllBookmarks = useCallback(() => {
+    saveProgress(activeParagraph, []);
+    toast({
+      title: "All Bookmarks Cleared",
+      variant: "destructive",
+    });
+  }, [activeParagraph, saveProgress, toast]);
+
+  // Handle hash-based deep linking
+  useEffect(() => {
+    if (!isLoading && story) {
+      const hash = window.location.hash;
+      if (hash && hash.startsWith('#p-')) {
+        const index = parseInt(hash.replace('#p-', ''));
+        if (!isNaN(index)) {
+          // Small delay to ensure DOM is ready
+          setTimeout(() => {
+            const el = document.querySelector(`[data-paragraph-index="${index}"]`);
+            el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Highlight the paragraph briefly
+            if (el) {
+              el.classList.add('bg-amber-100/50', 'dark:bg-amber-900/30', 'transition-colors', 'duration-1000');
+              setTimeout(() => {
+                el.classList.remove('bg-amber-100/50', 'dark:bg-amber-900/30');
+              }, 3000);
+            }
+          }, 500);
+        }
+      }
+    }
+  }, [isLoading, story]);
+
+  // Auto-resume logic
+  useEffect(() => {
+    if (progress && progress.lastParagraphIndex > 0) {
+      toast({
+        title: "Resume Reading?",
+        description: `You were at ${progress.percentage}% last time.`,
+        action: (
+          <Button
+            size="sm"
+            onClick={() => {
+              const el = document.querySelector(`[data-paragraph-index="${progress.lastParagraphIndex}"]`);
+              el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }}
+          >
+            Resume
+          </Button>
+        ),
+      });
+    }
+  }, [story, progress]); // Only run once story is loaded
 
   // Fetch story data
   useEffect(() => {
@@ -183,9 +249,8 @@ export default function StoryPage({ params }: { params: { id: string } }) {
     }
     toast({
       title: type === 'upvote' ? 'Upvoted!' : 'Downvoted',
-      description: `You have ${
-        type === 'upvote' ? 'upvoted' : 'downvoted'
-      } this story.`,
+      description: `You have ${type === 'upvote' ? 'upvoted' : 'downvoted'
+        } this story.`,
     });
   };
 
@@ -243,7 +308,7 @@ export default function StoryPage({ params }: { params: { id: string } }) {
   // Handle share
   const handleShare = async () => {
     setIsSharing(true);
-    
+
     trackInteraction('SHARE');
 
     try {
@@ -304,456 +369,508 @@ export default function StoryPage({ params }: { params: { id: string } }) {
   const genre = getGenreBySlug(story.genre);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="container mx-auto py-12"
-    >
-      <div className="mb-8">
-        <div className="flex items-center mb-8">
-          <Link href="/nft-gallery">
-            <Button variant="ghost">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Gallery
-            </Button>
-          </Link>
-        </div>
+    <div className="relative">
+      <ReadingProgressBar percentage={percentage} />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="container mx-auto py-12"
+      >
+        <div className="mb-8">
+          <div className="flex items-center mb-8">
+            <Link href="/nft-gallery">
+              <Button variant="ghost">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Gallery
+              </Button>
+            </Link>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.4 }}
-            >
-              <Card className="mb-8 overflow-hidden">
-                <div className="relative aspect-video w-full overflow-hidden">
-                  <Image
-                    src={story.coverImage}
-                    alt={story.title}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform duration-700"
-                    priority
-                  />
-                  {story.isTop10 && (
-                    <div className="absolute top-4 left-4 bg-gradient-to-r from-amber-500 to-yellow-300 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center">
-                      <Award className="h-3.5 w-3.5 mr-1" />
-                      Top Rated
-                    </div>
-                  )}
-                </div>
-
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400">
-                        {story.title}
-                      </CardTitle>
-                      <CardDescription className="text-lg">
-                        By {story.author} • {new Date().toLocaleDateString()}
-                      </CardDescription>
-                    </div>
-
-                    <div>
-                      {genre && (
-                        <Link href={`/genres/${genre.slug}`}>
-                          <Badge
-                            className="ml-2"
-                            style={{
-                              backgroundColor: genre.color + '20',
-                              color: genre.color,
-                              border: `1px solid ${genre.color}`,
-                            }}
-                          >
-                            {genre.name}
-                          </Badge>
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent>
-                  <div className="prose max-w-none dark:prose-invert">
-                    {story.description
-                      .split('\n\n')
-                      .map((paragraph: string, index: number) => (
-                        <p key={index}>{paragraph}</p>
-                      ))}
-                  </div>
-
-                  <div className="flex items-center justify-between mt-8">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant={
-                            voteStatus === 'upvote' ? 'default' : 'outline'
-                          }
-                          size="sm"
-                          onClick={() => handleVote('upvote')}
-                          className={
-                            voteStatus === 'upvote'
-                              ? 'bg-green-600 hover:bg-green-700'
-                              : ''
-                          }
-                        >
-                          <ThumbsUp className="h-4 w-4 mr-2" />
-                          {upvotes}
-                        </Button>
-                        <Button
-                          variant={
-                            voteStatus === 'downvote' ? 'default' : 'outline'
-                          }
-                          size="sm"
-                          onClick={() => handleVote('downvote')}
-                          className={
-                            voteStatus === 'downvote'
-                              ? 'bg-red-600 hover:bg-red-700'
-                              : ''
-                          }
-                        >
-                          <ThumbsDown className="h-4 w-4 mr-2" />
-                          {downvotes}
-                        </Button>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Card className="mb-8 overflow-hidden">
+                  <div className="relative aspect-video w-full overflow-hidden">
+                    <Image
+                      src={story.coverImage}
+                      alt={story.title}
+                      fill
+                      className="object-cover hover:scale-105 transition-transform duration-700"
+                      priority
+                    />
+                    {story.isTop10 && (
+                      <div className="absolute top-4 left-4 bg-gradient-to-r from-amber-500 to-yellow-300 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center">
+                        <Award className="h-3.5 w-3.5 mr-1" />
+                        Top Rated
                       </div>
+                    )}
+                  </div>
+
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400">
+                          {story.title}
+                        </CardTitle>
+                        <CardDescription className="text-lg">
+                          By {story.author} • {new Date().toLocaleDateString()}
+                        </CardDescription>
+                      </div>
+
+                      <div>
+                        {genre && (
+                          <Link href={`/genres/${genre.slug}`}>
+                            <Badge
+                              className="ml-2"
+                              style={{
+                                backgroundColor: genre.color + '20',
+                                color: genre.color,
+                                border: `1px solid ${genre.color}`,
+                              }}
+                            >
+                              {genre.name}
+                            </Badge>
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent>
+                    <div className="prose max-w-none dark:prose-invert">
+                      {paragraphs.map((paragraph: string, index: number) => (
+                        <p key={index} data-paragraph-index={index}>
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-between mt-8">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant={
+                              voteStatus === 'upvote' ? 'default' : 'outline'
+                            }
+                            size="sm"
+                            onClick={() => handleVote('upvote')}
+                            className={
+                              voteStatus === 'upvote'
+                                ? 'bg-green-600 hover:bg-green-700'
+                                : ''
+                            }
+                          >
+                            <ThumbsUp className="h-4 w-4 mr-2" />
+                            {upvotes}
+                          </Button>
+                          <Button
+                            variant={
+                              voteStatus === 'downvote' ? 'default' : 'outline'
+                            }
+                            size="sm"
+                            onClick={() => handleVote('downvote')}
+                            className={
+                              voteStatus === 'downvote'
+                                ? 'bg-red-600 hover:bg-red-700'
+                                : ''
+                            }
+                          >
+                            <ThumbsDown className="h-4 w-4 mr-2" />
+                            {downvotes}
+                          </Button>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setActiveTab('comments')}
+                        >
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          {comments.length}
+                        </Button>
+                        <div className="flex items-center">
+                          <Eye className="h-4 w-4 mr-2" />
+                          <span>{story.views} views</span>
+                        </div>
+                      </div>
+
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setActiveTab('comments')}
+                        onClick={handleShare}
+                        disabled={isSharing}
                       >
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        {comments.length}
+                        <Share className="h-4 w-4 mr-2" />
+                        Share
                       </Button>
-                      <div className="flex items-center">
-                        <Eye className="h-4 w-4 mr-2" />
-                        <span>{story.views} views</span>
-                      </div>
                     </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleShare}
-                      disabled={isSharing}
-                    >
-                      <Share className="h-4 w-4 mr-2" />
-                      Share
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-            >
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="mb-8"
+              <motion.div
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
               >
-                <TabsList className="grid grid-cols-2 mb-4">
-                  <TabsTrigger value="details">Story Details</TabsTrigger>
-                  <TabsTrigger value="comments">
-                    Comments ({comments.length})
-                  </TabsTrigger>
-                </TabsList>
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="mb-8"
+                >
+                  <TabsList className="grid grid-cols-2 mb-4">
+                    <TabsTrigger value="details">Story Details</TabsTrigger>
+                    <TabsTrigger value="comments">
+                      Comments ({comments.length})
+                    </TabsTrigger>
+                  </TabsList>
 
-                <TabsContent value="details">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="space-y-6">
-                        <div>
-                          <h3 className="text-lg font-semibold mb-2">
-                            About this Story
-                          </h3>
-                          <p className="text-muted-foreground">
-                            {story.description}
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <h4 className="text-sm font-medium">Created On</h4>
-                            <p className="text-sm flex items-center">
-                              <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                              {new Date().toLocaleDateString()}
+                  <TabsContent value="details">
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="space-y-6">
+                          <div>
+                            <h3 className="text-lg font-semibold mb-2">
+                              About this Story
+                            </h3>
+                            <p className="text-muted-foreground">
+                              {story.description}
                             </p>
                           </div>
-                          <div className="space-y-2">
-                            <h4 className="text-sm font-medium">
-                              Generated With
-                            </h4>
-                            <p className="text-sm flex items-center">
-                              <Cpu className="h-4 w-4 mr-2 text-muted-foreground" />
-                              Groq LLM
-                            </p>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <h4 className="text-sm font-medium">Created On</h4>
+                              <p className="text-sm flex items-center">
+                                <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                                {new Date().toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <h4 className="text-sm font-medium">
+                                Generated With
+                              </h4>
+                              <p className="text-sm flex items-center">
+                                <Cpu className="h-4 w-4 mr-2 text-muted-foreground" />
+                                Groq LLM
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
 
-                <TabsContent value="comments">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Community Discussion</CardTitle>
-                      <CardDescription>
-                        Join the conversation about "{story.title}"
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <form onSubmit={handleCommentSubmit} className="mb-6">
-                        <div className="space-y-4">
-                          <Textarea
-                            placeholder="Share your thoughts on this story..."
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            className="min-h-24"
-                          />
-                          <div className="flex justify-end">
-                            <Button
-                              type="submit"
-                              disabled={!commentText.trim() || !account}
-                              className="theme-gradient-bg"
-                            >
-                              Post Comment
-                            </Button>
+                  <TabsContent value="comments">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Community Discussion</CardTitle>
+                        <CardDescription>
+                          Join the conversation about "{story.title}"
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <form onSubmit={handleCommentSubmit} className="mb-6">
+                          <div className="space-y-4">
+                            <Textarea
+                              placeholder="Share your thoughts on this story..."
+                              value={commentText}
+                              onChange={(e) => setCommentText(e.target.value)}
+                              className="min-h-24"
+                            />
+                            <div className="flex justify-end">
+                              <Button
+                                type="submit"
+                                disabled={!commentText.trim() || !account}
+                                className="theme-gradient-bg"
+                              >
+                                Post Comment
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                      </form>
+                        </form>
 
-                      <div className="space-y-6">
-                        <AnimatePresence>
-                          {comments.map((comment) => (
-                            <motion.div
-                              key={comment.id}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -10 }}
-                              className="border rounded-lg p-4"
-                            >
-                              <div className="flex space-x-4">
-                                <Avatar>
-                                  <AvatarImage src={comment.authorAvatar} alt={`${comment.author}'s avatar`} />
-                                  <AvatarFallback>
-                                    {comment.author[0]}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                  <div className="flex items-center">
-                                    <h4 className="font-medium">
-                                      {comment.author}
-                                    </h4>
-                                    {comment.isVerified && (
-                                      <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
-                                    )}
+                        <div className="space-y-6">
+                          <AnimatePresence>
+                            {comments.map((comment) => (
+                              <motion.div
+                                key={comment.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="border rounded-lg p-4"
+                              >
+                                <div className="flex space-x-4">
+                                  <Avatar>
+                                    <AvatarImage src={comment.authorAvatar} alt={`${comment.author}'s avatar`} />
+                                    <AvatarFallback>
+                                      {comment.author[0]}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex-1">
+                                    <div className="flex items-center">
+                                      <h4 className="font-medium">
+                                        {comment.author}
+                                      </h4>
+                                      {comment.isVerified && (
+                                        <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground mb-2">
+                                      {comment.timestamp.toLocaleString()}
+                                    </p>
+                                    <p className="text-sm mb-3">{comment.text}</p>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() =>
+                                        handleCommentLike(comment.id)
+                                      }
+                                      disabled={!account}
+                                    >
+                                      <Heart className="h-3.5 w-3.5 mr-1" />
+                                      {comment.likes}
+                                    </Button>
                                   </div>
-                                  <p className="text-xs text-muted-foreground mb-2">
-                                    {comment.timestamp.toLocaleString()}
-                                  </p>
-                                  <p className="text-sm mb-3">{comment.text}</p>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() =>
-                                      handleCommentLike(comment.id)
-                                    }
-                                    disabled={!account}
-                                  >
-                                    <Heart className="h-3.5 w-3.5 mr-1" />
-                                    {comment.likes}
-                                  </Button>
                                 </div>
-                              </div>
-                            </motion.div>
-                          ))}
-                        </AnimatePresence>
+                              </motion.div>
+                            ))}
+                          </AnimatePresence>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </motion.div>
+            </div>
+
+            <div>
+              <motion.div
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="space-y-6"
+              >
+                <Card className="mb-8 overflow-hidden">
+                  <CardHeader className="pb-2">
+                    <CardTitle>Creator Profile</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-4 mb-4">
+                      <Avatar className="h-16 w-16 border-2 border-primary">
+                        <AvatarImage
+                          src={`https://api.dicebear.com/7.x/personas/svg?seed=${story.author}`}
+                          alt={`${story.author}'s profile picture`}
+                        />
+                        <AvatarFallback>
+                          {story.author.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="flex items-center">
+                          <h3 className="font-semibold text-lg">
+                            {story.author}
+                          </h3>
+                          <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Creator • Author • Artist
+                        </p>
+                        <div className="flex items-center mt-1">
+                          <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
+                          <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
+                          <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
+                          <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
+                          <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
+                          <span className="text-xs ml-1">5.0 (120 reviews)</span>
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            </motion.div>
-          </div>
-
-          <div>
-            <motion.div
-              initial={{ x: 20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-              className="space-y-6"
-            >
-              <Card className="mb-8 overflow-hidden">
-                <CardHeader className="pb-2">
-                  <CardTitle>Creator Profile</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center space-x-4 mb-4">
-                    <Avatar className="h-16 w-16 border-2 border-primary">
-                      <AvatarImage
-                        src={`https://api.dicebear.com/7.x/personas/svg?seed=${story.author}`}
-                        alt={`${story.author}'s profile picture`}
-                      />
-                      <AvatarFallback>
-                        {story.author.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="flex items-center">
-                        <h3 className="font-semibold text-lg">
-                          {story.author}
-                        </h3>
-                        <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Creative storyteller specializing in{' '}
+                      {genre?.name || 'various genres'} with a passion for
+                      immersive narratives. Has created over 35 original stories
+                      on GroqTales.
+                    </p>
+                    <div className="grid grid-cols-3 gap-2 mb-4 text-center">
+                      <div className="bg-muted/30 rounded p-2">
+                        <p className="font-medium">35</p>
+                        <p className="text-xs text-muted-foreground">Stories</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        Creator • Author • Artist
-                      </p>
-                      <div className="flex items-center mt-1">
-                        <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
-                        <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
-                        <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
-                        <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
-                        <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
-                        <span className="text-xs ml-1">5.0 (120 reviews)</span>
+                      <div className="bg-muted/30 rounded p-2">
+                        <p className="font-medium">2.5k</p>
+                        <p className="text-xs text-muted-foreground">Followers</p>
+                      </div>
+                      <div className="bg-muted/30 rounded p-2">
+                        <p className="font-medium">18k</p>
+                        <p className="text-xs text-muted-foreground">Views</p>
                       </div>
                     </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Creative storyteller specializing in{' '}
-                    {genre?.name || 'various genres'} with a passion for
-                    immersive narratives. Has created over 35 original stories
-                    on GroqTales.
-                  </p>
-                  <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-                    <div className="bg-muted/30 rounded p-2">
-                      <p className="font-medium">35</p>
-                      <p className="text-xs text-muted-foreground">Stories</p>
-                    </div>
-                    <div className="bg-muted/30 rounded p-2">
-                      <p className="font-medium">2.5k</p>
-                      <p className="text-xs text-muted-foreground">Followers</p>
-                    </div>
-                    <div className="bg-muted/30 rounded p-2">
-                      <p className="font-medium">18k</p>
-                      <p className="text-xs text-muted-foreground">Views</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" className="w-full mb-2">
-                    Follow Creator
-                  </Button>
-                  <Button
-                    variant="default"
-                    className="w-full theme-gradient-bg"
-                  >
-                    View All Stories
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>NFT Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Price</span>
-                      <span className="font-medium">{story.price} ETH</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Token ID</span>
-                      <span className="font-medium">#{params.id}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Blockchain</span>
-                      <span className="font-medium">Monad</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Created</span>
-                      <span className="font-medium">
-                        {new Date().toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Royalty</span>
-                      <span className="font-medium">10%</span>
-                    </div>
-
-                    <Separator />
-
-                    <Button className="w-full theme-gradient-bg">
-                      Purchase NFT
+                    <Button variant="outline" className="w-full mb-2">
+                      Follow Creator
                     </Button>
-
                     <Button
-                      variant="outline"
-                      className="w-full flex items-center justify-center"
-                      onClick={() => {
-                        // Direct navigation with URL parameters
-                        const genre = story.genre || 'fantasy';
-                        window.location.href = `/create/ai-story?source=story&genre=${encodeURIComponent(
-                          genre
-                        )}&format=nft`;
-                      }}
+                      variant="default"
+                      className="w-full theme-gradient-bg"
                     >
-                      <PenSquare className="h-4 w-4 mr-2" />
-                      Create Your Own Story
+                      View All Stories
                     </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>NFT Details</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Price</span>
+                        <span className="font-medium">{story.price} ETH</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Token ID</span>
+                        <span className="font-medium">#{params.id}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Blockchain</span>
+                        <span className="font-medium">Monad</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Created</span>
+                        <span className="font-medium">
+                          {new Date().toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Royalty</span>
+                        <span className="font-medium">10%</span>
+                      </div>
+
+                      <Separator />
+
+                      <Button className="w-full theme-gradient-bg">
+                        Purchase NFT
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        className="w-full flex items-center justify-center"
+                        onClick={() => {
+                          // Direct navigation with URL parameters
+                          const genre = story.genre || 'fantasy';
+                          window.location.href = `/create/ai-story?source=story&genre=${encodeURIComponent(
+                            genre
+                          )}&format=nft`;
+                        }}
+                      >
+                        <PenSquare className="h-4 w-4 mr-2" />
+                        Create Your Own Story
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
           </div>
+
+          <motion.div
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="mt-12"
+          >
+            <h2 className="text-2xl font-bold mb-6">Similar Stories</h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {relatedStories.map((relatedStory: any, index: number) => (
+                <motion.div
+                  key={relatedStory.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1, duration: 0.3 }}
+                  whileHover={{ y: -5 }}
+                >
+                  <StoryCard
+                    story={relatedStory}
+                    hideLink={false}
+                    showCreateButton={true}
+                  />
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="mt-10 text-center">
+              <Button
+                className="theme-gradient-bg text-white"
+                onClick={() => {
+                  // Direct navigation with URL parameters
+                  const genreSlug = genre?.slug || 'fantasy';
+                  window.location.href = `/create/ai-story?source=stories&genre=${encodeURIComponent(
+                    genreSlug
+                  )}&format=nft`;
+                }}
+              >
+                <PenSquare className="h-4 w-4 mr-2" />
+                Create Your Own Story
+              </Button>
+            </div>
+          </motion.div>
         </div>
+      </motion.div>
+
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-[144px] right-8 flex flex-col items-center gap-4 z-[1002]">
+        <motion.div
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <Button
+            className="h-12 w-12 rounded-full bg-emerald-500 text-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all p-0 flex items-center justify-center"
+            onClick={() => {
+              const note = prompt('Add a note for this bookmark (optional):') || undefined;
+              addBookmark(activeParagraph, note);
+              toast({
+                title: "POSITION SAVED!",
+                description: `Paragraph ${activeParagraph + 1} bookmarked. ${note ? `Note: ${note}` : ''}`,
+              });
+            }}
+            title="Add Bookmark with Note"
+          >
+            <Plus className="h-8 w-8 text-white stroke-[4px]" />
+          </Button>
+        </motion.div>
 
         <motion.div
-          initial={{ y: 40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="mt-12"
+          whileHover={{ scale: 1.1, rotate: -5 }}
+          whileTap={{ scale: 0.9 }}
         >
-          <h2 className="text-2xl font-bold mb-6">Similar Stories</h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {relatedStories.map((relatedStory: any, index: number) => (
-              <motion.div
-                key={relatedStory.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.3 }}
-                whileHover={{ y: -5 }}
-              >
-                <StoryCard
-                  story={relatedStory}
-                  hideLink={false}
-                  showCreateButton={true}
-                />
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="mt-10 text-center">
-            <Button
-              className="theme-gradient-bg text-white"
-              onClick={() => {
-                // Direct navigation with URL parameters
-                const genreSlug = genre?.slug || 'fantasy';
-                window.location.href = `/create/ai-story?source=stories&genre=${encodeURIComponent(
-                  genreSlug
-                )}&format=nft`;
-              }}
-            >
-              <PenSquare className="h-4 w-4 mr-2" />
-              Create Your Own Story
-            </Button>
-          </div>
+          <Button
+            className="h-14 w-14 rounded-full bg-amber-500 text-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all p-0 overflow-hidden flex items-center justify-center"
+            onClick={() => setIsBookmarkPanelOpen(true)}
+            title="View Bookmarks"
+          >
+            <List className="h-7 w-7 stroke-[3px]" />
+          </Button>
         </motion.div>
       </div>
-    </motion.div>
+
+      <BookmarkPanel
+        isOpen={isBookmarkPanelOpen}
+        onClose={() => setIsBookmarkPanelOpen(false)}
+        bookmarks={progress?.bookmarks || []}
+        onJump={(index) => {
+          const el = document.querySelector(`[data-paragraph-index="${index}"]`);
+          el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }}
+        onRemove={removeBookmark}
+        onClearAll={clearAllBookmarks}
+        storyTitle={story.title}
+      />
+    </div>
   );
 }

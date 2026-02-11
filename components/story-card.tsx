@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import StoryCommentsDialog from '@/components/story-comments-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,6 +24,7 @@ import {
   CardHeader,
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { getAllReadingProgress } from '@/hooks/use-reading-progress';
 
 interface StoryAuthor {
   name: string;
@@ -67,6 +68,19 @@ export function StoryCard({
   const router = useRouter();
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
 
+  const [isMounted, setIsMounted] = useState(false);
+  const [storyProgress, setStoryProgress] = useState<any>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const allProgress = getAllReadingProgress();
+    if (allProgress[story.id]) {
+      setStoryProgress(allProgress[story.id]);
+    }
+  }, [story.id]);
+
+  const hasProgress = isMounted && storyProgress && storyProgress.percentage > 0;
+
   // Extract author information
   const authorName =
     typeof story.author === 'string'
@@ -109,6 +123,31 @@ export function StoryCard({
                 View NFT <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
               </motion.button>
             </div>
+            {hasProgress && (
+              <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md rounded-full p-2 flex items-center justify-center border border-white/20">
+                <div className="relative h-8 w-8">
+                  <svg className="h-full w-full" viewBox="0 0 36 36">
+                    <circle
+                      cx="18" cy="18" r="16"
+                      fill="none"
+                      className="stroke-white/20"
+                      strokeWidth="3"
+                    />
+                    <circle
+                      cx="18" cy="18" r="16"
+                      fill="none"
+                      className="stroke-amber-500"
+                      strokeWidth="3"
+                      strokeDasharray={`${storyProgress.percentage}, 100`}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-white">
+                    {storyProgress.percentage}%
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="h-48 bg-gradient-to-br from-amber-100 to-orange-200 dark:from-amber-900/20 dark:to-orange-900/20 rounded-t-lg flex items-center justify-center">
@@ -126,9 +165,16 @@ export function StoryCard({
             </Avatar>
             <p className="text-sm font-medium">{authorName}</p>
           </div>
-          <h3 className="text-lg font-semibold mt-2 line-clamp-2 group-hover:text-amber-800 dark:group-hover:text-amber-300 text-gray-800 dark:text-white transition-colors duration-200">
-            {story.title}
-          </h3>
+          <div className="flex items-start justify-between mt-2">
+            <h3 className="text-lg font-semibold line-clamp-2 group-hover:text-amber-800 dark:group-hover:text-amber-300 text-gray-800 dark:text-white transition-colors duration-200">
+              {story.title}
+            </h3>
+            {hasProgress && storyProgress.percentage < 100 && (
+              <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse border border-amber-200 shadow-sm flex-shrink-0 ml-2">
+                CONTINUE
+              </span>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="p-4 pt-0">
           <p className="text-gray-700 dark:text-muted-foreground text-sm line-clamp-2">
