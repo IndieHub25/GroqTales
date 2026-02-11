@@ -97,7 +97,7 @@ export function Footer() {
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3 border-4 border-foreground dark:border-slate-700 bg-card dark:bg-slate-900 hover:bg-primary hover:border-primary hover:text-white transition-all duration-300 shadow-[4px_4px_0px_0px_var(--shadow-color)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_var(--shadow-color)] group"
+                    className="p-3 border-4 border-foreground dark:border-slate-700 bg-card dark:bg-slate-900 hover:bg-primary hover:border-primary transition-all duration-300 shadow-[4px_4px_0px_0px_var(--shadow-color)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_var(--shadow-color)] group"
                     aria-label={link.label}
                   >
                     <span className="block group-hover:scale-110 transition-transform duration-300">

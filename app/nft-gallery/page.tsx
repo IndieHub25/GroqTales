@@ -21,6 +21,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 import { useWeb3 } from '@/components/providers/web3-provider';
 import { Badge } from '@/components/ui/badge';
@@ -282,10 +291,12 @@ function NFTCard({
   nft,
   onLike,
   onPurchase,
+  onClick,
 }: {
   nft: NFTStory;
   onLike: (id: string) => void;
   onPurchase: (id: string) => void;
+  onClick: (nft: NFTStory) => void;
 }) {
   const getRarityColor = (rarity?: string) => {
     switch (rarity) {
@@ -307,7 +318,14 @@ function NFTCard({
       transition={{ duration: 0.3 }}
       className="group"
     >
-      <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-[1.02]">
+      <Card 
+        className="overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-[1.02] cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          console.log('Card clicked!');
+          onClick(nft);
+        }}
+      >
         <div className="relative">
           <img
             src={nft.coverImage}
@@ -393,12 +411,187 @@ function NFTCard({
   );
 }
 
+function NFTDetailModal({
+  nft,
+  isOpen,
+  onClose,
+  onLike,
+  onPurchase,
+}: {
+  nft: NFTStory | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onLike: (id: string) => void;
+  onPurchase: (id: string) => void;
+}) {
+  console.log('Modal render - isOpen:', isOpen, 'nft:', nft?.title);
+  if (!nft) return null;
+
+  const getRarityColor = (rarity?: string) => {
+    switch (rarity) {
+      case 'Legendary':
+        return 'bg-yellow-500 text-yellow-900 hover:bg-yellow-600';
+      case 'Epic':
+        return 'bg-purple-500 text-white hover:bg-purple-600';
+      case 'Rare':
+        return 'bg-blue-500 text-white hover:bg-blue-600';
+      default:
+        return 'bg-gray-500 text-white hover:bg-gray-600';
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900 text-white border-gray-700">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold text-white">{nft.title}</DialogTitle>
+          <DialogDescription className="text-gray-300">
+            by {nft.author}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 py-4">
+          {/* NFT Image Section */}
+          <div className="space-y-4">
+            <div className="relative rounded-lg overflow-hidden border-2 border-gray-600">
+              <img
+                src={nft.coverImage}
+                alt={nft.title}
+                className="w-full h-auto object-cover max-h-[500px]"
+              />
+              {nft.isTop10 && (
+                <div className="absolute top-3 left-3 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full font-bold text-sm flex items-center">
+                  <Star className="w-4 h-4 mr-1" />
+                  Top 10
+                </div>
+              )}
+              {nft.rarity && (
+                <div className={`absolute top-3 right-3 px-3 py-1 rounded-full font-bold text-sm ${
+                  nft.rarity === 'Legendary' ? 'bg-yellow-500 text-yellow-900' :
+                  nft.rarity === 'Epic' ? 'bg-purple-500 text-white' :
+                  nft.rarity === 'Rare' ? 'bg-blue-500 text-white' :
+                  'bg-gray-500 text-white'
+                }`}>
+                  {nft.rarity}
+                </div>
+              )}
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => onLike(nft.id)}
+                variant="outline"
+                className="flex-1"
+              >
+                <Heart className="w-4 h-4 mr-2" />
+                Like ({nft.likes})
+              </Button>
+              <Button 
+                onClick={() => onPurchase(nft.id)}
+                className="flex-1"
+              >
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Buy Now - {nft.price}
+              </Button>
+            </div>
+          </div>
+          
+          {/* NFT Details Section */}
+          <div className="space-y-6">
+            {/* Description */}
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Description</h3>
+              <p className="text-gray-700 dark:text-gray-300">{nft.description}</p>
+            </div>
+            
+            {/* Stats */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Story Stats</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+                  <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+                    <Heart className="w-4 h-4 text-red-500" />
+                    <span className="font-medium">Likes</span>
+                  </div>
+                  <div className="text-xl font-bold mt-1">{nft.likes}</div>
+                </div>
+                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+                  <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+                    <Eye className="w-4 h-4 text-blue-500" />
+                    <span className="font-medium">Views</span>
+                  </div>
+                  <div className="text-xl font-bold mt-1">{nft.views}</div>
+                </div>
+                {nft.sales && (
+                  <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+                    <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+                      <ShoppingCart className="w-4 h-4 text-green-500" />
+                      <span className="font-medium">Sales</span>
+                    </div>
+                    <div className="text-xl font-bold mt-1">{nft.sales}</div>
+                  </div>
+                )}
+                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+                  <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+                    <Palette className="w-4 h-4 text-purple-500" />
+                    <span className="font-medium">Genre</span>
+                  </div>
+                  <div className="text-xl font-bold mt-1">{nft.genre}</div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Additional Information */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Additional Information</h3>
+              <div className="space-y-3 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400 font-medium">NFT ID:</span>
+                  <span className="font-mono bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">{nft.id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400 font-medium">Price:</span>
+                  <span className="font-bold text-green-600 dark:text-green-400 text-lg">{nft.price}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300 font-medium">Rarity:</span>
+                  <span className={`font-medium px-2 py-1 rounded ${
+                    (nft.rarity || 'Common') === 'Legendary' ? 'bg-yellow-500 text-yellow-900' :
+                    (nft.rarity || 'Common') === 'Epic' ? 'bg-purple-500 text-white' :
+                    (nft.rarity || 'Common') === 'Rare' ? 'bg-blue-500 text-white' :
+                    'bg-gray-500 text-white'
+                  }`}>
+                    {nft.rarity || 'Common'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300 font-medium">Status:</span>
+                  <span className={`font-medium px-2 py-1 rounded ${
+                    nft.isTop10 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-500 text-white'
+                  }`}>
+                    {nft.isTop10 ? 'Featured' : 'Available'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function NFTGalleryPage() {
   const [nfts, setNfts] = useState<NFTStory[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'price' | 'likes' | 'recent'>('likes');
   const [loading, setLoading] = useState(true);
+  const [selectedNFT, setSelectedNFT] = useState<NFTStory | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+
 
   const { toast } = useToast();
   const { account, connected, connectWallet } = useWeb3();
@@ -453,6 +646,13 @@ export default function NFTGalleryPage() {
         variant: 'destructive',
       });
     }
+  };
+
+  const handleNFTClick = (nft: NFTStory) => {
+    console.log('NFT clicked:', nft.title);
+    setSelectedNFT(nft);
+    setIsModalOpen(true);
+    console.log('Modal state:', isModalOpen);
   };
 
   const handlePurchase = async (id: string) => {
@@ -655,12 +855,27 @@ export default function NFTGalleryPage() {
           <p className="text-sm text-muted-foreground">
             Showing {sortedNFTs.length} of {nfts.length} stories
           </p>
-          {!connected && (
-            <Button onClick={connectWallet} variant="outline">
-              <Users className="w-4 h-4 mr-2" />
-              Connect Wallet
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => {
+                console.log('Test button clicked');
+                const firstNFT = nfts[0];
+                if (firstNFT) {
+                  setSelectedNFT(firstNFT);
+                  setIsModalOpen(true);
+                }
+              }} 
+              variant="outline"
+            >
+              Test Modal
             </Button>
-          )}
+            {!connected && (
+              <Button onClick={connectWallet} variant="outline">
+                <Users className="w-4 h-4 mr-2" />
+                Connect Wallet
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -672,6 +887,7 @@ export default function NFTGalleryPage() {
               nft={nft}
               onLike={handleLike}
               onPurchase={handlePurchase}
+              onClick={handleNFTClick}
             />
           ))}
         </AnimatePresence>
@@ -686,6 +902,15 @@ export default function NFTGalleryPage() {
           </p>
         </div>
       )}
+
+      {/* NFT Detail Modal */}
+      <NFTDetailModal
+        nft={selectedNFT}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onLike={handleLike}
+        onPurchase={handlePurchase}
+      />
     </div>
   );
 }

@@ -20,35 +20,31 @@ experience.
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in GroqTales, we appreciate your help in disclosing it to
-us in a responsible manner. Please follow these steps to report a vulnerability:
+1. **GitHub Private Reporting (Recommended):** Please report vulnerabilities via the **[Security Tab](https://github.com/IndieHub25/GroqTales/security/advisories)** on GitHub. This is the most secure way to reach us.
+2. **Contact Us Privately:** If you cannot use GitHub, email [mantejarora@gmail.com](mailto:mantejarora@gmail.com). For highly sensitive details, you may request our PGP public key via email before sending the full report.
 
-1. **Do Not Publicly Disclose**: Do not report security vulnerabilities through public GitHub
-   issues, social media, or other public forums.
-2. **Contact Us Privately**: Email us at [mantejarora@gmail.com](mailto:mantejarora@gmail.com) with
-   details of the vulnerability. Please include:
-   - A detailed description of the issue.
-   - Steps to reproduce the vulnerability.
-   - Any potential impact of the vulnerability.
-   - Suggestions for mitigation, if any.
-3. **Response Time**: We will acknowledge your report within 48 hours and strive to provide a
-   detailed response within 7 days, including our assessment and planned next steps.
-4. **Disclosure Policy**: After the vulnerability is addressed, we will coordinate with you to
-   publicly disclose the issue if necessary, giving credit for the discovery unless you prefer to
-   remain anonymous.
+## Scope & AI Guidelines
 
-## Scope
+We welcome reports regarding our backend, smart contracts, and AI implementation.
 
-Security reporting covers: backend API routes, smart contracts in `contracts/`, build & deployment
-scripts, server-side rendering logic, authentication/session handling, NFT minting flows, and
-storage of user-generated content. Frontend cosmetic issues, denial of service via intentionally
-excessive legitimate usage, or vulnerabilities in experimental / clearly marked “disabled” Web3 code
-paths are out of scope unless they lead to data exposure or privilege escalation.
+### AI Security Scope (OWASP Top 10 for LLMs)
+* **Prompt Injection:** Bypassing system prompts to access internal logic or user data.
+* **Insecure Output Handling:** AI-generated content that executes malicious scripts (XSS).
+* **Training Data Poisoning:** Malicious manipulation of training data or fine-tuning processes to introduce backdoors or biases.
+* **Non-Security Issues:** AI "Hallucinations" (making things up) or generic "jailbreaks" that do not lead to data exposure are considered **Out-of-Scope**.
+
+### Severity Classification (Updated)
+
+| Severity      | Example Impact                                        | Target Fix Window |
+| ------------- | ---------------------------------------------------- | ----------------- |
+| Critical      | RCE, **AI-driven data exfiltration**, key compromise | 24–72h           |
+| High          | Auth bypass, **Prompt Injection leaking system logs**| 3–5 days         |
+| Medium        | **XSS via AI output**, SSRF                          | < 14 days         |
 
 ## Vulnerability Handling Process
 
 1. Report received (private email)
-2. Triage & severity classification (see table below) – target within 48h
+2. Triage & severity classification (see "Severity Classification" under Scope & AI Guidelines) – target within 48h
 3. Reproduction + impact assessment
 4. Patch development on private branch
 5. Optional coordinated disclosure window (up to 30 days for High/Critical if complex)

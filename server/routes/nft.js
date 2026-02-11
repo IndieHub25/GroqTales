@@ -113,6 +113,7 @@ router.get('/', async (req, res) => {
   
 });
 
+// POST /api/v1/nft/mint
 router.post('/mint', authRequired, async (req, res) => {
   try {
     const { storyId, metadataURI, metadata, price = 0 } = req.body;
@@ -178,6 +179,7 @@ router.post('/mint', authRequired, async (req, res) => {
   
 });
 
+// DELETE /api/v1/nft/burn/:Id
 router.delete('/burn/:Id', authRequired, async (req, res) => {
   try {
     const tokenId = req.params.Id;
@@ -224,7 +226,7 @@ router.delete('/burn/:Id', authRequired, async (req, res) => {
 });
 
 // NFT Marketplace Endpoints
-
+// PATCH /api/v1/nft/list/:tokenId
 router.patch('/list/:tokenId', authRequired, async (req, res) => {
   try {
     const price = Number(req.body.price);
@@ -266,6 +268,7 @@ router.patch('/list/:tokenId', authRequired, async (req, res) => {
   }
 });
 
+// PATCH /api/v1/nft/remove/:tokenId
 router.patch('/remove/:tokenId', authRequired, async (req, res) => {
   try {
     const tokenId = req.params.tokenId;
@@ -295,6 +298,7 @@ router.patch('/remove/:tokenId', authRequired, async (req, res) => {
   }
 });
 
+// PATCH /api/v1/nft/buy/:tokenId
 router.patch('/buy/:tokenId', authRequired, async (req, res) => {
   try {
     const tokenId = req.params.tokenId;
@@ -325,6 +329,7 @@ router.patch('/buy/:tokenId', authRequired, async (req, res) => {
   }
 });
 
+// PATCH /api/v1/nft/update-price/:tokenId
 router.patch('/update-price/:tokenId', authRequired, async (req, res) => {
   try {
     const price = req.body.price;

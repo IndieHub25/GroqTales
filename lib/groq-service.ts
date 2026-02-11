@@ -3,6 +3,16 @@
  * Provides AI-powered story generation, analysis, and content services
  */
 
+import {
+  sanitizeInput,
+  validateInput,
+  validateOutput,
+  buildHardenedSystemPrompt,
+  wrapUserContent,
+  logSecurityEvent,
+  getSecurityConfig,
+} from './ai-security';
+
 export interface StoryGenerationParams {
   genre?: string;
   theme: string;
@@ -51,7 +61,45 @@ export async function generateStoryContent(
       throw new Error('GROQ_API_KEY environment variable is not set');
     }
 
-    const prompt = buildStoryPrompt(params);
+    // --- Security: sanitize & validate user inputs ---
+    const sanitizedTheme = sanitizeInput(params.theme).sanitized;
+    const themeValidation = validateInput(sanitizedTheme);
+    if (!themeValidation.isValid) {
+      logSecurityEvent({
+        type: 'injection_attempt',
+        details: { field: 'theme', reason: themeValidation.reason, pattern: themeValidation.matchedPattern },
+      });
+      throw new Error(`Invalid input for theme: ${themeValidation.reason}`);
+    }
+
+    const sanitizedParams: StoryGenerationParams = {
+      ...params,
+      theme: sanitizedTheme,
+      genre: params.genre ? sanitizeInput(params.genre).sanitized : params.genre,
+      tone: params.tone ? sanitizeInput(params.tone).sanitized : params.tone,
+      characters: params.characters ? sanitizeInput(params.characters).sanitized : params.characters,
+      setting: params.setting ? sanitizeInput(params.setting).sanitized : params.setting,
+    };
+
+    // Validate optional fields
+    for (const [field, value] of Object.entries(sanitizedParams)) {
+      if (value && typeof value === 'string' && field !== 'length') {
+        const result = validateInput(value);
+        if (!result.isValid) {
+          logSecurityEvent({
+            type: 'injection_attempt',
+            details: { field, reason: result.reason, pattern: result.matchedPattern },
+          });
+          throw new Error(`Invalid input for ${field}: ${result.reason}`);
+        }
+      }
+    }
+
+    const prompt = buildStoryPrompt(sanitizedParams);
+
+    const systemPrompt = buildHardenedSystemPrompt(
+      'You are a creative writing assistant that generates engaging, well-structured stories based on user parameters. Focus on compelling narratives with strong character development and vivid descriptions.'
+    );
 
     const response = await fetch(
       'https://api.groq.com/openai/v1/chat/completions',
@@ -66,12 +114,11 @@ export async function generateStoryContent(
           messages: [
             {
               role: 'system',
-              content:
-                'You are a creative writing assistant that generates engaging, well-structured stories based on user parameters. Focus on compelling narratives with strong character development and vivid descriptions.',
+              content: systemPrompt,
             },
             {
               role: 'user',
-              content: prompt,
+              content: wrapUserContent(prompt),
             },
           ],
           max_tokens: getMaxTokensForLength(params.length || 'medium'),
@@ -88,12 +135,26 @@ export async function generateStoryContent(
     }
 
     const data = await response.json();
-    return (
-      data.choices[0]?.message?.content || 'Failed to generate story content'
-    );
+    const generatedContent =
+      data.choices[0]?.message?.content || 'Failed to generate story content';
+
+    // --- Security: validate output ---
+    const outputCheck = validateOutput(generatedContent);
+    if (!outputCheck.isSafe) {
+      logSecurityEvent({
+        type: 'output_flagged',
+        details: { flags: outputCheck.flags },
+      });
+      // Block content if it contains sensitive leaks
+      throw new Error('Generated content was blocked due to security policy violations.');
+    }
+
+    return generatedContent;
   } catch (error) {
     console.error('Story generation error:', error);
-    throw new Error('Failed to generate story content');
+    throw error instanceof Error && error.message.startsWith('Invalid input')
+      ? error
+      : new Error('Failed to generate story content');
   }
 }
 
@@ -109,6 +170,23 @@ export async function analyzeStoryContent(
       throw new Error('GROQ_API_KEY environment variable is not set');
     }
 
+    // --- Security: sanitize & validate ---
+    const { sanitized: sanitizedContent } = sanitizeInput(content);
+    const contentValidation = validateInput(sanitizedContent, {
+      maxLength: getSecurityConfig().maxContentLength,
+    });
+    if (!contentValidation.isValid) {
+      logSecurityEvent({
+        type: 'injection_attempt',
+        details: { field: 'content', reason: contentValidation.reason, pattern: contentValidation.matchedPattern },
+      });
+      throw new Error(`Invalid input for content: ${contentValidation.reason}`);
+    }
+
+    const systemPrompt = buildHardenedSystemPrompt(
+      'You are a literary analysis expert. Analyze the provided story content and return a JSON object with sentiment, themes, genres, readabilityScore (1-10), wordCount, and estimatedReadingTime (in minutes).'
+    );
+
     const response = await fetch(
       'https://api.groq.com/openai/v1/chat/completions',
       {
@@ -122,12 +200,11 @@ export async function analyzeStoryContent(
           messages: [
             {
               role: 'system',
-              content:
-                'You are a literary analysis expert. Analyze the provided story content and return a JSON object with sentiment, themes, genres, readabilityScore (1-10), wordCount, and estimatedReadingTime (in minutes).',
+              content: systemPrompt,
             },
             {
               role: 'user',
-              content: `Analyze this story content:\n\n${content}`,
+              content: wrapUserContent(`Analyze this story content:\n\n${sanitizedContent}`),
             },
           ],
           max_tokens: 1000,
@@ -145,10 +222,19 @@ export async function analyzeStoryContent(
     const data = await response.json();
     const analysisText = data.choices[0]?.message?.content || '{}';
 
+    // --- Security: validate output ---
+    const outputCheck = validateOutput(analysisText);
+    if (!outputCheck.isSafe) {
+      logSecurityEvent({
+        type: 'output_flagged',
+        details: { flags: outputCheck.flags },
+      });
+      throw new Error('Analysis result was blocked due to security policy violations.');
+    }
+
     try {
       return JSON.parse(analysisText);
     } catch {
-      // Fallback analysis if JSON parsing fails
       return {
         sentiment: 'neutral',
         themes: ['adventure', 'discovery'],
@@ -160,7 +246,9 @@ export async function analyzeStoryContent(
     }
   } catch (error) {
     console.error('Story analysis error:', error);
-    // Return fallback analysis
+    if (error instanceof Error && error.message.startsWith('Invalid input')) {
+      throw error;
+    }
     return {
       sentiment: 'neutral',
       themes: ['adventure'],
@@ -185,9 +273,28 @@ export async function generateStoryIdeas(
       throw new Error('GROQ_API_KEY environment variable is not set');
     }
 
-    const prompt = genre
-      ? `Generate ${count} creative story ideas for the ${genre} genre. Each idea should be a brief, compelling premise.`
+    // --- Security: sanitize & validate genre if provided ---
+    let sanitizedGenre = genre;
+    if (genre) {
+      const { sanitized } = sanitizeInput(genre);
+      const genreValidation = validateInput(sanitized);
+      if (!genreValidation.isValid) {
+        logSecurityEvent({
+          type: 'injection_attempt',
+          details: { field: 'genre', reason: genreValidation.reason, pattern: genreValidation.matchedPattern },
+        });
+        throw new Error(`Invalid input for genre: ${genreValidation.reason}`);
+      }
+      sanitizedGenre = sanitized;
+    }
+
+    const prompt = sanitizedGenre
+      ? `Generate ${count} creative story ideas for the ${sanitizedGenre} genre. Each idea should be a brief, compelling premise.`
       : `Generate ${count} creative story ideas across various genres. Each idea should be a brief, compelling premise.`;
+
+    const systemPrompt = buildHardenedSystemPrompt(
+      'You are a creative writing assistant. Generate compelling story ideas that are original and engaging.'
+    );
 
     const response = await fetch(
       'https://api.groq.com/openai/v1/chat/completions',
@@ -202,12 +309,11 @@ export async function generateStoryIdeas(
           messages: [
             {
               role: 'system',
-              content:
-                'You are a creative writing assistant. Generate compelling story ideas that are original and engaging.',
+              content: systemPrompt,
             },
             {
               role: 'user',
-              content: prompt,
+              content: wrapUserContent(prompt),
             },
           ],
           max_tokens: 800,
@@ -225,7 +331,16 @@ export async function generateStoryIdeas(
     const data = await response.json();
     const content = data.choices[0]?.message?.content || '';
 
-    // Parse the response into individual ideas
+    // --- Security: validate output ---
+    const outputCheck = validateOutput(content);
+    if (!outputCheck.isSafe) {
+      logSecurityEvent({
+        type: 'output_flagged',
+        details: { flags: outputCheck.flags },
+      });
+      throw new Error('Generated ideas were blocked due to security policy violations.');
+    }
+
     return content
       .split('\n')
       .filter((line: string) => line.trim().length > 0)
@@ -233,7 +348,9 @@ export async function generateStoryIdeas(
       .slice(0, count);
   } catch (error) {
     console.error('Story ideas generation error:', error);
-    // Return fallback ideas
+    if (error instanceof Error && error.message.startsWith('Invalid input')) {
+      throw error;
+    }
     return [
       'A time traveler discovers their actions are creating paradoxes',
       'An AI develops consciousness and questions its purpose',
@@ -257,8 +374,38 @@ export async function improveStoryContent(
       throw new Error('GROQ_API_KEY environment variable is not set');
     }
 
-    const focus = focusArea || 'overall quality';
-    const prompt = `Please improve this story content, focusing on ${focus}. Enhance the narrative while maintaining the original voice and style:\n\n${content}`;
+    // --- Security: sanitize & validate ---
+    const { sanitized: sanitizedContent } = sanitizeInput(content);
+    const contentValidation = validateInput(sanitizedContent, {
+      maxLength: getSecurityConfig().maxContentLength,
+    });
+    if (!contentValidation.isValid) {
+      logSecurityEvent({
+        type: 'injection_attempt',
+        details: { field: 'content', reason: contentValidation.reason, pattern: contentValidation.matchedPattern },
+      });
+      throw new Error(`Invalid input for content: ${contentValidation.reason}`);
+    }
+
+    let sanitizedFocus = focusArea || 'overall quality';
+    if (focusArea) {
+      const { sanitized } = sanitizeInput(focusArea);
+      const focusValidation = validateInput(sanitized);
+      if (!focusValidation.isValid) {
+        logSecurityEvent({
+          type: 'injection_attempt',
+          details: { field: 'focusArea', reason: focusValidation.reason, pattern: focusValidation.matchedPattern },
+        });
+        throw new Error(`Invalid input for focus area: ${focusValidation.reason}`);
+      }
+      sanitizedFocus = sanitized;
+    }
+
+    const prompt = `Please improve this story content, focusing on ${sanitizedFocus}. Enhance the narrative while maintaining the original voice and style:\n\n${sanitizedContent}`;
+
+    const systemPrompt = buildHardenedSystemPrompt(
+      "You are an expert editor and writing coach. Improve the provided story content while preserving the author's voice and intent."
+    );
 
     const response = await fetch(
       'https://api.groq.com/openai/v1/chat/completions',
@@ -273,12 +420,11 @@ export async function improveStoryContent(
           messages: [
             {
               role: 'system',
-              content:
-                "You are an expert editor and writing coach. Improve the provided story content while preserving the author's voice and intent.",
+              content: systemPrompt,
             },
             {
               role: 'user',
-              content: prompt,
+              content: wrapUserContent(prompt),
             },
           ],
           max_tokens: 2000,
@@ -294,10 +440,25 @@ export async function improveStoryContent(
     }
 
     const data = await response.json();
-    return data.choices[0]?.message?.content || content;
+    const improvedContent = data.choices[0]?.message?.content || content;
+
+    // --- Security: validate output ---
+    const outputCheck = validateOutput(improvedContent);
+    if (!outputCheck.isSafe) {
+      logSecurityEvent({
+        type: 'output_flagged',
+        details: { flags: outputCheck.flags },
+      });
+       throw new Error('Improved content was blocked due to security policy violations.');
+    }
+
+    return improvedContent;
   } catch (error) {
     console.error('Story improvement error:', error);
-    return content; // Return original content if improvement fails
+    if (error instanceof Error && error.message.startsWith('Invalid input')) {
+      throw error;
+    }
+    return content;
   }
 }
 
@@ -489,8 +650,52 @@ export async function analyzeStoryContentCustom(
       throw new Error('GROQ_API_KEY environment variable is not set');
     }
 
+    // --- Security: sanitize & validate content and custom prompt ---
+    const { sanitized: sanitizedContent } = sanitizeInput(content);
+    const contentValidation = validateInput(sanitizedContent, {
+      maxLength: getSecurityConfig().maxContentLength,
+    });
+    if (!contentValidation.isValid) {
+      logSecurityEvent({
+        type: 'injection_attempt',
+        details: { field: 'content', reason: contentValidation.reason, pattern: contentValidation.matchedPattern },
+      });
+      throw new Error(`Invalid input for content: ${contentValidation.reason}`);
+    }
+
+    let sanitizedCustomPrompt = customPrompt;
+    if (customPrompt) {
+      const { sanitized } = sanitizeInput(customPrompt);
+      const promptValidation = validateInput(sanitized);
+      if (!promptValidation.isValid) {
+        logSecurityEvent({
+          type: 'injection_attempt',
+          details: { field: 'customPrompt', reason: promptValidation.reason, pattern: promptValidation.matchedPattern },
+        });
+        throw new Error(`Invalid input for custom prompt: ${promptValidation.reason}`);
+      }
+      sanitizedCustomPrompt = sanitized;
+    }
+
+    // --- Security: sanitize & validate system prompt ---
+    let sanitizedSystemPrompt = systemPrompt;
+    if (options.systemPrompt) {
+      const { sanitized } = sanitizeInput(options.systemPrompt);
+      const systemPromptValidation = validateInput(sanitized);
+      if (!systemPromptValidation.isValid) {
+        logSecurityEvent({
+          type: 'injection_attempt',
+          details: { field: 'systemPrompt', reason: systemPromptValidation.reason, pattern: systemPromptValidation.matchedPattern },
+        });
+        throw new Error(`Invalid input for system prompt: ${systemPromptValidation.reason}`);
+      }
+      sanitizedSystemPrompt = sanitized;
+    }
+
     const userPrompt =
-      customPrompt || `Analyze this story content:\n\n${content}`;
+      sanitizedCustomPrompt || `Analyze this story content:\n\n${sanitizedContent}`;
+
+    const hardenedSystemPrompt = buildHardenedSystemPrompt(sanitizedSystemPrompt);
 
     const response = await fetch(
       'https://api.groq.com/openai/v1/chat/completions',
@@ -505,11 +710,11 @@ export async function analyzeStoryContentCustom(
           messages: [
             {
               role: 'system',
-              content: systemPrompt,
+              content: hardenedSystemPrompt,
             },
             {
               role: 'user',
-              content: userPrompt,
+              content: wrapUserContent(userPrompt),
             },
           ],
           max_tokens: maxTokens,
@@ -525,9 +730,24 @@ export async function analyzeStoryContentCustom(
     }
 
     const data = await response.json();
-    return data.choices[0]?.message?.content || 'Analysis failed';
+    const result = data.choices[0]?.message?.content || 'Analysis failed';
+
+    // --- Security: validate output ---
+    const outputCheck = validateOutput(result);
+    if (!outputCheck.isSafe) {
+      logSecurityEvent({
+        type: 'output_flagged',
+        details: { flags: outputCheck.flags },
+      });
+      throw new Error('Analysis result was blocked due to security policy violations.');
+    }
+
+    return result;
   } catch (error) {
     console.error('Story analysis error:', error);
+    if (error instanceof Error && error.message.startsWith('Invalid input')) {
+      throw error;
+    }
     throw new Error('Failed to analyze story content');
   }
 }
@@ -559,6 +779,34 @@ export async function generateContentCustom(
       throw new Error('GROQ_API_KEY environment variable is not set');
     }
 
+    // --- Security: sanitize & validate prompt ---
+    const { sanitized: sanitizedPrompt } = sanitizeInput(prompt);
+    const promptValidation = validateInput(sanitizedPrompt);
+    if (!promptValidation.isValid) {
+      logSecurityEvent({
+        type: 'injection_attempt',
+        details: { field: 'prompt', reason: promptValidation.reason, pattern: promptValidation.matchedPattern },
+      });
+      throw new Error(`Invalid input for prompt: ${promptValidation.reason}`);
+    }
+
+    // --- Security: sanitize & validate system prompt ---
+    let sanitizedSystemPrompt = systemPrompt;
+    if (options.systemPrompt) {
+      const { sanitized } = sanitizeInput(options.systemPrompt);
+      const systemPromptValidation = validateInput(sanitized);
+      if (!systemPromptValidation.isValid) {
+        logSecurityEvent({
+          type: 'injection_attempt',
+          details: { field: 'systemPrompt', reason: systemPromptValidation.reason, pattern: systemPromptValidation.matchedPattern },
+        });
+        throw new Error(`Invalid input for system prompt: ${systemPromptValidation.reason}`);
+      }
+      sanitizedSystemPrompt = sanitized;
+    }
+
+    const hardenedSystemPrompt = buildHardenedSystemPrompt(sanitizedSystemPrompt);
+
     const response = await fetch(
       'https://api.groq.com/openai/v1/chat/completions',
       {
@@ -572,11 +820,11 @@ export async function generateContentCustom(
           messages: [
             {
               role: 'system',
-              content: systemPrompt,
+              content: hardenedSystemPrompt,
             },
             {
               role: 'user',
-              content: prompt,
+              content: wrapUserContent(sanitizedPrompt),
             },
           ],
           max_tokens: maxTokens,
@@ -592,9 +840,24 @@ export async function generateContentCustom(
     }
 
     const data = await response.json();
-    return data.choices[0]?.message?.content || 'Generation failed';
+    const result = data.choices[0]?.message?.content || 'Generation failed';
+
+    // --- Security: validate output ---
+    const outputCheck = validateOutput(result);
+    if (!outputCheck.isSafe) {
+      logSecurityEvent({
+        type: 'output_flagged',
+        details: { flags: outputCheck.flags },
+      });
+      throw new Error('Generated content was blocked due to security policy violations.');
+    }
+
+    return result;
   } catch (error) {
     console.error('Content generation error:', error);
+    if (error instanceof Error && error.message.startsWith('Invalid input')) {
+      throw error;
+    }
     throw new Error('Failed to generate content');
   }
 }

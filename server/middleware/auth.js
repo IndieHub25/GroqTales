@@ -48,11 +48,11 @@ const refresh = async(req, res) => {
   }
 
   try {
-    // if (!process.env.JWT_REFRESH_SECRET) {
-    //   return res
-    //     .status(501)
-    //     .json({ success: false, error: 'Authentication not configured' });
-    // }
+    if (!process.env.JWT_REFRESH_SECRET) {
+      return res
+        .status(501)
+        .json({ success: false, error: 'Authentication not configured' });
+    }
     const decoded = verifyRefreshToken(token);
 
     const newAccessToken = signAccessToken({ id: decoded.id , role: decoded.role});

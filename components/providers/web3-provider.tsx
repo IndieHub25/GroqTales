@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-
+import { X, Download } from 'lucide-react';
 // Mock Web3 Provider for production deployment
 interface Web3ContextType {
   account: string | null;
@@ -90,6 +90,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [connecting, setConnecting] = useState(false);
   const [networkName, setNetworkName] = useState('Unknown');
   const [ensName, setEnsName] = useState<string | null>(null);
+  const [showInstallModal, setShowInstallModal] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).ethereum) {
@@ -141,7 +142,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         setConnecting(false);
       }
     } else {
-      alert('Please install MetaMask!');
+      setShowInstallModal(true);
     }
   };
 
@@ -229,7 +230,43 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <Web3Context.Provider value={contextValue}>{children}</Web3Context.Provider>
+    <Web3Context.Provider value={contextValue}>
+      {children}
+      
+      {showInstallModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-slate-900 border-2 border-black dark:border-white rounded-xl shadow-lg max-w-sm w-full p-6 relative">
+            <button 
+              onClick={() => setShowInstallModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-black dark:hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <Download className="w-6 h-6 text-orange-600" />
+              </div>
+              
+              <h3 className="text-xl font-bold dark:text-white">Install MetaMask</h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
+                You need a crypto wallet to log in.
+              </p>
+
+              <a 
+                href="https://metamask.io/download" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={() => setShowInstallModal(false)}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2"
+              >
+                Download Extension
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+      </Web3Context.Provider>
   );
 }
 
