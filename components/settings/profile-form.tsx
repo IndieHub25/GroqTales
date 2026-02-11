@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,8 +27,10 @@ type ProfileData = {
 };
 
 export function ProfileForm() {
-  const { data: session } = useSession();
+  
   const [isLoading, setIsLoading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
   
   const { register, handleSubmit, setValue, watch } = useForm<ProfileData>({
     defaultValues: {
@@ -47,22 +48,26 @@ export function ProfileForm() {
   useEffect(() => {
     async function loadProfile() {
       try {
-        const res = await fetch("/api/settings/profile");
-        if (res.ok) {
+        const res = await fetch("/api/v1/profile");
+        if (!res.ok) throw new Error();
+
           const data = await res.json();
-          setValue("username", data.username || "");
-          setValue("displayName", data.displayName || "");
-          setValue("bio", data.bio || "");
-          setValue("website", data.website || "");
-          setValue("location", data.location || "");
-          setValue("primaryGenre", data.primaryGenre || "other");
-        }
+          setValue("username", data.username);
+          setValue("displayName", data.displayName);
+          setValue("bio", data.bio ?? "");
+          setValue("website", data.website ?? "");
+          setValue("location", data.location ?? "");
+          setValue("primaryGenre", data.primaryGenre ?? "other");
+
+          setAvatarUrl(data.avatarUrl?? null);
+          setDisplayName(data.displayName?? null);
+        
       } catch (error) {
-        console.error("Failed to load profile", error);
+        toast.error("Failed to load profile");
       }
     }
-    if (session) loadProfile();
-  }, [session, setValue]);
+     loadProfile();
+  }, [setValue]);
 
   const onSubmit = async (data: ProfileData) => {
     setIsLoading(true);
@@ -97,8 +102,8 @@ export function ProfileForm() {
           <div className="flex flex-col md:flex-row gap-4 items-start">
             <div>
               <Avatar className="w-24 h-24">
-                <AvatarImage src={session?.user?.image || "/placeholder-avatar.jpg"} />
-                <AvatarFallback>{session?.user?.name?.slice(0, 2).toUpperCase() || "GT"}</AvatarFallback>
+                <AvatarImage src={avatarUrl || "/placeholder-avatar.jpg"} />
+                <AvatarFallback>{displayName?.slice(0, 2).toUpperCase() || "GT"}</AvatarFallback>
               </Avatar>
               <Button variant="outline" size="sm" type="button" className="mt-2 w-full" disabled title="Coming soon">
                 Change

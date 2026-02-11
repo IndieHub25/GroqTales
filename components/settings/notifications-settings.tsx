@@ -3,13 +3,14 @@ import {toast} from "sonner";
 import {useEffect, useState} from "react";
 import {Switch} from "@/components/ui/switch";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Skeleton } from "@/components/ui/skeleton";
 
 type NotificationSettings ={
     email: {
         comments: boolean;
         followers: boolean;
         likes: boolean;
-        nftPurchases: boolean;
+        nftSales: boolean;
     };
 };
 const DEFAULTS: NotificationSettings = {
@@ -17,22 +18,25 @@ const DEFAULTS: NotificationSettings = {
         comments: false,
         followers: false,
         likes: false,
-        nftPurchases: false,
+        nftSales: false,
     },
 };
 export default function NotificationsSettings() {
-    const [notifications, setNotifications] = useState<NotificationSettings>(DEFAULTS);
+    const [notifications, setNotifications] = useState<NotificationSettings| null>(null);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         const load = async() => {
             try {
                 const res = await fetch("/api/v1/settings/notifications");
                 if(!res.ok) {
-                    throw new Error("Failed to load notification settings");
+                    throw new Error();
                 }
                 const data = await res.json();
+                if(!data || typeof data !=="object"){
+                    throw new Error("Invalid response");
+                }
                 setNotifications(data);
-            } catch(err) {
+            } catch {
                 toast.error("Could not load notification settings");
             } finally {
                 setLoading(false);
@@ -44,7 +48,8 @@ export default function NotificationsSettings() {
         key: keyof NotificationSettings["email"],
         value: boolean  
     ) => {
-        const prev = notifications;
+        if (!notifications) return;
+        const prev= notifications;
 
         const next : NotificationSettings = {
             ...notifications,
@@ -60,16 +65,29 @@ export default function NotificationsSettings() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(next),
+                body: JSON.stringify({
+                    email:{
+                        [key]: value,
+                    },
+                }),
             });
             if(!res.ok) {
-                throw new Error("Update failed");
+                throw new Error();
             } 
-        } catch(err) {
+            const updated = await res.json();
+            if(!updated || !updated.email || typeof updated.email[key]!=="boolean")
+            {
+                throw new Error("Invalid response");
+            }
+            setNotifications(updated);
+        } catch{
             setNotifications(prev);
             toast.error("Failed to update notification settings");
         }
     };
+    if(loading || !notifications){
+        return <Skeleton />;
+    }
     return (
         <Card>
             <CardHeader>

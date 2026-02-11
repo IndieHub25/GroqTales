@@ -24,7 +24,7 @@ const DEFAULTS: PrivacySettingsData = {
     personalization: false,
 };
 export default function PrivacySettings(){
-    const [settings, setSettings] = useState<PrivacySettingsData>(DEFAULTS);
+    const [settings, setSettings] = useState<PrivacySettingsData | null>(null);
     const [loading, setLoading] = useState(true);
 
     //Fetch current settings on load
@@ -45,8 +45,12 @@ export default function PrivacySettings(){
     }, []);
     //Update handler
     const handleToggle = async(key: keyof PrivacySettingsData, value: boolean) => {
-        const previousSettings = { ...settings};
-        const newSettings = {...settings, [key]: value};
+        if(!settings) return;
+        const previousSettings: PrivacySettingsData = settings;
+        const newSettings:PrivacySettingsData = {
+            ...settings, 
+            [key]: value
+        };
         setSettings(newSettings);
         try{
             const res = await fetch("/api/v1/settings/privacy", {
@@ -62,7 +66,7 @@ export default function PrivacySettings(){
         }
         };
 
-        if (loading) return <div className="p-4 text-center">Loading settings...</div>;
+        if (loading || !settings) return <div className="p-4 text-center">Loading settings...</div>;
     return (
         <Card>
             <CardHeader>

@@ -6,29 +6,51 @@ import {Card, CardContent, CardHeader, CardTitle, CardDescription} from "@/compo
 
 
 export default function WalletSettings(){
-    const [wallet, setWallet] = useState<{address: string, network: string} | null>(null);
+    const [wallet, setWallet] = useState<any | null>(null);
+    const [loading, setLoading] = useState(true);
+    useEffect(()=>{
+        async function loadWallet() {
+            try{
+                const res = await fetch("/api/v1/settings/wallet");
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                setWallet(data);
+            } catch{
+                toast.error("Failed to load wallet");
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadWallet();
+    }, []);
     const connectWallet = async () => {
-        if(!window.ethereum) return toast.error("Please install MetaMask");
+        if(!window.ethereum){
+            toast.error("Please install MetaMask");
+            return;
+        }
         try{
-            const accounts = await window.ethereum.request({method: "eth_requestAccounts"});
+            const [address] = await window.ethereum.request({method: "eth_requestAccounts"});
             const chainId = await window.ethereum.request({method:"eth_chainId"});
 
-            const walletData ={
-                address: accounts[0],
-                network: chainId === "0x1"?" Ethereum": "Unknown",
-                provider: "MetaMask"
-            };
+            // const walletData ={
+            //     address: accounts[0],
+            //     network: chainId === "0x1"?" Ethereum": "Unknown",
+            //     provider: "MetaMask"
+            // };
             const res = await fetch("/api/v1/settings/wallet",{
                 method: "PUT",
                 headers: {"Content-Type":"application/json"},
-                body: JSON.stringify(walletData),
+                body: JSON.stringify({address, chainId}),
             });
-            if(res.ok) {
-                setWallet(walletData);
-                toast.success("Wallet connected and saved!");
-            }
+            if(!res.ok) throw new Error();
+
+            const updated = await res.json();
+            setWallet(updated);
+            
+            toast.success("Wallet connected");
+            
         } catch(err){
-            toast.error("Connection failed");
+            toast.error("Wallet Connection failed");
         }
     }
     return (
