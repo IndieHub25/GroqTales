@@ -373,17 +373,13 @@ router.patch('/buy/:tokenId', authRequired, async (req, res) => {
     const validSeller = sellerWallet && walletRegex.test(sellerWallet);
     const validBuyer = buyerWallet && walletRegex.test(buyerWallet);
 
-    if (sellerWallet && !validSeller) {
-      logger.warn('Invalid sellerWallet format, skipping royalty tracking', {
+    if ((sellerWallet && !validSeller) || (buyerWallet && !validBuyer)) {
+      logger.warn('Invalid wallet format, skipping royalty tracking', {
         requestId: req.id,
         component: 'nft-royalty',
         tokenId,
-      });
-    } else if (buyerWallet && !validBuyer) {
-      logger.warn('Invalid buyerWallet format, skipping royalty tracking', {
-        requestId: req.id,
-        component: 'nft-royalty',
-        tokenId,
+        invalidSeller: sellerWallet && !validSeller,
+        invalidBuyer: buyerWallet && !validBuyer,
       });
     } else if (validSeller && validBuyer) {
       try {
