@@ -104,11 +104,14 @@ export default function SettingsPage() {
       );
         
       
-      //if(!profileRes.ok || !notifRes.ok) throw new Error();
+      if(!res.ok ) throw new Error('Failed to fetch profile');
 
       const json: ApiResponse<User> = await res.json();
       //const notifJson = await notifRes.json();
-      if(!json.success || !json.data) return;
+      if(!json.success || !json.data) {
+        setLoading(false);
+        return;
+      }
       const userData = json.data;
       setUser(userData);
       setNotifications(userData.preferences.notifications);
@@ -116,8 +119,8 @@ export default function SettingsPage() {
 
       form.reset({
         username: userData.username,
-        displayName: userData.displayName,
-        email: userData.email,
+        displayName: userData.displayName ?? '',
+        email: userData.email ?? '',
         bio: userData.bio ?? '',
         //primaryGenre: profileJson.user.primaryGenre ?? '',
       });
@@ -851,7 +854,7 @@ const onSubmit = (data: ProfileFormValues) => {
                            profileVisible: value,
                           })
                         }
-                      defaultChecked />
+                      />
                     </div>
 
                     {/* <div className="flex items-center justify-between">

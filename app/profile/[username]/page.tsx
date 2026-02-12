@@ -32,23 +32,25 @@ export default function ProfilePage() {
     const signal = controller.signal;
 
     const fetchProfile = async () => {
-      const username = params?.username;
+      // const username = params?.username;
 
-      if(typeof username !== "string"){
-        return;
-      }
-      const wallet = username.toLowerCase();
+      // if(typeof username !== "string"){
+      //   return;
+      // }
+      // const wallet = username.toLowerCase();
+      if (!walletFromUrl) return;
 
         try {
           setLoading(true);
           setError(false);
 
-          console.log("Fetching profile for:",wallet);
-          console.log("API:",process.env.NEXT_PUBLIC_API_URL);
+          // console.log("Fetching profile for:",wallet);
+          // console.log("API:",process.env.NEXT_PUBLIC_API_URL);
 
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile/${walletFromUrl}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile/${walletFromUrl.toLowerCase()}`,
              { signal }); 
+
           if (!response.ok) throw new Error("Failed to load");
           const json = await response.json();
           if (!json.success){
@@ -72,7 +74,7 @@ export default function ProfilePage() {
     return () => {
       controller.abort();
     };
-  }, [params]);
+  }, [walletFromUrl]);
   // Show Loading Skeleton while fetching
   if (connecting || loading) {
     return <div className="container mx-auto p-20"><Skeleton className="h-40 w-full" /></div>;

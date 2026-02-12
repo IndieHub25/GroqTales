@@ -8,20 +8,18 @@ import {Label} from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 type PrivacySettingsData = {
-    profilePublic: boolean;
-    allowComments: boolean;
-    showActivity: boolean;
-    showReadingHistory: boolean;
-    dataCollection: boolean;
-    personalization: boolean;
+    profileVisible: boolean;
+    storiesVisible: boolean;
+    activityVisible: boolean;
+    showEmail: boolean;
+    showWallet: boolean;
 };
 const DEFAULTS: PrivacySettingsData = {
-    profilePublic: true,
-    allowComments: true,
-    showActivity: true,
-    showReadingHistory: true,
-    dataCollection: false,
-    personalization: false,
+    profileVisible: true,
+    storiesVisible: true,
+    activityVisible: true,
+    showEmail: false,
+    showWallet: false,
 };
 export default function PrivacySettings(){
     const [settings, setSettings] = useState<PrivacySettingsData | null>(null);
@@ -33,8 +31,11 @@ export default function PrivacySettings(){
             try{
                 const res = await fetch("/api/v1/settings/privacy");
                 if(!res.ok) throw new Error();
-                const data = await res.json();
-                setSettings(data);
+                const json = await res.json();
+                if(!json.success || !json.data){
+                    throw new Error();
+                }
+                setSettings(json.data);
             } catch(err){
                 toast.error("Failed to load privacy settings");
             } finally {
@@ -45,13 +46,18 @@ export default function PrivacySettings(){
     }, []);
     //Update handler
     const handleToggle = async(key: keyof PrivacySettingsData, value: boolean) => {
+        
         if(!settings) return;
-        const previousSettings: PrivacySettingsData = settings;
+
+        const previousSettings = settings;
+
         const newSettings:PrivacySettingsData = {
             ...settings, 
             [key]: value
         };
+
         setSettings(newSettings);
+
         try{
             const res = await fetch("/api/v1/settings/privacy", {
                 method: "PUT",
@@ -59,10 +65,10 @@ export default function PrivacySettings(){
                 body: JSON.stringify(newSettings),
             });
             if(!res.ok) throw new Error();
-            toast.success("Privacy preference updated");
+            //toast.success("Privacy preference updated");
         }catch(err){
             setSettings(previousSettings);
-            toast.error("Failed to save setting");
+            toast.error("Failed to update privacy setting");
         }
         };
 
@@ -86,8 +92,8 @@ export default function PrivacySettings(){
                     <p className="text-xs text-muted-foreground">Allow anyone to see your stories and collections.</p>
                 </div>
                 <Switch
-                    checked={settings.profilePublic}
-                    onCheckedChange={(v)=>handleToggle("profilePublic",v)}/>
+                    checked={settings.profileVisible}
+                    onCheckedChange={(v)=>handleToggle("profileVisible",v)}/>
                 </div>
                 <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -95,8 +101,8 @@ export default function PrivacySettings(){
                         <p className="text-xs text-muted-foreground">Display your likes and follows on your profile. </p>
                     </div>
                 <Switch
-                    checked={settings.showActivity}
-                    onCheckedChange={(v)=>handleToggle("showActivity",v)}/>
+                    checked={settings.activityVisible}
+                    onCheckedChange={(v)=>handleToggle("activityVisible",v)}/>
                 </div>
                 </div>
                 <Separator />
@@ -109,10 +115,10 @@ export default function PrivacySettings(){
                             <Label>Allow Comments</Label>
                             <p className="text-xs text-muted-foreground">Let others leave comments on your stories.</p>
                         </div>
-                        <Switch
+                        {/* <Switch
                         checked={settings.allowComments}
                         onCheckedChange={(v)=>handleToggle("allowComments",v)}
-                        />
+                        /> */}
                     </div>
                 </div>
                 <Separator/>
@@ -125,9 +131,9 @@ export default function PrivacySettings(){
                             <Label>Usage Data</Label>
                             <p className="text-xs text-muted-foreground">Help us improve by sharing anonymous usage data.</p>
                         </div>
-                        <Switch
+                        {/* <Switch
                         checked={settings.dataCollection}
-                        onCheckedChange={(v)=>handleToggle("dataCollection",v)}/>
+                        onCheckedChange={(v)=>handleToggle("dataCollection",v)}/> */}
                     </div>
                 </div>
             </CardContent>

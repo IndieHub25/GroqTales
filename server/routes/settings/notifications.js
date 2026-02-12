@@ -42,13 +42,14 @@ router.get("/", requireAuth, async(req, res) =>{
 router.put("/", requireAuth, async(req, res)=>{
     try {
         const {email, push, comments, likes, follows,} = req.body;
-
+        //const current = req.user.notificationSettings;
+        
         if(typeof comments === "boolean")
             req.user.notificationSettings.email.comments = comments;
         if(typeof likes === "boolean")
             req.user.notificationSettings.email.likes = likes;
         if(typeof follows === "boolean")
-            req.user.notificationSettings.email.follows = follows;
+            req.user.notificationSettings.email.followers = follows;
         if(typeof email === "boolean")
             req.user.notificationSettings.email.platform = email;
         if(typeof push === "boolean")
@@ -57,7 +58,14 @@ router.put("/", requireAuth, async(req, res)=>{
         await req.user.save();
         return res.json({
             success: true,
-            data: req.body,
+            data: {
+                email: req.user.notificationSettings.email.platform,
+                push: req.user.notificationSettings.inApp.messages,
+                comments: req.user.notificationSettings.email.comments,
+                likes: req.user.notificationSettings.email.likes,
+                follows: req.user.notificationSettings.email.followers,
+
+            },
     });
     } catch (err) {
         console.error("Notification settings update failed:", err);
