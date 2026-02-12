@@ -91,7 +91,7 @@ app.use(
   cors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
       'Content-Type',
       'Authorization',
@@ -177,6 +177,7 @@ app.use('/api/v1/comics', require('./routes/comics'));
 app.use('/api/v1/nft', require('./routes/nft'));
 app.use('/api/v1/users', require('./routes/users'));
 app.use('/api/v1/ai', require('./routes/ai'));
+app.use('/api/v1/drafts', require('./routes/drafts'));
 
 // SDK Routes (for future SDK implementations)
 app.use('/sdk/v1', require('./routes/sdk'));

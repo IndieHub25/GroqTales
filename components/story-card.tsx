@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
   Heart,
   MessageSquare,
@@ -10,9 +9,10 @@ import {
   ArrowUpRight,
   Eye,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 
 import StoryCommentsDialog from '@/components/story-comments-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -56,7 +56,7 @@ interface StoryCardProps {
   isAdmin?: boolean;
 }
 
-export function StoryCard({
+export const StoryCard = memo(function StoryCard({
   story,
   viewMode = 'grid',
   hideLink = false,
@@ -93,21 +93,22 @@ export function StoryCard({
       <div className="relative">
         {story.coverImage || story.image ? (
           <div className="relative h-48 overflow-hidden rounded-t-lg">
-            <img
-              src={story.coverImage || story.image}
+            <Image
+              src={story.coverImage || story.image || ''}
               alt={story.title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              loading="lazy"
             />
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black/40">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-white text-black px-3 py-1.5 rounded-lg text-sm font-medium flex items-center shadow-lg"
-                onClick={handleViewNFT}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black/40 z-10">
+              <button
+                className="bg-white text-black px-3 py-1.5 rounded-lg text-sm font-medium flex items-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
+                onClick={(e) => { e.stopPropagation(); handleViewNFT(); }}
                 aria-label={`View NFT: ${story.title}`}
               >
                 View NFT <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
-              </motion.button>
+              </button>
             </div>
           </div>
         ) : (
@@ -173,7 +174,7 @@ export function StoryCard({
                 size="icon"
                 className="h-6 w-6"
                 aria-label={`Create a story similar to ${story.title}`}
-                onClick={handleCreateSimilar}
+                onClick={(e) => { e.stopPropagation(); handleCreateSimilar(); }}
               >
                 <PenSquare className="h-3.5 w-3.5" />
               </Button>
@@ -186,15 +187,7 @@ export function StoryCard({
 
   return (
     <>
-      <motion.div
-        whileHover={{
-          y: -5,
-          scale: 1.02,
-          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-        }}
-        transition={{ duration: 0.2 }}
-        className="nft-pulse"
-      >
+      <div className="nft-pulse transition-all duration-200 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-lg">
         <Card
           className={cn(
             'overflow-hidden transition-all duration-200 hover:shadow-md group focus-within:ring-2 focus-within:ring-primary',
@@ -221,7 +214,7 @@ export function StoryCard({
             </div>
           )}
         </Card>
-      </motion.div>
+      </div>
 
       {/* Comments Dialog */}
       <StoryCommentsDialog
@@ -234,6 +227,6 @@ export function StoryCard({
       />
     </>
   );
-}
+});
 // Default export for backward compatibility
 export default StoryCard;

@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
@@ -36,10 +37,13 @@ export function CreatorCard({ creator }: CreatorCardProps) {
         <CardTitle>{creator.name}</CardTitle>
       </CardHeader>
       <CardContent>
-        <img
+        <Image
           src={creator.avatarUrl}
           alt={creator.name}
-          className="w-24 h-24 rounded-full mb-2"
+          width={96}
+          height={96}
+          className="rounded-full mb-2"
+          loading="lazy"
         />
         <p className="text-sm text-muted-foreground">{creator.bio}</p>
       </CardContent>

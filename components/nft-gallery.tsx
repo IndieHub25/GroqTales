@@ -1,6 +1,7 @@
 'use client';
 
 import { Loader2 } from 'lucide-react';
+import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -66,11 +67,16 @@ export function NFTGallery() {
                 <CardTitle>{story.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <img
-                  src={story.imageUrl}
-                  alt={story.title}
-                  className="w-full h-48 object-cover rounded-md mb-4"
-                />
+                <div className="relative w-full h-48 mb-4">
+                  <Image
+                    src={story.imageUrl}
+                    alt={story.title}
+                    fill
+                    className="object-cover rounded-md"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    loading="lazy"
+                  />
+                </div>
                 <p className="line-clamp-3">{story.content}</p>
               </CardContent>
               <CardFooter className="flex justify-between items-center">

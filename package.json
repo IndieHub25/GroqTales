@@ -91,6 +91,7 @@
     "@simplewebauthn/types": "^12.0.0",
     "@tanstack/react-query": "^5.74.3",
     "@uploadthing/react": "^7.1.0",
+    "@upstash/redis": "^1.36.2",
     "@web3modal/wagmi": "^4.0.0-alpha.0",
     "alchemy-sdk": "^3.5.7",
     "axios": "^1.9.0",

@@ -18,6 +18,7 @@ import {
   Heart,
   Zap,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState } from 'react';
 
@@ -67,10 +68,12 @@ export function Footer() {
                 <div className="relative">
                   <div className="absolute -inset-2 bg-primary/20 dark:bg-primary/10 blur opacity-75 group-hover:opacity-100 transition" />
                   <div className="relative bg-card dark:bg-slate-900 border-4 border-foreground dark:border-slate-700 p-3 shadow-[6px_6px_0px_0px_var(--shadow-color)] group-hover:-translate-y-1 group-hover:shadow-[8px_8px_0px_0px_var(--shadow-color)] transition-all duration-300">
-                    <img
+                    <Image
                       src="/logo.png"
                       alt="GroqTales Logo"
-                      className="w-20 h-20 object-contain"
+                      width={80}
+                      height={80}
+                      className="object-contain"
                     />
                   </div>
                 </div>

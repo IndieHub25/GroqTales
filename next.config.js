@@ -38,6 +38,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'gateway.pinata.cloud',
       },
+      {
+        protocol: 'https',
+        hostname: 'api.dicebear.com',
+      },
     ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
@@ -133,7 +137,12 @@ const nextConfig = {
 
   // Experimental features
   experimental: {
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    optimizePackageImports: [
+      'lucide-react',
+      'framer-motion',
+      'date-fns',
+      'recharts',
+    ],
     turbo: {
       rules: {
         '*.svg': {
