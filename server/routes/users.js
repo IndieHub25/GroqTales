@@ -27,11 +27,11 @@ router.get('/profile', authRequired, async (req, res) => {
 // GET /api/v1/users/profile/:walletAddress - Get user profile by wallet address
 router.get('/profile/:walletAddress', async (req, res) => {
   try {
-    const { walletAddress } = req.params;
+    //const { walletAddress } = req.params;
 
-    const addr = walletAddress.toLowerCase();
-    const user = await User.findOneAndUpdate(
-      { walletAddress: addr },
+    const addr = req.params.walletAddress.toLowerCase();
+    const user = await User.findOne(
+      { "wallet.address": addr },
       { 
         $setOnInsert: { 
           walletAddress: addr, 

@@ -78,8 +78,23 @@ export default function SettingsPage() {
   // );
   
   const[user, setUser] = useState<User|null>(null);
-  const[notifications, setNotifications] = useState<NotificationSettings| null>(null);
-  const[privacy, setPrivacy] =  useState<PrivacySettings | null>(null);
+  const[notifications, setNotifications] = useState<NotificationSettings>({
+    comments: true, 
+    likes : true,
+    follows: true,
+    email: true,
+    push: false,
+    sms: false,
+    marketing: false,
+    updates: true,
+  });
+  const[privacy, setPrivacy] =  useState<PrivacySettings>({
+    profileVisible: true,
+    activityVisible: true,
+    storiesVisible: true,
+    showEmail: false,
+    showWallet: false,
+  });
   const[loading, setLoading] = useState(true);
 
   const form = useForm<ProfileFormValues>({
@@ -114,8 +129,16 @@ export default function SettingsPage() {
       }
       const userData = json.data;
       setUser(userData);
-      setNotifications(userData.preferences.notifications);
-      setPrivacy(userData.preferences.privacy);
+      setNotifications(userData.preferences?.notifications ??{
+        comments: true,
+        likes: true,
+        follows: true,
+      }
+    );
+      setPrivacy(userData.preferences?.privacy ?? {
+        profileVisibile: true,
+        activityVisibile: true,
+      });
 
       form.reset({
         username: userData.username,
@@ -139,7 +162,7 @@ const onSubmit = (data: ProfileFormValues) => {
     console.log(data);
     // Show success message or redirect
   };
-  if(loading || !user || !notifications || !privacy)
+  if(loading || !user)
     return <div className="p-8">Loading...</div>
   return (
     <div className="container max-w-5xl mx-auto py-12 px-4 min-h-screen">

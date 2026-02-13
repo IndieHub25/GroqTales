@@ -11,21 +11,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useParams } from "next/navigation";
 
 
-<<<<<<< HEAD
-//import { StoryCard } from "@/components/profile/story-card";
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-
-
-
-=======
 export default function ProfilePage() {
-  const { account, connected, connecting } = useWeb3();
+  const { account, connected} = useWeb3();
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const params = useParams();
->>>>>>> upstream/main
+
 
   const walletFromUrl = typeof params?.username === "string" ? params.username : "";
   const isOwner = connected &&
@@ -37,107 +30,53 @@ export default function ProfilePage() {
     const signal = controller.signal;
 
     const fetchProfile = async () => {
-<<<<<<< HEAD
-      // const username = params?.username;
 
-      // if(typeof username !== "string"){
-      //   return;
-      // }
-      // const wallet = username.toLowerCase();
-      if (!walletFromUrl) return;
-
+      if (!walletFromUrl)  return;
         try {
           setLoading(true);
           setError(false);
 
-          // console.log("Fetching profile for:",wallet);
-          // console.log("API:",process.env.NEXT_PUBLIC_API_URL);
-
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile/${walletFromUrl.toLowerCase()}`,
-             { signal }); 
-
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile/${walletFromUrl}`, { signal }); 
           if (!response.ok) throw new Error("Failed to load");
           const json = await response.json();
-          if (!json.success){
-            throw new Error(json.error?.message||"Failed");
+          if(!json.success){
+            throw new Error(json.error?.message || "Failed");
           }
           setProfileData(json.data);
           //setError(false);
         } catch (err: any) {
           if (err.name === 'AbortError') return;
-          console.error("Profile fetch failed:",err);
-=======
-      if (walletFromUrl) {
-        try {
-          setLoading(true);
-          const response = await fetch(`/api/v1/users/profile/${walletFromUrl}`, { signal }); 
-          if (!response.ok) throw new Error("Failed to load");
-          const data = await response.json();
-          setProfileData(data);
-          setError(false);
-        } catch (err: any) {
-          if (err.name === 'AbortError') return;
-          console.error(err);
->>>>>>> upstream/main
+          console.error("Profile fetch failed:", err);
+
           setError(true);
         } finally {
           if (!signal.aborted) {
             setLoading(false);
           }
         }
-<<<<<<< HEAD
-      
-=======
-      }
->>>>>>> upstream/main
-    };
 
+      };
     fetchProfile();
     return () => {
       controller.abort();
     };
   }, [walletFromUrl]);
   // Show Loading Skeleton while fetching
-  if (connecting || loading) {
+  if (loading) {
     return <div className="container mx-auto p-20"><Skeleton className="h-40 w-full" /></div>;
   }
   if (error) {
     return <div className="p-20 text-white">Failed to load profile.</div>;
   }
-<<<<<<< HEAD
+
   if (!profileData) {
     return <div className="p-20 text-white">User not found.</div>;
   }
 
-=======
-  if (!profileData || !profileData.user) {
-    return <div className="p-20 text-white">User not found.</div>;
-  }
->>>>>>> upstream/main
 
   return (
     <main className="min-h-screen bg-black text-slate-200 pb-20">
-<<<<<<< HEAD
 
-      <ProfileHeader user={profileData} isOwner={isOwner} />
-
-
-      <div className="container mx-auto px-4">
-
-
-        <ProfileStats stats={profileData?.stats} />
-
-        {/* <div className="mt-8">
-          <Tabs defaultValue="stories" className="w-full"> */}
-
-        {/* <ProfileStats /> */}
-        
-         <div className="mt-8">  
-           <Tabs defaultValue="stories" className="w-full">
-
-
-=======
       <ProfileHeader user={profileData?.user} isOwner={isOwner} />
 
       <div className="container mx-auto px-4">
@@ -145,7 +84,7 @@ export default function ProfilePage() {
 
         <div className="mt-8">
           <Tabs defaultValue="stories" className="w-full">
->>>>>>> upstream/main
+
             <div className="flex justify-center md:justify-start mb-6">
               <TabsList className="bg-slate-900 border border-slate-800">
                 <TabsTrigger value="stories">Stories</TabsTrigger>

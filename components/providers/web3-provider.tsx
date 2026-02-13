@@ -1,7 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { X, Download } from 'lucide-react';
+// declare global{
+//   interface Window{
+//     ethereum?: any;
+//   }
+// }
 // Mock Web3 Provider for production deployment
 interface Web3ContextType {
   account: string | null;
@@ -88,35 +93,67 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [balance, setBalance] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
 
-  const [connecting, setConnecting] = useState(false);
-  const [networkName, setNetworkName] = useState('Unknown');
-  const [ensName, setEnsName] = useState<string | null>(null);
+  // const [connecting, setConnecting] = useState(false);
+  // const [networkName, setNetworkName] = useState('Unknown');
+  // const [ensName, setEnsName] = useState<string | null>(null);
   const [showInstallModal, setShowInstallModal] = useState(false);
 
+  //helper to get ethereum safely with type casting
+  const getEthereum = useCallback(() =>{
+    if(typeof window!== 'undefined' && window.ethereum){
+      return window.ethereum;
+    }
+    return null;
+  }, []);
 
-  // useEffect(() => {
-  //   if (typeof window !== 'undefined' && (window as any).ethereum) {
-  //     const handleAccounts = (accounts: string[]) => {
-  //       if (accounts.length > 0) {
-  //         setAccount(accounts[0]!);
-  //         setConnected(true);
-  //       } else {
-  //         setAccount(null);
-  //         setConnected(false);
-  //       }
-  //     };
-  //     const handleChain = (chainIdHex: string) => {
-  //       setChainId(parseInt(chainIdHex, 16));
-  //     };
-  //     (window as any).ethereum.on('accountsChanged', handleAccounts);
-  //     (window as any).ethereum.on('chainChanged', handleChain);
-  //     return () => {
-  //       (window as any).ethereum.removeListener('accountsChanged', handleAccounts);
-  //       (window as any).ethereum.removeListener('chainChanged', handleChain);
-  //     };
-  //   }
-  //   return;
-  // }, []);
+  const disconnectWallet = useCallback(()=>{
+    setAccount(null);
+    setChainId(null);
+    setBalance(null);
+    setConnected(false);
+  },[]);
+
+  useEffect(() => {
+    //if (typeof window === 'undefined' && !window.ethereum) return;
+      
+      const ethereum = getEthereum();
+      if(!ethereum) return;
+
+      const handleAccountsChanged = async(accounts: string[]) => {
+        if (!accounts || accounts.length === 0) {
+          // setAccount(accounts[0]!);
+          // setConnected(true);
+          disconnectWallet();
+          return;
+        } 
+        const selectedAccount = accounts[0];
+        if(!selectedAccount) return;
+
+        setAccount(selectedAccount);
+        setConnected(true);
+      try{
+      const balanceWei = await ethereum.request({
+        method: "eth_getBalance",
+        params: [selectedAccount, "latest"],
+      });
+      //const balanceBigInt = BigInt(balanceWei);
+      const balanceEth = Number(BigInt(balanceWei))/1e18;
+      setBalance(balanceEth.toFixed(4));
+    } catch(err){
+      console.error("Failed to refresh balance:", err);
+    }
+  };
+    const handleChainChanged = (chainIdHex: string) => {
+      setChainId(parseInt(chainIdHex, 16));
+      //setChainId(chainIdNum);
+    };
+      ethereum.on('accountsChanged', handleAccountsChanged);
+      ethereum.on('chainChanged', handleChainChanged);
+      return () => {
+        ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        ethereum.removeListener('chainChanged', handleChainChanged);
+      };
+  }, [getEthereum, disconnectWallet]);
 
   // useEffect(() => {
   //   if (chainId === 10143) setNetworkName('Monad Testnet');
@@ -126,52 +163,55 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   // }, [chainId]);
 
   const connectWallet = async () => {
-    if (!window.ethereum) {
-      alert("Please install MetaMask");
+    //if (typeof window === "undefined" || !window.ethereum) 
+    const ethereum = getEthereum();
+    if(!ethereum){
+      setShowInstallModal(true);
       return;
       //setConnecting(true);
     }
       try {
-        const accounts = await window.ethereum.request({
+        //const ethereum = window.ethereum;
+
+        const accounts:string[]= await ethereum.request({
           method: 'eth_requestAccounts',
         });
-        const chainIdHex = await window.ethereum.request({
+        if(!accounts || accounts.length === 0) return;
+        const selectedAccount = accounts[0]!;
+        const chainIdHex = await ethereum.request({
           method: 'eth_chainId',
         });
-        const balanceWei = await window.ethereum.request({
+        const balanceWei = await ethereum.request({
           method: 'eth_getBalance',
-          params: [accounts[0], "latest"],
+          params: [selectedAccount, "latest"],
         });
-        const chainIdNum = parseInt(chainIdHex, 16);
-        const balanceEth = parseInt(balanceWei, 16)/ 1e18;
-        setAccount(accounts[0]);
-        setChainId(chainIdNum);
+        //const chainIdNum = parseInt(chainIdHex, 16);
+        //const balanceBigInt = BigInt(balanceWei);
+        const balanceEth = Number(BigInt(balanceWei))/ 1e18;
+        setAccount(selectedAccount);
+        //setChainId(chainIdNum);
         setBalance(balanceEth.toFixed(4));
         setConnected(true);
         await fetch("/api/v1/settings/wallet",{
           method: "PUT",
           headers: {"Content-Type":"application/json"},
           credentials: "include",
-          body: JSON.stringify({address: accounts[0]}),
+          body: JSON.stringify({address: selectedAccount}),
         });
       } catch (error) {
         console.error('Wallet connection failed:', error);
       }
-
-    } else {
-      setShowInstallModal(true);
-    }
   };
 
 
-  const disconnectWallet = () => {
-    setAccount(null);
-    setChainId(null);
-    setBalance(null);
-    setConnected(false);
-    // setNetworkName('Unknown');
-    // setEnsName(null);
-  };
+  // const disconnectWallet = () => {
+  //   setAccount(null);
+  //   setChainId(null);
+  //   setBalance(null);
+  //   setConnected(false);
+  //   // setNetworkName('Unknown');
+  //   // setEnsName(null);
+  // };
 
   // const switchNetwork = async (targetChainId: number) => {
   //   if (typeof window !== 'undefined' && (window as any).ethereum) {

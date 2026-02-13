@@ -34,12 +34,12 @@ router.put("/", requireAuth, async(req,res)=>{
     try {
         const {address} = req.body;
 
-        if (!address) {
+        if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
             return res
             .status(400)
             .json({
                 // success: false,
-                error:  "wallet address is required",
+                error:  "A valid wallet address is required",
 
                 });
         }
@@ -54,6 +54,7 @@ router.put("/", requireAuth, async(req,res)=>{
                 });
         }
     user.wallet = {
+        ...user.wallet?.toObject?.()??{},
         address,
         connected: true,
         // network,

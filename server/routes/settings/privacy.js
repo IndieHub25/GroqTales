@@ -3,7 +3,7 @@ const {authRequired: requireAuth} = require("../../middleware/auth");
 
 router.get("/", requireAuth, async (req, res) => {
     try{
-        const p = req.user.privacySettings;
+        const p = req.user.privacySettings || {};
 
         res.json({
             success: true,
@@ -53,7 +53,14 @@ router.put("/", requireAuth, async(req,res)=>{
         
     res.json({
         success: true,
-        data: req.body,
+        data: {
+            profileVisible: req.user.privacySettings.profilePublic?? true,
+            allowComments: req.user.privacySettings.allowComments?? true,
+            showActivity: req.user.privacySettings.showActivity?? true,
+            showReadingHistory: req.user.privacySettings.showReadingHistory?? true,
+            dataCollection: req.user.privacySettings.dataCollection?? true,
+            personalization: req.user.privacySettings.personalization?? true,
+        },
     });
     } catch (err) {
         console.error("Privacy settings update failed:", err);
