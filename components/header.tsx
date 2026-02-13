@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Trophy,
   Menu,
+  DollarSign,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -121,6 +122,16 @@ export function Header() {
     },
     { type: 'link', href: '/nft-gallery', label: 'NFT Gallery' },
     { type: 'link', href: '/nft-marketplace', label: 'NFT Marketplace' },
+    ...(account
+      ? [
+          {
+            type: 'link' as const,
+            href: '/dashboard/royalties',
+            label: 'Earnings',
+            icon: <DollarSign className="h-4 w-4 mr-1.5 colorful-icon" />,
+          },
+        ]
+      : []),
   ];
 
   return (
