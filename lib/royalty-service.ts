@@ -131,6 +131,7 @@ export async function recordRoyaltyTransaction(
 // ── Get Creator Earnings ───────────────────────────────────────────
 
 const DEFAULT_EARNINGS = {
+  creatorWallet: '',
   totalEarned: 0,
   pendingPayout: 0,
   paidOut: 0,

@@ -282,8 +282,11 @@ describe('Security logging', () => {
     });
     const log = getSecurityLog();
     expect(log).toHaveLength(1);
-    expect(log[0].type).toBe('injection_attempt');
-    expect(log[0].timestamp).toBeDefined();
+    const [first] = log;
+    expect(first).toBeDefined();
+    if (!first) return;
+    expect(first.type).toBe('injection_attempt');
+    expect(first.timestamp).toBeDefined();
   });
 
   it('should clear the log', () => {

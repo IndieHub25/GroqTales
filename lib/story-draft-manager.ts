@@ -182,6 +182,16 @@ export function getLatestDraftRecord(
   return latest ? cloneRecord(latest) : null;
 }
 
+export function listDraftRecords(
+  filter?: (record: StoryDraftRecord) => boolean
+): StoryDraftRecord[] {
+  const store = readStore();
+  return Object.values(store.drafts)
+    .filter((record) => (filter ? filter(record) : true))
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .map((record) => cloneRecord(record));
+}
+
 export function upsertDraftRecord(record: StoryDraftRecord): StoryDraftRecord {
   const store = readStore();
   const cloned = cloneRecord(record);

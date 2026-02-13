@@ -110,7 +110,7 @@ export function RoyaltyConfigForm({
                 max={50}
                 step={1}
                 value={[percentage]}
-                onValueChange={([val]) => setPercentage(val)}
+                onValueChange={(values) => setPercentage(values[0] ?? 0)}
                 className="flex-1"
               />
               <div className="w-24">

@@ -14,12 +14,16 @@ const CONTRACT_ABI = [
   "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
 ];
 
+function getProvider() {
+  if (!RPC_URL) throw new Error("Blockchain Config Error: Missing 'MONAD_RPC_URL'");
+  return new ethers.JsonRpcProvider(RPC_URL);
+}
+
 /**
  * Initializes the wallet and contract instance with strict validation.
  * Fails fast if configuration is invalid.
  */
 function getContract() {
-  if (!RPC_URL) throw new Error("Blockchain Config Error: Missing 'MONAD_RPC_URL'");
   if (!PRIVATE_KEY) throw new Error("Blockchain Config Error: Missing 'MINT_AUTHORITY_PRIVATE_KEY'");
   if (!CONTRACT_ADDRESS) throw new Error("Blockchain Config Error: Missing 'NEXT_PUBLIC_CONTRACT_ADDR'");
 
@@ -28,7 +32,7 @@ function getContract() {
   }
 
   try {
-    const provider = new ethers.JsonRpcProvider(RPC_URL);
+    const provider = getProvider();
     
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
     
@@ -70,7 +74,7 @@ export async function mintNFT(toAddress: string, tokenURI: string): Promise<stri
  */
 export async function checkTxStatus(txHash: string) {
   try {
-    const { provider } = getContract();
+    const provider = getProvider();
     
     const receipt = await provider.getTransactionReceipt(txHash);
 
