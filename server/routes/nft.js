@@ -190,20 +190,20 @@ router.get('/', async (req, res) => {
  *          application/json:
  *            schema:
  *             type: object
- *             properties: 
+ *             required:
+ *                - storyId
+ *                - metadataURI
+ *                - metadata
+ *             properties:
  *                storyId:
  *                  type: string
- *                  required: true
  *                metadataURI:
  *                  type: string
- *                  required: true
  *                metadata:
  *                  type: string
- *                  required: true
  *                price:
  *                  type: integer
  *                  default: 0
- *                  required: false
  *     responses:
  *       200:
  *         description: NFTs minted successfully.
@@ -279,11 +279,9 @@ router.post('/mint', authRequired, async (req, res) => {
   }
 });
 
-
-
 /**
  * @swagger
- * /api/v1/nft/burn/{id} :
+ * /api/v1/nft/burn/{id}:
  *   delete:
  *     tags:
  *       - NFT
@@ -348,8 +346,6 @@ router.delete('/burn/:Id', authRequired, async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-
 
 // NFT Marketplace Endpoints
 /**
@@ -430,8 +426,14 @@ router.patch('/list/:tokenId', authRequired, async (req, res) => {
       nft,
     });
   } catch (error) {
-    console.error('Error listing NFT:', error);
-    return res.status(500).json({ error: error.message });
+    // console.log('Error listing NFT:', error);
+    logger.error('Error listing NFT', {
+      requestId: req.id,
+      component: 'nft',
+      tokenId: req.params.tokenId,
+      userId: req.user?.id,
+    });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -456,7 +458,7 @@ router.patch('/list/:tokenId', authRequired, async (req, res) => {
  *       200:
  *         description: NFT removed successfully
  *       400:
- *         description: Invalid input 
+ *         description: Invalid input
  *       403:
  *         description: User is not the owner
  *       404:
@@ -489,8 +491,14 @@ router.patch('/remove/:tokenId', authRequired, async (req, res) => {
       nft,
     });
   } catch (error) {
-    console.error('Error removing NFT from listing:', error);
-    return res.status(500).json({ error: error.message });
+    // console.log('Error removing NFT from listing:', error);
+    logger.error('Error removing NFT', {
+      requestId: req.id,
+      component: 'nft',
+      tokenId: req.params.tokenId,
+      userId: req.user?.id,
+    });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -510,12 +518,12 @@ router.patch('/remove/:tokenId', authRequired, async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
- *         description: The token ID of the NFT to remove
+ *         description: The token ID of the NFT to buy
  *     responses:
  *       200:
  *         description: NFT bought successfully
  *       400:
- *         description: Invalid input 
+ *         description: Invalid input
  *       403:
  *         description: User is not the owner
  *       404:
@@ -549,8 +557,14 @@ router.patch('/buy/:tokenId', authRequired, async (req, res) => {
       nft,
     });
   } catch (error) {
-    console.error('Error buying NFT from listing:', error);
-    return res.status(500).json({ error: error.message });
+    // console.log('Error buying NFT from listing:', error);
+    logger.error('Error buying NFT', {
+      requestId: req.id,
+      component: 'nft',
+      tokenId: req.params.tokenId,
+      userId: req.user?.id,
+    });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -570,7 +584,7 @@ router.patch('/buy/:tokenId', authRequired, async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
- *         description: The token ID of the NFT to list
+ *         description: The token ID of the NFT to update price
  *     requestBody:
  *       required: true
  *       content:
@@ -598,8 +612,8 @@ router.patch('/buy/:tokenId', authRequired, async (req, res) => {
 // PATCH /api/v1/nft/update-price/:tokenId
 router.patch('/update-price/:tokenId', authRequired, async (req, res) => {
   try {
-    const price = req.body.price;
-    if (price === undefined || isNaN(price) || price < 0) {
+    const price = Number(req.body.price);
+    if (!Number.isFinite(price) || price < 0) {
       return res
         .status(400)
         .json({ error: 'Invalid price or price is missing' });
@@ -630,8 +644,14 @@ router.patch('/update-price/:tokenId', authRequired, async (req, res) => {
       nft,
     });
   } catch (error) {
-    console.error('Error updating NFT price from listing:', error);
-    return res.status(500).json({ error: error.message });
+    // console.log('Error updating NFT price from listing:', error);
+    logger.error('Error updating priceo of NFT', {
+      requestId: req.id,
+      component: 'nft',
+      tokenId: req.params.tokenId,
+      userId: req.user?.id,
+    });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
