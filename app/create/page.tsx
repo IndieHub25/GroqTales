@@ -6,10 +6,15 @@ import {
   Sparkles,
   AlertCircle,
   ArrowLeft,
+  CheckCircle2,
+  Cloud,
+  CloudOff,
+  History,
+  RotateCcw,
   Save,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { genres } from '@/components/genre-selector';
 import { LoadingAnimation } from '@/components/loading-animation';
@@ -32,6 +37,21 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import {
+  clearDraftRecord,
+  createDraftKey,
+  DraftSaveReason,
+  getDraftRecord,
+  getLatestDraftRecord,
+  migrateLegacyDraftToRecord,
+  restoreDraftVersion,
+  saveDraftSnapshot,
+  setActiveDraftKey,
+  StoryDraftRecord,
+  StoryDraftSnapshot,
+  StoryDraftVersion,
+  upsertDraftRecord,
+} from '@/lib/story-draft-manager';
 // We'll import ipfs conditionally to avoid errors
 // import { create } from 'ipfs-http-client';
 
@@ -101,16 +121,17 @@ const getIpfsClient = async () => {
   }
 };
 
-const DRAFT_KEY = "groqtales_text_story_draft_v1";
+const AUTOSAVE_INTERVAL_MS = 8000;
+const MAX_DRAFT_VERSIONS = 5;
+const DRAFT_SYNC_TIMEOUT_MS = 10000;
+const DRAFT_SYNC_ENDPOINT = '/api/v1/drafts';
 
-interface StoryDraft {
+interface StoryFormData {
   title: string;
   description: string;
   genre: string;
   content: string;
-  coverImageName?: string;
-  updatedAt: number;
-  version: number;
+  coverImage: File | null;
 }
 
 interface StoryMetadata {
@@ -130,30 +151,214 @@ export default function CreateStoryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidEntry, setIsValidEntry] = useState(true);
-  const [storyData, setStoryData] = useState({
+  const [storyData, setStoryData] = useState<StoryFormData>({
     title: '',
     description: '',
     genre: '',
     content: '',
-    coverImage: null as File | null,
+    coverImage: null,
   });
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [storyType, setStoryType] = useState<string | null>(null);
   const [storyFormat, setStoryFormat] = useState<string | null>('free');
+  const [draftKey, setDraftKeyState] = useState('');
+  const [draftVersions, setDraftVersions] = useState<StoryDraftVersion[]>([]);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const [isSyncingDraft, setIsSyncingDraft] = useState(false);
+  const [draftSyncError, setDraftSyncError] = useState<string | null>(null);
 
   // Draft Recovery State
-  const [recoveredDraft, setRecoveredDraft] = useState<StoryDraft | null>(null);
+  const [recoveredDraft, setRecoveredDraft] = useState<StoryDraftRecord | null>(
+    null
+  );
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+  const latestSignatureRef = useRef('');
+  const storyDataRef = useRef(storyData);
+  const draftSyncErrorRef = useRef<string | null>(null);
+  const showRecoveryModalRef = useRef(false);
 
-  // Check authentication on mount and load story creation data
+  const setRecoveryModalVisible = useCallback((visible: boolean) => {
+    showRecoveryModalRef.current = visible;
+    setShowRecoveryModal(visible);
+  }, []);
+
+  useEffect(() => {
+    storyDataRef.current = storyData;
+  }, [storyData]);
+
+  useEffect(() => {
+    draftSyncErrorRef.current = draftSyncError;
+  }, [draftSyncError]);
+
+  const hasAnyStoryData = useCallback((formData: StoryFormData) => {
+    return Boolean(
+      formData.title.trim() ||
+        formData.description.trim() ||
+        formData.genre.trim() ||
+        formData.content.trim() ||
+        formData.coverImage
+    );
+  }, []);
+
+  const hasSnapshotContent = useCallback((snapshot: StoryDraftSnapshot) => {
+    return Boolean(
+      snapshot.title.trim() ||
+        snapshot.description.trim() ||
+        snapshot.genre.trim() ||
+        snapshot.content.trim() ||
+        snapshot.coverImageName
+    );
+  }, []);
+
+  const createSnapshot = useCallback(
+    (formData: StoryFormData): StoryDraftSnapshot => ({
+      title: formData.title,
+      description: formData.description,
+      genre: formData.genre,
+      content: formData.content,
+      coverImageName: formData.coverImage?.name || '',
+      updatedAt: Date.now(),
+      version: 1,
+    }),
+    []
+  );
+
+  const syncDraftToBackend = useCallback(
+    async (snapshot: StoryDraftSnapshot, reason: DraftSaveReason) => {
+      if (!draftKey) {
+        return;
+      }
+
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        setDraftSyncError(
+          'Offline mode: draft saved locally and will sync later.'
+        );
+        return;
+      }
+
+      try {
+        setIsSyncingDraft(true);
+        setDraftSyncError(null);
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => {
+          controller.abort();
+        }, DRAFT_SYNC_TIMEOUT_MS);
+
+        const response = await (async () => {
+          try {
+            return await fetch(DRAFT_SYNC_ENDPOINT, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              signal: controller.signal,
+              body: JSON.stringify({
+                draftKey,
+                storyType: storyType || 'text',
+                storyFormat: storyFormat || 'free',
+                ownerWallet: account || null,
+                ownerRole: account ? 'wallet' : 'admin',
+                snapshot,
+                saveReason: reason,
+                maxVersions: MAX_DRAFT_VERSIONS,
+              }),
+            });
+          } finally {
+            window.clearTimeout(timeoutId);
+          }
+        })();
+
+        if (!response.ok) {
+          throw new Error('Backend sync failed');
+        }
+
+        const payload = await response.json();
+        const remoteDraft = payload?.draft as StoryDraftRecord | undefined;
+        if (remoteDraft) {
+          const savedRemote = upsertDraftRecord(remoteDraft);
+          setDraftVersions(savedRemote.versions);
+          setLastSavedAt(savedRemote.updatedAt);
+        }
+      } catch (error) {
+        console.warn('Draft synced locally but not remotely:', error);
+        setDraftSyncError(
+          'Draft is saved locally. Cloud sync is currently unavailable.'
+        );
+      } finally {
+        setIsSyncingDraft(false);
+      }
+    },
+    [account, draftKey, storyFormat, storyType]
+  );
+
+  const persistDraft = useCallback(
+    async (
+      reason: DraftSaveReason,
+      formDataOverride?: StoryFormData,
+      forceSave: boolean = false
+    ) => {
+      if (!draftKey) {
+        return;
+      }
+
+      const sourceData = formDataOverride || storyDataRef.current;
+      if (!hasAnyStoryData(sourceData)) {
+        return;
+      }
+
+      const snapshot = createSnapshot(sourceData);
+      const signature = JSON.stringify([
+        snapshot.title,
+        snapshot.description,
+        snapshot.genre,
+        snapshot.content,
+        snapshot.coverImageName,
+      ]);
+
+      if (
+        !forceSave &&
+        reason === 'autosave' &&
+        signature === latestSignatureRef.current
+      ) {
+        if (draftSyncErrorRef.current) {
+          await syncDraftToBackend(snapshot, reason);
+        }
+        return;
+      }
+      latestSignatureRef.current = signature;
+
+      const localDraft = saveDraftSnapshot({
+        draftKey,
+        storyType: storyType || 'text',
+        storyFormat: storyFormat || 'free',
+        snapshot,
+        reason,
+        maxVersions: MAX_DRAFT_VERSIONS,
+      });
+
+      setDraftVersions(localDraft.versions);
+      setLastSavedAt(localDraft.updatedAt);
+      setActiveDraftKey(draftKey);
+
+      await syncDraftToBackend(snapshot, reason);
+    },
+    [
+      createSnapshot,
+      draftKey,
+      hasAnyStoryData,
+      storyFormat,
+      storyType,
+      syncDraftToBackend,
+    ]
+  );
+
+  // Check authentication and restore draft context
   useEffect(() => {
     const checkAuth = () => {
       console.log('Checking authentication and story data');
-      const isAdmin = localStorage.getItem('adminSession');
+      const isAdmin = localStorage.getItem('adminSession') === 'true';
 
-      // Check authentication first
       if (!account && !isAdmin) {
-        console.warn('User not authenticated');
         toast({
           title: 'Access Denied',
           description:
@@ -163,63 +368,92 @@ export default function CreateStoryPage() {
         router.push('/');
         return;
       }
-      // Try to load story creation data from localStorage
-      try {
-        console.log('Checking for storyCreationData in localStorage');
-        const savedData = localStorage.getItem('storyCreationData');
 
-        if (!savedData) {
-          console.warn('No storyCreationData found in localStorage');
+      try {
+        const now = Date.now();
+        const rawStoryCreationData = localStorage.getItem('storyCreationData');
+        const parsedData = rawStoryCreationData
+          ? JSON.parse(rawStoryCreationData)
+          : null;
+
+        if (parsedData?.type === 'ai') {
+          router.push('/create/ai-story');
+          return;
+        }
+
+        const fallbackDraft = getLatestDraftRecord(
+          (record) => record.storyType === 'text'
+        );
+        const resolvedDraftKey =
+          parsedData?.draftKey || fallbackDraft?.draftKey || createDraftKey();
+
+        if (parsedData) {
+          const createdAt = parsedData.timestamp || now;
+          const isSessionFresh = now - createdAt < 30 * 60 * 1000;
+          const hasExistingDraft = Boolean(getDraftRecord(resolvedDraftKey));
+
+          if (!isSessionFresh && !hasExistingDraft && !fallbackDraft) {
+            localStorage.removeItem('storyCreationData');
+            setIsValidEntry(false);
+            toast({
+              title: 'Session Expired',
+              description:
+                'Your story creation session has expired. Please start again.',
+              variant: 'destructive',
+            });
+            setIsLoading(false);
+            return;
+          }
+
+          localStorage.setItem(
+            'storyCreationData',
+            JSON.stringify({
+              ...parsedData,
+              draftKey: resolvedDraftKey,
+              timestamp: createdAt,
+            })
+          );
+
+          setStoryType(parsedData.type || 'text');
+          setStoryFormat(parsedData.format || 'free');
+          if (parsedData.genre) {
+            setStoryData((prev) => ({ ...prev, genre: parsedData.genre }));
+          }
+        } else if (fallbackDraft) {
+          setStoryType(fallbackDraft.storyType || 'text');
+          setStoryFormat(fallbackDraft.storyFormat || 'free');
+        } else {
           setIsValidEntry(false);
           toast({
             title: 'Invalid Navigation',
             description:
-              'Please start from the create button to set up your story properly',
+              'Please start from the create button to set up your story properly.',
             variant: 'destructive',
           });
           setIsLoading(false);
           return;
         }
-        // Parse and validate data
-        const parsedData = JSON.parse(savedData);
-        console.log('Found storyCreationData:', parsedData);
 
-        // Check timestamp validity
-        const now = new Date().getTime();
-        const createdAt = parsedData.timestamp || 0;
-        const isValid = now - createdAt < 30 * 60 * 1000; // 30 minutes
+        setDraftKeyState(resolvedDraftKey);
+        setActiveDraftKey(resolvedDraftKey);
 
-        if (!isValid) {
-          console.warn('storyCreationData timestamp is expired');
-          localStorage.removeItem('storyCreationData');
-          setIsValidEntry(false);
-          toast({
-            title: 'Session Expired',
-            description:
-              'Your story creation session has expired. Please start again',
-            variant: 'destructive',
-          });
-          setIsLoading(false);
-          return;
-        }
-        // Check for correct story type
-        if (parsedData.type === 'ai') {
-          console.warn("Wrong story type: 'ai', redirecting to ai-story page");
-          router.push('/create/ai-story');
-          return;
-        }
-        // Valid entry, set up the form
-        setStoryType(parsedData.type || 'text');
-        setStoryFormat(parsedData.format || 'free');
+        const migratedLegacy = migrateLegacyDraftToRecord({
+          draftKey: resolvedDraftKey,
+          storyType: parsedData?.type || fallbackDraft?.storyType || 'text',
+          storyFormat:
+            parsedData?.format || fallbackDraft?.storyFormat || 'free',
+        });
+        const localDraft = getDraftRecord(resolvedDraftKey) || migratedLegacy;
+        if (localDraft) {
+          setDraftVersions(localDraft.versions);
+          setLastSavedAt(localDraft.updatedAt);
 
-        // Initialize the genre from saved data
-        if (parsedData.genre) {
-          setStoryData((prev) => ({
-            ...prev,
-            genre: parsedData.genre,
-          }));
+          if (hasSnapshotContent(localDraft.current)) {
+            setRecoveredDraft(localDraft);
+            setRecoveryModalVisible(true);
+          }
         }
-        console.log('Successfully loaded story creation data:', parsedData);
+
         setIsValidEntry(true);
         setIsLoading(false);
       } catch (error) {
@@ -227,8 +461,7 @@ export default function CreateStoryPage() {
         setIsValidEntry(false);
         toast({
           title: 'Error',
-          description:
-            'An error occurred loading your data. Please start again',
+          description: 'Unable to initialize your draft. Please try again.',
           variant: 'destructive',
         });
         setIsLoading(false);
@@ -236,56 +469,216 @@ export default function CreateStoryPage() {
     };
 
     checkAuth();
-  }, [account, router, toast]);
+  }, [account, hasSnapshotContent, router, setRecoveryModalVisible, toast]);
 
-  // Draft recovery detection on mount
+  // Try to hydrate from backend if a newer server draft exists.
   useEffect(() => {
-    const saved = localStorage.getItem(DRAFT_KEY);
-    if (!saved) return;
+    if (!draftKey) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const hydrate = async () => {
+      try {
+        const params = new URLSearchParams({ draftKey });
+        if (account) {
+          params.set('ownerWallet', account.toLowerCase());
+        }
+
+        const response = await fetch(
+          `${DRAFT_SYNC_ENDPOINT}?${params.toString()}`,
+          {
+            signal: controller.signal,
+          }
+        );
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = await response.json();
+        const remoteDraft = payload?.draft as StoryDraftRecord | undefined;
+        if (!remoteDraft) {
+          return;
+        }
+
+        const localDraft = getDraftRecord(draftKey);
+        const remoteIsNewer =
+          !localDraft || remoteDraft.updatedAt > localDraft.updatedAt;
+        if (!remoteIsNewer) {
+          return;
+        }
+
+        const hydrated = upsertDraftRecord(remoteDraft);
+        setDraftVersions(hydrated.versions);
+        setLastSavedAt(hydrated.updatedAt);
+
+        if (
+          hasSnapshotContent(hydrated.current) &&
+          !showRecoveryModalRef.current
+        ) {
+          setRecoveredDraft(hydrated);
+          setRecoveryModalVisible(true);
+        }
+      } catch (error: any) {
+        if (error?.name !== 'AbortError') {
+          console.warn('Unable to hydrate remote draft:', error);
+        }
+      }
+    };
+
+    void hydrate();
+    return () => {
+      controller.abort();
+    };
+  }, [account, draftKey, hasSnapshotContent, setRecoveryModalVisible]);
+
+  // Autosave every X seconds.
+  useEffect(() => {
+    if (!draftKey) {
+      return;
+    }
+
+    const autosaveInterval = window.setInterval(() => {
+      void persistDraft('autosave');
+    }, AUTOSAVE_INTERVAL_MS);
+
+    return () => window.clearInterval(autosaveInterval);
+  }, [draftKey, persistDraft]);
+
+  // Save on blur-like lifecycle signals.
+  useEffect(() => {
+    if (!draftKey) {
+      return;
+    }
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        void persistDraft('blur', undefined, true);
+      }
+    };
+
+    const onBeforeUnload = () => {
+      void persistDraft('blur', undefined, true);
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('beforeunload', onBeforeUnload);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    };
+  }, [draftKey, persistDraft]);
+
+  const handleFieldBlur = () => {
+    void persistDraft('blur');
+  };
+
+  const handleRevertToVersion = async (versionId: string) => {
+    if (!draftKey) {
+      return;
+    }
+
+    const restored = restoreDraftVersion({
+      draftKey,
+      versionId,
+      maxVersions: MAX_DRAFT_VERSIONS,
+    });
+    if (!restored) {
+      toast({
+        title: 'Restore Failed',
+        description: 'Could not restore this version.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setStoryData((prev) => ({
+      ...prev,
+      title: restored.current.title,
+      description: restored.current.description,
+      genre: restored.current.genre,
+      content: restored.current.content,
+      coverImage: null,
+    }));
+    setDraftVersions(restored.versions);
+    setLastSavedAt(restored.updatedAt);
 
     try {
-      const draft = JSON.parse(saved);
-      if (draft?.content?.trim()) {
-        setRecoveredDraft(draft);
-        setShowRecoveryModal(true);
+      setIsSyncingDraft(true);
+      setDraftSyncError(null);
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => {
+        controller.abort();
+      }, DRAFT_SYNC_TIMEOUT_MS);
+
+      const response = await (async () => {
+        try {
+          return await fetch(DRAFT_SYNC_ENDPOINT, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            signal: controller.signal,
+            body: JSON.stringify({
+              draftKey,
+              versionId,
+              maxVersions: MAX_DRAFT_VERSIONS,
+            }),
+          });
+        } finally {
+          window.clearTimeout(timeoutId);
+        }
+      })();
+
+      if (!response.ok) {
+        throw new Error('Failed to sync version restore');
+      }
+
+      const payload = await response.json();
+      const remoteDraft = payload?.draft as StoryDraftRecord | undefined;
+      if (remoteDraft) {
+        const updated = upsertDraftRecord(remoteDraft);
+        setDraftVersions(updated.versions);
+        setLastSavedAt(updated.updatedAt);
       }
     } catch (error) {
-      console.error('Error parsing draft:', error);
-      localStorage.removeItem(DRAFT_KEY);
+      console.warn('Version restore synced locally only:', error);
+      setDraftSyncError(
+        'Version restored locally. Cloud sync will retry automatically.'
+      );
+    } finally {
+      setIsSyncingDraft(false);
+    }
+
+    toast({
+      title: 'Version Restored',
+      description: 'Your draft was reverted to the selected snapshot.',
+    });
+  };
+
+  const deleteRemoteDraft = useCallback(async (targetDraftKey: string) => {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      controller.abort();
+    }, DRAFT_SYNC_TIMEOUT_MS);
+
+    try {
+      await fetch(
+        `${DRAFT_SYNC_ENDPOINT}?draftKey=${encodeURIComponent(targetDraftKey)}`,
+        {
+          method: 'DELETE',
+          signal: controller.signal,
+        }
+      );
+    } finally {
+      window.clearTimeout(timeoutId);
     }
   }, []);
 
-  // Autosave logic with debounce
-  useEffect(() => {
-    const hasAnyDraftData =
-      storyData.title.trim() ||
-      storyData.description.trim() ||
-      storyData.genre.trim() ||
-      storyData.content.trim() ||
-      storyData.coverImage;
-    if (!hasAnyDraftData) return;
-
-     const timeout = setTimeout(() => {
-       const draft: StoryDraft = {
-         title: storyData.title,
-         description: storyData.description,
-         genre: storyData.genre,
-         content: storyData.content,
-         coverImageName: storyData.coverImage?.name,
-         updatedAt: Date.now(),
-         version: 1,
-       };
-      try {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-      } catch (error) {
-        console.warn('Autosave failed:', error);
-      }
-     }, 1000); // autosave every 1s after typing stops
-
-    return () => clearTimeout(timeout);
-  }, [storyData.title, storyData.description, storyData.genre, storyData.content, storyData.coverImage]);
-
   const handleGoBack = () => {
+    void persistDraft('manual', storyData, true);
     router.push('/');
   };
 
@@ -300,10 +693,17 @@ export default function CreateStoryPage() {
   };
 
   const handleGenreChange = (value: string) => {
+    const latestData = storyDataRef.current;
+    const nextData = {
+      ...latestData,
+      genre: value,
+    };
+
     setStoryData((prev) => ({
       ...prev,
       genre: value,
     }));
+    void persistDraft('blur', nextData, true);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -317,6 +717,14 @@ export default function CreateStoryPage() {
         ...prev,
         coverImage: file,
       }));
+      void persistDraft(
+        'manual',
+        {
+          ...storyDataRef.current,
+          coverImage: file,
+        },
+        true
+      );
     }
   };
 
@@ -416,6 +824,9 @@ export default function CreateStoryPage() {
       if (!storyData.title || !storyData.content || !storyData.genre) {
         throw new Error('Please fill in all required fields');
       }
+
+      await persistDraft('manual', storyData, true);
+
       // Show progress toast
       toast({
         title:
@@ -511,7 +922,16 @@ export default function CreateStoryPage() {
       localStorage.removeItem('storyCreationData');
 
       // Clear draft on successful publication
-      localStorage.removeItem(DRAFT_KEY);
+      if (draftKey) {
+        clearDraftRecord(draftKey);
+        setActiveDraftKey(null);
+
+        try {
+          await deleteRemoteDraft(draftKey);
+        } catch (error) {
+          console.warn('Could not delete synced draft:', error);
+        }
+      }
 
       // Finally, perform the redirect with a slight delay to allow toasts to be seen
       setTimeout(() => {
@@ -626,28 +1046,33 @@ export default function CreateStoryPage() {
                     </h3>
                     <p className="text-sm text-muted-foreground">
                       We found an unsaved draft from{' '}
-                      {new Date(recoveredDraft.updatedAt).toLocaleString()}.
-                      Would you like to restore it?
+                      {new Date(
+                        recoveredDraft.current.updatedAt
+                      ).toLocaleString()}
+                      . Would you like to restore it?
                     </p>
                   </div>
 
                   <div className="flex gap-4">
                     <Button
                       onClick={() => {
-                        // Restore draft
+                        const draft = recoveredDraft.current;
                         setStoryData({
-                          title: recoveredDraft.title,
-                          description: recoveredDraft.description,
-                          genre: recoveredDraft.genre,
-                          content: recoveredDraft.content,
-                          coverImage: null, // Can't restore file objects
+                          title: draft.title,
+                          description: draft.description,
+                          genre: draft.genre,
+                          content: draft.content,
+                          coverImage: null,
                         });
-                        setShowRecoveryModal(false);
+                        setDraftVersions(recoveredDraft.versions);
+                        setLastSavedAt(recoveredDraft.updatedAt);
+                        setRecoveryModalVisible(false);
                         setRecoveredDraft(null);
                         toast({
                           title: 'DRAFT RESTORED!',
                           description: 'Your previous work has been recovered.',
-                          className: 'font-bangers bg-green-400 text-black border-4 border-black',
+                          className:
+                            'font-bangers bg-green-400 text-black border-4 border-black',
                         });
                       }}
                       className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bangers px-6 py-3"
@@ -656,14 +1081,25 @@ export default function CreateStoryPage() {
                     </Button>
                     <Button
                       onClick={() => {
-                        // Discard draft
-                        localStorage.removeItem(DRAFT_KEY);
-                        setShowRecoveryModal(false);
+                        if (draftKey) {
+                          clearDraftRecord(draftKey);
+                          setActiveDraftKey(null);
+                          void deleteRemoteDraft(draftKey).catch((error) => {
+                            console.warn(
+                              'Failed to delete remote draft:',
+                              error
+                            );
+                          });
+                        }
+                        setRecoveryModalVisible(false);
                         setRecoveredDraft(null);
+                        setDraftVersions([]);
+                        setLastSavedAt(null);
                         toast({
                           title: 'DRAFT DISCARDED',
                           description: 'Starting fresh!',
-                          className: 'font-bangers bg-gray-400 text-black border-4 border-black',
+                          className:
+                            'font-bangers bg-gray-400 text-black border-4 border-black',
                         });
                       }}
                       className="flex-1 font-bangers border-4 border-black bg-white text-black hover:bg-gray-100"
@@ -687,6 +1123,7 @@ export default function CreateStoryPage() {
                   name="title"
                   value={storyData.title}
                   onChange={handleInputChange}
+                  onBlur={handleFieldBlur}
                   placeholder="Enter your story title"
                   required
                 />
@@ -726,6 +1163,7 @@ export default function CreateStoryPage() {
                   name="description"
                   value={storyData.description}
                   onChange={handleInputChange}
+                  onBlur={handleFieldBlur}
                   placeholder="Write a brief description of your story"
                   required
                 />
@@ -740,6 +1178,7 @@ export default function CreateStoryPage() {
                   name="content"
                   value={storyData.content}
                   onChange={handleInputChange}
+                  onBlur={handleFieldBlur}
                   placeholder="Write your story here..."
                   className="min-h-[300px]"
                   required
@@ -785,6 +1224,78 @@ export default function CreateStoryPage() {
                 )}
               </div>
 
+              {/* Autosave Status + Version History */}
+              <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-medium flex items-center gap-2">
+                    <History className="h-4 w-4 text-primary" />
+                    Draft Autosave & Version History
+                  </h3>
+                  <div className="text-xs text-muted-foreground flex items-center gap-2">
+                    {isSyncingDraft ? (
+                      <>
+                        <Cloud className="h-3.5 w-3.5 animate-pulse" />
+                        Syncing...
+                      </>
+                    ) : draftSyncError ? (
+                      <>
+                        <CloudOff className="h-3.5 w-3.5 text-amber-600" />
+                        Local only
+                      </>
+                    ) : lastSavedAt ? (
+                      <>
+                        <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+                        Saved {new Date(lastSavedAt).toLocaleTimeString()}
+                      </>
+                    ) : (
+                      <>Not saved yet</>
+                    )}
+                  </div>
+                </div>
+
+                {draftSyncError && (
+                  <p className="text-xs text-amber-700">{draftSyncError}</p>
+                )}
+
+                {draftVersions.length > 0 ? (
+                  <ul className="space-y-2">
+                    {draftVersions
+                      .slice(0, MAX_DRAFT_VERSIONS)
+                      .map((version) => (
+                        <li
+                          key={version.id}
+                          className="flex items-center justify-between rounded-md border bg-background px-3 py-2"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {version.title || 'Untitled snapshot'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(version.updatedAt).toLocaleString()} (
+                              {version.reason})
+                            </p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRevertToVersion(version.id)}
+                            className="ml-3"
+                          >
+                            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                            Revert
+                          </Button>
+                        </li>
+                      ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No previous snapshots yet. Autosave runs every few seconds
+                    and when fields lose focus.
+                  </p>
+                )}
+              </div>
+
               {/* Creation Process Steps */}
               <div className="bg-muted/30 p-4 rounded-lg">
                 <h3 className="font-medium mb-2 flex items-center gap-2">
@@ -822,7 +1333,10 @@ export default function CreateStoryPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.back()}
+                  onClick={() => {
+                    void persistDraft('manual', storyData, true);
+                    router.back();
+                  }}
                   disabled={isSubmitting}
                 >
                   Cancel

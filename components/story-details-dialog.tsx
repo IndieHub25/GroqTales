@@ -6,6 +6,7 @@ import {
   Wallet,
   ShoppingCart,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import * as React from 'react';
 
@@ -70,10 +71,13 @@ export default function StoryDetailsDialog({
           <div className="relative">
             {story.image && (
               <div className="aspect-[4/3] relative rounded-lg overflow-hidden">
-                <img
+                <Image
                   src={story.image}
                   alt={story.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  loading="lazy"
                 />
               </div>
             )}

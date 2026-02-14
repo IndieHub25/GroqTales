@@ -11,6 +11,53 @@ Active full support: 1.1.2 (latest), 1.1.1 (previous). Security maintenance (cri
 
 ## [Unreleased]
 
+### Off-Chain Royalty Tracking & Creator Revenue Dashboard (Issue #334)
+
+#### Added
+- **Database Models**: `RoyaltyConfig`, `RoyaltyTransaction`, `CreatorEarnings` Mongoose schemas in `models/`
+- **Service Layer**: `lib/royalty-service.ts` with business logic for configuring, recording, and querying royalties
+- **API Endpoints**: 4 new routes under `app/api/royalties/` (configure, earnings, transactions, record)
+- **React Hook**: `hooks/use-royalties.ts` with `useCreatorEarnings`, `useCreatorTransactions`, `useRoyaltyConfig`, `useConfigureRoyalty`
+- **Dashboard Components**: `components/royalty/` — EarningsOverview, RevenueChart, TransactionHistory, RoyaltyConfigForm
+- **Creator Revenue Dashboard**: Full page at `/dashboard/royalties` with wallet-gated access
+- **Type Definitions**: `types/royalty.ts` with centralized TypeScript types for all royalty entities
+- **Documentation**: `docs/royalty-tracking.md` with architecture, API reference, and usage guide
+
+#### Changed
+- **NFT Model** (`server/models/Nft.js`): Added `royaltyPercentage`, `royaltyRecipient`, `royaltyConfigId` fields
+- **NFT Mint Flow** (`server/routes/nft.js`): Automatically creates `RoyaltyConfig` on mint with default 5%
+- **NFT Buy Flow** (`server/routes/nft.js`): Records royalty transaction and updates creator earnings on purchase
+- **Main Dashboard** (`app/dashboard/page.tsx`): Replaced hardcoded earnings with real data from `useCreatorEarnings`
+- **NFT Gallery** (`components/nft-gallery.tsx`): Added royalty percentage badge on NFT cards
+- **Header Navigation** (`components/header.tsx`): Added "Earnings" link (visible when wallet connected)
+
+#### Files Created
+- `models/RoyaltyConfig.ts`
+- `models/RoyaltyTransaction.ts`
+- `models/CreatorEarnings.ts`
+- `lib/royalty-service.ts`
+- `app/api/royalties/configure/route.ts`
+- `app/api/royalties/earnings/[wallet]/route.ts`
+- `app/api/royalties/transactions/[wallet]/route.ts`
+- `app/api/royalties/record/route.ts`
+- `hooks/use-royalties.ts`
+- `components/royalty/earnings-overview.tsx`
+- `components/royalty/revenue-chart.tsx`
+- `components/royalty/transaction-history.tsx`
+- `components/royalty/royalty-config-form.tsx`
+- `app/dashboard/royalties/page.tsx`
+- `types/royalty.ts`
+- `docs/royalty-tracking.md`
+
+#### Files Modified
+- `server/models/Nft.js`
+- `server/routes/nft.js`
+- `app/dashboard/page.tsx`
+- `components/nft-gallery.tsx`
+- `components/header.tsx`
+
+---
+
 ### ✨ Accessibility Improvements - WCAG 2.1 AA Compliance
 
 #### Keyboard Navigation & Focus Management

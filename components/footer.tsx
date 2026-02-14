@@ -18,6 +18,7 @@ import {
   Heart,
   Zap,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState } from 'react';
 
@@ -67,10 +68,12 @@ export function Footer() {
                 <div className="relative">
                   <div className="absolute -inset-2 bg-primary/20 dark:bg-primary/10 blur opacity-75 group-hover:opacity-100 transition" />
                   <div className="relative bg-card dark:bg-slate-900 border-4 border-foreground dark:border-slate-700 p-3 shadow-[6px_6px_0px_0px_var(--shadow-color)] group-hover:-translate-y-1 group-hover:shadow-[8px_8px_0px_0px_var(--shadow-color)] transition-all duration-300">
-                    <img
+                    <Image
                       src="/logo.png"
                       alt="GroqTales Logo"
-                      className="w-20 h-20 object-contain"
+                      width={80}
+                      height={80}
+                      className="object-contain"
                     />
                   </div>
                 </div>
@@ -109,11 +112,11 @@ export function Footer() {
             </div>
 
             {/* Explore Section */}
-            <nav aria-label="Explore links" className="text-center sm:text-left">
+            <nav aria-label="Explore links" className="text-left">
               <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
                 Explore
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-3 pl-0 list-none">
                 {[
                   { href: '/genres', label: 'Genres' },
                   { href: '/community', label: 'Community' },
@@ -124,9 +127,9 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="group inline-flex items-center text-sm font-bold text-foreground/70 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors duration-300 uppercase"
+                      className="group relative inline-flex items-center text-sm font-bold text-foreground/70 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors duration-300 uppercase"
                     >
-                      <span className="w-2 h-2 bg-primary mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <span className="w-2 h-2 bg-primary opacity-0 group-hover:opacity-100 transition-opacity absolute -left-4" />
                       {link.label}
                     </Link>
                   </li>
@@ -135,11 +138,11 @@ export function Footer() {
             </nav>
 
             {/* Legal Section */}
-            <nav aria-label="Legal links" className="text-center sm:text-left">
+            <nav aria-label="Legal links" className="text-left">
               <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
                 Legal
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-3 pl-0 list-none">
                 {[
                   { href: '/terms', label: 'Terms' },
                   { href: '/privacy', label: 'Privacy' },
@@ -149,9 +152,9 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="group inline-flex items-center text-sm font-bold text-foreground/70 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors duration-300 uppercase"
+                      className="group relative inline-flex items-center text-sm font-bold text-foreground/70 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors duration-300 uppercase"
                     >
-                      <span className="w-2 h-2 bg-primary mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <span className="w-2 h-2 bg-primary opacity-0 group-hover:opacity-100 transition-opacity absolute -left-4" />
                       {link.label}
                     </Link>
                   </li>
@@ -160,11 +163,11 @@ export function Footer() {
             </nav>
 
             {/* Resources Section */}
-            <nav aria-label="Resources links" className="text-center sm:text-left">
+            <nav aria-label="Resources links" className="text-left">
               <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
                 Resources
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-3 pl-0 list-none">
                 {[
                   { href: '/docs', label: 'Documentation' },
                   { href: '/faq', label: 'FAQ' },
@@ -172,9 +175,9 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="group inline-flex items-center text-sm font-bold text-foreground/70 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors duration-300 uppercase"
+                      className="group relative inline-flex items-center text-sm font-bold text-foreground/70 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors duration-300 uppercase"
                     >
-                      <span className="w-2 h-2 bg-primary mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <span className="w-2 h-2 bg-primary opacity-0 group-hover:opacity-100 transition-opacity absolute -left-4" />
                       {link.label}
                     </Link>
                   </li>
@@ -183,7 +186,7 @@ export function Footer() {
             </nav>
 
             {/* Built by Section */}
-            <div className="text-center sm:text-left">
+            <div className="text-left">
               <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
                 Built by
               </h3>

@@ -483,4 +483,31 @@
     outline-offset: 3px;
     box-shadow: none;
   }
+
+  /* Performance: CSS twinkle animation for stars (replaces framer-motion per-star animations) */
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.5); }
+  }
+
+  .animate-twinkle {
+    animation: twinkle ease-in-out infinite;
+  }
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-twinkle,
+    .animate-pulse,
+    .animate-spin {
+      animation: none !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }

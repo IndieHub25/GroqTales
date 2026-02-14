@@ -1,4 +1,4 @@
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '../components/ui/use-toast';
 
 // Types
 interface AdminAction {

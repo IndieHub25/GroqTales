@@ -12,6 +12,11 @@ import {
   logSecurityEvent,
   getSecurityConfig,
 } from './ai-security';
+import {
+  getCachedResponse,
+  setCachedResponse,
+  type CacheCategory,
+} from './ai-cache';
 
 export interface StoryGenerationParams {
   genre?: string;
@@ -56,6 +61,18 @@ export async function generateStoryContent(
   params: StoryGenerationParams
 ): Promise<string> {
   try {
+    // --- Cache: check for cached response ---
+    const cacheCategory: CacheCategory = 'STORY_GENERATION';
+    const cacheOptions = {
+      genre: params.genre,
+      length: params.length,
+      tone: params.tone,
+      characters: params.characters,
+      setting: params.setting,
+    };
+    const cached = await getCachedResponse<string>(cacheCategory, params.theme, cacheOptions);
+    if (cached) return cached;
+
     const groqApiKey = process.env.GROQ_API_KEY;
     if (!groqApiKey) {
       throw new Error('GROQ_API_KEY environment variable is not set');
@@ -149,6 +166,9 @@ export async function generateStoryContent(
       throw new Error('Generated content was blocked due to security policy violations.');
     }
 
+    // --- Cache: store the response ---
+    await setCachedResponse(cacheCategory, params.theme, cacheOptions, generatedContent);
+
     return generatedContent;
   } catch (error) {
     console.error('Story generation error:', error);
@@ -165,6 +185,11 @@ export async function analyzeStoryContent(
   content: string
 ): Promise<StoryAnalysis> {
   try {
+    // --- Cache: check for cached analysis ---
+    const cacheCategory: CacheCategory = 'STORY_ANALYSIS';
+    const cached = await getCachedResponse<StoryAnalysis>(cacheCategory, content, {});
+    if (cached) return cached;
+
     const groqApiKey = process.env.GROQ_API_KEY;
     if (!groqApiKey) {
       throw new Error('GROQ_API_KEY environment variable is not set');
@@ -233,7 +258,10 @@ export async function analyzeStoryContent(
     }
 
     try {
-      return JSON.parse(analysisText);
+      const parsed = JSON.parse(analysisText);
+      // --- Cache: store the analysis ---
+      await setCachedResponse(cacheCategory, content, {}, parsed);
+      return parsed;
     } catch {
       return {
         sentiment: 'neutral',
@@ -268,6 +296,12 @@ export async function generateStoryIdeas(
   count: number = 5
 ): Promise<string[]> {
   try {
+    // --- Cache: check for cached ideas ---
+    const cacheCategory: CacheCategory = 'STORY_IDEAS';
+    const cacheOptions = { genre: genre || '__all__', count };
+    const cached = await getCachedResponse<string[]>(cacheCategory, genre || '__all__', cacheOptions);
+    if (cached) return cached;
+
     const groqApiKey = process.env.GROQ_API_KEY;
     if (!groqApiKey) {
       throw new Error('GROQ_API_KEY environment variable is not set');
@@ -341,11 +375,16 @@ export async function generateStoryIdeas(
       throw new Error('Generated ideas were blocked due to security policy violations.');
     }
 
-    return content
+    const ideas = content
       .split('\n')
       .filter((line: string) => line.trim().length > 0)
       .map((line: string) => line.replace(/^\d+\.\s*/, '').trim())
       .slice(0, count);
+
+    // --- Cache: store the ideas ---
+    await setCachedResponse(cacheCategory, genre || '__all__', cacheOptions, ideas);
+
+    return ideas;
   } catch (error) {
     console.error('Story ideas generation error:', error);
     if (error instanceof Error && error.message.startsWith('Invalid input')) {
@@ -369,6 +408,12 @@ export async function improveStoryContent(
   focusArea?: string
 ): Promise<string> {
   try {
+    // --- Cache: check for cached improvement ---
+    const cacheCategory: CacheCategory = 'CONTENT_IMPROVEMENT';
+    const cacheOptions = { focusArea: focusArea || 'overall quality' };
+    const cached = await getCachedResponse<string>(cacheCategory, content, cacheOptions);
+    if (cached) return cached;
+
     const groqApiKey = process.env.GROQ_API_KEY;
     if (!groqApiKey) {
       throw new Error('GROQ_API_KEY environment variable is not set');
@@ -451,6 +496,9 @@ export async function improveStoryContent(
       });
        throw new Error('Improved content was blocked due to security policy violations.');
     }
+
+    // --- Cache: store the improvement ---
+    await setCachedResponse(cacheCategory, content, cacheOptions, improvedContent);
 
     return improvedContent;
   } catch (error) {

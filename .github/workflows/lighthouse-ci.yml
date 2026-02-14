@@ -1,0 +1,192 @@
+name: Lighthouse CI - Performance Budget
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  lighthouse:
+    name: Lighthouse Performance Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js app
+        run: npm run build
+        env:
+          NEXT_PUBLIC_BUILD_MODE: 'true'
+          NEXT_PUBLIC_URL: 'http://localhost:3000'
+          NEXT_PUBLIC_VERSION: '1.0.0'
+          NEXT_PUBLIC_IMAGE_URL: 'http://localhost:3000/images'
+          NEXT_PUBLIC_SPLASH_IMAGE_URL: 'http://localhost:3000/splash.jpg'
+          NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR: '#1a1a2e'
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.13.x
+
+      - name: Run Lighthouse CI
+        run: |
+          lhci autorun \
+            --collect.startServerCommand="npx next start -p 3000" \
+            --collect.startServerReadyPattern="Ready" \
+            --collect.startServerReadyTimeout=30000 \
+            --collect.numberOfRuns=3 \
+            --collect.url="http://localhost:3000/" \
+            --collect.url="http://localhost:3000/nft-gallery" \
+            --collect.settings.chromeFlags="--no-sandbox --disable-dev-shm-usage --headless" \
+            --assert.assertions.categories:performance="error" \
+            --assert.assertions.categories:performance.minScore=0.8 \
+            --assert.assertions.categories:accessibility="warn" \
+            --assert.assertions.categories:accessibility.minScore=0.9 \
+            --assert.assertions.categories:best-practices="warn" \
+            --assert.assertions.categories:best-practices.minScore=0.85 \
+            --assert.assertions.categories:seo="warn" \
+            --assert.assertions.categories:seo.minScore=0.9 \
+            --upload.target=temporary-public-storage
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          NEXT_PUBLIC_BUILD_MODE: 'true'
+          NEXT_PUBLIC_URL: 'http://localhost:3000'
+          NEXT_PUBLIC_VERSION: '1.0.0'
+          NEXT_PUBLIC_IMAGE_URL: 'http://localhost:3000/images'
+          NEXT_PUBLIC_SPLASH_IMAGE_URL: 'http://localhost:3000/splash.jpg'
+          NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR: '#1a1a2e'
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 30
+
+      - name: Comment PR with Lighthouse results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Read Lighthouse results
+            const lhciDir = '.lighthouseci';
+            if (!fs.existsSync(lhciDir)) {
+              console.log('No Lighthouse results found');
+              return;
+            }
+
+            const manifestPath = path.join(lhciDir, 'manifest.json');
+            if (!fs.existsSync(manifestPath)) {
+              console.log('No manifest.json found');
+              return;
+            }
+
+            let manifest;
+            try {
+              manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+            } catch (e) {
+              console.log('Failed to parse manifest.json:', e.message);
+              return;
+            }
+
+            // Build summary table
+            let comment = '## Lighthouse Performance Report\n\n';
+            comment += '| URL | Performance | Accessibility | Best Practices | SEO |\n';
+            comment += '|-----|------------|---------------|----------------|-----|\n';
+
+            const routeScores = {};
+
+            for (const entry of manifest) {
+              const jsonFile = entry.jsonPath?.split('/').pop();
+              if (!jsonFile) continue;
+              const resultPath = path.join(lhciDir, jsonFile);
+              if (!fs.existsSync(resultPath)) continue;
+
+              let result;
+              try {
+                result = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
+              } catch (e) {
+                console.log(`Failed to parse ${jsonFile}:`, e.message);
+                continue;
+              }
+              const categories = result.categories || {};
+
+              const rawUrl = entry.url || result.requestedUrl || '';
+              if (!rawUrl) continue;
+              let route;
+              try {
+                route = new URL(rawUrl).pathname;
+              } catch (e) {
+                console.log(`Invalid URL: ${rawUrl}`);
+                continue;
+              }
+
+              if (!routeScores[route]) {
+                routeScores[route] = { perf: [], a11y: [], bp: [], seo: [] };
+              }
+
+              routeScores[route].perf.push((categories.performance?.score || 0) * 100);
+              routeScores[route].a11y.push((categories.accessibility?.score || 0) * 100);
+              routeScores[route].bp.push((categories['best-practices']?.score || 0) * 100);
+              routeScores[route].seo.push((categories.seo?.score || 0) * 100);
+            }
+
+            const avg = (arr) => arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
+            const emoji = (score) => score >= 90 ? '🟢' : score >= 50 ? '🟠' : '🔴';
+
+            for (const [route, scores] of Object.entries(routeScores)) {
+              const perf = avg(scores.perf);
+              const a11y = avg(scores.a11y);
+              const bp = avg(scores.bp);
+              const seo = avg(scores.seo);
+              comment += `| \`${route}\` | ${emoji(perf)} ${perf} | ${emoji(a11y)} ${a11y} | ${emoji(bp)} ${bp} | ${emoji(seo)} ${seo} |\n`;
+            }
+
+            comment += '\n### Performance Budget Thresholds\n';
+            comment += '- Performance: >= 80 (required)\n';
+            comment += '- LCP: < 2.5s (target)\n';
+            comment += '- CLS: < 0.1 (target)\n';
+            comment += '- TBT: < 200ms (target)\n\n';
+            comment += '*Generated by Lighthouse CI*';
+
+            // Post comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existingComment = comments.find(c =>
+              c.body?.includes('## Lighthouse Performance Report') && c.user?.login === 'github-actions[bot]'
+            );
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: comment,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment,
+              });
+            }

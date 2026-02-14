@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Trophy,
   Menu,
+  DollarSign,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -121,6 +122,16 @@ export function Header() {
     },
     { type: 'link', href: '/nft-gallery', label: 'NFT Gallery' },
     { type: 'link', href: '/nft-marketplace', label: 'NFT Marketplace' },
+    ...(account
+      ? [
+          {
+            type: 'link' as const,
+            href: '/dashboard/royalties',
+            label: 'Earnings',
+            icon: <DollarSign className="h-4 w-4 mr-1.5 colorful-icon" />,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -157,7 +168,7 @@ export function Header() {
             </motion.div>
           </Link>
 
-          <nav role="navigation" aria-label="Primary navigation" className="hidden md:flex items-center space-x-2">
+          <nav role="navigation" aria-label="Primary navigation" className="hidden xl:flex items-center space-x-2">
             {navItems.map((item, index) => (
               <motion.div
                 key={
@@ -229,13 +240,13 @@ export function Header() {
         </div>
 
         <div className="flex items-center space-x-2">
-          <div className="hidden md:block dark:hover:bg-gray-700">
+          <div className="hidden xl:block dark:hover:bg-gray-700">
             <WalletConnect />
           </div>
           <Button
             variant="outline"
             size="sm"
-            className="hidden md:flex items-center gap-2 px-3 sm:px-5 py-1.5 sm:py-2 rounded-none bg-white text-black border-2 sm:border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-primary hover:text-white hover:border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all duration-200 comic-pop comic-text-bold dark:hover:border-white/50"
+            className="hidden xl:flex items-center gap-2 px-3 sm:px-5 py-1.5 sm:py-2 rounded-none bg-white text-black border-2 sm:border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-primary hover:text-white hover:border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all duration-200 comic-pop comic-text-bold dark:hover:border-white/50"
             onClick={handleCreateClick}
             aria-label="Create a new story"
           >
@@ -246,7 +257,7 @@ export function Header() {
           <UserNav />
 
           {/* Mobile Menu */}
-          <div className="md:hidden">
+          <div className="xl:hidden">
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
                 <Button

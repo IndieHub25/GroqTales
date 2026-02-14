@@ -15,20 +15,21 @@
   <img src="https://img.shields.io/badge/status-active-brightgreen?style=flat-square" alt="Active"/>
   <img src="https://img.shields.io/badge/contributions-welcome-blueviolet?style=flat-square" alt="Contributions Welcome"/>
   <img src="https://img.shields.io/badge/website-groqtales.xyz-0052cc?style=flat-square" alt="Website"/>
-  <a href="mailto:support@groqtales.xyz"><img src="https://img.shields.io/badge/contact-support%40groqtales.xyz-orange?style=flat-square" alt="Contact Us"/></a>
+  <a href="mailto:mantejarora@gmail.com"><img src="https://img.shields.io/badge/contact-mantejarora%40gmail.com-orange?style=flat-square" alt="Contact Us"/></a>
   <a href="https://discord.gg/JK29FZRm"><img src="https://img.shields.io/discord/1245696768829601812?label=Discord&logo=discord&style=flat-square" alt="Discord"/></a>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/SWOC'26-Open%20Source-orange?style=flat-square" alt="SWOC'26"/>
+  <img src="https://img.shields.io/badge/OSGC'26-Open%20Source-purple?style=flat-square" alt="OSGC'26"/>
+  <img src="https://img.shields.io/badge/ECWOC'26-Open%20Source-ff69b4?style=flat-square" alt="ECWOC'26"/>
   <img src="https://img.shields.io/badge/GSSOC'25-Legacy-lightgrey?style=flat-square" alt="GSSOC'25"/>
-  <img src="https://img.shields.io/badge/FOSS%20Hack-Open%20Source-blue?style=flat-square" alt="FOSS Hack"/>
-  <img src="https://img.shields.io/badge/LGM--SOC-Open%20Source-purple?style=flat-square" alt="LGM-SOC"/>
-  <img src="https://img.shields.io/badge/MLH-Open%20Source-red?style=flat-square" alt="MLH"/>
-  <img src="https://img.shields.io/badge/HackinCodes-Open%20Source-green?style=flat-square" alt="HackinCodes"/>
-  <img src="https://img.shields.io/badge/cWoc-Open%20Source-ff69b4?style=flat-square" alt="cWoc"/>
+  <img src="https://img.shields.io/badge/FOSS%20Hack-Legacy-lightgrey?style=flat-square" alt="FOSS Hack"/>
+  <img src="https://img.shields.io/badge/HACKOCTOBER-Legacy-lightgrey?style=flat-square" alt="HACKOCTOBER"/>
   <img src="https://img.shields.io/badge/Indie%20Hub-Main%20Partner-6e5494?style=flat-square" alt="Indie Hub"/>
+  <img src="https://img.shields.io/badge/Indie%20Developers%20Society-Community%20Partner-6e5494?style=flat-square" alt="Indie Developers Society"/>
   <img src="https://img.shields.io/badge/Open%20Source%20Community-Welcome-0052cc?style=flat-square" alt="Open Source Community"/>
+  <img src="https://img.shields.io/badge/Investment%20Partners-Applications%20Open-0052cc?style=flat-square" alt="Investment Partners"/>
 </p>
 
 <p align="center">
@@ -363,12 +364,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## Roadmap
 
-- AI visuals: Integrate Stable Diffusion/DALL·E for comic panels
-- Multilingual story generation
-- Native marketplace for story NFTs
-- Enhanced wallet security & decentralized data storage
-- Mobile app support
-- More blockchain integrations
+- AI visuals: Integrate Stable Diffusion/DALL·E for comic panels [Phase 2]
+- Multilingual story generation [Phase 4]
+- Native marketplace for story NFTs [Phase 1]
+- Enhanced wallet security & decentralized data storage [Phase 1]
+- Mobile app support [Phase 5]
+- More blockchain integrations [Open for Discussions on Ideas]
 
 ---
 

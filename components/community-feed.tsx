@@ -61,37 +61,37 @@ const mockUsers: Array<{
   name: string;
   avatar: string;
 }> = [
-  {
-    id: 1,
-    name: 'Alex Chen',
-    avatar:
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-  },
-  {
-    id: 2,
-    name: 'Sarah Johnson',
-    avatar:
-      'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-  },
-  {
-    id: 3,
-    name: 'Michael Brown',
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-  },
-  {
-    id: 4,
-    name: 'Emily Davis',
-    avatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-  },
-  {
-    id: 5,
-    name: 'David Wilson',
-    avatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-  },
-];
+    {
+      id: 1,
+      name: 'Alex Chen',
+      avatar:
+        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+    },
+    {
+      id: 2,
+      name: 'Sarah Johnson',
+      avatar:
+        'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+    },
+    {
+      id: 3,
+      name: 'Michael Brown',
+      avatar:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+    },
+    {
+      id: 4,
+      name: 'Emily Davis',
+      avatar:
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+    },
+    {
+      id: 5,
+      name: 'David Wilson',
+      avatar:
+        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+    },
+  ];
 
 const mockPosts: CommunityPost[] = [
   {
@@ -387,7 +387,7 @@ export default function CommunityFeed() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between bg-muted/50 p-4 rounded-lg">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between bg-muted/50 p-4 rounded-lg gap-4">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
