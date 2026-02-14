@@ -171,11 +171,10 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
                 variant="outline"
                 aria-label={`${option.title}: ${option.description}`}
                 aria-pressed={selectedOption === option.id}
-                className={`w-full h-auto p-4 justify-start gap-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none whitespace-normal text-left transition-all bg-white ${
-                  selectedOption === option.id
+                className={`w-full h-auto p-4 justify-start gap-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none whitespace-normal text-left transition-all bg-white ${selectedOption === option.id
                     ? 'bg-primary/10 border-primary ring-2 ring-primary ring-inset'
                     : ''
-                }`}
+                  }`}
                 onClick={() => handleOptionSelect(option)}
               >
                 <div className="flex items-center justify-center w-12 h-12 rounded-none bg-black text-white shrink-0 border-2 border-white/20 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" aria-hidden="true">
@@ -251,20 +250,20 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
               </h3>
               <div className="grid grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-2 pb-2 custom-scrollbar">
                 {genres.map((genre) => (
-                  <div
+                  <button
+                    type="button"
                     key={genre.slug}
                     onClick={() => handleGenreChange(genre.slug)}
-                    className={`border-4 border-black p-4 cursor-pointer hover:bg-black/5 flex items-center space-x-3 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
-                      selectedGenre === genre.slug
+                    className={`border-4 border-black p-4 cursor-pointer hover:bg-black/5 flex items-center space-x-3 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none w-full text-left ${selectedGenre === genre.slug
                         ? 'bg-primary/10 border-primary shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] translate-x-[2px] translate-y-[2px]'
                         : ''
-                    }`}
+                      }`}
                   >
                     <div className="text-2xl shrink-0">{genre.icon}</div>
                     <span className="text-xs font-black uppercase tracking-tighter">
                       {genre.name}
                     </span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -273,11 +272,10 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
               <Button
                 onClick={handleContinue}
                 disabled={!selectedGenre}
-                className={`w-full h-14 text-lg font-black uppercase italic tracking-widest border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all ${
-                  !selectedGenre
+                className={`w-full h-14 text-lg font-black uppercase italic tracking-widest border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all ${!selectedGenre
                     ? 'bg-gray-200 text-gray-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] translate-y-0 opacity-100 cursor-not-allowed'
                     : 'bg-primary text-white hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none'
-                }`}
+                  }`}
               >
                 Go to Editor!
               </Button>
