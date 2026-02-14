@@ -30,7 +30,7 @@ export function UserNav() {
     const fetchUserData = async () => {
       if (account) {
         try {
-          const res = await fetch(`/api/v1/users/profile/${account}`);
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile/${account}`);
           if (res.ok) {
             const data = await res.json();
             setDbUser(data.user);
