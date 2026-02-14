@@ -25,10 +25,7 @@ const config: Config = {
         ring: 'var(--ring)',
         background: 'var(--background)',
         foreground: 'var(--foreground)',
-        primary: {
-          DEFAULT: 'var(--primary)',
-          foreground: 'var(--primary-foreground)',
-        },
+        primary: '#8B0000',
         secondary: {
           DEFAULT: 'var(--secondary)',
           foreground: 'var(--secondary-foreground)',
@@ -53,6 +50,12 @@ const config: Config = {
           DEFAULT: 'var(--card)',
           foreground: 'var(--card-foreground)',
         },
+        pulp: {
+          black: '#050505',
+          pure: '#E5E5E5',
+          dark: '#0a0a0a',
+          shadow: '#1a0000',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -60,6 +63,10 @@ const config: Config = {
         sm: 'var(--radius)',
       },
       fontFamily: {
+        display: ['Permanent Marker', 'cursive'],
+        impact: ['Big Shoulders Display', 'sans-serif'],
+        subheading: ['Roboto Condensed', 'sans-serif'],
+        body: ['Source Sans Pro', 'sans-serif'],
         comic: ['var(--font-comic)', 'cursive'],
       },
       boxShadow: {
