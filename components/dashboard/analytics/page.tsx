@@ -21,7 +21,7 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard label="Total Stories" value={insights?.totalStories || 0} icon={<BookOpen size={24}/>} />
-        <StatCard label="Words Woven" value={insights?.totalTokensUsed || 0} icon={<Zap size={24}/>} />
+        <StatCard label="Words Woven" value={insights?.totalWordCount || 0} icon={<Zap size={24}/>} />
         <StatCard label="Complexity" value="High" icon={<Cpu size={24}/>} />
         <StatCard label="Productivity" value="+12%" icon={<BarChart3 size={24}/>} />
       </div>

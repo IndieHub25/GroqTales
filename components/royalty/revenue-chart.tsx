@@ -83,7 +83,9 @@ export function RevenueChart({ transactions }: RevenueChartProps) {
               <Tooltip
                 content={({ active, payload }) => {
                   if (!active || !payload?.length) return null;
-                  const data = payload[0].payload;
+                  const first = payload?.[0];
+                  if (!first) return null;
+                  const data = first.payload as any;
                   return (
                     <div className="border-2 border-black bg-background p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                       <p className="text-sm font-bold">
