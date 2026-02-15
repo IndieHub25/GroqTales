@@ -140,7 +140,7 @@ const DANGEROUS_OUTPUT_PATTERNS: { name: string; pattern: RegExp }[] = [
   {
     name: 'leaked_api_key',
     pattern:
-      /(?:api[_-]?key|token|secret|password)\s*[=:]\s*["']?[A-Za-z0-9_\-]{20,}/i,
+      /(?:api[_-]?key|token|secret|password)\s*[=:]\s*["']?[A-Za-z0-9_-]{20,}/i,
   },
   {
     name: 'leaked_env_var',

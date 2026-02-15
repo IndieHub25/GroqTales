@@ -114,7 +114,7 @@ export async function checkTxStatus(txHash: string) {
 
       return {
         status: 'confirmed',
-        tokenId: tokenId,
+        tokenId,
         blockNumber: receipt.blockNumber,
       };
     } else {

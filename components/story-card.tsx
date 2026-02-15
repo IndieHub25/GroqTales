@@ -56,14 +56,14 @@ interface StoryCardProps {
   isAdmin?: boolean;
 }
 
-export const StoryCard = memo(function StoryCard({
+export const StoryCard = memo(({
   story,
   viewMode = 'grid',
   hideLink = false,
   showCreateButton = false,
   isWalletConnected = false,
   isAdmin = false,
-}: StoryCardProps) {
+}: StoryCardProps) => {
   const router = useRouter();
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
 
@@ -234,5 +234,6 @@ export const StoryCard = memo(function StoryCard({
     </>
   );
 });
+StoryCard.displayName = 'StoryCard';
 // Default export for backward compatibility
 export default StoryCard;

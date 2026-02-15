@@ -17,7 +17,7 @@ export async function getPersonalizedFeed(
   await connectMongoose();
   const skip = (page - 1) * limit;
 
-  const interactions = await UserInteraction.find({ userId: userId } as any)
+  const interactions = await UserInteraction.find({ userId } as any)
     .sort({ createdAt: -1 })
     .limit(50)
     .populate('storyId');

@@ -173,9 +173,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Stories</p>
-                  <p className="text-2xl font-bold">
-                    {profile?.storiesCount}
-                  </p>
+                  <p className="text-2xl font-bold">{profile?.storiesCount}</p>
                 </div>
               </div>
             </CardContent>
@@ -203,9 +201,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Views</p>
-                  <p className="text-2xl font-bold">
-                    {profile?.totalViews}
-                  </p>
+                  <p className="text-2xl font-bold">{profile?.totalViews}</p>
                 </div>
               </div>
             </CardContent>
@@ -219,9 +215,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Likes</p>
-                  <p className="text-2xl font-bold">
-                    {profile?.totalLikes}
-                  </p>
+                  <p className="text-2xl font-bold">{profile?.totalLikes}</p>
                 </div>
               </div>
             </CardContent>

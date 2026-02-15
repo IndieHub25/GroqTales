@@ -107,7 +107,6 @@ export default function SettingsPage() {
     mode: 'onChange',
   });
 
-
   useEffect(() => {
     const controller = new AbortController();
     async function hydrate() {

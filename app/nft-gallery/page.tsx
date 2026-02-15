@@ -29,7 +29,8 @@ import { useToast } from '@/components/ui/use-toast';
 
 // Lightweight animation fallbacks with optional framer-motion integration.
 
-const MotionDiv = React.forwardRef(function MotionDiv(props: any, ref: any) {
+const MotionDiv = React.forwardRef((props: any, ref: any) => {
+  // eslint-disable-next-line react/display-name
   const [Comp, setComp] = useState<any>(() => (innerProps: any) => (
     <div {...innerProps} ref={ref} />
   ));
@@ -51,6 +52,7 @@ const MotionDiv = React.forwardRef(function MotionDiv(props: any, ref: any) {
 
   return <Comp {...props} ref={ref} />;
 });
+MotionDiv.displayName = 'MotionDiv';
 
 const motion = { div: MotionDiv, motion: { div: MotionDiv } };
 
@@ -58,6 +60,7 @@ const AnimatePresence = ({
   children,
   ...rest
 }: { children: React.ReactNode } & any) => {
+  // eslint-disable-next-line react/display-name
   const [Comp, setComp] = useState<any>(() => ({ children }: any) => (
     <>{children}</>
   ));
@@ -167,7 +170,7 @@ const featuredNFTs: NFTStory[] = [
 ];
 
 // Modal (resolved conflicts)
-const NFTDetailModal = memo(function NFTDetailModal({
+const NFTDetailModal = memo(({
   nft,
   isOpen,
   onClose,
@@ -179,7 +182,7 @@ const NFTDetailModal = memo(function NFTDetailModal({
   onClose: () => void;
   onLike: (id: string) => void;
   onPurchase: (id: string) => void;
-}) {
+}) => {
   if (!nft) return null;
 
   return (
@@ -303,6 +306,7 @@ const NFTDetailModal = memo(function NFTDetailModal({
     </Dialog>
   );
 });
+NFTDetailModal.displayName = 'NFTDetailModal';
 
 export default function NFTGalleryPage() {
   return <div className="container mx-auto py-8 px-4">NFT Gallery</div>;
