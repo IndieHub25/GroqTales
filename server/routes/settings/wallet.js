@@ -1,8 +1,9 @@
 const router = require('express').Router();
 const { authRequired: requireAuth } = require('../../middleware/auth');
+const settingsLimiter = require('../../middleware/settingsLimiter');
 const User = require('../../models/User');
 
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', settingsLimiter, requireAuth, async (req, res) => {
   //   if (!req.user.wallet) {
   //     return res.json({
   //         success: true,
@@ -31,7 +32,7 @@ router.get('/', requireAuth, async (req, res) => {
   }
 });
 
-router.put('/', requireAuth, async (req, res) => {
+router.put('/', settingsLimiter, requireAuth, async (req, res) => {
   try {
     const { address } = req.body;
 
