@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
 import clientPromise from './mongodb';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * ---------------------------------------------------------
@@ -167,3 +168,20 @@ export function createObjectId(id: string) {
 }
 
 export { clientPromise };
+
+/**
+ * ---------------------------------------------------------
+ * PRISMA CLIENT EXPORT
+ * ---------------------------------------------------------
+ * This singleton instance prevents multiple connections
+ * during Next.js hot-reloading.
+ */
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
+
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: ['query', 'error', 'warn'],
+  });
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
