@@ -1,6 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
 import { X, Download } from 'lucide-react';
 
 interface Web3ContextType {
@@ -38,11 +44,11 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   const disconnectWallet = useCallback(async () => {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings/wallet`, {
-        method: "DELETE",
-        credentials: "include",
+        method: 'DELETE',
+        credentials: 'include',
       });
     } catch (err) {
-      console.error("Failed to disconnect wallet on server:", err);
+      console.error('Failed to disconnect wallet on server:', err);
     }
     setAccount(null);
     setChainId(null);
@@ -68,13 +74,13 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
 
       try {
         const balanceWei = await ethereum.request({
-          method: "eth_getBalance",
-          params: [selectedAccount, "latest"],
+          method: 'eth_getBalance',
+          params: [selectedAccount, 'latest'],
         });
         const balanceEth = Number(BigInt(balanceWei)) / 1e18;
         setBalance(balanceEth.toFixed(4));
       } catch (err) {
-        console.error("Failed to refresh balance:", err);
+        console.error('Failed to refresh balance:', err);
       }
     };
 
@@ -112,7 +118,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
 
       const balanceWei = await ethereum.request({
         method: 'eth_getBalance',
-        params: [selectedAccount, "latest"],
+        params: [selectedAccount, 'latest'],
       });
 
       const balanceEth = Number(BigInt(balanceWei)) / 1e18;
@@ -123,9 +129,9 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       setConnected(true);
 
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings/wallet`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ address: selectedAccount }),
       });
     } catch (error) {
@@ -191,7 +197,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
 export function useWeb3() {
   const context = useContext(Web3Context);
   if (!context) {
-    throw new Error("useWeb3 must be used within Web3Provider");
+    throw new Error('useWeb3 must be used within Web3Provider');
   }
   return context;
 }

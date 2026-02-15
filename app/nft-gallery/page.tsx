@@ -30,7 +30,9 @@ import { useToast } from '@/components/ui/use-toast';
 // Lightweight animation fallbacks with optional framer-motion integration.
 
 const MotionDiv = React.forwardRef(function MotionDiv(props: any, ref: any) {
-  const [Comp, setComp] = useState<any>(() => (innerProps: any) => <div {...innerProps} ref={ref} />);
+  const [Comp, setComp] = useState<any>(() => (innerProps: any) => (
+    <div {...innerProps} ref={ref} />
+  ));
 
   useEffect(() => {
     let mounted = true;
@@ -52,8 +54,13 @@ const MotionDiv = React.forwardRef(function MotionDiv(props: any, ref: any) {
 
 const motion = { div: MotionDiv, motion: { div: MotionDiv } };
 
-const AnimatePresence = ({ children, ...rest }: { children: React.ReactNode } & any) => {
-  const [Comp, setComp] = useState<any>(() => ({ children }: any) => <>{children}</>);
+const AnimatePresence = ({
+  children,
+  ...rest
+}: { children: React.ReactNode } & any) => {
+  const [Comp, setComp] = useState<any>(() => ({ children }: any) => (
+    <>{children}</>
+  ));
 
   useEffect(() => {
     let mounted = true;
@@ -91,16 +98,36 @@ function useReducedMotion(): boolean {
 }
 
 // Simple icon replacements
-const Heart = ({ className = '' }: { className?: string }) => <span className={className}>♥</span>;
-const Eye = ({ className = '' }: { className?: string }) => <span className={className}>👁</span>;
-const ShoppingCart = ({ className = '' }: { className?: string }) => <span className={className}>🛒</span>;
-const Search = ({ className = '' }: { className?: string }) => <span className={className}>🔍</span>;
-const Filter = ({ className = '' }: { className?: string }) => <span className={className}>⚙</span>;
-const TrendingUp = ({ className = '' }: { className?: string }) => <span className={className}>📈</span>;
-const Star = ({ className = '' }: { className?: string }) => <span className={className}>⭐</span>;
-const Palette = ({ className = '' }: { className?: string }) => <span className={className}>🎨</span>;
-const BookOpen = ({ className = '' }: { className?: string }) => <span className={className}>📖</span>;
-const Users = ({ className = '' }: { className?: string }) => <span className={className}>👥</span>;
+const Heart = ({ className = '' }: { className?: string }) => (
+  <span className={className}>♥</span>
+);
+const Eye = ({ className = '' }: { className?: string }) => (
+  <span className={className}>👁</span>
+);
+const ShoppingCart = ({ className = '' }: { className?: string }) => (
+  <span className={className}>🛒</span>
+);
+const Search = ({ className = '' }: { className?: string }) => (
+  <span className={className}>🔍</span>
+);
+const Filter = ({ className = '' }: { className?: string }) => (
+  <span className={className}>⚙</span>
+);
+const TrendingUp = ({ className = '' }: { className?: string }) => (
+  <span className={className}>📈</span>
+);
+const Star = ({ className = '' }: { className?: string }) => (
+  <span className={className}>⭐</span>
+);
+const Palette = ({ className = '' }: { className?: string }) => (
+  <span className={className}>🎨</span>
+);
+const BookOpen = ({ className = '' }: { className?: string }) => (
+  <span className={className}>📖</span>
+);
+const Users = ({ className = '' }: { className?: string }) => (
+  <span className={className}>👥</span>
+);
 
 interface NFTStory {
   id: string;
@@ -123,15 +150,18 @@ const featuredNFTs: NFTStory[] = [
     id: '1',
     title: "The Last Dragon's Tale",
     author: 'Elena Stormweaver',
-    authorAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Elena&backgroundColor=f3e8ff',
-    coverImage: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=1200&fit=crop&q=80',
+    authorAvatar:
+      'https://api.dicebear.com/7.x/bottts/svg?seed=Elena&backgroundColor=f3e8ff',
+    coverImage:
+      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=1200&fit=crop&q=80',
     price: '2.5 ETH',
     likes: 1247,
     views: 15420,
     genre: 'Epic Fantasy',
     isTop10: true,
     sales: 156,
-    description: 'An epic tale of the last dragon and the young mage destined to either save or destroy the realm.',
+    description:
+      'An epic tale of the last dragon and the young mage destined to either save or destroy the realm.',
     rarity: 'Legendary',
   },
 ];
@@ -156,7 +186,9 @@ const NFTDetailModal = memo(function NFTDetailModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 border-slate-200 dark:border-slate-800">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-foreground">{nft.title}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-foreground">
+            {nft.title}
+          </DialogTitle>
           <DialogDescription className="text-muted-foreground">
             by {nft.author}
           </DialogDescription>
@@ -174,19 +206,28 @@ const NFTDetailModal = memo(function NFTDetailModal({
                 priority
               />
               {nft.rarity && (
-                <div className={`absolute top-3 right-3 px-3 py-1 rounded-full font-bold text-sm ${
-                  nft.rarity === 'Legendary' ? 'bg-yellow-500 text-yellow-900' :
-                  nft.rarity === 'Epic' ? 'bg-purple-500 text-white' :
-                  nft.rarity === 'Rare' ? 'bg-blue-500 text-white' :
-                  'bg-gray-500 text-white'
-                }`}>
+                <div
+                  className={`absolute top-3 right-3 px-3 py-1 rounded-full font-bold text-sm ${
+                    nft.rarity === 'Legendary'
+                      ? 'bg-yellow-500 text-yellow-900'
+                      : nft.rarity === 'Epic'
+                        ? 'bg-purple-500 text-white'
+                        : nft.rarity === 'Rare'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-500 text-white'
+                  }`}
+                >
                   {nft.rarity}
                 </div>
               )}
             </div>
 
             <div className="flex gap-3">
-              <Button onClick={() => onLike(nft.id)} variant="outline" className="flex-1">
+              <Button
+                onClick={() => onLike(nft.id)}
+                variant="outline"
+                className="flex-1"
+              >
                 <Heart className="w-4 h-4 mr-2" />
                 Like ({nft.likes})
               </Button>
@@ -200,34 +241,57 @@ const NFTDetailModal = memo(function NFTDetailModal({
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-2">Description</h3>
-              <p className="text-slate-700 dark:text-slate-300">{nft.description}</p>
+              <p className="text-slate-700 dark:text-slate-300">
+                {nft.description}
+              </p>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-3">Additional Information</h3>
+              <h3 className="text-lg font-semibold mb-3">
+                Additional Information
+              </h3>
               <div className="space-y-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800">
                 <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">NFT ID:</span>
-                  <span className="font-mono bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded">{nft.id}</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">
+                    NFT ID:
+                  </span>
+                  <span className="font-mono bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded">
+                    {nft.id}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">Price:</span>
-                  <span className="font-bold text-green-600 dark:text-green-400 text-lg">{nft.price}</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">
+                    Price:
+                  </span>
+                  <span className="font-bold text-green-600 dark:text-green-400 text-lg">
+                    {nft.price}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground font-medium">Rarity:</span>
-                  <span className={`font-medium px-2 py-1 rounded ${
-                    (nft.rarity || 'Common') === 'Legendary' ? 'bg-yellow-500 text-yellow-900' :
-                    (nft.rarity || 'Common') === 'Epic' ? 'bg-purple-500 text-white' :
-                    (nft.rarity || 'Common') === 'Rare' ? 'bg-blue-500 text-white' :
-                    'bg-gray-500 text-white'
-                  }`}>
+                  <span className="text-muted-foreground font-medium">
+                    Rarity:
+                  </span>
+                  <span
+                    className={`font-medium px-2 py-1 rounded ${
+                      (nft.rarity || 'Common') === 'Legendary'
+                        ? 'bg-yellow-500 text-yellow-900'
+                        : (nft.rarity || 'Common') === 'Epic'
+                          ? 'bg-purple-500 text-white'
+                          : (nft.rarity || 'Common') === 'Rare'
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-500 text-white'
+                    }`}
+                  >
                     {nft.rarity || 'Common'}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground font-medium">Status:</span>
-                  <span className={`font-medium px-2 py-1 rounded ${nft.isTop10 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-500 text-white'}`}>
+                  <span className="text-muted-foreground font-medium">
+                    Status:
+                  </span>
+                  <span
+                    className={`font-medium px-2 py-1 rounded ${nft.isTop10 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-500 text-white'}`}
+                  >
                     {nft.isTop10 ? 'Featured' : 'Available'}
                   </span>
                 </div>

@@ -1,7 +1,7 @@
 # Performance Baseline Audit - GroqTales
 
 **Audit Date:** 2026-02-11 **Auditor:** Performance Budget Implementation (Issue #335)
-**Framework:** Next.js 14.1.0 (App Router) **Deployment:** Vercel
+**Framework:** Next.js 15.x (App Router) **Deployment:** Vercel
 
 ---
 
@@ -115,8 +115,8 @@
 
 1. **Replace all `<img>` with `<Image>`** - Use Next.js Image component with proper width/height,
    loading="lazy", and format optimization
-2. **Add `React.memo()` to NFTCard** - Receives stable props, re-renders unnecessarily on parent
-   state changes
+2. ~~**Add `React.memo()` to NFTCard**~~ — ✅ Already wrapped with `memo()` in
+   `nft-gallery/page.tsx`
 3. **Lazy load GalaxyBackground** - Use `next/dynamic` with `ssr: false` since it's purely
    decorative
 4. **Simplify GalaxyBackground for mobile** - Reduce star count and disable meteors on mobile

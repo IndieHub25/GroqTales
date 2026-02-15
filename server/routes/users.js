@@ -49,7 +49,9 @@ router.get('/profile/:walletAddress', async (req, res) => {
         new: true,
       }
     )
-      .select('username bio avatar badges firstName lastName wallet walletAddress createdAt')
+      .select(
+        'username bio avatar badges firstName lastName wallet walletAddress createdAt'
+      )
       .lean();
 
     const stories = await Story.find({ author: user._id })

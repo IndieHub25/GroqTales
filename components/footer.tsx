@@ -99,7 +99,11 @@ export function Footer() {
                 Create • Mint • Own
               </div>
 
-              <div className="flex gap-3 pt-2" role="group" aria-label="Social media links">
+              <div
+                className="flex gap-3 pt-2"
+                role="group"
+                aria-label="Social media links"
+              >
                 {socialLinks.map((link) => (
                   <Link
                     key={link.url}

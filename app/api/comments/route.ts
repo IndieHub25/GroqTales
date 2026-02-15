@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { rateLimiters, checkRateLimit } from '@/lib/rate-limit';
+import { rateLimiters, checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 /**
  * Check if the request has admin privileges
@@ -15,8 +15,7 @@ function isAdminRequest(request: NextRequest): boolean {
  */
 export async function GET(request: NextRequest) {
   // Rate limit: 30 requests per minute
-  const ip =
-    request.headers.get('x-forwarded-for') ?? request.ip ?? '127.0.0.1';
+  const ip = getClientIp(request);
   const rateLimitResponse = await checkRateLimit(
     rateLimiters.general,
     `comments:${ip}`
@@ -92,8 +91,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   // Rate limit: 30 requests per minute
-  const ip =
-    request.headers.get('x-forwarded-for') ?? request.ip ?? '127.0.0.1';
+  const ip = getClientIp(request);
   const rateLimitResponse = await checkRateLimit(
     rateLimiters.general,
     `comments:${ip}`

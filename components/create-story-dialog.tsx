@@ -115,10 +115,16 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] p-0 border-4 border-black dark:border-slate-200 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] dark:shadow-[12px_12px_0px_0px_rgba(255,255,255,0.2)] bg-white dark:bg-slate-950 text-foreground max-h-[90vh] flex flex-col overflow-hidden" aria-describedby="create-story-description">
+      <DialogContent
+        className="sm:max-w-[500px] p-0 border-4 border-black dark:border-slate-200 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] dark:shadow-[12px_12px_0px_0px_rgba(255,255,255,0.2)] bg-white dark:bg-slate-950 text-foreground max-h-[90vh] flex flex-col overflow-hidden"
+        aria-describedby="create-story-description"
+      >
         <DialogHeader className="p-6 pb-2 text-left sm:text-left items-start space-y-0">
           <DialogTitle className="flex items-center gap-4 text-2xl font-black uppercase italic tracking-tight">
-            <div className="flex items-center justify-center w-10 h-10 bg-black text-white dark:bg-white dark:text-black shrink-0" aria-hidden="true">
+            <div
+              className="flex items-center justify-center w-10 h-10 bg-black text-white dark:bg-white dark:text-black shrink-0"
+              aria-hidden="true"
+            >
               <PenSquare className="w-6 h-6" />
             </div>
             <span>{currentStep === 1 ? 'Create Story' : 'Story Details'}</span>
@@ -138,7 +144,10 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
 
         {currentStep === 1 && (
           <div className="flex flex-col gap-4 p-6 pt-2 overflow-y-auto custom-scrollbar">
-            <p id="create-story-description" className="text-sm font-bold text-muted-foreground uppercase mb-2">
+            <p
+              id="create-story-description"
+              className="text-sm font-bold text-muted-foreground uppercase mb-2"
+            >
               Choose your creative path:
             </p>
             {createOptions.map((option) => (
@@ -148,7 +157,10 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
                 className={`w-full h-auto p-4 justify-start gap-5 border-4 border-black dark:border-slate-200 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-[6px_6px_0px_0px_rgba(255,255,255,0.2)] whitespace-normal text-left transition-all bg-white dark:bg-slate-900`}
                 onClick={() => handleOptionSelect(option)}
               >
-                <div className="flex items-center justify-center w-12 h-12 rounded-none bg-black text-white dark:bg-white dark:text-black shrink-0 border-2 border-white/20 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-none" aria-hidden="true">
+                <div
+                  className="flex items-center justify-center w-12 h-12 rounded-none bg-black text-white dark:bg-white dark:text-black shrink-0 border-2 border-white/20 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-none"
+                  aria-hidden="true"
+                >
                   {React.cloneElement(option.icon as React.ReactElement, {
                     className: 'w-6 h-6',
                     strokeWidth: 2.5,
@@ -170,27 +182,50 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
         {currentStep === 2 && (
           <div className="flex flex-col gap-6 p-6 pt-2 overflow-y-auto custom-scrollbar flex-1">
             <div className="space-y-4">
-              <h3 className="font-black text-lg uppercase italic tracking-tight">1. Story Format</h3>
-              <RadioGroup defaultValue={selectedFormat} onValueChange={handleFormatChange} className="grid grid-cols-2 gap-4">
+              <h3 className="font-black text-lg uppercase italic tracking-tight">
+                1. Story Format
+              </h3>
+              <RadioGroup
+                defaultValue={selectedFormat}
+                onValueChange={handleFormatChange}
+                className="grid grid-cols-2 gap-4"
+              >
                 <div className="flex items-center space-x-3 border-4 border-black dark:border-slate-200 p-4 cursor-pointer bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)]">
-                  <RadioGroupItem value="free" id="free" className="border-2 border-black" />
-                  <Label htmlFor="free" className="flex flex-col cursor-pointer">
+                  <RadioGroupItem
+                    value="free"
+                    id="free"
+                    className="border-2 border-black"
+                  />
+                  <Label
+                    htmlFor="free"
+                    className="flex flex-col cursor-pointer"
+                  >
                     <span className="font-black uppercase text-sm">Free</span>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Public</span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                      Public
+                    </span>
                   </Label>
                 </div>
                 <div className="flex items-center space-x-3 border-4 border-black dark:border-slate-200 p-4 cursor-pointer bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)]">
-                  <RadioGroupItem value="nft" id="nft" className="border-2 border-black" />
+                  <RadioGroupItem
+                    value="nft"
+                    id="nft"
+                    className="border-2 border-black"
+                  />
                   <Label htmlFor="nft" className="flex flex-col cursor-pointer">
                     <span className="font-black uppercase text-sm">NFT</span>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Mintable</span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                      Mintable
+                    </span>
                   </Label>
                 </div>
               </RadioGroup>
             </div>
 
             <div className="space-y-4">
-              <h3 className="font-black text-lg uppercase italic tracking-tight">2. Choose Genre</h3>
+              <h3 className="font-black text-lg uppercase italic tracking-tight">
+                2. Choose Genre
+              </h3>
               <div className="grid grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-2 pb-2 custom-scrollbar">
                 {genres.map((genre) => (
                   <div
@@ -208,7 +243,11 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
             </div>
 
             <div className="mt-2 pb-2">
-              <Button onClick={handleContinue} disabled={!selectedGenre} className="w-full h-14 text-lg font-black uppercase italic tracking-widest border-4 border-black dark:border-slate-200">
+              <Button
+                onClick={handleContinue}
+                disabled={!selectedGenre}
+                className="w-full h-14 text-lg font-black uppercase italic tracking-widest border-4 border-black dark:border-slate-200"
+              >
                 Go to Editor!
               </Button>
             </div>

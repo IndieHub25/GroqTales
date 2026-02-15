@@ -36,8 +36,25 @@ export const rateLimiters = {
 };
 
 /**
+ * Extracts the real client IP from x-forwarded-for header.
+ * Takes the first (leftmost) IP, trims whitespace, falls back to request.ip or '127.0.0.1'.
+ */
+export function getClientIp(request: {
+  headers: Headers;
+  ip?: string;
+}): string {
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) {
+    const firstIp = forwarded.split(',')[0]?.trim();
+    if (firstIp) return firstIp;
+  }
+  return request.ip ?? '127.0.0.1';
+}
+
+/**
  * Checks rate limit for the given identifier.
  * Returns a 429 NextResponse if the limit is exceeded, or `null` if allowed.
+ * Fails open (returns null) on Redis/network errors to avoid blocking requests.
  */
 export async function checkRateLimit(
   limiter: Ratelimit | null,
@@ -45,21 +62,27 @@ export async function checkRateLimit(
 ): Promise<NextResponse | null> {
   if (!limiter) return null; // rate limiting disabled
 
-  const { success, limit, remaining, reset } = await limiter.limit(identifier);
+  try {
+    const { success, limit, remaining, reset } =
+      await limiter.limit(identifier);
 
-  if (!success) {
-    return NextResponse.json(
-      { error: 'Too many requests. Please try again later.' },
-      {
-        status: 429,
-        headers: {
-          'X-RateLimit-Limit': limit.toString(),
-          'X-RateLimit-Remaining': remaining.toString(),
-          'X-RateLimit-Reset': reset.toString(),
-        },
-      }
-    );
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': limit.toString(),
+            'X-RateLimit-Remaining': remaining.toString(),
+            'X-RateLimit-Reset': reset.toString(),
+          },
+        }
+      );
+    }
+
+    return null;
+  } catch (error) {
+    console.error('[rate-limit] Redis error, failing open:', error);
+    return null; // fail open — allow the request through
   }
-
-  return null;
 }

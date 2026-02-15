@@ -14,7 +14,7 @@ try {
 export async function GET(req: Request) {
   try {
     let session = null;
-    
+
     // Safely call auth if available
     if (typeof authFunction === 'function') {
       try {
@@ -23,7 +23,7 @@ export async function GET(req: Request) {
         console.warn('Auth call failed, using public feed:', authErr);
       }
     }
-    
+
     const { searchParams } = new URL(req.url);
     const page = Math.max(
       1,

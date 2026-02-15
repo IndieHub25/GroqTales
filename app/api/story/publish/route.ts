@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth';
 import Story from '../../../../models/Story';
 import Outbox from '../../../../models/Outbox';
 import dbConnect from '@/lib/dbConnect';
-import { rateLimiters, checkRateLimit } from '@/lib/rate-limit';
+import { rateLimiters, checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 interface CustomUser {
   name?: string | null;
@@ -16,7 +16,7 @@ interface CustomUser {
 
 export async function POST(req: NextRequest) {
   // Rate limit: 5 requests per minute for publishing
-  const ip = req.headers.get('x-forwarded-for') ?? req.ip ?? '127.0.0.1';
+  const ip = getClientIp(req);
   const rateLimitResponse = await checkRateLimit(
     rateLimiters.publish,
     `publish:${ip}`

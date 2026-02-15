@@ -5,6 +5,8 @@ import Story from '../models/Story';
 import { mintNFT, checkTxStatus } from '@/lib/blockchain';
 
 const MAX_RETRIES = 20;
+const MAX_PENDING_AGE_MS = 30 * 60 * 1000; // 30 minutes
+const MAX_PENDING_RETRIES = 60; // cap on how many times we re-check a pending tx
 
 async function processOutbox() {
   await dbConnect();
@@ -45,20 +47,53 @@ async function processOutbox() {
     );
 
     const currentAttempts = event.attempts || 0;
+    const currentPendingAttempts = event.pendingAttempts || 0;
 
-    const nextAttempts = isPendingTx ? currentAttempts : currentAttempts + 1;
+    if (isPendingTx) {
+      // Check if the pending transaction has aged out
+      const processedAt = event.processedAt || event.createdAt;
+      const age = Date.now() - new Date(processedAt).getTime();
+      const pendingExpired =
+        age > MAX_PENDING_AGE_MS ||
+        currentPendingAttempts + 1 >= MAX_PENDING_RETRIES;
 
-    const status =
-      nextAttempts >= MAX_RETRIES && !isPendingTx ? 'failed' : 'pending';
-
-    await Outbox.updateOne(
-      { _id: event._id },
-      {
-        status,
-        attempts: nextAttempts,
-        lastError: errorMsg.substring(0, 500),
+      if (pendingExpired) {
+        console.log(
+          `💀 [${event._id}] Pending tx expired (age: ${Math.round(age / 1000)}s, pendingAttempts: ${currentPendingAttempts + 1})`
+        );
+        await Outbox.updateOne(
+          { _id: event._id },
+          {
+            status: 'failed',
+            attempts: currentAttempts,
+            pendingAttempts: currentPendingAttempts + 1,
+            lastError: `Transaction pending timeout after ${Math.round(age / 1000)}s`,
+          }
+        );
+      } else {
+        await Outbox.updateOne(
+          { _id: event._id },
+          {
+            status: 'pending',
+            attempts: currentAttempts,
+            pendingAttempts: currentPendingAttempts + 1,
+            lastError: errorMsg.substring(0, 500),
+          }
+        );
       }
-    );
+    } else {
+      const nextAttempts = currentAttempts + 1;
+      const status = nextAttempts >= MAX_RETRIES ? 'failed' : 'pending';
+
+      await Outbox.updateOne(
+        { _id: event._id },
+        {
+          status,
+          attempts: nextAttempts,
+          lastError: errorMsg.substring(0, 500),
+        }
+      );
+    }
   }
 }
 

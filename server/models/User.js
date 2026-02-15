@@ -23,7 +23,7 @@ const UserSchema = new mongoose.Schema(
     lastName: { type: String, default: 'Creator' },
     phone: { type: String, default: null },
 
-    bio: { type: String, maxlength: 500, default: "" },
+    bio: { type: String, maxlength: 500, default: '' },
     avatar: { type: String },
 
     badges: [{ type: String }], // Array to store earned badges like 'Alpha Tester'

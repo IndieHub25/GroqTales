@@ -1,15 +1,16 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Homepage', () => {
+  const errors: string[] = [];
+
   test.beforeEach(async ({ page }) => {
+    // Capture uncaught exceptions BEFORE navigation
+    errors.length = 0;
+    page.on('pageerror', (err) => errors.push(err.message));
     await page.goto('/');
   });
 
   test('loads without errors', async ({ page }) => {
-    // Verify no uncaught exceptions
-    const errors: string[] = [];
-    page.on('pageerror', (err) => errors.push(err.message));
-
     await page.waitForLoadState('networkidle');
     expect(errors).toHaveLength(0);
   });
@@ -18,8 +19,8 @@ test.describe('Homepage', () => {
     // Hero tagline
     await expect(page.getByText('The Future of Storytelling')).toBeVisible();
 
-    // Main heading text
-    await expect(page.getByText('Create')).toBeVisible();
+    // Main heading — use heading role to avoid matching multiple elements
+    await expect(page.getByRole('heading', { name: /create/i })).toBeVisible();
 
     // CTA button
     await expect(

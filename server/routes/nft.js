@@ -74,8 +74,10 @@ router.get('/', async (req, res) => {
 
     if (priceRange) {
       const [minRaw, maxRaw] = priceRange.split('-');
-      const min = minRaw !== undefined && minRaw !== '' ? Number(minRaw) : undefined;
-      const max = maxRaw !== undefined && maxRaw !== '' ? Number(maxRaw) : undefined;
+      const min =
+        minRaw !== undefined && minRaw !== '' ? Number(minRaw) : undefined;
+      const max =
+        maxRaw !== undefined && maxRaw !== '' ? Number(maxRaw) : undefined;
 
       nftFilter.price = {};
 
@@ -156,18 +158,24 @@ router.post('/mint', authRequired, async (req, res) => {
 
     const royaltyPercentage = Number(rawRoyalty);
     if (!Number.isFinite(royaltyPercentage)) {
-      return res.status(400).json({ error: 'royaltyPercentage must be a valid number' });
+      return res
+        .status(400)
+        .json({ error: 'royaltyPercentage must be a valid number' });
     }
 
     if (!storyId || !metadataURI) {
-      return res.status(400).json({ error: 'storyId and metadataURI are required' });
+      return res
+        .status(400)
+        .json({ error: 'storyId and metadataURI are required' });
     }
 
     if (
       metadata &&
       (typeof metadata !== 'object' || Object.keys(metadata).length === 0)
     ) {
-      return res.status(400).json({ error: 'metadata must be a valid JSON object if provided' });
+      return res
+        .status(400)
+        .json({ error: 'metadata must be a valid JSON object if provided' });
     }
 
     if (!mongoose.Types.ObjectId.isValid(storyId)) {
@@ -265,7 +273,9 @@ router.delete('/burn/:Id', authRequired, async (req, res) => {
     }
 
     if (nft.owner.toString() !== req.user.id) {
-      return res.status(403).json({ error: 'You are not the owner of this NFT' });
+      return res
+        .status(403)
+        .json({ error: 'You are not the owner of this NFT' });
     }
 
     await nft.deleteOne();
@@ -292,7 +302,9 @@ router.patch('/list/:tokenId', authRequired, async (req, res) => {
   try {
     const price = Number(req.body.price);
     if (!Number.isFinite(price) || price < 0) {
-      return res.status(400).json({ error: 'Invalid price or price is missing' });
+      return res
+        .status(400)
+        .json({ error: 'Invalid price or price is missing' });
     }
 
     const tokenId = req.params.tokenId;
@@ -306,7 +318,9 @@ router.patch('/list/:tokenId', authRequired, async (req, res) => {
     }
 
     if (nft.owner.toString() !== req.user.id) {
-      return res.status(403).json({ error: 'You are not the owner of this NFT' });
+      return res
+        .status(403)
+        .json({ error: 'You are not the owner of this NFT' });
     }
 
     if (nft.isListed) {

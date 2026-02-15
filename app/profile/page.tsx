@@ -28,7 +28,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 // Sample user data
 // const userData = {
 //   name: 'Alex Thompson',
@@ -78,7 +78,7 @@ import { useState,useEffect } from 'react';
 //   // ... more stories
 // ];
 const [profile, setProfile] = useState<any>(null);
-const [stories,setStories] = useState<any[]>([]);
+const [stories, setStories] = useState<any[]>([]);
 const [loading, setLoading] = useState<any>(null);
 const [error, setError] = useState(false);
 
@@ -133,32 +133,31 @@ const StoryCard = ({ story }: any) => (
     </CardContent>
   </Card>
 );
-useEffect(()=>{
+useEffect(() => {
   const controller = new AbortController();
   async function loadProfile() {
     try {
       setLoading(true);
 
-      const res= await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile`,
-          {credentials: 'include', signal: controller.signal}
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile`,
+        { credentials: 'include', signal: controller.signal }
       );
-      if(!res.ok) throw new Error();
+      if (!res.ok) throw new Error();
       const json = await res.json();
       setProfile(json.user);
-      setStories(json.stories??[]);
-
-    }catch(err){
-      if((err as any).name!=='AbortError'){
+      setStories(json.stories ?? []);
+    } catch (err) {
+      if ((err as any).name !== 'AbortError') {
         setError(true);
       }
-    } finally{
+    } finally {
       setLoading(false);
     }
   }
   loadProfile();
-  return() => controller.abort();
-},[]);
+  return () => controller.abort();
+}, []);
 export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/80">

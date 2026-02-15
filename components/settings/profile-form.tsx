@@ -1,22 +1,28 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSession } from "next-auth/react";
+} from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { useSession } from 'next-auth/react';
 
 type ProfileData = {
   username: string;
@@ -50,22 +56,22 @@ export function ProfileForm() {
   useEffect(() => {
     async function loadProfile() {
       try {
-        const res = await fetch("/api/settings/profile");
+        const res = await fetch('/api/settings/profile');
         if (!res.ok) throw new Error();
 
         const data = await res.json();
-        setValue("username", data.username ?? "");
-        setValue("displayName", data.displayName ?? "");
-        setValue("bio", data.bio ?? "");
-        setValue("website", data.website ?? "");
-        setValue("location", data.location ?? "");
-        setValue("primaryGenre", data.primaryGenre ?? "other");
+        setValue('username', data.username ?? '');
+        setValue('displayName', data.displayName ?? '');
+        setValue('bio', data.bio ?? '');
+        setValue('website', data.website ?? '');
+        setValue('location', data.location ?? '');
+        setValue('primaryGenre', data.primaryGenre ?? 'other');
 
         setAvatarUrl(data.avatarUrl ?? null);
         setDisplayName(data.displayName ?? null);
       } catch (error) {
-        console.error("Failed to load profile", error);
-        toast.error("Failed to load profile");
+        console.error('Failed to load profile', error);
+        toast.error('Failed to load profile');
       }
     }
 
@@ -77,11 +83,14 @@ export function ProfileForm() {
   const onSubmit = async (data: ProfileData) => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/settings/profile`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/settings/profile`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        }
+      );
 
       if (!res.ok) throw new Error('Failed to update profile');
 
@@ -106,11 +115,17 @@ export function ProfileForm() {
           <div className="flex flex-col md:flex-row gap-4 items-start">
             <div>
               <Avatar className="w-24 h-24">
-                <AvatarImage src={avatarUrl || session?.user?.image || "/placeholder-avatar.jpg"} />
+                <AvatarImage
+                  src={
+                    avatarUrl ||
+                    session?.user?.image ||
+                    '/placeholder-avatar.jpg'
+                  }
+                />
                 <AvatarFallback>
                   {displayName?.slice(0, 2).toUpperCase() ||
                     session?.user?.name?.slice(0, 2).toUpperCase() ||
-                    "GT"}
+                    'GT'}
                 </AvatarFallback>
               </Avatar>
               <Button
