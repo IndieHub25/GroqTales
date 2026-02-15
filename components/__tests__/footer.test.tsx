@@ -15,9 +15,8 @@ import { Footer } from '../footer';
 // ---------------------------------------------------------------------------
 
 // Mock next/link to render a plain anchor
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({
+jest.mock('next/link', () => {
+  const MockLink = ({
     children,
     href,
     ...props
@@ -25,8 +24,10 @@ jest.mock('next/link', () => ({
     children: React.ReactNode;
     href: string;
     [key: string]: unknown;
-  }) => React.createElement('a', { href, ...props }, children),
-}));
+  }) => React.createElement('a', { href, ...props }, children);
+  MockLink.displayName = 'MockLink';
+  return { __esModule: true, default: MockLink };
+});
 
 // Mock AdminLoginModal (complex child not under test)
 jest.mock('../admin-login-modal', () => ({

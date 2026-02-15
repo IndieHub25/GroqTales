@@ -8,6 +8,7 @@ export interface IOutbox extends Document {
   createdAt: Date;
   processedAt?: Date;
   attempts: number;
+  pendingAttempts: number;
   lastError?: string;
 }
 
@@ -23,6 +24,7 @@ const OutboxSchema = new Schema<IOutbox>(
       index: true,
     },
     attempts: { type: Number, default: 0 },
+    pendingAttempts: { type: Number, default: 0 },
     lastError: { type: String },
     processedAt: { type: Date },
   },

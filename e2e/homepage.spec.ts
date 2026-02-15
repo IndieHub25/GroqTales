@@ -34,7 +34,9 @@ test.describe('Homepage', () => {
     // Feature cards
     await expect(page.getByText('AI Generation')).toBeVisible();
     await expect(page.getByText('NFT Ownership')).toBeVisible();
-    await expect(page.getByText('Community')).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Community' })
+    ).toBeVisible();
   });
 
   test('displays CTA section', async ({ page }) => {

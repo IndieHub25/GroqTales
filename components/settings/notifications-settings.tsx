@@ -67,9 +67,7 @@ export default function NotificationsSettings() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: {
-            [key]: value,
-          },
+          [key]: value,
         }),
       });
       if (!res.ok) {

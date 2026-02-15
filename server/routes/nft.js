@@ -66,8 +66,8 @@ const { authRequired } = require('../middleware/auth');
 
 router.get('/', async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 10));
     const { category, priceRange } = req.query;
 
     let nftFilter = {};

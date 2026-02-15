@@ -6,7 +6,7 @@ test.describe('Navigation', () => {
     await page.waitForLoadState('networkidle');
 
     // Click "View All" link in the Trending section which links to /nft-gallery
-    await page.getByRole('link', { name: /view all/i }).click();
+    await page.getByRole('link', { name: /view all/i }).first().click();
     await expect(page).toHaveURL(/\/nft-gallery/);
   });
 

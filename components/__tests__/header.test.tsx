@@ -25,32 +25,40 @@ jest.mock('next/navigation', () => ({
 }));
 
 // Mock next/image (Next.js optimized images don't render in jsdom)
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: (props: Record<string, unknown>) => {
+jest.mock('next/image', () => {
+  const MockImage = (props: Record<string, unknown>) => {
     // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
     return React.createElement('img', props);
-  },
-}));
+  };
+  MockImage.displayName = 'MockImage';
+  return { __esModule: true, default: MockImage };
+});
 
 // Mock framer-motion to render plain DOM elements
-jest.mock('framer-motion', () => ({
-  motion: {
-    header: React.forwardRef(
-      (props: Record<string, unknown>, ref: React.Ref<HTMLElement>) =>
-        React.createElement('header', { ...props, ref })
-    ),
-    div: React.forwardRef(
-      (props: Record<string, unknown>, ref: React.Ref<HTMLDivElement>) =>
-        React.createElement('div', { ...props, ref })
-    ),
-    button: React.forwardRef(
-      (props: Record<string, unknown>, ref: React.Ref<HTMLButtonElement>) =>
-        React.createElement('button', { ...props, ref })
-    ),
-  },
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
-}));
+jest.mock('framer-motion', () => {
+  const RefHeader = React.forwardRef(
+    (props: Record<string, unknown>, ref: React.Ref<HTMLElement>) =>
+      React.createElement('header', { ...props, ref })
+  );
+  RefHeader.displayName = 'MockMotionHeader';
+
+  const RefDiv = React.forwardRef(
+    (props: Record<string, unknown>, ref: React.Ref<HTMLDivElement>) =>
+      React.createElement('div', { ...props, ref })
+  );
+  RefDiv.displayName = 'MockMotionDiv';
+
+  const RefButton = React.forwardRef(
+    (props: Record<string, unknown>, ref: React.Ref<HTMLButtonElement>) =>
+      React.createElement('button', { ...props, ref })
+  );
+  RefButton.displayName = 'MockMotionButton';
+
+  return {
+    motion: { header: RefHeader, div: RefDiv, button: RefButton },
+    AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
+  };
+});
 
 // Mock Web3 provider
 jest.mock('@/components/providers/web3-provider', () => ({

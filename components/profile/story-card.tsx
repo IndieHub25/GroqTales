@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 
-interface StoryProps {
+export interface StoryProps {
   title: string;
   excerpt: string;
   coverImage: string;

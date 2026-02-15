@@ -100,17 +100,14 @@ export default function SettingsPage() {
     showWallet: false,
   });
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     mode: 'onChange',
   });
 
-  // const onSubmit = (data: ProfileFormValues) => {
-  //   // In a real app, this would save the data to the server
-  //   console.log(data);
-  //   // Show success message or redirect
-  // };
+
   useEffect(() => {
     const controller = new AbortController();
     async function hydrate() {
@@ -147,6 +144,9 @@ export default function SettingsPage() {
           userData.preferences?.privacy ?? {
             profileVisible: true,
             activityVisible: true,
+            storiesVisible: true,
+            showEmail: false,
+            showWallet: false,
           }
         );
 
@@ -158,7 +158,10 @@ export default function SettingsPage() {
           //primaryGenre: profileJson.user.primaryGenre ?? '',
         });
       } catch (err) {
-        console.error(err);
+        if ((err as Error).name !== 'AbortError') {
+          console.error(err);
+          setFetchError('Failed to load profile. Please try again.');
+        }
       } finally {
         setLoading(false);
       }
@@ -167,9 +170,8 @@ export default function SettingsPage() {
     return () => controller.abort();
   }, [form]);
   const onSubmit = (data: ProfileFormValues) => {
-    // In a real app, this would save the data to the server
-    console.log(data);
-    // Show success message or redirect
+    // TODO: Implement server-side persistence via PUT /api/v1/users/profile
+    console.log('Profile save not yet implemented:', data);
   };
   const savePreferences = async () => {
     try {
@@ -193,7 +195,15 @@ export default function SettingsPage() {
       console.error('Failed to save preferences:', err);
     }
   };
-  if (loading || !user) return <div className="p-8">Loading...</div>;
+  if (loading) return <div className="p-8">Loading...</div>;
+  if (fetchError)
+    return (
+      <div className="p-8 text-center">
+        <p className="text-red-500 mb-4">{fetchError}</p>
+        <Button onClick={() => window.location.reload()}>Retry</Button>
+      </div>
+    );
+  if (!user) return <div className="p-8">No user data available.</div>;
   return (
     <div className="container max-w-5xl mx-auto py-12 px-4 min-h-screen">
       <div className="mb-8">

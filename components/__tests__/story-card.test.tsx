@@ -24,9 +24,8 @@ jest.mock('next/navigation', () => ({
 }));
 
 // Mock next/link
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({
+jest.mock('next/link', () => {
+  const MockLink = ({
     children,
     href,
     ...props
@@ -34,23 +33,30 @@ jest.mock('next/link', () => ({
     children: React.ReactNode;
     href: string;
     [key: string]: unknown;
-  }) => React.createElement('a', { href, ...props }, children),
-}));
+  }) => React.createElement('a', { href, ...props }, children);
+  MockLink.displayName = 'MockLink';
+  return { __esModule: true, default: MockLink };
+});
 
 // Mock framer-motion
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: React.forwardRef(
-      (props: Record<string, unknown>, ref: React.Ref<HTMLDivElement>) =>
-        React.createElement('div', { ...props, ref })
-    ),
-    button: React.forwardRef(
-      (props: Record<string, unknown>, ref: React.Ref<HTMLButtonElement>) =>
-        React.createElement('button', { ...props, ref })
-    ),
-  },
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
-}));
+jest.mock('framer-motion', () => {
+  const RefDiv = React.forwardRef(
+    (props: Record<string, unknown>, ref: React.Ref<HTMLDivElement>) =>
+      React.createElement('div', { ...props, ref })
+  );
+  RefDiv.displayName = 'MockMotionDiv';
+
+  const RefButton = React.forwardRef(
+    (props: Record<string, unknown>, ref: React.Ref<HTMLButtonElement>) =>
+      React.createElement('button', { ...props, ref })
+  );
+  RefButton.displayName = 'MockMotionButton';
+
+  return {
+    motion: { div: RefDiv, button: RefButton },
+    AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
+  };
+});
 
 // Mock StoryCommentsDialog
 jest.mock('@/components/story-comments-dialog', () => ({

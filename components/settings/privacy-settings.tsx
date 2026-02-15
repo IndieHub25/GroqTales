@@ -19,6 +19,8 @@ type PrivacySettingsData = {
   activityVisible: boolean;
   showEmail: boolean;
   showWallet: boolean;
+  allowComments?: boolean;
+  dataCollection?: boolean;
 };
 const DEFAULTS: PrivacySettingsData = {
   profileVisible: true,
@@ -26,6 +28,8 @@ const DEFAULTS: PrivacySettingsData = {
   activityVisible: true,
   showEmail: false,
   showWallet: false,
+  allowComments: true,
+  dataCollection: true,
 };
 export default function PrivacySettings() {
   const [settings, setSettings] = useState<PrivacySettingsData | null>(null);
@@ -41,9 +45,10 @@ export default function PrivacySettings() {
         if (!json.success || !json.data) {
           throw new Error();
         }
-        setSettings(json.data);
-      } catch (err) {
+        setSettings({ ...DEFAULTS, ...json.data });
+      } catch {
         toast.error('Failed to load privacy settings');
+        setSettings(DEFAULTS);
       } finally {
         setLoading(false);
       }
@@ -73,15 +78,15 @@ export default function PrivacySettings() {
         body: JSON.stringify(newSettings),
       });
       if (!res.ok) throw new Error();
-      //toast.success("Privacy preference updated");
-    } catch (err) {
+    } catch {
       setSettings(previousSettings);
       toast.error('Failed to update privacy setting');
     }
   };
 
-  if (loading || !settings)
+  if (loading)
     return <div className="p-4 text-center">Loading settings...</div>;
+  if (!settings) return null;
   return (
     <Card>
       <CardHeader>
@@ -133,10 +138,10 @@ export default function PrivacySettings() {
                 Let others leave comments on your stories.
               </p>
             </div>
-            {/* <Switch
-                        checked={settings.allowComments}
-                        onCheckedChange={(v)=>handleToggle("allowComments",v)}
-                        /> */}
+            <Switch
+              checked={settings.allowComments ?? true}
+              onCheckedChange={(v) => handleToggle('allowComments', v)}
+            />
           </div>
         </div>
         <Separator />
@@ -151,9 +156,10 @@ export default function PrivacySettings() {
                 Help us improve by sharing anonymous usage data.
               </p>
             </div>
-            {/* <Switch
-                        checked={settings.dataCollection}
-                        onCheckedChange={(v)=>handleToggle("dataCollection",v)}/> */}
+            <Switch
+              checked={settings.dataCollection ?? true}
+              onCheckedChange={(v) => handleToggle('dataCollection', v)}
+            />
           </div>
         </div>
       </CardContent>
