@@ -65,7 +65,8 @@ jest.mock('@/components/story-comments-dialog', () => ({
 const mockStory = {
   id: 'story-1',
   title: 'The Quantum Garden',
-  content: 'A physicist discovers a garden that grows in quantum superposition...',
+  content:
+    'A physicist discovers a garden that grows in quantum superposition...',
   author: 'Alice Chen',
   authorAvatar: '/avatars/alice.png',
   likes: 42,
@@ -177,7 +178,9 @@ describe('StoryCard', () => {
   describe('Accessibility', () => {
     it('has correct aria-label on the view story button', () => {
       render(<StoryCard story={mockStory} />);
-      const viewButton = screen.getByLabelText('View story: The Quantum Garden');
+      const viewButton = screen.getByLabelText(
+        'View story: The Quantum Garden'
+      );
       expect(viewButton).toBeInTheDocument();
     });
 
@@ -191,7 +194,9 @@ describe('StoryCard', () => {
   describe('Props Behavior', () => {
     it('renders without link wrapper when hideLink is true', () => {
       render(<StoryCard story={mockStory} hideLink />);
-      expect(screen.queryByLabelText('View story: The Quantum Garden')).not.toBeInTheDocument();
+      expect(
+        screen.queryByLabelText('View story: The Quantum Garden')
+      ).not.toBeInTheDocument();
     });
 
     it('shows create similar button when showCreateButton is true', () => {

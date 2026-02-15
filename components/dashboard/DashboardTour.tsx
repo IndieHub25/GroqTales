@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Joyride, { CallBackProps, STATUS, Step } from "react-joyride";
-import { useTheme } from "next-themes";
+import { useState, useEffect } from 'react';
+import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
+import { useTheme } from 'next-themes';
 
 export function DashboardTour({
   shouldRun,
@@ -16,23 +16,26 @@ export function DashboardTour({
 
   const steps: Step[] = [
     {
-      target: "body",
-      placement: "center",
-      title: "Welcome to GroqTales! 🧞‍♂️",
-      content: "This is your Creator Dashboard. Let's take a quick tour to help you start earning.",
+      target: 'body',
+      placement: 'center',
+      title: 'Welcome to GroqTales! 🧞‍♂️',
+      content:
+        "This is your Creator Dashboard. Let's take a quick tour to help you start earning.",
       disableBeacon: true,
     },
     {
-      target: ".tour-create-story",
-      content: "Click here to generate your first AI-powered story using Groq.",
+      target: '.tour-create-story',
+      content: 'Click here to generate your first AI-powered story using Groq.',
     },
     {
-      target: ".tour-wallet-connect",
-      content: "Connect your wallet (MetaMask/Rainbow) here. This is required to mint NFTs and receive earnings.",
+      target: '.tour-wallet-connect',
+      content:
+        'Connect your wallet (MetaMask/Rainbow) here. This is required to mint NFTs and receive earnings.',
     },
     {
-      target: ".tour-analytics",
-      content: "Track your story views, NFT sales, and royalties in real-time here.",
+      target: '.tour-analytics',
+      content:
+        'Track your story views, NFT sales, and royalties in real-time here.',
     },
   ];
 
@@ -59,9 +62,9 @@ export function DashboardTour({
       styles={{
         options: {
           zIndex: 10000,
-          primaryColor: theme === "dark" ? "#a855f7" : "#7c3aed",
-          backgroundColor: theme === "dark" ? "#1f2937" : "#ffffff",
-          textColor: theme === "dark" ? "#f3f4f6" : "#111827",
+          primaryColor: theme === 'dark' ? '#a855f7' : '#7c3aed',
+          backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+          textColor: theme === 'dark' ? '#f3f4f6' : '#111827',
         },
       }}
     />

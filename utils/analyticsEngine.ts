@@ -28,7 +28,7 @@ export const calculateStoryInsights = (stories: any[]): StoryStats => {
 
   // Calculate the most recent creation date
   const latestDate = stories
-    .map(s => s.createdAt)
+    .map((s) => s.createdAt)
     .filter(Boolean)
     .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
 

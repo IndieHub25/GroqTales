@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 export default function LegalHeader() {
   return (
@@ -22,11 +22,7 @@ export default function LegalHeader() {
         transition-all
       "
     >
-      <ArrowLeft
-        size={22}
-        strokeWidth={3}
-        className="text-black"
-      />
+      <ArrowLeft size={22} strokeWidth={3} className="text-black" />
       <span className="sr-only">Home</span>
     </Link>
   );

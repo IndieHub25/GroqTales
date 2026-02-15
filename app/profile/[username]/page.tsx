@@ -1,14 +1,13 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useWeb3 } from "@/components/providers/web3-provider";
-import { ProfileHeader } from "@/components/profile/profile-header";
-import { ProfileStats } from "@/components/profile/profile-stats";
-import { StoryCard } from "@/components/profile/story-card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useParams } from "next/navigation";
-
+import { useEffect, useState } from 'react';
+import { useWeb3 } from '@/components/providers/web3-provider';
+import { ProfileHeader } from '@/components/profile/profile-header';
+import { ProfileStats } from '@/components/profile/profile-stats';
+import { StoryCard } from '@/components/profile/story-card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useParams } from 'next/navigation';
 
 export default function ProfilePage() {
   const { account, connected, connecting } = useWeb3();
@@ -17,9 +16,10 @@ export default function ProfilePage() {
   const [error, setError] = useState(false);
   const params = useParams();
 
-  const walletFromUrl = typeof params?.username === "string" ? params.username : "";
-  const isOwner = connected &&
-    account?.toLowerCase() === walletFromUrl?.toLowerCase();
+  const walletFromUrl =
+    typeof params?.username === 'string' ? params.username : '';
+  const isOwner =
+    connected && account?.toLowerCase() === walletFromUrl?.toLowerCase();
 
   useEffect(() => {
     // 1. Create the controller
@@ -30,8 +30,11 @@ export default function ProfilePage() {
       if (walletFromUrl) {
         try {
           setLoading(true);
-          const response = await fetch(`/api/v1/users/profile/${walletFromUrl}`, { signal }); 
-          if (!response.ok) throw new Error("Failed to load");
+          const response = await fetch(
+            `/api/v1/users/profile/${walletFromUrl}`,
+            { signal }
+          );
+          if (!response.ok) throw new Error('Failed to load');
           const data = await response.json();
           setProfileData(data);
           setError(false);
@@ -54,7 +57,11 @@ export default function ProfilePage() {
   }, [walletFromUrl]);
   // Show Loading Skeleton while fetching
   if (connecting || loading) {
-    return <div className="container mx-auto p-20"><Skeleton className="h-40 w-full" /></div>;
+    return (
+      <div className="container mx-auto p-20">
+        <Skeleton className="h-40 w-full" />
+      </div>
+    );
   }
   if (error) {
     return <div className="p-20 text-white">Failed to load profile.</div>;
@@ -80,7 +87,10 @@ export default function ProfilePage() {
               </TabsList>
             </div>
 
-            <TabsContent value="stories" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <TabsContent
+              value="stories"
+              className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+            >
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Map through the REAL stories from your API */}
                 {profileData?.stories?.map((story: any, idx: number) => (
@@ -91,7 +101,9 @@ export default function ProfilePage() {
               {profileData?.stories?.length === 0 && (
                 <div className="text-center py-20 text-slate-500">
                   <p className="text-lg">No stories told yet.</p>
-                  <button className="mt-4 text-violet-400 hover:underline">Create your first story</button>
+                  <button className="mt-4 text-violet-400 hover:underline">
+                    Create your first story
+                  </button>
                 </div>
               )}
             </TabsContent>

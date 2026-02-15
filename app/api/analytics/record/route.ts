@@ -16,7 +16,13 @@ export async function POST(req: Request) {
   }
   await connectMongoose();
   const { storyId, type, duration } = await req.json();
-  const allowedTypes = ['VIEW', 'LIKE', 'BOOKMARK', 'SHARE', 'TIME_SPENT'] as const;
+  const allowedTypes = [
+    'VIEW',
+    'LIKE',
+    'BOOKMARK',
+    'SHARE',
+    'TIME_SPENT',
+  ] as const;
 
   if (typeof storyId !== 'string' || !storyId) {
     return NextResponse.json({ error: 'Invalid storyId' }, { status: 400 });
@@ -32,7 +38,7 @@ export async function POST(req: Request) {
     userId: session.user.id,
     storyId,
     type,
-    value: type === 'TIME_SPENT' ? duration : 1
+    value: type === 'TIME_SPENT' ? duration : 1,
   });
 
   return NextResponse.json({ success: true });

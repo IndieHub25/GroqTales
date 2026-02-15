@@ -65,7 +65,12 @@ jest.mock('@/components/ui/use-toast', () => ({
 // Mock child components that are complex and not under test
 jest.mock('@/components/wallet-connect', () => ({
   __esModule: true,
-  default: () => React.createElement('div', { 'data-testid': 'wallet-connect' }, 'WalletConnect'),
+  default: () =>
+    React.createElement(
+      'div',
+      { 'data-testid': 'wallet-connect' },
+      'WalletConnect'
+    ),
 }));
 
 jest.mock('../create-story-dialog', () => ({
@@ -73,11 +78,13 @@ jest.mock('../create-story-dialog', () => ({
 }));
 
 jest.mock('../mode-toggle', () => ({
-  ModeToggle: () => React.createElement('div', { 'data-testid': 'mode-toggle' }, 'ModeToggle'),
+  ModeToggle: () =>
+    React.createElement('div', { 'data-testid': 'mode-toggle' }, 'ModeToggle'),
 }));
 
 jest.mock('@/components/user-nav', () => ({
-  UserNav: () => React.createElement('div', { 'data-testid': 'user-nav' }, 'UserNav'),
+  UserNav: () =>
+    React.createElement('div', { 'data-testid': 'user-nav' }, 'UserNav'),
 }));
 
 // ---------------------------------------------------------------------------

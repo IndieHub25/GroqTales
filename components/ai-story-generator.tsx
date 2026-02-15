@@ -51,7 +51,7 @@ interface AIStoryGeneratorProps {
   className?: string;
 }
 
-const DRAFT_KEY = "groqtales_story_draft_v1";
+const DRAFT_KEY = 'groqtales_story_draft_v1';
 
 interface StoryDraft {
   prompt: string;
@@ -643,13 +643,18 @@ The air crackled with energy as the first shot was fired...`;
                         </div>
 
                         <div>
-                          <h3 id="draft-recovery-title" className="font-bangers text-2xl mb-2">
+                          <h3
+                            id="draft-recovery-title"
+                            className="font-bangers text-2xl mb-2"
+                          >
                             DRAFT RECOVERED!
                           </h3>
                           <p className="text-sm text-muted-foreground">
                             We found an unsaved draft from{' '}
-                            {new Date(recoveredDraft.updatedAt).toLocaleString()}.
-                            Would you like to restore it?
+                            {new Date(
+                              recoveredDraft.updatedAt
+                            ).toLocaleString()}
+                            . Would you like to restore it?
                           </p>
                         </div>
 
@@ -661,35 +666,59 @@ The air crackled with energy as the first shot was fired...`;
                               setStoryTitle(recoveredDraft.storyTitle);
                               setSelectedGenres(recoveredDraft.selectedGenres);
                               setStoryLength(recoveredDraft.storyLength);
-                              setMainCharacterName(recoveredDraft.mainCharacterName);
+                              setMainCharacterName(
+                                recoveredDraft.mainCharacterName
+                              );
                               setCharacterCount(recoveredDraft.characterCount);
-                              setCharacterTraits(recoveredDraft.characterTraits);
+                              setCharacterTraits(
+                                recoveredDraft.characterTraits
+                              );
                               setCharacterAge(recoveredDraft.characterAge);
-                              setCharacterBackground(recoveredDraft.characterBackground);
-                              setProtagonistType(recoveredDraft.protagonistType);
+                              setCharacterBackground(
+                                recoveredDraft.characterBackground
+                              );
+                              setProtagonistType(
+                                recoveredDraft.protagonistType
+                              );
                               setPlotType(recoveredDraft.plotType);
                               setConflictType(recoveredDraft.conflictType);
                               setStoryArc(recoveredDraft.storyArc);
                               setPacing(recoveredDraft.pacing);
                               setEndingType(recoveredDraft.endingType);
                               setPlotTwists(recoveredDraft.plotTwists);
-                              setIncludeFlashbacks(recoveredDraft.includeFlashbacks);
+                              setIncludeFlashbacks(
+                                recoveredDraft.includeFlashbacks
+                              );
                               setTimePeriod(recoveredDraft.timePeriod);
                               setLocationType(recoveredDraft.locationType);
-                              setWorldBuildingDepth(recoveredDraft.worldBuildingDepth);
+                              setWorldBuildingDepth(
+                                recoveredDraft.worldBuildingDepth
+                              );
                               setAtmosphere(recoveredDraft.atmosphere);
                               setNarrativeVoice(recoveredDraft.narrativeVoice);
                               setTone(recoveredDraft.tone);
                               setWritingStyle(recoveredDraft.writingStyle);
                               setReadingLevel(recoveredDraft.readingLevel);
                               setMood(recoveredDraft.mood);
-                              setDialoguePercentage(recoveredDraft.dialoguePercentage);
-                              setDescriptionDetail(recoveredDraft.descriptionDetail);
+                              setDialoguePercentage(
+                                recoveredDraft.dialoguePercentage
+                              );
+                              setDescriptionDetail(
+                                recoveredDraft.descriptionDetail
+                              );
                               setPrimaryTheme(recoveredDraft.primaryTheme);
-                              setSecondaryThemes(recoveredDraft.secondaryThemes);
-                              setMoralComplexity(recoveredDraft.moralComplexity);
-                              setSocialCommentary(recoveredDraft.socialCommentary);
-                              setSocialCommentaryTopic(recoveredDraft.socialCommentaryTopic);
+                              setSecondaryThemes(
+                                recoveredDraft.secondaryThemes
+                              );
+                              setMoralComplexity(
+                                recoveredDraft.moralComplexity
+                              );
+                              setSocialCommentary(
+                                recoveredDraft.socialCommentary
+                              );
+                              setSocialCommentaryTopic(
+                                recoveredDraft.socialCommentaryTopic
+                              );
                               setViolenceLevel(recoveredDraft.violenceLevel);
                               setRomanceLevel(recoveredDraft.romanceLevel);
                               setLanguageLevel(recoveredDraft.languageLevel);
@@ -709,8 +738,10 @@ The air crackled with energy as the first shot was fired...`;
                               setRecoveredDraft(null);
                               toast({
                                 title: 'DRAFT RESTORED!',
-                                description: 'Your previous work has been recovered.',
-                                className: 'font-bangers bg-green-400 text-black border-4 border-black',
+                                description:
+                                  'Your previous work has been recovered.',
+                                className:
+                                  'font-bangers bg-green-400 text-black border-4 border-black',
                               });
                             }}
                             className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bangers px-6 py-3"
@@ -730,7 +761,8 @@ The air crackled with energy as the first shot was fired...`;
                               toast({
                                 title: 'DRAFT DISCARDED',
                                 description: 'Starting fresh!',
-                                className: 'font-bangers bg-gray-400 text-black border-4 border-black',
+                                className:
+                                  'font-bangers bg-gray-400 text-black border-4 border-black',
                               });
                             }}
                             className="flex-1 font-bangers border-4 border-black bg-white text-black hover:bg-gray-100"
@@ -881,7 +913,10 @@ The air crackled with energy as the first shot was fired...`;
                               value={characterCount}
                               onValueChange={setCharacterCount}
                             >
-                              <SelectTrigger className="border-2 border-black" aria-label="Character Count">
+                              <SelectTrigger
+                                className="border-2 border-black"
+                                aria-label="Character Count"
+                              >
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -925,7 +960,10 @@ The air crackled with energy as the first shot was fired...`;
                               value={characterAge}
                               onValueChange={setCharacterAge}
                             >
-                              <SelectTrigger className="border-2 border-black" aria-label="Character Age">
+                              <SelectTrigger
+                                className="border-2 border-black"
+                                aria-label="Character Age"
+                              >
                                 <SelectValue placeholder="Select age range" />
                               </SelectTrigger>
                               <SelectContent>
@@ -944,7 +982,10 @@ The air crackled with energy as the first shot was fired...`;
                               value={protagonistType}
                               onValueChange={setProtagonistType}
                             >
-                              <SelectTrigger className="border-2 border-black" aria-label="Protagonist Type">
+                              <SelectTrigger
+                                className="border-2 border-black"
+                                aria-label="Protagonist Type"
+                              >
                                 <SelectValue placeholder="Select type" />
                               </SelectTrigger>
                               <SelectContent>
@@ -1002,7 +1043,10 @@ The air crackled with energy as the first shot was fired...`;
                               value={plotType}
                               onValueChange={setPlotType}
                             >
-                              <SelectTrigger className="border-2 border-black" aria-label="Plot Type">
+                              <SelectTrigger
+                                className="border-2 border-black"
+                                aria-label="Plot Type"
+                              >
                                 <SelectValue placeholder="Select plot type" />
                               </SelectTrigger>
                               <SelectContent>
@@ -1027,7 +1071,10 @@ The air crackled with energy as the first shot was fired...`;
                               value={conflictType}
                               onValueChange={setConflictType}
                             >
-                              <SelectTrigger className="border-2 border-black" aria-label="Conflict Type">
+                              <SelectTrigger
+                                className="border-2 border-black"
+                                aria-label="Conflict Type"
+                              >
                                 <SelectValue placeholder="Select conflict" />
                               </SelectTrigger>
                               <SelectContent>
@@ -1060,7 +1107,10 @@ The air crackled with energy as the first shot was fired...`;
                               value={storyArc}
                               onValueChange={setStoryArc}
                             >
-                              <SelectTrigger className="border-2 border-black" aria-label="Story Arc">
+                              <SelectTrigger
+                                className="border-2 border-black"
+                                aria-label="Story Arc"
+                              >
                                 <SelectValue placeholder="Select arc" />
                               </SelectTrigger>
                               <SelectContent>
@@ -1084,7 +1134,10 @@ The air crackled with energy as the first shot was fired...`;
                               Pacing
                             </Label>
                             <Select value={pacing} onValueChange={setPacing}>
-                              <SelectTrigger className="border-2 border-black" aria-label="Pacing">
+                              <SelectTrigger
+                                className="border-2 border-black"
+                                aria-label="Pacing"
+                              >
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -1980,7 +2033,10 @@ The air crackled with energy as the first shot was fired...`;
                             value={modelSelection}
                             onValueChange={setModelSelection}
                           >
-                            <SelectTrigger className="border-2 border-black" aria-label="AI Model Selection">
+                            <SelectTrigger
+                              className="border-2 border-black"
+                              aria-label="AI Model Selection"
+                            >
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>

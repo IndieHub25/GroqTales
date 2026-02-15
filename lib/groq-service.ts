@@ -70,7 +70,11 @@ export async function generateStoryContent(
       characters: params.characters,
       setting: params.setting,
     };
-    const cached = await getCachedResponse<string>(cacheCategory, params.theme, cacheOptions);
+    const cached = await getCachedResponse<string>(
+      cacheCategory,
+      params.theme,
+      cacheOptions
+    );
     if (cached) return cached;
 
     const groqApiKey = process.env.GROQ_API_KEY;
@@ -84,7 +88,11 @@ export async function generateStoryContent(
     if (!themeValidation.isValid) {
       logSecurityEvent({
         type: 'injection_attempt',
-        details: { field: 'theme', reason: themeValidation.reason, pattern: themeValidation.matchedPattern },
+        details: {
+          field: 'theme',
+          reason: themeValidation.reason,
+          pattern: themeValidation.matchedPattern,
+        },
       });
       throw new Error(`Invalid input for theme: ${themeValidation.reason}`);
     }
@@ -92,10 +100,16 @@ export async function generateStoryContent(
     const sanitizedParams: StoryGenerationParams = {
       ...params,
       theme: sanitizedTheme,
-      genre: params.genre ? sanitizeInput(params.genre).sanitized : params.genre,
+      genre: params.genre
+        ? sanitizeInput(params.genre).sanitized
+        : params.genre,
       tone: params.tone ? sanitizeInput(params.tone).sanitized : params.tone,
-      characters: params.characters ? sanitizeInput(params.characters).sanitized : params.characters,
-      setting: params.setting ? sanitizeInput(params.setting).sanitized : params.setting,
+      characters: params.characters
+        ? sanitizeInput(params.characters).sanitized
+        : params.characters,
+      setting: params.setting
+        ? sanitizeInput(params.setting).sanitized
+        : params.setting,
     };
 
     // Validate optional fields
@@ -105,7 +119,11 @@ export async function generateStoryContent(
         if (!result.isValid) {
           logSecurityEvent({
             type: 'injection_attempt',
-            details: { field, reason: result.reason, pattern: result.matchedPattern },
+            details: {
+              field,
+              reason: result.reason,
+              pattern: result.matchedPattern,
+            },
           });
           throw new Error(`Invalid input for ${field}: ${result.reason}`);
         }
@@ -163,11 +181,18 @@ export async function generateStoryContent(
         details: { flags: outputCheck.flags },
       });
       // Block content if it contains sensitive leaks
-      throw new Error('Generated content was blocked due to security policy violations.');
+      throw new Error(
+        'Generated content was blocked due to security policy violations.'
+      );
     }
 
     // --- Cache: store the response ---
-    await setCachedResponse(cacheCategory, params.theme, cacheOptions, generatedContent);
+    await setCachedResponse(
+      cacheCategory,
+      params.theme,
+      cacheOptions,
+      generatedContent
+    );
 
     return generatedContent;
   } catch (error) {
@@ -187,7 +212,11 @@ export async function analyzeStoryContent(
   try {
     // --- Cache: check for cached analysis ---
     const cacheCategory: CacheCategory = 'STORY_ANALYSIS';
-    const cached = await getCachedResponse<StoryAnalysis>(cacheCategory, content, {});
+    const cached = await getCachedResponse<StoryAnalysis>(
+      cacheCategory,
+      content,
+      {}
+    );
     if (cached) return cached;
 
     const groqApiKey = process.env.GROQ_API_KEY;
@@ -203,7 +232,11 @@ export async function analyzeStoryContent(
     if (!contentValidation.isValid) {
       logSecurityEvent({
         type: 'injection_attempt',
-        details: { field: 'content', reason: contentValidation.reason, pattern: contentValidation.matchedPattern },
+        details: {
+          field: 'content',
+          reason: contentValidation.reason,
+          pattern: contentValidation.matchedPattern,
+        },
       });
       throw new Error(`Invalid input for content: ${contentValidation.reason}`);
     }
@@ -229,7 +262,9 @@ export async function analyzeStoryContent(
             },
             {
               role: 'user',
-              content: wrapUserContent(`Analyze this story content:\n\n${sanitizedContent}`),
+              content: wrapUserContent(
+                `Analyze this story content:\n\n${sanitizedContent}`
+              ),
             },
           ],
           max_tokens: 1000,
@@ -254,7 +289,9 @@ export async function analyzeStoryContent(
         type: 'output_flagged',
         details: { flags: outputCheck.flags },
       });
-      throw new Error('Analysis result was blocked due to security policy violations.');
+      throw new Error(
+        'Analysis result was blocked due to security policy violations.'
+      );
     }
 
     try {
@@ -299,7 +336,11 @@ export async function generateStoryIdeas(
     // --- Cache: check for cached ideas ---
     const cacheCategory: CacheCategory = 'STORY_IDEAS';
     const cacheOptions = { genre: genre || '__all__', count };
-    const cached = await getCachedResponse<string[]>(cacheCategory, genre || '__all__', cacheOptions);
+    const cached = await getCachedResponse<string[]>(
+      cacheCategory,
+      genre || '__all__',
+      cacheOptions
+    );
     if (cached) return cached;
 
     const groqApiKey = process.env.GROQ_API_KEY;
@@ -315,7 +356,11 @@ export async function generateStoryIdeas(
       if (!genreValidation.isValid) {
         logSecurityEvent({
           type: 'injection_attempt',
-          details: { field: 'genre', reason: genreValidation.reason, pattern: genreValidation.matchedPattern },
+          details: {
+            field: 'genre',
+            reason: genreValidation.reason,
+            pattern: genreValidation.matchedPattern,
+          },
         });
         throw new Error(`Invalid input for genre: ${genreValidation.reason}`);
       }
@@ -372,7 +417,9 @@ export async function generateStoryIdeas(
         type: 'output_flagged',
         details: { flags: outputCheck.flags },
       });
-      throw new Error('Generated ideas were blocked due to security policy violations.');
+      throw new Error(
+        'Generated ideas were blocked due to security policy violations.'
+      );
     }
 
     const ideas = content
@@ -382,7 +429,12 @@ export async function generateStoryIdeas(
       .slice(0, count);
 
     // --- Cache: store the ideas ---
-    await setCachedResponse(cacheCategory, genre || '__all__', cacheOptions, ideas);
+    await setCachedResponse(
+      cacheCategory,
+      genre || '__all__',
+      cacheOptions,
+      ideas
+    );
 
     return ideas;
   } catch (error) {
@@ -411,7 +463,11 @@ export async function improveStoryContent(
     // --- Cache: check for cached improvement ---
     const cacheCategory: CacheCategory = 'CONTENT_IMPROVEMENT';
     const cacheOptions = { focusArea: focusArea || 'overall quality' };
-    const cached = await getCachedResponse<string>(cacheCategory, content, cacheOptions);
+    const cached = await getCachedResponse<string>(
+      cacheCategory,
+      content,
+      cacheOptions
+    );
     if (cached) return cached;
 
     const groqApiKey = process.env.GROQ_API_KEY;
@@ -427,7 +483,11 @@ export async function improveStoryContent(
     if (!contentValidation.isValid) {
       logSecurityEvent({
         type: 'injection_attempt',
-        details: { field: 'content', reason: contentValidation.reason, pattern: contentValidation.matchedPattern },
+        details: {
+          field: 'content',
+          reason: contentValidation.reason,
+          pattern: contentValidation.matchedPattern,
+        },
       });
       throw new Error(`Invalid input for content: ${contentValidation.reason}`);
     }
@@ -439,9 +499,15 @@ export async function improveStoryContent(
       if (!focusValidation.isValid) {
         logSecurityEvent({
           type: 'injection_attempt',
-          details: { field: 'focusArea', reason: focusValidation.reason, pattern: focusValidation.matchedPattern },
+          details: {
+            field: 'focusArea',
+            reason: focusValidation.reason,
+            pattern: focusValidation.matchedPattern,
+          },
         });
-        throw new Error(`Invalid input for focus area: ${focusValidation.reason}`);
+        throw new Error(
+          `Invalid input for focus area: ${focusValidation.reason}`
+        );
       }
       sanitizedFocus = sanitized;
     }
@@ -494,11 +560,18 @@ export async function improveStoryContent(
         type: 'output_flagged',
         details: { flags: outputCheck.flags },
       });
-       throw new Error('Improved content was blocked due to security policy violations.');
+      throw new Error(
+        'Improved content was blocked due to security policy violations.'
+      );
     }
 
     // --- Cache: store the improvement ---
-    await setCachedResponse(cacheCategory, content, cacheOptions, improvedContent);
+    await setCachedResponse(
+      cacheCategory,
+      content,
+      cacheOptions,
+      improvedContent
+    );
 
     return improvedContent;
   } catch (error) {
@@ -706,7 +779,11 @@ export async function analyzeStoryContentCustom(
     if (!contentValidation.isValid) {
       logSecurityEvent({
         type: 'injection_attempt',
-        details: { field: 'content', reason: contentValidation.reason, pattern: contentValidation.matchedPattern },
+        details: {
+          field: 'content',
+          reason: contentValidation.reason,
+          pattern: contentValidation.matchedPattern,
+        },
       });
       throw new Error(`Invalid input for content: ${contentValidation.reason}`);
     }
@@ -718,9 +795,15 @@ export async function analyzeStoryContentCustom(
       if (!promptValidation.isValid) {
         logSecurityEvent({
           type: 'injection_attempt',
-          details: { field: 'customPrompt', reason: promptValidation.reason, pattern: promptValidation.matchedPattern },
+          details: {
+            field: 'customPrompt',
+            reason: promptValidation.reason,
+            pattern: promptValidation.matchedPattern,
+          },
         });
-        throw new Error(`Invalid input for custom prompt: ${promptValidation.reason}`);
+        throw new Error(
+          `Invalid input for custom prompt: ${promptValidation.reason}`
+        );
       }
       sanitizedCustomPrompt = sanitized;
     }
@@ -733,17 +816,26 @@ export async function analyzeStoryContentCustom(
       if (!systemPromptValidation.isValid) {
         logSecurityEvent({
           type: 'injection_attempt',
-          details: { field: 'systemPrompt', reason: systemPromptValidation.reason, pattern: systemPromptValidation.matchedPattern },
+          details: {
+            field: 'systemPrompt',
+            reason: systemPromptValidation.reason,
+            pattern: systemPromptValidation.matchedPattern,
+          },
         });
-        throw new Error(`Invalid input for system prompt: ${systemPromptValidation.reason}`);
+        throw new Error(
+          `Invalid input for system prompt: ${systemPromptValidation.reason}`
+        );
       }
       sanitizedSystemPrompt = sanitized;
     }
 
     const userPrompt =
-      sanitizedCustomPrompt || `Analyze this story content:\n\n${sanitizedContent}`;
+      sanitizedCustomPrompt ||
+      `Analyze this story content:\n\n${sanitizedContent}`;
 
-    const hardenedSystemPrompt = buildHardenedSystemPrompt(sanitizedSystemPrompt);
+    const hardenedSystemPrompt = buildHardenedSystemPrompt(
+      sanitizedSystemPrompt
+    );
 
     const response = await fetch(
       'https://api.groq.com/openai/v1/chat/completions',
@@ -787,7 +879,9 @@ export async function analyzeStoryContentCustom(
         type: 'output_flagged',
         details: { flags: outputCheck.flags },
       });
-      throw new Error('Analysis result was blocked due to security policy violations.');
+      throw new Error(
+        'Analysis result was blocked due to security policy violations.'
+      );
     }
 
     return result;
@@ -833,7 +927,11 @@ export async function generateContentCustom(
     if (!promptValidation.isValid) {
       logSecurityEvent({
         type: 'injection_attempt',
-        details: { field: 'prompt', reason: promptValidation.reason, pattern: promptValidation.matchedPattern },
+        details: {
+          field: 'prompt',
+          reason: promptValidation.reason,
+          pattern: promptValidation.matchedPattern,
+        },
       });
       throw new Error(`Invalid input for prompt: ${promptValidation.reason}`);
     }
@@ -846,14 +944,22 @@ export async function generateContentCustom(
       if (!systemPromptValidation.isValid) {
         logSecurityEvent({
           type: 'injection_attempt',
-          details: { field: 'systemPrompt', reason: systemPromptValidation.reason, pattern: systemPromptValidation.matchedPattern },
+          details: {
+            field: 'systemPrompt',
+            reason: systemPromptValidation.reason,
+            pattern: systemPromptValidation.matchedPattern,
+          },
         });
-        throw new Error(`Invalid input for system prompt: ${systemPromptValidation.reason}`);
+        throw new Error(
+          `Invalid input for system prompt: ${systemPromptValidation.reason}`
+        );
       }
       sanitizedSystemPrompt = sanitized;
     }
 
-    const hardenedSystemPrompt = buildHardenedSystemPrompt(sanitizedSystemPrompt);
+    const hardenedSystemPrompt = buildHardenedSystemPrompt(
+      sanitizedSystemPrompt
+    );
 
     const response = await fetch(
       'https://api.groq.com/openai/v1/chat/completions',
@@ -897,7 +1003,9 @@ export async function generateContentCustom(
         type: 'output_flagged',
         details: { flags: outputCheck.flags },
       });
-      throw new Error('Generated content was blocked due to security policy violations.');
+      throw new Error(
+        'Generated content was blocked due to security policy violations.'
+      );
     }
 
     return result;

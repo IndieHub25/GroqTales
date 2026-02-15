@@ -1,5 +1,7 @@
 import RoyaltyConfig, { IRoyaltyConfig } from '../models/RoyaltyConfig';
-import RoyaltyTransaction, { IRoyaltyTransaction } from '../models/RoyaltyTransaction';
+import RoyaltyTransaction, {
+  IRoyaltyTransaction,
+} from '../models/RoyaltyTransaction';
 import CreatorEarnings, { ICreatorEarnings } from '../models/CreatorEarnings';
 
 const WALLET_REGEX = /^0x[a-fA-F0-9]{40}$/;
@@ -109,7 +111,11 @@ export async function recordRoyaltyTransaction(
     await CreatorEarnings.findOneAndUpdate(
       { creatorWallet: config.creatorWallet },
       {
-        $inc: { totalEarned: royaltyAmount, pendingPayout: royaltyAmount, totalSales: 1 },
+        $inc: {
+          totalEarned: royaltyAmount,
+          pendingPayout: royaltyAmount,
+          totalSales: 1,
+        },
         $set: { lastUpdated: new Date() },
       },
       { upsert: true }
@@ -149,7 +155,12 @@ export async function getCreatorEarnings(
     creatorWallet: walletAddress.toLowerCase(),
   });
 
-  return earnings || { ...DEFAULT_EARNINGS, creatorWallet: walletAddress.toLowerCase() };
+  return (
+    earnings || {
+      ...DEFAULT_EARNINGS,
+      creatorWallet: walletAddress.toLowerCase(),
+    }
+  );
 }
 
 // ── Get Creator Transactions ───────────────────────────────────────

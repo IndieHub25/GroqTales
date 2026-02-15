@@ -30,16 +30,17 @@ router.get('/profile/:walletAddress', async (req, res) => {
     const addr = walletAddress.toLowerCase();
     const user = await User.findOneAndUpdate(
       { walletAddress: addr },
-      { 
-        $setOnInsert: { 
-          walletAddress: addr, 
-          username: `user_${addr.slice(-8)}` 
-        } 
+      {
+        $setOnInsert: {
+          walletAddress: addr,
+          username: `user_${addr.slice(-8)}`,
+        },
       },
-      { 
-        upsert: true, 
-        new: true, 
-        projection: 'username bio avatar badges firstName lastName walletAddress createdAt' 
+      {
+        upsert: true,
+        new: true,
+        projection:
+          'username bio avatar badges firstName lastName walletAddress createdAt',
       }
     ).lean();
     const stories = await Story.find({ author: user._id })
@@ -51,8 +52,8 @@ router.get('/profile/:walletAddress', async (req, res) => {
       stats: {
         storyCount: stories.length,
         totalLikes: stories.reduce((sum, s) => sum + (s.stats?.likes || 0), 0),
-        totalViews: stories.reduce((sum, s) => sum + (s.stats?.views || 0), 0)
-      }
+        totalViews: stories.reduce((sum, s) => sum + (s.stats?.views || 0), 0),
+      },
     });
   } catch (error) {
     console.error('Profile Route Error:', error);

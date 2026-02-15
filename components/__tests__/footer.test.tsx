@@ -46,7 +46,9 @@ describe('Footer', () => {
 
   it('displays the GroqTales brand name', () => {
     render(<Footer />);
-    expect(screen.getByText('GroqTales', { selector: 'h3' })).toBeInTheDocument();
+    expect(
+      screen.getByText('GroqTales', { selector: 'h3' })
+    ).toBeInTheDocument();
   });
 
   it('displays the brand tagline', () => {
@@ -59,7 +61,9 @@ describe('Footer', () => {
   it('renders the current year in copyright', () => {
     render(<Footer />);
     const currentYear = new Date().getFullYear().toString();
-    expect(screen.getByText(new RegExp(`© ${currentYear} GroqTales`))).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`© ${currentYear} GroqTales`))
+    ).toBeInTheDocument();
   });
 
   it('renders social media links with correct aria-labels', () => {
@@ -74,7 +78,13 @@ describe('Footer', () => {
     const exploreNav = screen.getByRole('navigation', { name: /explore/i });
     expect(exploreNav).toBeInTheDocument();
 
-    const links = ['Genres', 'Community', 'Create Story', 'NFT Gallery', 'Marketplace'];
+    const links = [
+      'Genres',
+      'Community',
+      'Create Story',
+      'NFT Gallery',
+      'Marketplace',
+    ];
     for (const linkText of links) {
       expect(screen.getByText(linkText)).toBeInTheDocument();
     }

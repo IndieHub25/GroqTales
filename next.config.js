@@ -123,11 +123,10 @@ const nextConfig = {
       },
     ];
   },
-  async rewrites() { 
+  async rewrites() {
     const envUrl = process.env.NEXT_PUBLIC_API_URL;
-    const apiUrl = (envUrl && envUrl.startsWith('http')) 
-      ? envUrl 
-      : 'http://localhost:3001';
+    const apiUrl =
+      envUrl && envUrl.startsWith('http') ? envUrl : 'http://localhost:3001';
 
     return [
       {

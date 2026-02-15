@@ -20,7 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 
-const DRAFT_KEY = "groqtales_story_tools_draft_v1";
+const DRAFT_KEY = 'groqtales_story_tools_draft_v1';
 
 interface StoryToolsDraft {
   title: string;
@@ -41,7 +41,9 @@ export default function StoryToolsPage() {
   const [summaryKeywords, setSummaryKeywords] = useState<string[]>([]);
 
   // Draft Recovery State
-  const [recoveredDraft, setRecoveredDraft] = useState<StoryToolsDraft | null>(null);
+  const [recoveredDraft, setRecoveredDraft] = useState<StoryToolsDraft | null>(
+    null
+  );
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
 
   // Draft recovery detection on mount
@@ -178,8 +180,10 @@ export default function StoryToolsPage() {
                           setRecoveredDraft(null);
                           toast({
                             title: 'DRAFT RESTORED!',
-                            description: 'Your previous work has been recovered.',
-                            className: 'font-bangers bg-green-400 text-black border-4 border-black',
+                            description:
+                              'Your previous work has been recovered.',
+                            className:
+                              'font-bangers bg-green-400 text-black border-4 border-black',
                           });
                         }}
                         className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bangers px-6 py-3"
@@ -199,7 +203,8 @@ export default function StoryToolsPage() {
                           toast({
                             title: 'DRAFT DISCARDED',
                             description: 'Starting fresh!',
-                            className: 'font-bangers bg-gray-400 text-black border-4 border-black',
+                            className:
+                              'font-bangers bg-gray-400 text-black border-4 border-black',
                           });
                         }}
                         className="flex-1 font-bangers border-4 border-black bg-white text-black hover:bg-gray-100"
@@ -280,8 +285,8 @@ export default function StoryToolsPage() {
                   </Button>
 
                   <Button
-               onClick={() => {
-                     setActiveTab('summary');                   
+                    onClick={() => {
+                      setActiveTab('summary');
                     }}
                     disabled={!storyContent || storyContent.length < 100}
                   >

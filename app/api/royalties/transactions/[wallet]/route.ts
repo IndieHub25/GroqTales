@@ -50,7 +50,10 @@ export async function GET(
     // Validate status if provided
     if (status && !['pending', 'completed', 'failed'].includes(status)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid status. Must be pending, completed, or failed' },
+        {
+          success: false,
+          error: 'Invalid status. Must be pending, completed, or failed',
+        },
         { status: 400 }
       );
     }

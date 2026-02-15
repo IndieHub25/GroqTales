@@ -109,7 +109,10 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       (window as any).ethereum.on('accountsChanged', handleAccounts);
       (window as any).ethereum.on('chainChanged', handleChain);
       return () => {
-        (window as any).ethereum.removeListener('accountsChanged', handleAccounts);
+        (window as any).ethereum.removeListener(
+          'accountsChanged',
+          handleAccounts
+        );
         (window as any).ethereum.removeListener('chainChanged', handleChain);
       };
     }
@@ -232,11 +235,11 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   return (
     <Web3Context.Provider value={contextValue}>
       {children}
-      
+
       {showInstallModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-slate-900 border-2 border-black dark:border-white rounded-xl shadow-lg max-w-sm w-full p-6 relative">
-            <button 
+            <button
               onClick={() => setShowInstallModal(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-black dark:hover:text-white"
             >
@@ -247,15 +250,17 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
               <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                 <Download className="w-6 h-6 text-orange-600" />
               </div>
-              
-              <h3 className="text-xl font-bold dark:text-white">Install MetaMask</h3>
+
+              <h3 className="text-xl font-bold dark:text-white">
+                Install MetaMask
+              </h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
                 You need a crypto wallet to log in.
               </p>
 
-              <a 
-                href="https://metamask.io/download" 
-                target="_blank" 
+              <a
+                href="https://metamask.io/download"
+                target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setShowInstallModal(false)}
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2"
@@ -266,7 +271,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       )}
-      </Web3Context.Provider>
+    </Web3Context.Provider>
   );
 }
 

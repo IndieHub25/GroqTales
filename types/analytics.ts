@@ -3,7 +3,7 @@
  */
 export interface StoryStats {
   totalStories: number;
-  totalWordCount: number; 
+  totalWordCount: number;
   averageWordsPerStory: number;
   genreBreakdown: Record<string, number>;
   lastGeneratedDate: string;

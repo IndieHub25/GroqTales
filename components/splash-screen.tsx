@@ -55,7 +55,6 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
             />
           </motion.div>
 
-          
           <p className="mt-8 text-sm font-bold tracking-[0.3em] uppercase text-white/80 animate-pulse font-comic z-10">
             Where AI Meets Imagination
           </p>

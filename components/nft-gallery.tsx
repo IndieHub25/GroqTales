@@ -68,11 +68,15 @@ export function NFTGallery() {
               <CardHeader>
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle className="truncate">{story.title}</CardTitle>
-                  {story.royaltyPercentage != null && story.royaltyPercentage > 0 && (
-                    <Badge variant="secondary" className="shrink-0 text-[10px]">
-                      {story.royaltyPercentage}% Royalty
-                    </Badge>
-                  )}
+                  {story.royaltyPercentage != null &&
+                    story.royaltyPercentage > 0 && (
+                      <Badge
+                        variant="secondary"
+                        className="shrink-0 text-[10px]"
+                      >
+                        {story.royaltyPercentage}% Royalty
+                      </Badge>
+                    )}
                 </div>
               </CardHeader>
               <CardContent>

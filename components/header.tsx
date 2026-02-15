@@ -168,7 +168,11 @@ export function Header() {
             </motion.div>
           </Link>
 
-          <nav role="navigation" aria-label="Primary navigation" className="hidden xl:flex items-center space-x-2">
+          <nav
+            role="navigation"
+            aria-label="Primary navigation"
+            className="hidden xl:flex items-center space-x-2"
+          >
             {navItems.map((item, index) => (
               <motion.div
                 key={
@@ -214,7 +218,9 @@ export function Header() {
                         <DropdownMenuItem key={subItem.href} asChild>
                           <Link
                             href={subItem.href}
-                            aria-current={pathname === subItem.href ? 'page' : undefined}
+                            aria-current={
+                              pathname === subItem.href ? 'page' : undefined
+                            }
                             className="flex items-center w-full text-foreground/90 hover:text-foreground hover:bg-white/5 comic-text"
                           >
                             {subItem.icon && subItem.icon}

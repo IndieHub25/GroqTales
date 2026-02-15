@@ -54,7 +54,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (salePrice === undefined || salePrice === null || typeof salePrice !== 'number' || isNaN(salePrice) || salePrice <= 0) {
+    if (
+      salePrice === undefined ||
+      salePrice === null ||
+      typeof salePrice !== 'number' ||
+      isNaN(salePrice) ||
+      salePrice <= 0
+    ) {
       return NextResponse.json(
         { success: false, error: 'salePrice must be a positive number' },
         { status: 400 }
@@ -83,10 +89,7 @@ export async function POST(request: NextRequest) {
       txHash,
     });
 
-    return NextResponse.json(
-      { success: true, transaction },
-      { status: 201 }
-    );
+    return NextResponse.json({ success: true, transaction }, { status: 201 });
   } catch (error: any) {
     console.error('Error recording royalty transaction:', error);
 

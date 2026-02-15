@@ -3,7 +3,11 @@ const mongoose = require('mongoose');
 const RoyaltyConfigSchema = new mongoose.Schema(
   {
     nftId: { type: mongoose.Schema.Types.ObjectId, ref: 'Nft', index: true },
-    storyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Story', index: true },
+    storyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Story',
+      index: true,
+    },
     creatorWallet: {
       type: String,
       required: true,

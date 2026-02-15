@@ -139,10 +139,16 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] p-0 border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-white max-h-[90vh] flex flex-col overflow-hidden" aria-describedby="create-story-description">
+      <DialogContent
+        className="sm:max-w-[500px] p-0 border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-white max-h-[90vh] flex flex-col overflow-hidden"
+        aria-describedby="create-story-description"
+      >
         <DialogHeader className="p-6 pb-2 text-left sm:text-left items-start space-y-0">
           <DialogTitle className="flex items-center gap-4 text-2xl font-black uppercase italic tracking-tight">
-            <div className="flex items-center justify-center w-10 h-10 bg-black text-white shrink-0" aria-hidden="true">
+            <div
+              className="flex items-center justify-center w-10 h-10 bg-black text-white shrink-0"
+              aria-hidden="true"
+            >
               <PenSquare className="w-6 h-6" />
             </div>
             <span>{currentStep === 1 ? 'Create Story' : 'Story Details'}</span>
@@ -162,7 +168,10 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
 
         {currentStep === 1 && (
           <div className="flex flex-col gap-4 p-6 pt-2 overflow-y-auto custom-scrollbar">
-            <p id="create-story-description" className="text-sm font-bold text-muted-foreground uppercase mb-2">
+            <p
+              id="create-story-description"
+              className="text-sm font-bold text-muted-foreground uppercase mb-2"
+            >
               Choose your creative path:
             </p>
             {createOptions.map((option) => (
@@ -178,7 +187,10 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
                 }`}
                 onClick={() => handleOptionSelect(option)}
               >
-                <div className="flex items-center justify-center w-12 h-12 rounded-none bg-black text-white shrink-0 border-2 border-white/20 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" aria-hidden="true">
+                <div
+                  className="flex items-center justify-center w-12 h-12 rounded-none bg-black text-white shrink-0 border-2 border-white/20 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                  aria-hidden="true"
+                >
                   {React.cloneElement(option.icon as React.ReactElement, {
                     className: 'w-6 h-6',
                     color: 'white',

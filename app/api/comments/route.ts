@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimiters, checkRateLimit } from '@/lib/rate-limit';
 
 /**
  * Check if the request has admin privileges
@@ -13,6 +14,15 @@ function isAdminRequest(request: NextRequest): boolean {
  * Fetch all comments for a specific story
  */
 export async function GET(request: NextRequest) {
+  // Rate limit: 30 requests per minute
+  const ip =
+    request.headers.get('x-forwarded-for') ?? request.ip ?? '127.0.0.1';
+  const rateLimitResponse = await checkRateLimit(
+    rateLimiters.general,
+    `comments:${ip}`
+  );
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { searchParams } = new URL(request.url);
     const storyId = searchParams.get('storyId');
@@ -81,6 +91,15 @@ export async function GET(request: NextRequest) {
  * Create a new comment
  */
 export async function POST(request: NextRequest) {
+  // Rate limit: 30 requests per minute
+  const ip =
+    request.headers.get('x-forwarded-for') ?? request.ip ?? '127.0.0.1';
+  const rateLimitResponse = await checkRateLimit(
+    rateLimiters.general,
+    `comments:${ip}`
+  );
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await request.json();
     const { storyId, content, author, parentId } = body;

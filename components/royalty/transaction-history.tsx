@@ -115,7 +115,9 @@ export function TransactionHistory({ walletAddress }: TransactionHistoryProps) {
                         {tx.royaltyAmount.toFixed(4)} ETH
                       </TableCell>
                       <TableCell>
-                        <Badge variant={statusVariant[tx.status] || 'secondary'}>
+                        <Badge
+                          variant={statusVariant[tx.status] || 'secondary'}
+                        >
                           {tx.status}
                         </Badge>
                       </TableCell>
@@ -128,7 +130,8 @@ export function TransactionHistory({ walletAddress }: TransactionHistoryProps) {
             {/* Pagination */}
             <div className="flex items-center justify-between mt-4">
               <p className="text-sm text-muted-foreground">
-                Page {pagination.page} of {pagination.totalPages} ({pagination.total} total)
+                Page {pagination.page} of {pagination.totalPages} (
+                {pagination.total} total)
               </p>
               <div className="flex gap-2">
                 <Button
@@ -142,7 +145,9 @@ export function TransactionHistory({ walletAddress }: TransactionHistoryProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                  onClick={() =>
+                    setPage((p) => Math.min(pagination.totalPages, p + 1))
+                  }
                   disabled={page >= pagination.totalPages}
                 >
                   <ChevronRight className="h-4 w-4" />

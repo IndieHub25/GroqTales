@@ -1,4 +1,5 @@
 <!-- markdownlint-enable MD033 -->
+
 # Contributing to GroqTales
 
 <p align="center">
@@ -13,8 +14,9 @@
   <img src="https://img.shields.io/badge/Open%20Source%20Community-Welcome-0052cc?style=flat-square" alt="Open Source Community"/>
 </p>
 
-
-Thank you for your interest in contributing to **GroqTales**, an AI-powered Web3 storytelling platform! We welcome developers, writers, designers, and blockchain enthusiasts to help us build a creative, open, and secure platform. Please read this guide before getting started.
+Thank you for your interest in contributing to **GroqTales**, an AI-powered Web3 storytelling
+platform! We welcome developers, writers, designers, and blockchain enthusiasts to help us build a
+creative, open, and secure platform. Please read this guide before getting started.
 
 ---
 
@@ -37,7 +39,9 @@ Thank you for your interest in contributing to **GroqTales**, an AI-powered Web3
 
 ## SWOC'26 Participation
 
-Are you contributing as part of **Social Winter of Code (SWOC) 2026**? Please see our [SWOC'26.md](./docs/SWOC'26.md) for program-specific guidelines, point systems, and communication channels. 
+Are you contributing as part of **Social Winter of Code (SWOC) 2026**? Please see our
+[SWOC'26.md](./docs/SWOC'26.md) for program-specific guidelines, point systems, and communication
+channels.
 
 > **Note:** Ensure your PRs are tagged with the `SWOC'26` label to be eligible for program points.
 
@@ -45,7 +49,9 @@ Are you contributing as part of **Social Winter of Code (SWOC) 2026**? Please se
 
 ## Code of Conduct
 
-We are committed to providing a welcoming and inclusive environment for everyone. By participating, you agree to:
+We are committed to providing a welcoming and inclusive environment for everyone. By participating,
+you agree to:
+
 - Be respectful of different viewpoints and experiences.
 - Gracefully accept constructive criticism.
 - Focus on what is best for the community and project.
@@ -68,10 +74,10 @@ GroqTales uses labels to help contributors understand scope, difficulty, and exp
 - **Security** 🔐 – Vulnerabilities or sensitive issues (use responsible disclosure)
 
 ### Difficulty Labels
-- **Easy** – Beginner friendly, good first issue  
-- **Medium** – Requires familiarity with the codebase  
-- **Hard** – Complex logic or architectural changes
 
+- **Easy** – Beginner friendly, good first issue
+- **Medium** – Requires familiarity with the codebase
+- **Hard** – Complex logic or architectural changes
 
 You can contribute in several ways:
 
@@ -86,8 +92,9 @@ You can contribute in several ways:
 
 ## Using Issue Templates
 
-**Before opening any issue or pull request, you must use the relevant template provided in `.github/ISSUE_TEMPLATE/`.**
-Templates include:
+**Before opening any issue or pull request, you must use the relevant template provided in
+`.github/ISSUE_TEMPLATE/`.** Templates include:
+
 - `bug_report.md` – For bugs or unexpected behavior
 - `feature.md` – For new features or enhancements
 - `web3_issue.md` – For blockchain/NFT/Web3-specific issues
@@ -107,7 +114,8 @@ Please choose the correct template when opening an issue:
 
 Choosing the right template helps maintainers respond faster.
 
-**Please fill out all required sections in the template to help us triage and resolve your issue quickly.**
+**Please fill out all required sections in the template to help us triage and resolve your issue
+quickly.**
 
 ---
 
@@ -116,6 +124,7 @@ Choosing the right template helps maintainers respond faster.
 To get started with development:
 
 1. **Clone the Repository:**
+
    ```bash
    git clone [https://github.com/IndieHub25/GroqTales.git](https://github.com/IndieHub25/GroqTales.git)
    cd GroqTales
@@ -125,12 +134,11 @@ To get started with development:
    ```bash
    npm install
    ```
-   
-3. **Environment Variables:**
-Copy `.env.example` to `.env.local` and fill in:
-* `GROQ_API_KEY` – Groq AI key (required)
-* `MONAD_RPC_URL` – Monad blockchain endpoint
-* `UNSPLASH_API_KEY` – (Optional) for placeholder visuals
+3. **Environment Variables:** Copy `.env.example` to `.env.local` and fill in:
+
+- `GROQ_API_KEY` – Groq AI key (required)
+- `MONAD_RPC_URL` – Monad blockchain endpoint
+- `UNSPLASH_API_KEY` – (Optional) for placeholder visuals
 
 4. **Run Development Server:**
    ```bash
@@ -139,10 +147,10 @@ Copy `.env.example` to `.env.local` and fill in:
 
 _Visit [http://localhost:3000](http://localhost:3000) in your browser._
 
-
 ---
 
 ## Repository Structure & Architecture
+
 GroqTales is organized for scalability and modularity. Here’s a high-level overview:
 
 ```text
@@ -174,7 +182,8 @@ GroqTales/
 ## Architecture Notes
 
 - **Frontend:** Built with Next.js, React, TailwindCSS, and shadcn/ui for a modern, responsive UI.
-- **Backend:** Node.js API routes handle authentication, story generation, and blockchain interactions.
+- **Backend:** Node.js API routes handle authentication, story generation, and blockchain
+  interactions.
 - **Blockchain:** Monad SDK and Solidity smart contracts manage NFT minting and ownership.
 - **AI:** Groq API powers story and comic generation.
 - **Database:** MongoDB stores user data, stories, and metadata.
@@ -185,7 +194,8 @@ GroqTales/
 ## Coding Guidelines
 
 - **JavaScript/TypeScript:** Follow the Airbnb Style Guide.
-- **React/Next.js:** Use functional components and hooks. Follow Next.js routing and data-fetching conventions.
+- **React/Next.js:** Use functional components and hooks. Follow Next.js routing and data-fetching
+  conventions.
 - **Formatting:** Use Prettier (`npm run format`).
 - **Linting:** Use ESLint (`npm run lint`).
 - **Commits:** Use descriptive commit messages (Conventional Commits format preferred).
@@ -217,8 +227,8 @@ Please wait for review before starting large changes.
    cd GroqTales
    git remote add upstream https://github.com/IndieHub25/GroqTales.git
    ```
-   
 3. **Synchronize before starting work:**
+
    ```bash
    git fetch upstream
    git checkout main
@@ -226,12 +236,14 @@ Please wait for review before starting large changes.
    ```
 
 4. **Create a feature branch (use descriptive, kebab or slash style):**
+
    ```bash
    git checkout -b feature/improve-story-generator
    ```
 
 5. **Implement changes (small, atomic commits – use Conventional Commit style if possible).**
 6. **Run quality gates locally:**
+
    ```bash
    npm run lint
    npm run type-check
@@ -239,17 +251,20 @@ Please wait for review before starting large changes.
    ```
 
 7. **Rebase onto upstream/main before opening PR:**
+
    ```bash
    git fetch upstream
    git rebase upstream/main
    ```
 
 8. **Push to your fork:**
+
    ```bash
    git push -u origin feature/improve-story-generator
    ```
 
 9. **Open a Pull Request:**
+
 - Base: `IndieHub25/GroqTales` `main`
 - Head: `your-username:feature/improve-story-generator`
 - Fill out PR template completely
@@ -266,14 +281,21 @@ Please wait for review before starting large changes.
     ```
 
 ---
+
 The following section describes the full pull request process in detail:
 
 ## CI & GitHub Actions
+
 GroqTales uses GitHub Actions to ensure code quality and security.
 
-- **Fork Behavior:** If you are contributing from a fork, some workflows (like Deployments) will not run. This is expected security behavior.
-- **"Approve and Run":** Maintainers may need to approve your workflows if you are a first-time contributor. Note that automated PR comments (linting feedback, welcome messages) might not appear on fork PRs due to GitHub security restrictions. Please check the "Files changed" tab and the Actions logs for feedback.
-- **Failures:** If a workflow fails with a "Resource not accessible by integration" error, it is likely a permission issue with your fork. A maintainer will review the logs.
+- **Fork Behavior:** If you are contributing from a fork, some workflows (like Deployments) will not
+  run. This is expected security behavior.
+- **"Approve and Run":** Maintainers may need to approve your workflows if you are a first-time
+  contributor. Note that automated PR comments (linting feedback, welcome messages) might not appear
+  on fork PRs due to GitHub security restrictions. Please check the "Files changed" tab and the
+  Actions logs for feedback.
+- **Failures:** If a workflow fails with a "Resource not accessible by integration" error, it is
+  likely a permission issue with your fork. A maintainer will review the logs.
 
 ---
 
@@ -288,26 +310,32 @@ GroqTales uses GitHub Actions to ensure code quality and security.
 ---
 
 ## Labeling & Tagging
+
 To ensure your contributions are tracked for **SWOC'26**, use the following labels:
-* **Program:** `SWOC'26` (Mandatory for points)
-* **Difficulty:** `SWOC-Level-1`, `SWOC-Level-2`, `SWOC-Level-3`
-* **Area:** `frontend`, `backend`, `blockchain`, `AI/LLM`
-* **Status:** `good first issue`, `help wanted`
+
+- **Program:** `SWOC'26` (Mandatory for points)
+- **Difficulty:** `SWOC-Level-1`, `SWOC-Level-2`, `SWOC-Level-3`
+- **Area:** `frontend`, `backend`, `blockchain`, `AI/LLM`
+- **Status:** `good first issue`, `help wanted`
 
 ---
 
 ## Documentation
+
 - Update or add documentation for any new features or changes.
 - Add inline comments for complex logic.
-- Keep the [Wiki](https://github.com/IndieHub25/GroqTales/wiki) up to date for setup, usage, and architecture.
+- Keep the [Wiki](https://github.com/IndieHub25/GroqTales/wiki) up to date for setup, usage, and
+  architecture.
 
 ---
 
 ## Community & Support
-- **Discord:** [Join our Discord server](https://discord.gg/JK29FZRm) for real-time help and collaboration.
-- **Discussions:** Use [GitHub Discussions](https://github.com/IndieHub25/GroqTales/discussions) for ideas and Q&A.
-- **Security:** For vulnerabilities, see [SECURITY.md](./SECURITY.md).
 
+- **Discord:** [Join our Discord server](https://discord.gg/JK29FZRm) for real-time help and
+  collaboration.
+- **Discussions:** Use [GitHub Discussions](https://github.com/IndieHub25/GroqTales/discussions) for
+  ideas and Q&A.
+- **Security:** For vulnerabilities, see [SECURITY.md](./SECURITY.md).
 
 ---
 
@@ -319,6 +347,7 @@ To ensure your contributions are tracked for **SWOC'26**, use the following labe
 - [ ] Screenshots/logs attached (if applicable)
 - [ ] Linked related issues or discussions
 
-Thank you for contributing to GroqTales! If you have any questions, open an issue, ask in Discord, or contact the maintainers directly.
+Thank you for contributing to GroqTales! If you have any questions, open an issue, ask in Discord,
+or contact the maintainers directly.
 
 <!-- markdownlint-enable MD033 -->

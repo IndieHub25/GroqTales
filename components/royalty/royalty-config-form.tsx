@@ -29,13 +29,21 @@ export function RoyaltyConfigForm({
   const { toast } = useToast();
   const [percentage, setPercentage] = useState(5);
 
-  const { config, isLoading: configLoading, refetch } = useRoyaltyConfig({
+  const {
+    config,
+    isLoading: configLoading,
+    refetch,
+  } = useRoyaltyConfig({
     creatorWallet: walletAddress,
     storyId,
     nftId,
   });
 
-  const { configure, isLoading: saving, error: saveError } = useConfigureRoyalty();
+  const {
+    configure,
+    isLoading: saving,
+    error: saveError,
+  } = useConfigureRoyalty();
 
   // Populate form with existing config
   useEffect(() => {
@@ -121,7 +129,10 @@ export function RoyaltyConfigForm({
                   max={50}
                   value={percentage}
                   onChange={(e) => {
-                    const val = Math.min(50, Math.max(0, Number(e.target.value)));
+                    const val = Math.min(
+                      50,
+                      Math.max(0, Number(e.target.value))
+                    );
                     setPercentage(val);
                   }}
                 />
@@ -129,14 +140,16 @@ export function RoyaltyConfigForm({
               <span className="font-bold text-lg">%</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              You earn {percentage}% of every secondary sale of your NFTs. Range: 0-50%.
+              You earn {percentage}% of every secondary sale of your NFTs.
+              Range: 0-50%.
             </p>
           </div>
 
           <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
             <p className="text-sm">
               <strong>Example:</strong> If your NFT sells for 1 ETH, you earn{' '}
-              <strong>{(1 * (percentage / 100)).toFixed(4)} ETH</strong> as royalty.
+              <strong>{(1 * (percentage / 100)).toFixed(4)} ETH</strong> as
+              royalty.
             </p>
           </div>
 

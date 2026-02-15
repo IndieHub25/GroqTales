@@ -10,24 +10,27 @@ export interface IRoyaltyConfig extends Document {
   updatedAt: Date;
 }
 
-const RoyaltyConfigSchema = new Schema<IRoyaltyConfig>({
-  nftId: { type: Schema.Types.ObjectId, ref: 'Nft', index: true },
-  storyId: { type: Schema.Types.ObjectId, ref: 'Story', index: true },
-  creatorWallet: {
-    type: String,
-    required: true,
-    lowercase: true,
-    trim: true,
-    index: true,
+const RoyaltyConfigSchema = new Schema<IRoyaltyConfig>(
+  {
+    nftId: { type: Schema.Types.ObjectId, ref: 'Nft', index: true },
+    storyId: { type: Schema.Types.ObjectId, ref: 'Story', index: true },
+    creatorWallet: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+      index: true,
+    },
+    royaltyPercentage: {
+      type: Number,
+      default: 5,
+      min: 0,
+      max: 50,
+    },
+    isActive: { type: Boolean, default: true },
   },
-  royaltyPercentage: {
-    type: Number,
-    default: 5,
-    min: 0,
-    max: 50,
-  },
-  isActive: { type: Boolean, default: true },
-}, { timestamps: true });
+  { timestamps: true }
+);
 
 RoyaltyConfigSchema.index({ creatorWallet: 1, storyId: 1 });
 

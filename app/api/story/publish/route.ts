@@ -1,10 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
-import { getServerSession } from 'next-auth'; 
+import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import Story from '../../../../models/Story';
 import Outbox from '../../../../models/Outbox';
 import dbConnect from '@/lib/dbConnect';
+import { rateLimiters, checkRateLimit } from '@/lib/rate-limit';
 
 interface CustomUser {
   name?: string | null;
@@ -13,7 +14,15 @@ interface CustomUser {
   wallet?: string;
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // Rate limit: 5 requests per minute for publishing
+  const ip = req.headers.get('x-forwarded-for') ?? req.ip ?? '127.0.0.1';
+  const rateLimitResponse = await checkRateLimit(
+    rateLimiters.publish,
+    `publish:${ip}`
+  );
+  if (rateLimitResponse) return rateLimitResponse;
+
   await dbConnect();
 
   const session = await getServerSession(authOptions);
@@ -21,7 +30,7 @@ export async function POST(req: Request) {
 
   if (!session || !user || !user.wallet) {
     return NextResponse.json(
-      { success: false, error: "Unauthorized: Wallet not connected" }, 
+      { success: false, error: 'Unauthorized: Wallet not connected' },
       { status: 401 }
     );
   }
@@ -30,39 +39,56 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch (e) {
-    return NextResponse.json({ success: false, error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: 'Invalid JSON' },
+      { status: 400 }
+    );
   }
 
   const { storyId } = body;
 
   if (!storyId || !mongoose.Types.ObjectId.isValid(storyId)) {
-    return NextResponse.json({ success: false, error: 'Invalid or missing storyId' }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: 'Invalid or missing storyId' },
+      { status: 400 }
+    );
   }
 
-  const existingStory = await Story.findById(storyId).select('authorWallet status');
-  
+  const existingStory = await Story.findById(storyId).select(
+    'authorWallet status'
+  );
+
   if (!existingStory) {
-    return NextResponse.json({ success: false, error: 'Story not found' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: 'Story not found' },
+      { status: 404 }
+    );
   }
-  
+
   if (existingStory.authorWallet.toLowerCase() !== user.wallet.toLowerCase()) {
-    return NextResponse.json({ success: false, error: 'Forbidden: You do not own this story' }, { status: 403 });
+    return NextResponse.json(
+      { success: false, error: 'Forbidden: You do not own this story' },
+      { status: 403 }
+    );
   }
 
   if (existingStory.status !== 'draft') {
-    return NextResponse.json({ success: false, error: 'Story is already published or processing' }, { status: 409 });
+    return NextResponse.json(
+      { success: false, error: 'Story is already published or processing' },
+      { status: 409 }
+    );
   }
 
   const mongoSession = await mongoose.startSession();
-  
+
   try {
     mongoSession.startTransaction();
 
     const story = await Story.findOneAndUpdate(
-      { 
-        _id: storyId, 
-        status: 'draft', 
-        authorWallet: user.wallet.toLowerCase()
+      {
+        _id: storyId,
+        status: 'draft',
+        authorWallet: user.wallet.toLowerCase(),
       },
       { status: 'publishing' },
       { session: mongoSession, new: true }
@@ -71,7 +97,10 @@ export async function POST(req: Request) {
     if (!story) {
       await mongoSession.abortTransaction();
       return NextResponse.json(
-        { success: false, error: "Conflict: Story was modified by another process" }, 
+        {
+          success: false,
+          error: 'Conflict: Story was modified by another process',
+        },
         { status: 409 }
       );
     }
@@ -79,7 +108,10 @@ export async function POST(req: Request) {
     if (!story.ipfsHash) {
       await mongoSession.abortTransaction();
       return NextResponse.json(
-        { success: false, error: "Validation Error: Story missing IPFS metadata" }, 
+        {
+          success: false,
+          error: 'Validation Error: Story missing IPFS metadata',
+        },
         { status: 400 }
       );
     }
@@ -88,28 +120,32 @@ export async function POST(req: Request) {
       storyId: story._id,
       authorWallet: story.authorWallet,
       metadataUri: story.ipfsHash,
-      title: story.title
+      title: story.title,
     };
 
-    await Outbox.create([{
-      eventType: 'MintRequested',
-      aggregateId: story._id,
-      payload: eventPayload,
-      status: 'pending'
-    }], { session: mongoSession });
+    await Outbox.create(
+      [
+        {
+          eventType: 'MintRequested',
+          aggregateId: story._id,
+          payload: eventPayload,
+          status: 'pending',
+        },
+      ],
+      { session: mongoSession }
+    );
 
     await mongoSession.commitTransaction();
-    
-    return NextResponse.json({ success: true, storyId });
 
+    return NextResponse.json({ success: true, storyId });
   } catch (error: any) {
     if (mongoSession.inTransaction()) {
-        await mongoSession.abortTransaction();
+      await mongoSession.abortTransaction();
     }
-    console.error("Publish Transaction Error:", error);
-    
+    console.error('Publish Transaction Error:', error);
+
     return NextResponse.json(
-      { success: false, error: "Internal Server Error" }, 
+      { success: false, error: 'Internal Server Error' },
       { status: 500 }
     );
   } finally {

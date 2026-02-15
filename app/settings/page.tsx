@@ -31,9 +31,9 @@ export const metadata: Metadata = {
 
 export default async function SettingsPage() {
   const session = await getServerSession(authOptions);
-  
+
   if (!session) {
-    redirect("/login?callbackUrl=/settings");
+    redirect('/login?callbackUrl=/settings');
   }
 
   return (
@@ -69,7 +69,7 @@ export default async function SettingsPage() {
                   <Input
                     id="email"
                     type="email"
-                    defaultValue={session?.user?.email || ""}
+                    defaultValue={session?.user?.email || ''}
                     disabled
                   />
                   <p className="text-[0.8rem] text-muted-foreground">
@@ -77,8 +77,8 @@ export default async function SettingsPage() {
                   </p>
                 </div>
                 <div className="border-t pt-4 mt-4">
-                    <h3 className="font-medium mb-4">Security</h3>
-                    <Button variant="outline">Change Password</Button>
+                  <h3 className="font-medium mb-4">Security</h3>
+                  <Button variant="outline">Change Password</Button>
                 </div>
               </div>
 
@@ -108,18 +108,32 @@ export default async function SettingsPage() {
             <CardContent>
               <div className="space-y-4">
                 {[
-                  { title: "New Story Comments", desc: "When someone comments on your stories" },
-                  { title: "New Followers", desc: "When someone follows your profile" },
-                  { title: "Story Likes", desc: "When someone likes your stories" },
-                  { title: "NFT Purchases", desc: "When someone purchases your NFT stories" },
+                  {
+                    title: 'New Story Comments',
+                    desc: 'When someone comments on your stories',
+                  },
+                  {
+                    title: 'New Followers',
+                    desc: 'When someone follows your profile',
+                  },
+                  {
+                    title: 'Story Likes',
+                    desc: 'When someone likes your stories',
+                  },
+                  {
+                    title: 'NFT Purchases',
+                    desc: 'When someone purchases your NFT stories',
+                  },
                 ].map((item, i) => (
-                    <div key={i} className="flex items-center justify-between">
+                  <div key={i} className="flex items-center justify-between">
                     <div>
-                        <h4 className="font-medium">{item.title}</h4>
-                        <p className="text-sm text-muted-foreground">{item.desc}</p>
+                      <h4 className="font-medium">{item.title}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {item.desc}
+                      </p>
                     </div>
                     <Switch defaultChecked />
-                    </div>
+                  </div>
                 ))}
               </div>
             </CardContent>
@@ -139,7 +153,11 @@ export default async function SettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="wallet-address">Connected Wallet</Label>
                   <div className="flex gap-2">
-                    <Input id="wallet-address" placeholder="No wallet connected" readOnly />
+                    <Input
+                      id="wallet-address"
+                      placeholder="No wallet connected"
+                      readOnly
+                    />
                     <Button variant="outline">Connect</Button>
                   </div>
                 </div>
@@ -174,9 +192,15 @@ export default async function SettingsPage() {
                 <div className="space-y-2">
                   <Label>Theme</Label>
                   <div className="grid grid-cols-3 gap-2">
-                    <Button variant="outline" className="justify-start">Light</Button>
-                    <Button variant="outline" className="justify-start">Dark</Button>
-                    <Button variant="outline" className="justify-start">System</Button>
+                    <Button variant="outline" className="justify-start">
+                      Light
+                    </Button>
+                    <Button variant="outline" className="justify-start">
+                      Dark
+                    </Button>
+                    <Button variant="outline" className="justify-start">
+                      System
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -197,7 +221,9 @@ export default async function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium">Profile Visibility</h4>
-                    <p className="text-sm text-muted-foreground">Who can see your profile</p>
+                    <p className="text-sm text-muted-foreground">
+                      Who can see your profile
+                    </p>
                   </div>
                   <Select defaultValue="public">
                     <SelectTrigger className="w-[180px]">
@@ -210,11 +236,13 @@ export default async function SettingsPage() {
                   </Select>
                 </div>
               </div>
-              
+
               <div className="pt-4 border-t">
-                <h3 className="font-medium mb-2 text-destructive">Danger Zone</h3>
+                <h3 className="font-medium mb-2 text-destructive">
+                  Danger Zone
+                </h3>
                 <Button variant="destructive" className="w-full sm:w-auto">
-                   Delete Account
+                  Delete Account
                 </Button>
               </div>
             </CardContent>

@@ -41,7 +41,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (royaltyPercentage === undefined || royaltyPercentage === null || typeof royaltyPercentage !== 'number' || isNaN(royaltyPercentage)) {
+    if (
+      royaltyPercentage === undefined ||
+      royaltyPercentage === null ||
+      typeof royaltyPercentage !== 'number' ||
+      isNaN(royaltyPercentage)
+    ) {
       return NextResponse.json(
         { success: false, error: 'royaltyPercentage must be a number' },
         { status: 400 }
@@ -80,7 +85,10 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Error configuring royalty:', error);
 
-    if (error.message?.includes('Invalid') || error.message?.includes('must be')) {
+    if (
+      error.message?.includes('Invalid') ||
+      error.message?.includes('must be')
+    ) {
       return NextResponse.json(
         { success: false, error: error.message },
         { status: 400 }
@@ -117,7 +125,11 @@ export async function GET(request: NextRequest) {
 
     if (!nftId && !storyId && !creatorWallet) {
       return NextResponse.json(
-        { success: false, error: 'At least one query parameter is required (nftId, storyId, or creatorWallet)' },
+        {
+          success: false,
+          error:
+            'At least one query parameter is required (nftId, storyId, or creatorWallet)',
+        },
         { status: 400 }
       );
     }
