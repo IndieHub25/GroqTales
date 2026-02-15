@@ -1,10 +1,29 @@
 import { NextResponse } from 'next/server';
 import { getPersonalizedFeed } from '@/lib/feedService';
-import { auth } from '@/auth/auth';
+
+let authFunction: any = null;
+
+// Safely import auth with error handling
+try {
+  const authModule = require('@/auth/auth');
+  authFunction = authModule?.auth || authModule?.default?.auth;
+} catch (err) {
+  console.warn('Could not load auth module:', err);
+}
 
 export async function GET(req: Request) {
   try {
-    const session = await auth();
+    let session = null;
+    
+    // Safely call auth if available
+    if (typeof authFunction === 'function') {
+      try {
+        session = await authFunction();
+      } catch (authErr) {
+        console.warn('Auth call failed, using public feed:', authErr);
+      }
+    }
+    
     const { searchParams } = new URL(req.url);
     const page = Math.max(
       1,

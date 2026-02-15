@@ -28,55 +28,59 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
+import { useState,useEffect } from 'react';
 // Sample user data
-const userData = {
-  name: 'Alex Thompson',
-  username: '@alexstoryteller',
-  avatar: '/avatars/alex.jpg',
-  bio: 'Web3 storyteller exploring the intersection of AI and blockchain. Creating unique narrative experiences one story at a time.',
-  joinDate: 'March 2024',
-  isVerified: true,
-  storiesCount: 15,
-  followers: 1240,
-  following: 384,
-  walletAddress: '0x1234...5678',
-  badges: ['Top Creator', 'Early Adopter', 'Story Master'],
-  favoriteGenres: ['Science Fiction', 'Fantasy', 'Mystery'],
-  totalViews: 25600,
-  totalLikes: 3200,
-};
+// const userData = {
+//   name: 'Alex Thompson',
+//   username: '@alexstoryteller',
+//   avatar: '/avatars/alex.jpg',
+//   bio: 'Web3 storyteller exploring the intersection of AI and blockchain. Creating unique narrative experiences one story at a time.',
+//   joinDate: 'March 2024',
+//   isVerified: true,
+//   storiesCount: 15,
+//   followers: 1240,
+//   following: 384,
+//   walletAddress: '0x1234...5678',
+//   badges: ['Top Creator', 'Early Adopter', 'Story Master'],
+//   favoriteGenres: ['Science Fiction', 'Fantasy', 'Mystery'],
+//   totalViews: 25600,
+//   totalLikes: 3200,
+// };
 
 // Sample story data
-const userStories = [
-  {
-    id: 1,
-    title: 'The Last Algorithm',
-    excerpt: 'In a world where AI has evolved beyond human comprehension...',
-    coverImage: '/stories/algorithm-cover.jpg',
-    date: '2 days ago',
-    genre: 'Science Fiction',
-    likes: 342,
-    comments: 28,
-    isNFT: true,
-  },
-  // ... more stories
-];
+// const userStories = [
+//   {
+//     id: 1,
+//     title: 'The Last Algorithm',
+//     excerpt: 'In a world where AI has evolved beyond human comprehension...',
+//     coverImage: '/stories/algorithm-cover.jpg',
+//     date: '2 days ago',
+//     genre: 'Science Fiction',
+//     likes: 342,
+//     comments: 28,
+//     isNFT: true,
+//   },
+//   // ... more stories
+// ];
 
-const savedStories = [
-  {
-    id: 1,
-    title: 'Echoes of Tomorrow',
-    excerpt: 'The quantum resonance chamber hummed with possibility...',
-    coverImage: '/stories/echoes-cover.jpg',
-    date: '1 week ago',
-    genre: 'Science Fiction',
-    likes: 567,
-    comments: 45,
-    isNFT: true,
-  },
-  // ... more stories
-];
+// const savedStories = [
+//   {
+//     id: 1,
+//     title: 'Echoes of Tomorrow',
+//     excerpt: 'The quantum resonance chamber hummed with possibility...',
+//     coverImage: '/stories/echoes-cover.jpg',
+//     date: '1 week ago',
+//     genre: 'Science Fiction',
+//     likes: 567,
+//     comments: 45,
+//     isNFT: true,
+//   },
+//   // ... more stories
+// ];
+const [profile, setProfile] = useState<any>(null);
+const [stories,setStories] = useState<any[]>([]);
+const [loading, setLoading] = useState<any>(null);
+const [error, setError] = useState(false);
 
 // Floating GitHub button component
 const FloatingGithub = () => (
@@ -129,7 +133,32 @@ const StoryCard = ({ story }: any) => (
     </CardContent>
   </Card>
 );
+useEffect(()=>{
+  const controller = new AbortController();
+  async function loadProfile() {
+    try {
+      setLoading(true);
 
+      const res= await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile`,
+          {credentials: 'include', signal: controller.signal}
+      );
+      if(!res.ok) throw new Error();
+      const json = await res.json();
+      setProfile(json.user);
+      setStories(json.stories??[]);
+
+    }catch(err){
+      if((err as any).name!=='AbortError'){
+        setError(true);
+      }
+    } finally{
+      setLoading(false);
+    }
+  }
+  loadProfile();
+  return() => controller.abort();
+},[]);
 export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
@@ -141,28 +170,28 @@ export default function ProfilePage() {
         <Card className="mb-8">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              <Avatar className="w-24 h-24 border-4 border-background">
-                <AvatarImage src={userData.avatar} alt={userData.name} />
+              {/* <Avatar className="w-24 h-24 border-4 border-background">
+                <AvatarImage src={profile?.avatar} alt={userData.name} />
                 <AvatarFallback>AT</AvatarFallback>
-              </Avatar>
+              </Avatar> */}
 
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <h1 className="text-2xl font-bold">{userData.name}</h1>
-                  {userData.isVerified && (
+                  {/* <h1 className="text-2xl font-bold">{userData.name}</h1>
+                  {profile?.isVerified && (
                     <CheckCircle2 className="w-5 h-5 text-primary" />
-                  )}
+                  )} */}
                 </div>
                 <p className="text-muted-foreground mb-4">
-                  {userData.username}
+                  {profile?.username}
                 </p>
-                <p className="text-sm mb-4">{userData.bio}</p>
+                <p className="text-sm mb-4">{profile?.bio}</p>
                 <div className="flex flex-wrap gap-2">
-                  {userData.badges.map((badge) => (
+                  {/* {profile?.badges.map((badge) => (
                     <Badge key={badge} variant="secondary">
                       {badge}
-                    </Badge>
-                  ))}
+                    </Badge> */}
+                  {/* ))} */}
                 </div>
               </div>
 
@@ -186,7 +215,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Stories</p>
-                  <p className="text-2xl font-bold">{userData.storiesCount}</p>
+                  <p className="text-2xl font-bold">{profile?.storiesCount}</p>
                 </div>
               </div>
             </CardContent>
@@ -200,7 +229,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Followers</p>
-                  <p className="text-2xl font-bold">{userData.followers}</p>
+                  <p className="text-2xl font-bold">{profile?.followers}</p>
                 </div>
               </div>
             </CardContent>
@@ -214,7 +243,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Views</p>
-                  <p className="text-2xl font-bold">{userData.totalViews}</p>
+                  <p className="text-2xl font-bold">{profile?.totalViews}</p>
                 </div>
               </div>
             </CardContent>
@@ -228,7 +257,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Likes</p>
-                  <p className="text-2xl font-bold">{userData.totalLikes}</p>
+                  <p className="text-2xl font-bold">{profile?.totalLikes}</p>
                 </div>
               </div>
             </CardContent>
@@ -254,7 +283,7 @@ export default function ProfilePage() {
 
           <TabsContent value="stories">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {userStories.map((story) => (
+              {stories.map((story) => (
                 <StoryCard key={story.id} story={story} />
               ))}
             </div>
@@ -262,7 +291,7 @@ export default function ProfilePage() {
 
           <TabsContent value="saved">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {savedStories.map((story) => (
+              {stories.map((story) => (
                 <StoryCard key={story.id} story={story} />
               ))}
             </div>

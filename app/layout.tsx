@@ -171,7 +171,9 @@ export default function RootLayout({
 
         {/* Optimize for performance */}
         <meta name="color-scheme" content="light dark" />
-
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#000000" />
+        <meta name="mobile-web-app-capable" content="yes" />
         {/* Performance optimization scripts */}
         <Script
           id="theme-fix"
@@ -192,6 +194,19 @@ export default function RootLayout({
           id="scroll-optimization"
           src="/scroll-optimization.js"
           strategy="afterInteractive"
+        />
+        <Script
+          id="pwa-register"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                  console.log('ServiceWorker registration failed: ', err);
+                });
+              }
+            `,
+          }}
         />
       </head>
       <body

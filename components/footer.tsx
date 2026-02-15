@@ -60,7 +60,6 @@ export function Footer() {
       role="contentinfo"
       className="relative mt-20 border-t-8 border-foreground dark:border-slate-700 bg-card dark:bg-slate-950"
     >
-      {/* Premium Background Glows for Dark Mode */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-0 dark:opacity-100">
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-600/5 blur-[120px]" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-600/5 blur-[120px]" />
@@ -68,9 +67,7 @@ export function Footer() {
 
       <div className="relative">
         <div className="container mx-auto px-6 py-16">
-          {/* Main Footer Content Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
-            {/* Brand Section */}
             <div className="space-y-6 flex flex-col items-center sm:items-start">
               <Link href="/" className="group inline-block">
                 <div className="relative">
@@ -102,11 +99,7 @@ export function Footer() {
                 Create • Mint • Own
               </div>
 
-              <div
-                className="flex gap-3 pt-2"
-                role="group"
-                aria-label="Social media links"
-              >
+              <div className="flex gap-3 pt-2" role="group" aria-label="Social media links">
                 {socialLinks.map((link) => (
                   <Link
                     key={link.url}
@@ -124,7 +117,6 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Explore Section */}
             <nav aria-label="Explore links" className="text-left">
               <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
                 Explore
@@ -150,7 +142,6 @@ export function Footer() {
               </ul>
             </nav>
 
-            {/* Legal Section */}
             <nav aria-label="Legal links" className="text-left">
               <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
                 Legal
@@ -175,7 +166,6 @@ export function Footer() {
               </ul>
             </nav>
 
-            {/* Resources Section */}
             <nav aria-label="Resources links" className="text-left">
               <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
                 Resources
@@ -184,6 +174,7 @@ export function Footer() {
                 {[
                   { href: '/docs', label: 'Documentation' },
                   { href: '/faq', label: 'FAQ' },
+                  { href: '/feedback', label: 'Feedback' },
                 ].map((link) => (
                   <li key={link.href}>
                     <Link
@@ -198,7 +189,6 @@ export function Footer() {
               </ul>
             </nav>
 
-            {/* Built by Section */}
             <div className="text-left">
               <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
                 Built by
@@ -220,10 +210,8 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Divider */}
           <div className="border-t-4 border-foreground dark:border-slate-700 my-8" />
 
-          {/* Footer Bottom - Copyright & Credits */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-bold uppercase">
             <div className="flex flex-col sm:flex-row items-center gap-4 text-center">
               <p className="flex items-center gap-2 text-foreground dark:text-slate-400">

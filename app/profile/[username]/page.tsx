@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useParams } from 'next/navigation';
 
 export default function ProfilePage() {
-  const { account, connected, connecting } = useWeb3();
+  const { account, connected } = useWeb3();
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -22,30 +22,38 @@ export default function ProfilePage() {
     connected && account?.toLowerCase() === walletFromUrl?.toLowerCase();
 
   useEffect(() => {
-    // 1. Create the controller
     const controller = new AbortController();
     const signal = controller.signal;
 
     const fetchProfile = async () => {
-      if (walletFromUrl) {
-        try {
-          setLoading(true);
-          const response = await fetch(
-            `/api/v1/users/profile/${walletFromUrl}`,
-            { signal }
-          );
-          if (!response.ok) throw new Error('Failed to load');
-          const data = await response.json();
-          setProfileData(data);
-          setError(false);
-        } catch (err: any) {
-          if (err.name === 'AbortError') return;
-          console.error(err);
-          setError(true);
-        } finally {
-          if (!signal.aborted) {
-            setLoading(false);
-          }
+      if (!walletFromUrl) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(false);
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile/${walletFromUrl}`,
+          { signal }
+        );
+        if (!response.ok) throw new Error('Failed to load');
+
+        const json = await response.json();
+        if (!json.success) {
+          throw new Error(json.error?.message || 'Failed');
+        }
+
+        setProfileData(json.data);
+      } catch (err: any) {
+        if (err.name === 'AbortError') return;
+        console.error('Profile fetch failed:', err);
+        setError(true);
+      } finally {
+        if (!signal.aborted) {
+          setLoading(false);
         }
       }
     };
@@ -55,18 +63,20 @@ export default function ProfilePage() {
       controller.abort();
     };
   }, [walletFromUrl]);
-  // Show Loading Skeleton while fetching
-  if (connecting || loading) {
+
+  if (loading) {
     return (
       <div className="container mx-auto p-20">
         <Skeleton className="h-40 w-full" />
       </div>
     );
   }
+
   if (error) {
     return <div className="p-20 text-white">Failed to load profile.</div>;
   }
-  if (!profileData || !profileData.user) {
+
+  if (!profileData) {
     return <div className="p-20 text-white">User not found.</div>;
   }
 
@@ -92,7 +102,6 @@ export default function ProfilePage() {
               className="animate-in fade-in slide-in-from-bottom-4 duration-500"
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Map through the REAL stories from your API */}
                 {profileData?.stories?.map((story: any, idx: number) => (
                   <StoryCard key={story._id || idx} story={story} />
                 ))}

@@ -1,8 +1,10 @@
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Copy, Edit, Share2, Wallet } from 'lucide-react';
-import Link from 'next/link';
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Copy, Edit, Share2, Wallet } from "lucide-react";
+import Link from "next/link";
 
 interface ProfileHeaderProps {
   user: {
@@ -17,7 +19,6 @@ interface ProfileHeaderProps {
 }
 
 export function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
-  // Logic: Use Name if exists, otherwise use Username, otherwise use a slice of Wallet
   const displayName = user.firstName
     ? `${user.firstName} ${user.lastName || ''}`
     : user.username || `${user.walletAddress.slice(0, 6)}...`;
@@ -71,7 +72,6 @@ export function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
             </p>
           </div>
 
-          {/* Use the isOwner prop passed from the page */}
           <div className="flex gap-3 mt-4 md:mt-0">
             {isOwner ? (
               <Button

@@ -1,0 +1,32 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:v1.0.0
+    command: anvil --host 0.0.0.0 --port 8545
+    ports:
+      - "8545:8545"
+
+  server:
+    build:
+      context: .
+    depends_on:
+      - mongo
+      - anvil
+    environment:
+      NODE_ENV: development
+      MONGODB_URI: mongodb://mongo:27017/groqtales
+      NEXT_PUBLIC_RPC_URL: http://anvil:8545
+    command: sh -c "node scripts/seed.js && npm start"
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+
+volumes:
+  mongo_data:

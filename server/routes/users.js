@@ -15,6 +15,7 @@ router.get('/profile', authRequired, async (req, res) => {
     const profile = await User.findById(req.user.id)
       .select('-password -refreshToken')
       .lean();
+
     if (!profile) return res.status(404).json({ error: 'Profile not found' });
 
     return res.json(profile);
@@ -27,11 +28,18 @@ router.get('/profile', authRequired, async (req, res) => {
 router.get('/profile/:walletAddress', async (req, res) => {
   try {
     const { walletAddress } = req.params;
+
+    if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+      return res.status(400).json({ error: 'Invalid wallet address' });
+    }
+
     const addr = walletAddress.toLowerCase();
+
     const user = await User.findOneAndUpdate(
-      { walletAddress: addr },
+      { 'wallet.address': addr },
       {
         $setOnInsert: {
+          wallet: { address: addr },
           walletAddress: addr,
           username: `user_${addr.slice(-8)}`,
         },
@@ -39,13 +47,15 @@ router.get('/profile/:walletAddress', async (req, res) => {
       {
         upsert: true,
         new: true,
-        projection:
-          'username bio avatar badges firstName lastName walletAddress createdAt',
       }
-    ).lean();
+    )
+      .select('username bio avatar badges firstName lastName wallet walletAddress createdAt')
+      .lean();
+
     const stories = await Story.find({ author: user._id })
       .sort({ createdAt: -1 })
       .lean();
+
     return res.json({
       user,
       stories,
@@ -65,11 +75,13 @@ router.get('/profile/:walletAddress', async (req, res) => {
 router.patch('/update', authRequired, async (req, res) => {
   try {
     const updates = req.body;
+
     if (updates.password || updates.role) {
       return res
         .status(400)
         .json({ error: 'Cannot update password or role via this endpoint' });
     }
+
     const allowed = [
       'firstName',
       'lastName',
@@ -77,16 +89,19 @@ router.patch('/update', authRequired, async (req, res) => {
       'walletAddress',
       'email',
     ];
+
     Object.keys(updates).forEach((key) => {
       if (!allowed.includes(key)) {
         delete updates[key];
       }
     });
+
     const updatedProfile = await User.findByIdAndUpdate(
       req.user.id,
       { $set: { ...updates } },
       { new: true, upsert: false, runValidators: true }
     ).lean();
+
     if (!updatedProfile)
       return res.status(404).json({ error: 'Profile not found' });
 
