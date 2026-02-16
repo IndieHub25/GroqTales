@@ -97,6 +97,7 @@ export interface NotificationSettings {
   comments: boolean;
   likes: boolean;
   follows: boolean;
+  nftSales: boolean;
 }
 
 export interface PrivacySettings {
@@ -270,11 +271,11 @@ export interface NFTAttribute {
   traitType: string;
   value: string | number;
   displayType?:
-    | 'string'
-    | 'number'
-    | 'boost_number'
-    | 'boost_percentage'
-    | 'date';
+  | 'string'
+  | 'number'
+  | 'boost_number'
+  | 'boost_percentage'
+  | 'date';
 }
 
 export interface NFTProperties {

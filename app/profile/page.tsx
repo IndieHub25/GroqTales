@@ -28,7 +28,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 // Sample user data
 // const userData = {
 //   name: 'Alex Thompson',
@@ -77,10 +77,10 @@ import { useState,useEffect } from 'react';
 //   },
 //   // ... more stories
 // ];
-const [profile, setProfile] = useState<any>(null);
-const [stories,setStories] = useState<any[]>([]);
-const [loading, setLoading] = useState<any>(null);
+const [loading, setLoading] = useState<boolean>(true);
 const [error, setError] = useState(false);
+const [profile, setProfile] = useState<any>(null);
+const [stories, setStories] = useState<any[]>([]);
 
 
 // Floating GitHub button component
@@ -134,32 +134,34 @@ const StoryCard = ({ story }: any) => (
     </CardContent>
   </Card>
 );
-useEffect(()=>{
+
+useEffect(() => {
   const controller = new AbortController();
   async function loadProfile() {
     try {
       setLoading(true);
 
-      const res= await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile`,
-          {credentials: 'include', signal: controller.signal}
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile`,
+        { credentials: 'include', signal: controller.signal }
       );
-      if(!res.ok) throw new Error();
+      if (!res.ok) throw new Error();
       const json = await res.json();
       setProfile(json.user);
-      setStories(json.stories??[]);
-
-    }catch(err){
-      if((err as any).name!=='AbortError'){
+      setStories(json.stories ?? []);
+    } catch (err) {
+      if ((err as any).name !== 'AbortError') {
         setError(true);
       }
-    } finally{
-      setLoading(false);
+    } finally {
+      if (!controller.signal.aborted) {
+        setLoading(false);
+      }
     }
   }
   loadProfile();
-  return() => controller.abort();
-},[]);
+  return () => controller.abort();
+}, []);
 
 export default function ProfilePage() {
   return (
@@ -172,7 +174,7 @@ export default function ProfilePage() {
         <Card className="mb-8">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-{/* <Avatar className="w-24 h-24 border-4 border-background">
+              {/* <Avatar className="w-24 h-24 border-4 border-background">
                 <AvatarImage src={profile?.avatar} alt={userData.name} />
                 <AvatarFallback>AT</AvatarFallback>
               </Avatar> */}
@@ -218,7 +220,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Stories</p>
-<p className="text-2xl font-bold">{profile?.storiesCount}</p>
+                  <p className="text-2xl font-bold">{profile?.storiesCount}</p>
 
                 </div>
               </div>
@@ -233,7 +235,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Followers</p>
-<p className="text-2xl font-bold">{profile?.followers}</p>
+                  <p className="text-2xl font-bold">{profile?.followers}</p>
 
                 </div>
               </div>
@@ -248,7 +250,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Views</p>
-<p className="text-2xl font-bold">{profile?.totalViews}</p>
+                  <p className="text-2xl font-bold">{profile?.totalViews}</p>
 
                 </div>
               </div>
@@ -263,7 +265,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Likes</p>
-<p className="text-2xl font-bold">{profile?.totalLikes}</p>
+                  <p className="text-2xl font-bold">{profile?.totalLikes}</p>
 
                 </div>
               </div>
@@ -290,7 +292,7 @@ export default function ProfilePage() {
 
           <TabsContent value="stories">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-{stories.map((story) => (
+              {stories.map((story) => (
 
                 <StoryCard key={story.id} story={story} />
               ))}
@@ -299,7 +301,7 @@ export default function ProfilePage() {
 
           <TabsContent value="saved">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-{stories.map((story) => (
+              {stories.map((story) => (
 
                 <StoryCard key={story.id} story={story} />
               ))}

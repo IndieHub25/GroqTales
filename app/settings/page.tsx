@@ -79,7 +79,7 @@ export const metadata: Metadata = {
 export default async function SettingsPage() {
   const session = await getServerSession(authOptions);
   
-if (!session) redirect("/login");
+  if (!session) redirect('/login');
   
   return <SettingsClient />;
 }

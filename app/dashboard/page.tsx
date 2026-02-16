@@ -65,15 +65,16 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background p-8">
-      <DashboardTour
-        shouldRun={runTour}
-        onComplete={handleTourComplete}
-      />
+      <DashboardTour shouldRun={runTour} onComplete={handleTourComplete} />
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Creator Dashboard</h1>
-          <p className="text-muted-foreground">Manage your stories, NFTs, and earnings.</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Creator Dashboard
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your stories, NFTs, and earnings.
+          </p>
         </div>
 
         <Button variant="outline" className="tour-wallet-connect gap-2">
@@ -91,22 +92,29 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <Card className="tour-analytics">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Earnings
+            </CardTitle>
             <span className="text-muted-foreground">
               <DollarSign className="h-4 w-4" />
             </span>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {earnings ? `${(earnings.totalEarned ?? 0).toFixed(4)} ETH` : '0.0000 ETH'}
+              {earnings
+                ? `${(earnings.totalEarned ?? 0).toFixed(4)} ETH`
+                : "0.0000 ETH"}
             </div>
             <p className="text-xs text-muted-foreground flex items-center mt-1">
               {address ? (
-                <Link href="/dashboard/royalties" className="text-primary flex items-center hover:underline">
+                <Link
+                  href="/dashboard/royalties"
+                  className="text-primary flex items-center hover:underline"
+                >
                   View details <ArrowUpRight className="h-3 w-3 ml-0.5" />
                 </Link>
               ) : (
-                'Connect wallet to track'
+                "Connect wallet to track"
               )}
             </p>
           </CardContent>
@@ -114,7 +122,9 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Stories Published</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Stories Published
+            </CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -173,19 +183,25 @@ export default function DashboardPage() {
             <Button className="tour-create-story bg-primary text-primary-foreground">
               <Plus className="mr-2 h-4 w-4" /> Create New Story
             </Button>
-
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                <div
+                  key={i}
+                  className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
+                >
                   <div className="flex items-center gap-4">
                     <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                       📚
                     </div>
                     <div>
-                      <p className="font-medium">The Lost Algorithm of Atlantis</p>
-                      <p className="text-sm text-muted-foreground">Updated 2 hours ago</p>
+                      <p className="font-medium">
+                        The Lost Algorithm of Atlantis
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Updated 2 hours ago
+                      </p>
                     </div>
                   </div>
                   <Button variant="ghost" size="icon">
@@ -204,10 +220,12 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-4 text-sm">
               <div className="p-3 bg-primary/10 rounded-lg text-primary border border-primary/20">
-                <strong>💡 Pro Tip:</strong> Minting your story as an NFT allows you to earn royalties every time it is resold.
+                <strong>💡 Pro Tip:</strong> Minting your story as an NFT allows
+                you to earn royalties every time it is resold.
               </div>
               <div className="p-3 bg-muted rounded-lg border">
-                <strong>Writing with AI:</strong> Try using the "Fantasy" prompt preset to generate immersive worlds quickly.
+                <strong>Writing with AI:</strong> Try using the "Fantasy" prompt
+                preset to generate immersive worlds quickly.
               </div>
             </div>
           </CardContent>

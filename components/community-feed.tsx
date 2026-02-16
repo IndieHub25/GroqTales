@@ -61,7 +61,7 @@ const mockUsers: Array<{
   name: string;
   avatar: string;
 }> = [
-{
+    {
       id: 1,
       name: 'Alex Chen',
       avatar:
@@ -388,7 +388,7 @@ export default function CommunityFeed() {
         </div>
       </div>
 
-<div className="flex flex-col md:flex-row items-start md:items-center justify-between bg-muted/50 p-4 rounded-lg gap-4">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between bg-muted/50 p-4 rounded-lg gap-4">
 
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">

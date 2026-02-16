@@ -82,6 +82,7 @@ export default function SettingsPage() {
     sms: false,
     marketing: false,
     updates: true,
+    nftSales: true,
   });
   const [privacy, setPrivacy] = useState<PrivacySettings>({
     profileVisible: true,
@@ -91,6 +92,8 @@ export default function SettingsPage() {
     showWallet: false,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const { account, chainId, connected } = useWeb3();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -128,11 +131,15 @@ export default function SettingsPage() {
           sms: userData.preferences?.notifications?.sms ?? false,
           marketing: userData.preferences?.notifications?.marketing ?? false,
           updates: userData.preferences?.notifications?.updates ?? true,
-        }
-        );
+          nftSales: userData.preferences?.notifications?.nftSales ?? true,
+        });
+
         setPrivacy(userData.preferences?.privacy ?? {
           profileVisible: true,
           activityVisible: true,
+          storiesVisible: true,
+          showEmail: false,
+          showWallet: false,
         });
 
         form.reset({
@@ -152,10 +159,28 @@ export default function SettingsPage() {
     hydrate();
     return () => controller.abort();
   }, [form])
-  const onSubmit = (data: ProfileFormValues) => {
-    // In a real app, this would save the data to the server
-    console.log(data);
-    // Show success message or redirect
+  const onSubmit = async (data: ProfileFormValues) => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data),
+        }
+      );
+      if (!res.ok) throw new Error('Failed to update profile');
+      const json = await res.json();
+      if (json.success && json.data) {
+        setUser(json.data);
+        // Show toast success here if available
+        console.log("Profile updated successfully");
+      }
+
+    } catch (err) {
+      console.error("Failed to update profile", err);
+    }
   };
   const savePreferences = async () => {
     try {
@@ -179,8 +204,8 @@ export default function SettingsPage() {
       console.error("Failed to save preferences:", err);
     }
   };
-  if (loading || !user)
-    return <div className="p-8">Loading...</div>
+  if (loading) return <div className="p-8">Loading...</div>;
+  if (error || !user) return <div className="p-8">Failed to load user settings. Please try refreshing.</div>;
   return (
     <div className="container max-w-5xl mx-auto py-12 px-4 min-h-screen">
       <div className="mb-8">
@@ -486,10 +511,10 @@ export default function SettingsPage() {
                         id="followers"
                         checked={notifications.follows}
                         onCheckedChange={(value) =>
-                          setNotifications({
-                            ...notifications,
+                          setNotifications(prev => ({
+                            ...prev,
                             follows: value,
-                          })
+                          }))
                         }
                       />
                       <div className="space-y-0.5">
@@ -503,7 +528,15 @@ export default function SettingsPage() {
                           Receive emails when one of your NFT stories is sold
                         </p>
                       </div>
-                      <Switch id="nft-sale" defaultChecked />
+                      <Switch id="nft-sale"
+                        checked={notifications.nftSales}
+                        onCheckedChange={(value) =>
+                          setNotifications(prev => ({
+                            ...prev,
+                            nftSales: value,
+                          }))
+                        }
+                      />
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -601,7 +634,7 @@ export default function SettingsPage() {
               </CardContent>
               <CardFooter className="flex justify-end space-x-4 border-t pt-6">
                 <Button variant="outline">Reset to Defaults</Button>
-                <Button>Save Preferences</Button>
+                <Button onClick={savePreferences}>Save Preferences</Button>
               </CardFooter>
             </Card>
           </div >
@@ -632,7 +665,7 @@ export default function SettingsPage() {
                           variant="outline"
                           className="bg-primary/10 font-mono text-xs py-1"
                         >
-                          0x1a2b3c4d5e6f7890abcdef1234567890abcdef12
+                          {account || "Not Connected"}
                         </Badge>
                         <Button
                           variant="ghost"
@@ -643,8 +676,8 @@ export default function SettingsPage() {
                         </Button>
                       </div >
                       <div className="flex gap-2 items-center text-sm text-muted-foreground">
-                        <Badge>Monad</Badge>
-                        <span>Connected Jan 15, 2023</span>
+                        <Badge>{chainId ? `Chain ID: ${chainId}` : 'Network'}</Badge>
+                        <span>{connected ? 'Connected' : 'Disconnected'}</span>
                       </div>
                     </div >
                     <div>
