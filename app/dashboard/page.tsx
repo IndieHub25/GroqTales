@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
+=======
+import Link from "next/link";
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
 import { DashboardTour } from "@/components/dashboard/DashboardTour";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+<<<<<<< HEAD
 import { 
   BarChart3, 
   Wallet, 
@@ -14,6 +19,20 @@ import {
   MoreVertical, 
   ArrowUpRight 
 } from "lucide-react";
+=======
+import {
+  BarChart3,
+  Wallet,
+  BookOpen,
+  Trophy,
+  Plus,
+  MoreVertical,
+  ArrowUpRight,
+  DollarSign
+} from "lucide-react";
+import { useWallet } from "@/hooks/use-wallet";
+import { useCreatorEarnings } from "@/hooks/use-royalties";
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 
 interface ChecklistStep {
   id: string;
@@ -23,6 +42,12 @@ interface ChecklistStep {
 }
 
 export default function DashboardPage() {
+<<<<<<< HEAD
+=======
+  const { address } = useWallet();
+  const { earnings } = useCreatorEarnings(address || undefined);
+
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
   const [runTour, setRunTour] = useState(false);
 
   const [isChecklistVisible, setIsChecklistVisible] = useState(false);
@@ -87,6 +112,7 @@ export default function DashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
             <span className="text-muted-foreground">
+<<<<<<< HEAD
                 <BarChart3 className="h-4 w-4" />
             </span>
           </CardHeader>
@@ -97,6 +123,23 @@ export default function DashboardPage() {
                 +20.1% <ArrowUpRight className="h-3 w-3 ml-0.5" />
               </span>
               from last month
+=======
+                <DollarSign className="h-4 w-4" />
+            </span>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {earnings ? `${(earnings.totalEarned ?? 0).toFixed(4)} ETH` : '0.0000 ETH'}
+            </div>
+            <p className="text-xs text-muted-foreground flex items-center mt-1">
+              {address ? (
+                <Link href="/dashboard/royalties" className="text-primary flex items-center hover:underline">
+                  View details <ArrowUpRight className="h-3 w-3 ml-0.5" />
+                </Link>
+              ) : (
+                'Connect wallet to track'
+              )}
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
             </p>
           </CardContent>
         </Card>

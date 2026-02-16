@@ -3,16 +3,29 @@
     "collect": {
       "numberOfRuns": 3,
       "settings": {
+<<<<<<< HEAD
         "chromeFlags": "--no-sandbox --disable-dev-shm-usage"
+=======
+        "chromeFlags": "--no-sandbox --disable-dev-shm-usage --disable-device-emulation",
+        "onlyCategories": ["performance", "accessibility", "best-practices", "seo", "pwa"]
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
       }
     },
     "assert": {
       "assertions": {
+<<<<<<< HEAD
         "categories:performance": ["warn", { "minScore": 0.8 }],
         "categories:accessibility": ["error", { "minScore": 0.9 }],
         "categories:best-practices": ["warn", { "minScore": 0.85 }],
         "categories:seo": ["warn", { "minScore": 0.9 }],
         "categories:pwa": ["warn", { "minScore": 0.7 }]
+=======
+        "categories:performance": ["warn", { "minScore": 0.7 }],
+        "categories:accessibility": ["warn", { "minScore": 0.85 }],
+        "categories:best-practices": ["warn", { "minScore": 0.85 }],
+        "categories:seo": ["warn", { "minScore": 0.9 }],
+        "categories:pwa": ["warn", { "minScore": 0.5 }]
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
       }
     },
     "upload": {

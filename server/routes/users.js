@@ -23,10 +23,15 @@ router.get('/profile', authRequired, async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 // GET /api/v1/users/profile/:walletAddress - Get user profile by wallet address
 router.get('/profile/:walletAddress', async (req, res) => {
   try {
     const { walletAddress } = req.params;
+<<<<<<< HEAD
     const addr = walletAddress.toLowerCase();
     const user = await User.findOneAndUpdate(
       { walletAddress: addr },
@@ -35,13 +40,40 @@ router.get('/profile/:walletAddress', async (req, res) => {
           walletAddress: addr, 
           username: `user_${addr.slice(-8)}` 
         } 
+=======
+
+    if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)){
+      return res.status(400).json({error: "Invalid wallet address"});
+    }
+    const addr = walletAddress.toLowerCase();
+    const user = await User.findOneAndUpdate(
+      { "wallet.address": addr },
+       {
+        $setOnInsert: { 
+          wallet: {address: addr}, 
+          username: `user_${addr.slice(-6)}` 
+        } 
+      
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
       },
       { 
         upsert: true, 
         new: true, 
+<<<<<<< HEAD
         projection: 'username bio avatar badges firstName lastName walletAddress createdAt' 
       }
     ).lean();
+=======
+        //projection: 'username bio avatar badges firstName lastName walletAddress createdAt' 
+      }
+    )
+    .select('username bio avatar badges firstName lastName wallet createdAt')
+    .lean();
+
+    // if(!user){
+    //   return res.status(404).json({error: "User not found"});
+    // }
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
     const stories = await Story.find({ author: user._id })
       .sort({ createdAt: -1 })
       .lean();
@@ -60,6 +92,10 @@ router.get('/profile/:walletAddress', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 // PATCH /api/v1/users/update - Update user profile
 router.patch('/update', authRequired, async (req, res) => {
   try {

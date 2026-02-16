@@ -42,6 +42,13 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'api.dicebear.com',
       },
+<<<<<<< HEAD
+=======
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
     ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
@@ -155,7 +162,11 @@ const nextConfig = {
 
   // TypeScript configuration
   typescript: {
+<<<<<<< HEAD
     ignoreBuildErrors: process.env.CI === 'true' || process.env.VERCEL === '1',
+=======
+    ignoreBuildErrors:true,
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
   },
 
   // ESLint configuration

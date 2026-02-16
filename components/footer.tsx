@@ -78,7 +78,10 @@ export function Footer() {
                   </div>
                 </div>
               </Link>
+<<<<<<< HEAD
               
+=======
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
               <div className="text-center sm:text-left">
                 <h3 className="text-xl font-black text-foreground dark:text-white uppercase mb-2">
                   GroqTales
@@ -87,12 +90,18 @@ export function Footer() {
                   Empowering creators with AI-driven storytelling and Web3 ownership.
                 </p>
               </div>
+<<<<<<< HEAD
               
+=======
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
               <div className="inline-flex items-center gap-2 text-xs font-black text-foreground dark:text-slate-300 uppercase tracking-wide bg-primary/10 dark:bg-primary/5 px-4 py-2 border-2 border-primary/30 dark:border-primary/20">
                 <Sparkles className="w-3 h-3" />
                 Create • Mint • Own
               </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
               <div className="flex gap-3 pt-2" role="group" aria-label="Social media links">
                 {socialLinks.map((link) => (
                   <Link
@@ -112,11 +121,19 @@ export function Footer() {
             </div>
 
             {/* Explore Section */}
+<<<<<<< HEAD
             <nav aria-label="Explore links" className="text-center sm:text-left">
               <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
                 Explore
               </h3>
               <ul className="space-y-3">
+=======
+            <nav aria-label="Explore links" className="text-left">
+              <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
+                Explore
+              </h3>
+              <ul className="space-y-3 pl-0 list-none">
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                 {[
                   { href: '/genres', label: 'Genres' },
                   { href: '/community', label: 'Community' },
@@ -127,9 +144,15 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
+<<<<<<< HEAD
                       className="group inline-flex items-center text-sm font-bold text-foreground/70 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors duration-300 uppercase"
                     >
                       <span className="w-2 h-2 bg-primary mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+=======
+                      className="group relative inline-flex items-center text-sm font-bold text-foreground/70 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors duration-300 uppercase"
+                    >
+                      <span className="w-2 h-2 bg-primary opacity-0 group-hover:opacity-100 transition-opacity absolute -left-4" />
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                       {link.label}
                     </Link>
                   </li>
@@ -138,11 +161,19 @@ export function Footer() {
             </nav>
 
             {/* Legal Section */}
+<<<<<<< HEAD
             <nav aria-label="Legal links" className="text-center sm:text-left">
               <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
                 Legal
               </h3>
               <ul className="space-y-3">
+=======
+            <nav aria-label="Legal links" className="text-left">
+              <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
+                Legal
+              </h3>
+              <ul className="space-y-3 pl-0 list-none">
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                 {[
                   { href: '/terms', label: 'Terms' },
                   { href: '/privacy', label: 'Privacy' },
@@ -152,9 +183,15 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
+<<<<<<< HEAD
                       className="group inline-flex items-center text-sm font-bold text-foreground/70 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors duration-300 uppercase"
                     >
                       <span className="w-2 h-2 bg-primary mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+=======
+                      className="group relative inline-flex items-center text-sm font-bold text-foreground/70 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors duration-300 uppercase"
+                    >
+                      <span className="w-2 h-2 bg-primary opacity-0 group-hover:opacity-100 transition-opacity absolute -left-4" />
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                       {link.label}
                     </Link>
                   </li>
@@ -163,6 +200,7 @@ export function Footer() {
             </nav>
 
             {/* Resources Section */}
+<<<<<<< HEAD
             <nav aria-label="Resources links" className="text-center sm:text-left">
               <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
                 Resources
@@ -171,13 +209,30 @@ export function Footer() {
                 {[
                   { href: '/docs', label: 'Documentation' },
                   { href: '/faq', label: 'FAQ' },
+=======
+            <nav aria-label="Resources links" className="text-left">
+              <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
+                Resources
+              </h3>
+              <ul className="space-y-3 pl-0 list-none">
+                {[
+                  { href: '/docs', label: 'Documentation' },
+                  { href: '/faq', label: 'FAQ' },
+                  { href: '/feedback', label: 'Feedback' },
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                 ].map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
+<<<<<<< HEAD
                       className="group inline-flex items-center text-sm font-bold text-foreground/70 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors duration-300 uppercase"
                     >
                       <span className="w-2 h-2 bg-primary mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+=======
+                      className="group relative inline-flex items-center text-sm font-bold text-foreground/70 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors duration-300 uppercase"
+                    >
+                      <span className="w-2 h-2 bg-primary opacity-0 group-hover:opacity-100 transition-opacity absolute -left-4" />
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                       {link.label}
                     </Link>
                   </li>
@@ -186,7 +241,11 @@ export function Footer() {
             </nav>
 
             {/* Built by Section */}
+<<<<<<< HEAD
             <div className="text-center sm:text-left">
+=======
+            <div className="text-left">
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
               <h3 className="font-black text-lg mb-5 text-foreground dark:text-white border-b-4 border-primary dark:border-accent inline-block pb-1 uppercase">
                 Built by
               </h3>

@@ -4,19 +4,33 @@ import { useEffect, useState } from "react";
 import { useWeb3 } from "@/components/providers/web3-provider";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileStats } from "@/components/profile/profile-stats";
+<<<<<<< HEAD
+=======
+
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 import { StoryCard } from "@/components/profile/story-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParams } from "next/navigation";
 
 
+<<<<<<< HEAD
 export default function ProfilePage() {
   const { account, connected, connecting } = useWeb3();
+=======
+
+export default function ProfilePage() {
+  const { account, connected} = useWeb3();
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const params = useParams();
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
   const walletFromUrl = typeof params?.username === "string" ? params.username : "";
   const isOwner = connected &&
     account?.toLowerCase() === walletFromUrl?.toLowerCase();
@@ -27,6 +41,7 @@ export default function ProfilePage() {
     const signal = controller.signal;
 
     const fetchProfile = async () => {
+<<<<<<< HEAD
       if (walletFromUrl) {
         try {
           setLoading(true);
@@ -38,33 +53,78 @@ export default function ProfilePage() {
         } catch (err: any) {
           if (err.name === 'AbortError') return;
           console.error(err);
+=======
+
+      if (!walletFromUrl){
+        setLoading(false);
+        return;
+      }
+        
+        try {
+          setLoading(true);
+          setError(false);
+
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile/${walletFromUrl}`, { signal }); 
+          if (!response.ok) throw new Error("Failed to load");
+          const json = await response.json();
+          if(!json.success){
+            throw new Error(json.error?.message || "Failed");
+          }
+          setProfileData(json.data);
+          //setError(false);
+        } catch (err: any) {
+          if (err.name === 'AbortError') return;
+          console.error("Profile fetch failed:", err);
+
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
           setError(true);
         } finally {
           if (!signal.aborted) {
             setLoading(false);
           }
         }
+<<<<<<< HEAD
       }
     };
 
+=======
+
+      };
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
     fetchProfile();
     return () => {
       controller.abort();
     };
   }, [walletFromUrl]);
   // Show Loading Skeleton while fetching
+<<<<<<< HEAD
   if (connecting || loading) {
+=======
+  if (loading) {
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
     return <div className="container mx-auto p-20"><Skeleton className="h-40 w-full" /></div>;
   }
   if (error) {
     return <div className="p-20 text-white">Failed to load profile.</div>;
   }
+<<<<<<< HEAD
   if (!profileData || !profileData.user) {
     return <div className="p-20 text-white">User not found.</div>;
   }
 
   return (
     <main className="min-h-screen bg-black text-slate-200 pb-20">
+=======
+
+  if (!profileData) {
+    return <div className="p-20 text-white">User not found.</div>;
+  }
+
+
+  return (
+    <main className="min-h-screen bg-black text-slate-200 pb-20">
+
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
       <ProfileHeader user={profileData?.user} isOwner={isOwner} />
 
       <div className="container mx-auto px-4">
@@ -72,6 +132,10 @@ export default function ProfilePage() {
 
         <div className="mt-8">
           <Tabs defaultValue="stories" className="w-full">
+<<<<<<< HEAD
+=======
+
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
             <div className="flex justify-center md:justify-start mb-6">
               <TabsList className="bg-slate-900 border border-slate-800">
                 <TabsTrigger value="stories">Stories</TabsTrigger>
@@ -107,9 +171,16 @@ export default function ProfilePage() {
                 Activity feed coming soon.
               </div>
             </TabsContent>
+<<<<<<< HEAD
           </Tabs>
         </div>
       </div>
     </main>
+=======
+          </Tabs> 
+        </div>
+      </div> 
+     </main> 
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
   );
 }

@@ -171,7 +171,13 @@ export default function RootLayout({
 
         {/* Optimize for performance */}
         <meta name="color-scheme" content="light dark" />
+<<<<<<< HEAD
 
+=======
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#000000" />
+        <meta name="mobile-web-app-capable" content="yes" />
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
         {/* Performance optimization scripts */}
         <Script
           id="theme-fix"
@@ -193,6 +199,22 @@ export default function RootLayout({
           src="/scroll-optimization.js"
           strategy="afterInteractive"
         />
+<<<<<<< HEAD
+=======
+        <Script
+          id="pwa-register"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                  console.log('ServiceWorker registration failed: ', err);
+                });
+              }
+            `,
+          }}
+        />
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
       </head>
       <body
         className={`${inter.className} ${comicNeue.variable} optimize-paint`}

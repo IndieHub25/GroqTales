@@ -1,7 +1,17 @@
 'use client';
 
+<<<<<<< HEAD
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { X, Download } from 'lucide-react';
+=======
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { X, Download } from 'lucide-react';
+// declare global{
+//   interface Window{
+//     ethereum?: any;
+//   }
+// }
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 // Mock Web3 Provider for production deployment
 interface Web3ContextType {
   account: string | null;
@@ -10,6 +20,7 @@ interface Web3ContextType {
   connected: boolean;
   connecting: boolean;
   connectWallet: () => Promise<void>;
+<<<<<<< HEAD
   disconnectWallet: () => void;
   networkName: string;
   ensName: string | null;
@@ -34,6 +45,32 @@ interface Web3ContextType {
   sellNFT: (tokenId: string, price: string) => Promise<void>;
   buyNFT: (tokenId: string, price: string) => Promise<void>;
   cancelListing: (tokenId: string) => Promise<void>;
+=======
+  disconnectWallet: () => Promise<void>;
+  networkName: string;
+  ensName: string | null;
+  // switchNetwork: (chainId: number) => Promise<void>;
+  // mintNFTOnBase: (
+  //   metadata: any,
+  //   recipient?: string
+  // ) => Promise<{
+  //   tokenId: string;
+  //   transactionHash: string;
+  // }>;
+  // mintNFTOnMonad: (
+  //   metadata: any,
+  //   recipient?: string
+  // ) => Promise<{
+  //   tokenId: string;
+  //   transactionHash: string;
+  // }>;
+  // transferNFT: (tokenId: string, to: string) => Promise<string>;
+  // getUserNFTs: () => Promise<any[]>;
+  // getMarketplaceNFTs: () => Promise<any[]>;
+  // sellNFT: (tokenId: string, price: string) => Promise<void>;
+  // buyNFT: (tokenId: string, price: string) => Promise<void>;
+  // cancelListing: (tokenId: string) => Promise<void>;
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 }
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
@@ -43,6 +80,7 @@ const Web3Context = createContext<Web3ContextType | undefined>(undefined);
 // pages without executing RootLayout providers). This prevents build-time
 // crashes like: "TypeError: Cannot read properties of null (reading 'useContext')".
 // All methods either resolve immediately or throw a clear disabled message.
+<<<<<<< HEAD
 const fallbackWeb3Context: Web3ContextType = {
   account: null,
   chainId: null,
@@ -81,17 +119,62 @@ const fallbackWeb3Context: Web3ContextType = {
     throw new Error('Web3 functionality unavailable during prerender');
   },
 };
+=======
+// const fallbackWeb3Context: Web3ContextType = {
+//   account: null,
+//   chainId: null,
+//   balance: null,
+//   connected: false,
+//   connecting: false,
+//   networkName: 'Unknown',
+//   ensName: null,
+//   connectWallet: async () => {
+//     /* no-op during SSR */
+//   },
+//   disconnectWallet: () => {
+//     /* no-op */
+//   },
+//   switchNetwork: async () => {
+//     /* no-op */
+//   },
+//   mintNFTOnBase: async () => {
+//     throw new Error('Web3 functionality unavailable during prerender');
+//   },
+//   mintNFTOnMonad: async () => {
+//     throw new Error('Web3 functionality unavailable during prerender');
+//   },
+//   transferNFT: async () => {
+//     throw new Error('Web3 functionality unavailable during prerender');
+//   },
+//   getUserNFTs: async () => [],
+//   getMarketplaceNFTs: async () => [],
+//   sellNFT: async () => {
+//     throw new Error('Web3 functionality unavailable during prerender');
+//   },
+//   buyNFT: async () => {
+//     throw new Error('Web3 functionality unavailable during prerender');
+//   },
+//   cancelListing: async () => {
+//     throw new Error('Web3 functionality unavailable during prerender');
+//   },
+// };
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [account, setAccount] = useState<string | null>(null);
   const [chainId, setChainId] = useState<number | null>(null);
   const [balance, setBalance] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
+<<<<<<< HEAD
+=======
+
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
   const [connecting, setConnecting] = useState(false);
   const [networkName, setNetworkName] = useState('Unknown');
   const [ensName, setEnsName] = useState<string | null>(null);
   const [showInstallModal, setShowInstallModal] = useState(false);
 
+<<<<<<< HEAD
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).ethereum) {
       const handleAccounts = (accounts: string[]) => {
@@ -147,10 +230,30 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   };
 
   const disconnectWallet = () => {
+=======
+  //helper to get ethereum safely with type casting
+  const getEthereum = useCallback(() =>{
+    if(typeof window!== 'undefined' && window.ethereum){
+      return window.ethereum;
+    }
+    return null;
+  }, []);
+
+  const disconnectWallet = useCallback(async()=>{
+    try{
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings/wallet`,{
+        method: "DELETE",
+        credentials: "include",
+      });
+    } catch(err){
+      console.error("Failed to disconnect wallet on server:", err);
+    }
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
     setAccount(null);
     setChainId(null);
     setBalance(null);
     setConnected(false);
+<<<<<<< HEAD
     setNetworkName('Unknown');
     setEnsName(null);
   };
@@ -207,6 +310,162 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     console.log('Mock cancelListing - Web3 functionality disabled');
     throw new Error('Web3 functionality is disabled in this build');
   };
+=======
+  },[]);
+
+  useEffect(() => {
+    //if (typeof window === 'undefined' && !window.ethereum) return;
+      
+      const ethereum = getEthereum();
+      if(!ethereum) return;
+
+      const handleAccountsChanged = async(accounts: string[]) => {
+        if (!accounts || accounts.length === 0) {
+          // setAccount(accounts[0]!);
+          // setConnected(true);
+          disconnectWallet();
+          return;
+        } 
+        const selectedAccount = accounts[0];
+        if(!selectedAccount) return;
+
+        setAccount(selectedAccount);
+        setConnected(true);
+      try{
+      const balanceWei = await ethereum.request({
+        method: "eth_getBalance",
+        params: [selectedAccount, "latest"],
+      });
+      //const balanceBigInt = BigInt(balanceWei);
+      const balanceEth = Number(BigInt(balanceWei))/1e18;
+      setBalance(balanceEth.toFixed(4));
+    } catch(err){
+      console.error("Failed to refresh balance:", err);
+    }
+  };
+    const handleChainChanged = (chainIdHex: string) => {
+      setChainId(parseInt(chainIdHex, 16));
+      //setChainId(chainIdNum);
+    };
+      ethereum.on('accountsChanged', handleAccountsChanged);
+      ethereum.on('chainChanged', handleChainChanged);
+      return () => {
+        ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        ethereum.removeListener('chainChanged', handleChainChanged);
+      };
+  }, [getEthereum, disconnectWallet]);
+
+  // useEffect(() => {
+  //   if (chainId === 10143) setNetworkName('Monad Testnet');
+  //   else if (chainId === 1) setNetworkName('Ethereum Mainnet');
+  //   else if (chainId) setNetworkName(`Chain ID: ${chainId}`);
+  //   else setNetworkName('Unknown');
+  // }, [chainId]);
+
+  const connectWallet = async () => {
+    //if (typeof window === "undefined" || !window.ethereum) 
+    const ethereum = getEthereum();
+    if(!ethereum){
+      setShowInstallModal(true);
+      return;
+      //setConnecting(true);
+    }
+      try {
+        //const ethereum = window.ethereum;
+
+        const accounts:string[]= await ethereum.request({
+          method: 'eth_requestAccounts',
+        });
+        if(!accounts || accounts.length === 0) return;
+        const selectedAccount = accounts[0]!;
+        const chainIdHex = await ethereum.request({
+          method: 'eth_chainId',
+        });
+        const balanceWei = await ethereum.request({
+          method: 'eth_getBalance',
+          params: [selectedAccount, "latest"],
+        });
+        //const chainIdNum = parseInt(chainIdHex, 16);
+        //const balanceBigInt = BigInt(balanceWei);
+        const balanceEth = Number(BigInt(balanceWei))/ 1e18;
+        setAccount(selectedAccount);
+        //setChainId(chainIdNum);
+        setBalance(balanceEth.toFixed(4));
+        setConnected(true);
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings/wallet`,{
+          method: "PUT",
+          headers: {"Content-Type":"application/json"},
+          credentials: "include",
+          body: JSON.stringify({address: selectedAccount}),
+        });
+      } catch (error) {
+        console.error('Wallet connection failed:', error);
+      }
+  };
+
+
+  // const disconnectWallet = () => {
+  //   setAccount(null);
+  //   setChainId(null);
+  //   setBalance(null);
+  //   setConnected(false);
+  //   // setNetworkName('Unknown');
+  //   // setEnsName(null);
+  // };
+
+  // const switchNetwork = async (targetChainId: number) => {
+  //   if (typeof window !== 'undefined' && (window as any).ethereum) {
+  //     try {
+  //       await (window as any).ethereum.request({
+  //         method: 'wallet_switchEthereumChain',
+  //         params: [{ chainId: `0x${targetChainId.toString(16)}` }],
+  //       });
+  //     } catch (error) {
+  //       console.error('Failed to switch network:', error);
+  //     }
+  //   }
+  // };
+
+  // const mintNFTOnBase = async (metadata: any, recipient?: string) => {
+  //   console.log('Mock mintNFTOnBase - Web3 functionality disabled');
+  //   throw new Error('Web3 functionality is disabled in this build');
+  // };
+
+  // const mintNFTOnMonad = async (metadata: any, recipient?: string) => {
+  //   console.log('Mock mintNFTOnMonad - Web3 functionality disabled');
+  //   throw new Error('Web3 functionality is disabled in this build');
+  // };
+
+  // const transferNFT = async (tokenId: string, to: string) => {
+  //   console.log('Mock transferNFT - Web3 functionality disabled');
+  //   throw new Error('Web3 functionality is disabled in this build');
+  // };
+
+  // const getUserNFTs = async () => {
+  //   console.log('Mock getUserNFTs - Web3 functionality disabled');
+  //   return [];
+  // };
+
+  // const getMarketplaceNFTs = async () => {
+  //   console.log('Mock getMarketplaceNFTs - Web3 functionality disabled');
+  //   return [];
+  // };
+
+  // const sellNFT = async (tokenId: string, price: string) => {
+  //   console.log('Mock sellNFT - Web3 functionality disabled');
+  //   throw new Error('Web3 functionality is disabled in this build');
+  // };
+
+  // const buyNFT = async (tokenId: string, price: string) => {
+  //   console.log('Mock buyNFT - Web3 functionality disabled');
+  //   throw new Error('Web3 functionality is disabled in this build');
+  // };
+
+  // const cancelListing = async (tokenId: string) => {
+  //   console.log('Mock cancelListing - Web3 functionality disabled');
+  //   throw new Error('Web3 functionality is disabled in this build');
+  // };
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 
   const contextValue: Web3ContextType = {
     account,
@@ -218,6 +477,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     disconnectWallet,
     networkName,
     ensName,
+<<<<<<< HEAD
     switchNetwork,
     mintNFTOnBase,
     mintNFTOnMonad,
@@ -227,6 +487,17 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     sellNFT,
     buyNFT,
     cancelListing,
+=======
+    // switchNetwork,
+    // mintNFTOnBase,
+    // mintNFTOnMonad,
+    // transferNFT,
+    // getUserNFTs,
+    // getMarketplaceNFTs,
+    // sellNFT,
+    // buyNFT,
+    // cancelListing,
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
   };
 
   return (
@@ -272,6 +543,13 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
 
 export function useWeb3() {
   const context = useContext(Web3Context);
+<<<<<<< HEAD
   // Return a safe fallback instead of throwing to keep build / prerender alive.
   return context ?? fallbackWeb3Context;
+=======
+  if(!context) {
+    throw new Error("useWeb3 must be used within Web3Provider");
+  }
+  return context;
+>>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 }
