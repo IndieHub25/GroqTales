@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/components/ui/use-toast';
 import { truncateAddress } from '@/lib/utils';
-<<<<<<< HEAD
 import { AuthModal } from '@/components/auth-modal';
 
 
@@ -28,24 +27,12 @@ export function UserNav() {
   const { toast } = useToast();
   const [dbUser, setDbUser] = useState<any>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
-=======
-
-
-export function UserNav() {
-  const { account, connectWallet, disconnectWallet } = useWeb3();
-  const { toast } = useToast();
-  const [dbUser, setDbUser] = useState<any>(null);
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 
   useEffect(() => {
     const fetchUserData = async () => {
       if (account) {
         try {
-<<<<<<< HEAD
-          const res = await fetch(`/api/v1/users/profile/${account}`);
-=======
           const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile/${account}`);
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
           if (res.ok) {
             const data = await res.json();
             setDbUser(data.user);
@@ -58,22 +45,10 @@ export function UserNav() {
     fetchUserData();
   }, [account]);
 
-  const handleConnect = async () => {
-    try {
-      await connectWallet();
-    } catch (error) {
-      console.error('Failed to connect wallet:', error);
-      toast({
-        title: 'Connection Failed',
-        description: 'Could not connect wallet. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  };
+
 
   if (!account) {
     return (
-<<<<<<< HEAD
       <>
         <Button
           variant="default"
@@ -89,17 +64,6 @@ export function UserNav() {
           onClose={() => setShowAuthModal(false)}
         />
       </>
-=======
-      <Button
-        variant="default"
-        size="sm"
-        onClick={handleConnect}
-        aria-label="Connect wallet to login"
-        className="flex items-center gap-2 px-3 sm:px-6 py-1.5 sm:py-2 rounded-none bg-white hover:text-white hover:border-white/50 text-black border-2 sm:border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all duration-200 font-black uppercase tracking-wider text-xs sm:text-sm"
-      >
-        Login
-      </Button>
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
     );
   }
 
@@ -108,11 +72,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" aria-label="User menu" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-<<<<<<< HEAD
             <AvatarImage src={dbUser?.avatar || "/avatars/default.png"} alt="User Avatar" />
-=======
-             <AvatarImage src={dbUser?.avatar || "/avatars/default.png"} alt="User Avatar" />
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
             <AvatarFallback>{dbUser?.username?.slice(0, 2).toUpperCase() || "U"}</AvatarFallback>
           </Avatar>
         </Button>
@@ -131,13 +91,8 @@ export function UserNav() {
               asChild
               className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all"
             >
-<<<<<<< HEAD
               <Link
                 href={`/profile/${account}`}
-=======
-               <Link
-                href={`/profile/${account}`} 
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                 className="flex items-center w-full uppercase py-2"
               >
                 <User className="mr-2 h-4 w-4" />
