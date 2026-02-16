@@ -77,10 +77,7 @@ import { useState, useEffect } from 'react';
 //   },
 //   // ... more stories
 // ];
-const [loading, setLoading] = useState<boolean>(true);
-const [error, setError] = useState(false);
-const [profile, setProfile] = useState<any>(null);
-const [stories, setStories] = useState<any[]>([]);
+
 
 
 // Floating GitHub button component
@@ -135,35 +132,41 @@ const StoryCard = ({ story }: any) => (
   </Card>
 );
 
-useEffect(() => {
-  const controller = new AbortController();
-  async function loadProfile() {
-    try {
-      setLoading(true);
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile`,
-        { credentials: 'include', signal: controller.signal }
-      );
-      if (!res.ok) throw new Error();
-      const json = await res.json();
-      setProfile(json.user);
-      setStories(json.stories ?? []);
-    } catch (err) {
-      if ((err as any).name !== 'AbortError') {
-        setError(true);
-      }
-    } finally {
-      if (!controller.signal.aborted) {
-        setLoading(false);
-      }
-    }
-  }
-  loadProfile();
-  return () => controller.abort();
-}, []);
 
 export default function ProfilePage() {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
+  const [stories, setStories] = useState<any[]>([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadProfile() {
+      try {
+        setLoading(true);
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile`,
+          { credentials: 'include', signal: controller.signal }
+        );
+        if (!res.ok) throw new Error();
+        const json = await res.json();
+        setProfile(json.user);
+        setStories(json.stories ?? []);
+      } catch (err) {
+        if ((err as any).name !== 'AbortError') {
+          setError(true);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    }
+    loadProfile();
+    return () => controller.abort();
+  }, []);
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
       <FloatingDoodles />
@@ -300,12 +303,17 @@ export default function ProfilePage() {
           </TabsContent>
 
           <TabsContent value="saved">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {stories.map((story) => (
-
-                <StoryCard key={story.id} story={story} />
-              ))}
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Saved Stories</CardTitle>
+                <CardDescription>
+                  Stories you have bookmarked for later
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Coming soon...</p>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="activity">
