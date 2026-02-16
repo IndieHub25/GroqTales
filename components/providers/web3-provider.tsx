@@ -178,6 +178,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       if (!accounts || accounts.length === 0) return;
 
       const selectedAccount = accounts[0];
+      if (!selectedAccount) return;
       const chainIdHex = await ethereum.request({
         method: 'eth_chainId',
       });
