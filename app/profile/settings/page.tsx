@@ -642,7 +642,7 @@ export default function SettingsPage() {
         </TabsContent >
 
         {/* Wallet Settings */}
-        < TabsContent value="wallet" className="mt-0" >
+        <TabsContent value="wallet" className="mt-0" >
           <div className="grid grid-cols-1 gap-8">
             <Card>
               <CardHeader>
@@ -804,7 +804,7 @@ export default function SettingsPage() {
         </TabsContent >
 
         {/* Privacy Settings */}
-        < TabsContent value="privacy" className="mt-0" >
+        <TabsContent value="privacy" className="mt-0" >
           <div className="grid grid-cols-1 gap-8">
             <Card>
               <CardHeader>
@@ -855,7 +855,7 @@ export default function SettingsPage() {
                           Allow users to comment on your stories
                         </p>
                       </div>
-                      <Switch id="story-comments" defaultChecked />
+                      <Switch id="story-comments" disabled />
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -892,7 +892,7 @@ export default function SettingsPage() {
                           Show stories you've read on your profile
                         </p>
                       </div>
-                      <Switch id="show-reading" defaultChecked />
+                      <Switch id="show-reading" disabled />
                     </div>
                   </div>
                 </div>

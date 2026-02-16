@@ -167,6 +167,24 @@ export default function ProfilePage() {
     loadProfile();
     return () => controller.abort();
   }, []);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-background/80">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-background/80 px-4 text-center">
+        <h2 className="text-2xl font-bold mb-4">Something went wrong</h2>
+        <p className="text-muted-foreground mb-8">We couldn't load the profile data. Please try again later.</p>
+        <Button onClick={() => window.location.reload()}>Retry</Button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
       <FloatingDoodles />
