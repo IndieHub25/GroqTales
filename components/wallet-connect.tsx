@@ -103,7 +103,6 @@ export default function WalletConnect({ onConnectClick }: WalletConnectProps) {
     window.open(`${explorerUrl}/address/${account}`, '_blank');
   }, [account, chainId]);
 
-<<<<<<< HEAD
   const handleConnectClick = () => {
     if (onConnectClick) {
       onConnectClick();
@@ -111,18 +110,11 @@ export default function WalletConnect({ onConnectClick }: WalletConnectProps) {
       connectWallet();
     }
   };
-
-=======
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
   // Show connect button if not connected
   if (!connected) {
     return (
       <Button
-<<<<<<< HEAD
         onClick={handleConnectClick}
-=======
-        onClick={connectWallet}
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
         disabled={connecting}
         aria-label={connecting ? "Connecting to wallet" : "Connect your wallet"}
         className="flex items-center gap-2 px-3 sm:px-6 py-1.5 sm:py-2 rounded-none bg-white hover:text-white hover:border-white/50 text-black border-2 sm:border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all duration-200 font-black uppercase tracking-wider text-xs sm:text-sm"
