@@ -11,8 +11,6 @@ Active full support: 1.1.2 (latest), 1.1.1 (previous). Security maintenance (cri
 
 ## [Unreleased]
 
-<<<<<<< HEAD
-=======
 ### Off-Chain Royalty Tracking & Creator Revenue Dashboard (Issue #334)
 
 #### Added
@@ -60,7 +58,7 @@ Active full support: 1.1.2 (latest), 1.1.1 (previous). Security maintenance (cri
 
 ---
 
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
 ### ✨ Accessibility Improvements - WCAG 2.1 AA Compliance
 
 #### Keyboard Navigation & Focus Management

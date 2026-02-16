@@ -15,19 +15,15 @@ const logger = require('../utils/logger');
 
 const Nft = require('../models/Nft');
 const Story = require('../models/Story');
-<<<<<<< HEAD
-=======
 const RoyaltyConfig = require('../models/RoyaltyConfig');
 const RoyaltyTransaction = require('../models/RoyaltyTransaction');
 const CreatorEarnings = require('../models/CreatorEarnings');
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
 
 const { authRequired } = require('../middleware/auth');
 
 // NFT Endpoints
 
-<<<<<<< HEAD
-=======
 /**
  * @swagger
  * /api/v1/nft:
@@ -89,7 +85,7 @@ const { authRequired } = require('../middleware/auth');
  *         description: Internal server error.
  */
 
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
 // GET /api/v1/nft - Get all NFTs with optional filters: category (genre), priceRange
 router.get('/', async (req, res) => {
   try {
@@ -177,15 +173,7 @@ router.get('/', async (req, res) => {
       requestId: req.id,
       component: 'nft',
     });
-<<<<<<< HEAD
-  
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-  
-});
-=======
-
-    return res.status(500).json({ error: 'Internal server error' });
+return res.status(500).json({ error: 'Internal server error' });
   }
 });
 /**
@@ -236,22 +224,19 @@ router.get('/', async (req, res) => {
  *       500:
  *         description: Internal server error.
  */
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
 
 // POST /api/v1/nft/mint
 router.post('/mint', authRequired, async (req, res) => {
   try {
-<<<<<<< HEAD
-    const { storyId, metadataURI, metadata, price = 0 } = req.body;
-=======
-    const { storyId, metadataURI, metadata, price = 0, royaltyPercentage: rawRoyalty = 5, creatorWallet } = req.body;
+const { storyId, metadataURI, metadata, price = 0, royaltyPercentage: rawRoyalty = 5, creatorWallet } = req.body;
 
     // Validate royaltyPercentage is a valid number
     const royaltyPercentage = Number(rawRoyalty);
     if (!Number.isFinite(royaltyPercentage)) {
       return res.status(400).json({ error: 'royaltyPercentage must be a valid number' });
     }
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
 
     // Basic validation
     if (!storyId || !metadataURI) {
@@ -285,11 +270,9 @@ router.post('/mint', authRequired, async (req, res) => {
     // Calculate keccak256 hash of story content (using ethers v6 API)
     const storyHash = ethers.keccak256(ethers.toUtf8Bytes(story.content));
 
-<<<<<<< HEAD
-=======
-    const walletAddr = creatorWallet || story.authorWallet || null;
+const walletAddr = creatorWallet || story.authorWallet || null;
 
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
     const nft = new Nft({
       tokenId,
       storyId,
@@ -301,18 +284,14 @@ router.post('/mint', authRequired, async (req, res) => {
       owner: req.user.id,
       price,
       isListed: false,
-<<<<<<< HEAD
-=======
-      royaltyPercentage: Math.min(50, Math.max(0, royaltyPercentage)),
+royaltyPercentage: Math.min(50, Math.max(0, royaltyPercentage)),
       royaltyRecipient: walletAddr,
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
     });
 
     await nft.save();
 
-<<<<<<< HEAD
-=======
-    // Create default royalty config for the new NFT (non-critical)
+// Create default royalty config for the new NFT (non-critical)
     const walletRegex = /^0x[a-fA-F0-9]{40}$/;
     try {
       if (walletAddr && walletRegex.test(walletAddr)) {
@@ -341,7 +320,7 @@ router.post('/mint', authRequired, async (req, res) => {
       });
     }
 
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
     return res.status(201).json(nft);
   } catch (error) {
     logger.error('Error minting NFT', {
@@ -350,18 +329,12 @@ router.post('/mint', authRequired, async (req, res) => {
       storyId: req.body.storyId,
       userId: req.user?.id,
     });
-<<<<<<< HEAD
-  
-=======
 
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
     return res.status(500).json({ error: 'Internal server error' });
   }
   
 });
 
-<<<<<<< HEAD
-=======
 /**
  * @swagger
  * /api/v1/nft/burn/{Id}:
@@ -397,7 +370,7 @@ router.post('/mint', authRequired, async (req, res) => {
  *       500:
  *         description: Internal server error.
  */
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
 // DELETE /api/v1/nft/burn/:Id
 router.delete('/burn/:Id', authRequired, async (req, res) => {
   try {
@@ -438,17 +411,7 @@ router.delete('/burn/:Id', authRequired, async (req, res) => {
       tokenId: req.params.Id,
       userId: req.user?.id,
     });
-<<<<<<< HEAD
-  
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-  
-});
-
-// NFT Marketplace Endpoints
-=======
-
-    return res.status(500).json({ error: 'Internal server error' });
+return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -494,7 +457,7 @@ router.delete('/burn/:Id', authRequired, async (req, res) => {
  *       500:
  *         description: Internal server error
  */
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
 // PATCH /api/v1/nft/list/:tokenId
 router.patch('/list/:tokenId', authRequired, async (req, res) => {
   try {
@@ -532,14 +495,7 @@ router.patch('/list/:tokenId', authRequired, async (req, res) => {
       nft,
     });
   } catch (error) {
-<<<<<<< HEAD
-    console.error('Error listing NFT:', error);
-    return res.status(500).json({ error: error.message });
-  }
-});
-
-=======
-    // console.log('Error listing NFT:', error);
+// console.log('Error listing NFT:', error);
     logger.error('Error listing NFT', {
       requestId: req.id,
       component: 'nft',
@@ -579,7 +535,7 @@ router.patch('/list/:tokenId', authRequired, async (req, res) => {
  *       500:
  *         description: Internal server error
  */
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
 // PATCH /api/v1/nft/remove/:tokenId
 router.patch('/remove/:tokenId', authRequired, async (req, res) => {
   try {
@@ -605,14 +561,7 @@ router.patch('/remove/:tokenId', authRequired, async (req, res) => {
       nft,
     });
   } catch (error) {
-<<<<<<< HEAD
-    console.error('Error removing NFT from listing:', error);
-    return res.status(500).json({ error: error.message });
-  }
-});
-
-=======
-    // console.log('Error removing NFT from listing:', error);
+// console.log('Error removing NFT from listing:', error);
     logger.error('Error removing NFT', {
       requestId: req.id,
       component: 'nft',
@@ -667,7 +616,7 @@ router.patch('/remove/:tokenId', authRequired, async (req, res) => {
  *       500:
  *         description: Internal server error
  */
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
 // PATCH /api/v1/nft/buy/:tokenId
 router.patch('/buy/:tokenId', authRequired, async (req, res) => {
   try {
@@ -684,20 +633,16 @@ router.patch('/buy/:tokenId', authRequired, async (req, res) => {
       return res.status(400).json({ error: 'You already own this NFT' });
     }
 
-<<<<<<< HEAD
-=======
-    const previousOwner = nft.owner;
+const previousOwner = nft.owner;
     const salePrice = nft.price;
 
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
     nft.owner = req.user.id;
     nft.isListed = false;
 
     await nft.save();
 
-<<<<<<< HEAD
-=======
-    // Record royalty transaction (non-blocking, non-critical)
+// Record royalty transaction (non-blocking, non-critical)
     const sellerWallet = req.body.sellerWallet;
     const buyerWallet = req.body.buyerWallet;
 
@@ -779,25 +724,13 @@ router.patch('/buy/:tokenId', authRequired, async (req, res) => {
       });
     }
 
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
     return res.json({
       message: `NFT with tokenId ${tokenId} has been bought from listing.`,
       nft,
     });
   } catch (error) {
-<<<<<<< HEAD
-    console.error('Error buying NFT from listing:', error);
-    return res.status(500).json({ error: error.message });
-  }
-});
-
-// PATCH /api/v1/nft/update-price/:tokenId
-router.patch('/update-price/:tokenId', authRequired, async (req, res) => {
-  try {
-    const price = req.body.price;
-    if (price === undefined || isNaN(price) || price < 0) {
-=======
-    // console.log('Error buying NFT from listing:', error);
+// console.log('Error buying NFT from listing:', error);
     logger.error('Error buying NFT', {
       requestId: req.id,
       component: 'nft',
@@ -854,7 +787,7 @@ router.patch('/update-price/:tokenId', authRequired, async (req, res) => {
   try {
     const price = Number(req.body.price);
     if (!Number.isFinite(price) || price < 0) {
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
       return res
         .status(400)
         .json({ error: 'Invalid price or price is missing' });
@@ -881,15 +814,7 @@ router.patch('/update-price/:tokenId', authRequired, async (req, res) => {
     await nft.save();
 
     return res.json({
-<<<<<<< HEAD
-      message: `NFT proce with tokenId ${tokenId} has been updated.`,
-      nft,
-    });
-  } catch (error) {
-    console.error('Error updating NFT price from listing:', error);
-    return res.status(500).json({ error: error.message });
-=======
-      message: `NFT price with tokenId ${tokenId} has been updated.`,
+message: `NFT price with tokenId ${tokenId} has been updated.`,
       nft,
     });
   } catch (error) {
@@ -901,7 +826,7 @@ router.patch('/update-price/:tokenId', authRequired, async (req, res) => {
       userId: req.user?.id,
     });
     return res.status(500).json({ error: 'Internal server error' });
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
   }
 });
 

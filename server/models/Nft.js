@@ -88,8 +88,6 @@ const NftSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-<<<<<<< HEAD
-=======
     royaltyPercentage: {
       type: Number,
       default: 5,
@@ -105,7 +103,6 @@ const NftSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'RoyaltyConfig',
     },
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
   },
   { timestamps: true }
 );

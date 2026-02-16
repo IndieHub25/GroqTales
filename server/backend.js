@@ -112,10 +112,7 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Middleware
-<<<<<<< HEAD
-=======
 app.use(requestIdMiddleware);
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 app.use(compression());
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
@@ -180,17 +177,8 @@ app.use('/api/v1/stories', require('./routes/stories'));
 app.use('/api/v1/comics', require('./routes/comics'));
 app.use('/api/v1/nft', require('./routes/nft'));
 app.use('/api/v1/users', require('./routes/users'));
-<<<<<<< HEAD
 app.use('/api/v1/ai', require('./routes/ai'));
 app.use('/api/v1/drafts', require('./routes/drafts'));
-
-=======
-
-app.use('/api/v1/ai', require('./routes/ai'));
-app.use('/api/v1/drafts', require('./routes/drafts'));
-
-
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 // SDK Routes (for future SDK implementations)
 app.use('/sdk/v1', require('./routes/sdk'));
 

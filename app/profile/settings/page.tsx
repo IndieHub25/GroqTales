@@ -13,22 +13,13 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-<<<<<<< HEAD
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-=======
-import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-
-// import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-// import { Badge } from '@/components/ui/badge';
-import {ApiResponse, User, NotificationSettings, PrivacySettings,} from '@/types/api';
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+import { ApiResponse, User, NotificationSettings, PrivacySettings, } from '@/types/api';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -59,11 +50,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-<<<<<<< HEAD
-=======
-import {useWeb3} from '@/components/providers/web3-provider';
-
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+import { useWeb3 } from '@/components/providers/web3-provider';
 
 const profileFormSchema = z.object({
   username: z
@@ -85,19 +72,10 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function SettingsPage() {
-<<<<<<< HEAD
-  const [avatar, setAvatar] = useState<string>(
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3'
-  );
-=======
-  // const [avatar, setAvatar] = useState<string>(
-  //   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3'
-  // );
-  
-  const[user, setUser] = useState<User|null>(null);
-  const[notifications, setNotifications] = useState<NotificationSettings>({
-    comments: true, 
-    likes : true,
+  const [user, setUser] = useState<User | null>(null);
+  const [notifications, setNotifications] = useState<NotificationSettings>({
+    comments: true,
+    likes: true,
     follows: true,
     email: true,
     push: false,
@@ -105,99 +83,87 @@ export default function SettingsPage() {
     marketing: false,
     updates: true,
   });
-  const[privacy, setPrivacy] =  useState<PrivacySettings>({
+  const [privacy, setPrivacy] = useState<PrivacySettings>({
     profileVisible: true,
     activityVisible: true,
     storiesVisible: true,
     showEmail: false,
     showWallet: false,
   });
-  const[loading, setLoading] = useState(true);
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+  const [loading, setLoading] = useState(true);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     mode: 'onChange',
   });
 
-<<<<<<< HEAD
-  const onSubmit = (data: ProfileFormValues) => {
-=======
-  // const onSubmit = (data: ProfileFormValues) => {
-  //   // In a real app, this would save the data to the server
-  //   console.log(data);
-  //   // Show success message or redirect
-  // };
-  useEffect(()=>{
-  const controller = new AbortController();
-  async function hydrate(){
-    try{
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile`,{
+  useEffect(() => {
+    const controller = new AbortController();
+    async function hydrate() {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile`, {
           credentials: 'include',
           signal: controller.signal,
         }
-      );
-        
-      
-      if(!res.ok ) throw new Error('Failed to fetch profile');
+        );
 
-      const json: ApiResponse<User> = await res.json();
-      //const notifJson = await notifRes.json();
-      if(!json.success || !json.data) {
-        setLoading(false);
-        return;
-      }
-      const userData = json.data;
-      setUser(userData);
-      setNotifications({
-        comments: userData.preferences?.notifications?.comments ?? true,
-        likes: userData.preferences?.notifications?.likes??true,
-        follows: userData.preferences?.notifications?.follows??true,
-        email: userData.preferences?.notifications?.email ??true,
-        push:userData.preferences?.notifications?.push ?? false,
-        sms:userData.preferences?.notifications?.sms ?? false,
-        marketing:userData.preferences?.notifications?.marketing ?? false,
-        updates:userData.preferences?.notifications?.updates ?? true,
-      }
-    );
-      setPrivacy(userData.preferences?.privacy ?? {
-        profileVisible: true,
-        activityVisible: true,
-      });
 
-      form.reset({
-        username: userData.username,
-        displayName: userData.displayName ?? '',
-        email: userData.email ?? '',
-        bio: userData.bio ?? '',
-        //primaryGenre: profileJson.user.primaryGenre ?? '',
-      });
-    } catch(err){
-      console.error(err);
-    }
+        if (!res.ok) throw new Error('Failed to fetch profile');
+
+        const json: ApiResponse<User> = await res.json();
+        //const notifJson = await notifRes.json();
+        if (!json.success || !json.data) {
+          setLoading(false);
+          return;
+        }
+        const userData = json.data;
+        setUser(userData);
+        setNotifications({
+          comments: userData.preferences?.notifications?.comments ?? true,
+          likes: userData.preferences?.notifications?.likes ?? true,
+          follows: userData.preferences?.notifications?.follows ?? true,
+          email: userData.preferences?.notifications?.email ?? true,
+          push: userData.preferences?.notifications?.push ?? false,
+          sms: userData.preferences?.notifications?.sms ?? false,
+          marketing: userData.preferences?.notifications?.marketing ?? false,
+          updates: userData.preferences?.notifications?.updates ?? true,
+        }
+        );
+        setPrivacy(userData.preferences?.privacy ?? {
+          profileVisible: true,
+          activityVisible: true,
+        });
+
+        form.reset({
+          username: userData.username,
+          displayName: userData.displayName ?? '',
+          email: userData.email ?? '',
+          bio: userData.bio ?? '',
+          //primaryGenre: profileJson.user.primaryGenre ?? '',
+        });
+      } catch (err) {
+        console.error(err);
+      }
       finally {
-      setLoading(false);
+        setLoading(false);
+      }
     }
-  }
-  hydrate();
-  return () => controller.abort();
-},[form])
-const onSubmit = (data: ProfileFormValues) => {
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+    hydrate();
+    return () => controller.abort();
+  }, [form])
+  const onSubmit = (data: ProfileFormValues) => {
     // In a real app, this would save the data to the server
     console.log(data);
     // Show success message or redirect
   };
-<<<<<<< HEAD
-=======
-  const savePreferences = async()=>{
-    try{
+  const savePreferences = async () => {
+    try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings/preferences`,
         {
           method: "PUT",
-          headers: {"Content-Type":"application/json"},
+          headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({
             notifications,
@@ -205,17 +171,16 @@ const onSubmit = (data: ProfileFormValues) => {
           }),
         }
       );
-      if(!res.ok){
+      if (!res.ok) {
         throw new Error("Failed to save preferences");
       }
       console.log("Preferences saved");
-    } catch(err){
+    } catch (err) {
       console.error("Failed to save preferences:", err);
     }
   };
-  if(loading || !user)
+  if (loading || !user)
     return <div className="p-8">Loading...</div>
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
   return (
     <div className="container max-w-5xl mx-auto py-12 px-4 min-h-screen">
       <div className="mb-8">
@@ -269,17 +234,10 @@ const onSubmit = (data: ProfileFormValues) => {
                     <div className="space-y-8">
                       <div className="flex flex-col items-center space-y-4 sm:flex-row sm:space-y-0 sm:space-x-6">
                         <div className="relative group">
-<<<<<<< HEAD
                           <Avatar className="h-24 w-24 border">
-                            <AvatarImage src={avatar} alt="Profile picture" />
+                            <AvatarImage src={user.avatar} alt="Profile picture" />
                             <AvatarFallback>AC</AvatarFallback>
                           </Avatar>
-=======
-                          {/* <Avatar className="h-24 w-24 border">
-                            <AvatarImage src={profile?.avatar} alt="Profile picture" />
-                            <AvatarFallback>AC</AvatarFallback>
-                          </Avatar> */}
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                           <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                             <Upload className="h-6 w-6 text-white" />
                           </div>
@@ -386,11 +344,10 @@ const onSubmit = (data: ProfileFormValues) => {
                             </FormControl>
                             <FormDescription>
                               <span
-                                className={`${
-                                  (field.value?.length || 0) > 200
-                                    ? 'text-warning'
-                                    : ''
-                                }`}
+                                className={`${(field.value?.length || 0) > 200
+                                  ? 'text-warning'
+                                  : ''
+                                  }`}
                               >
                                 {field.value?.length || 0}
                               </span>
@@ -463,11 +420,7 @@ const onSubmit = (data: ProfileFormValues) => {
                   Manage how and when you receive notifications
                 </CardDescription>
               </CardHeader>
-<<<<<<< HEAD
               <CardContent className="space-y-6">
-=======
-              {/* <CardContent className="space-y-6"> */}
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Email Notifications</h3>
                   <Separator className="my-4" />
@@ -485,20 +438,16 @@ const onSubmit = (data: ProfileFormValues) => {
                           Receive emails when someone comments on your stories
                         </p>
                       </div>
-<<<<<<< HEAD
-                      <Switch id="comments" defaultChecked />
-=======
-                      <Switch 
-                        id="comments" 
+                      <Switch
+                        id="comments"
                         checked={notifications.comments}
-                        onCheckedChange={(value)=>
-                          setNotifications(prev=>({
+                        onCheckedChange={(value) =>
+                          setNotifications(prev => ({
                             ...prev,
-                            comments: value, 
+                            comments: value,
                           }))
                         }
                       />
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -510,19 +459,15 @@ const onSubmit = (data: ProfileFormValues) => {
                           Receive emails when someone likes your stories
                         </p>
                       </div>
-<<<<<<< HEAD
-                      <Switch id="likes" defaultChecked />
-=======
-                      <Switch id="likes" 
-                      checked={notifications.likes}
-                        onCheckedChange={(value)=>
-                          setNotifications(prev =>({
+                      <Switch id="likes"
+                        checked={notifications.likes}
+                        onCheckedChange={(value) =>
+                          setNotifications(prev => ({
                             ...prev,
                             likes: value,
-                            }))
-                          }
-                     />
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+                          }))
+                        }
+                      />
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -537,26 +482,16 @@ const onSubmit = (data: ProfileFormValues) => {
                           Receive emails when someone follows you
                         </p>
                       </div>
-<<<<<<< HEAD
-                      <Switch id="followers" defaultChecked />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-=======
-                      <Switch 
-                      id="followers" 
-                      checked={notifications.follows}
-                        onCheckedChange={(value)=>
+                      <Switch
+                        id="followers"
+                        checked={notifications.follows}
+                        onCheckedChange={(value) =>
                           setNotifications({
                             ...notifications,
-                           follows: value,
+                            follows: value,
                           })
                         }
-                        />
-                    </div>
-
-                    {/* <div className="flex items-center justify-between">
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+                      />
                       <div className="space-y-0.5">
                         <label
                           htmlFor="nft-sale"
@@ -568,25 +503,8 @@ const onSubmit = (data: ProfileFormValues) => {
                           Receive emails when one of your NFT stories is sold
                         </p>
                       </div>
-<<<<<<< HEAD
                       <Switch id="nft-sale" defaultChecked />
                     </div>
-=======
-                      <Switch 
-                      id="nft-sale" 
-                      checked={notifications.nftSales}
-                        onCheckedChange={(value)=>{
-                          setNotifications((prev: any)=>({
-                            ...prev,
-                            email:{
-                              ...prev.email,
-                              comments: value,
-                            },
-                          }));
-                        }}
-                       />
-                    </div> */}
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
@@ -600,28 +518,20 @@ const onSubmit = (data: ProfileFormValues) => {
                           Receive emails about new features and platform updates
                         </p>
                       </div>
-<<<<<<< HEAD
-                      <Switch id="newsletter" />
-=======
-                      <Switch 
-                      id="newsletter" 
-                      checked={notifications.updates}
-                      onCheckedChange={(value)=>
-                        setNotifications(prev=>({
-                        ...prev,
-                        updates: value,
-                      }))
-                    }/>
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+                      <Switch
+                        id="newsletter"
+                        checked={notifications.updates}
+                        onCheckedChange={(value) =>
+                          setNotifications(prev => ({
+                            ...prev,
+                            updates: value,
+                          }))
+                        } />
                     </div>
                   </div>
                 </div>
 
-<<<<<<< HEAD
                 <div className="space-y-4">
-=======
-                {/* <div className="space-y-4">
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                   <h3 className="text-lg font-medium">In-App Notifications</h3>
                   <Separator className="my-4" />
 
@@ -639,22 +549,7 @@ const onSubmit = (data: ProfileFormValues) => {
                           stories
                         </p>
                       </div>
-<<<<<<< HEAD
                       <Switch id="app-comments" defaultChecked />
-=======
-                      <Switch id="app-comments" 
-                      checked={!!notifications?.inApp?.comments}
-                        onCheckedChange={(value)=>{
-                          setNotifications((prev: any)=>({
-                            ...prev,
-                            email:{
-                              ...prev.email,
-                              comments: value,
-                            },
-                          }));
-                        }}
-                      />
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -669,23 +564,7 @@ const onSubmit = (data: ProfileFormValues) => {
                           Show notifications when someone likes your stories
                         </p>
                       </div>
-<<<<<<< HEAD
                       <Switch id="app-likes" defaultChecked />
-=======
-                      <Switch 
-                      id="app-likes" 
-                      checked={!!notifications?.inApp?.likes}
-                        onCheckedChange={(value)=>{
-                          setNotifications((prev: any)=>({
-                            ...prev,
-                            email:{
-                              ...prev.email,
-                              comments: value,
-                            },
-                          }));
-                        }}
-                       />
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -700,22 +579,7 @@ const onSubmit = (data: ProfileFormValues) => {
                           Show notifications when someone follows you
                         </p>
                       </div>
-<<<<<<< HEAD
                       <Switch id="app-followers" defaultChecked />
-=======
-                      <Switch id="app-followers" 
-                      checked={!!notifications?.inApp?.followers}
-                        onCheckedChange={(value)=>{
-                          setNotifications((prev: any)=>({
-                            ...prev,
-                            email:{
-                              ...prev.email,
-                              comments: value,
-                            },
-                          }));
-                        }}
-                      />
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -730,7 +594,6 @@ const onSubmit = (data: ProfileFormValues) => {
                           Show notifications for new direct messages
                         </p>
                       </div>
-<<<<<<< HEAD
                       <Switch id="app-messages" defaultChecked />
                     </div>
                   </div>
@@ -740,34 +603,12 @@ const onSubmit = (data: ProfileFormValues) => {
                 <Button variant="outline">Reset to Defaults</Button>
                 <Button>Save Preferences</Button>
               </CardFooter>
-=======
-                      <Switch id="app-messages"
-                      checked={!!notifications?.inApp?.messages}
-                        onCheckedChange={(value)=>{
-                          setNotifications((prev: any)=>({
-                            ...prev,
-                            email:{
-                              ...prev.email,
-                              comments: value,
-                            },
-                          }));
-                        }} 
-                      />
-                    </div>
-                  </div>
-                </div>
-              </CardContent> */}
-              {/* <CardFooter className="flex justify-end space-x-4 border-t pt-6">
-                <Button variant="outline">Reset to Defaults</Button>
-                <Button>Save Preferences</Button>
-              </CardFooter> */}
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
             </Card>
-          </div>
-        </TabsContent>
+          </div >
+        </TabsContent >
 
         {/* Wallet Settings */}
-        <TabsContent value="wallet" className="mt-0">
+        < TabsContent value="wallet" className="mt-0" >
           <div className="grid grid-cols-1 gap-8">
             <Card>
               <CardHeader>
@@ -787,20 +628,12 @@ const onSubmit = (data: ProfileFormValues) => {
                         Connected Wallet
                       </h3>
                       <div className="flex items-center gap-2 mb-2">
-<<<<<<< HEAD
                         <Badge
-=======
-                        {/* <Badge
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                           variant="outline"
                           className="bg-primary/10 font-mono text-xs py-1"
                         >
                           0x1a2b3c4d5e6f7890abcdef1234567890abcdef12
-<<<<<<< HEAD
                         </Badge>
-=======
-                        </Badge> */}
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                         <Button
                           variant="ghost"
                           size="sm"
@@ -808,32 +641,21 @@ const onSubmit = (data: ProfileFormValues) => {
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
-                      </div>
-<<<<<<< HEAD
+                      </div >
                       <div className="flex gap-2 items-center text-sm text-muted-foreground">
                         <Badge>Monad</Badge>
                         <span>Connected Jan 15, 2023</span>
                       </div>
-=======
-                      {/* <div className="flex gap-2 items-center text-sm text-muted-foreground">
-                        <Badge>Monad</Badge>
-                        <span>Connected Jan 15, 2023</span>
-                      </div> */}
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
-                    </div>
+                    </div >
                     <div>
                       <Button variant="outline" size="sm">
                         Disconnect
                       </Button>
                     </div>
-                  </div>
-                </div>
+                  </div >
+                </div >
 
-<<<<<<< HEAD
                 <div className="space-y-4">
-=======
-                {/* <div className="space-y-4">
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                   <h3 className="text-lg font-medium">NFT Settings</h3>
                   <Separator className="my-4" />
 
@@ -851,22 +673,7 @@ const onSubmit = (data: ProfileFormValues) => {
                           prompting
                         </p>
                       </div>
-<<<<<<< HEAD
                       <Switch id="auto-sign" />
-=======
-                      <Switch id="auto-sign" 
-                      checked={!!notifications?.inApp?.auto-sign}
-                        onCheckedChange={(value)=>{
-                          setNotifications((prev: any)=>({
-                            ...prev,
-                            email:{
-                              ...prev.email,
-                              comments: value,
-                            },
-                          }));
-                        }}
-                        />
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -881,23 +688,7 @@ const onSubmit = (data: ProfileFormValues) => {
                           Make your NFT collection public on your profile
                         </p>
                       </div>
-<<<<<<< HEAD
                       <Switch id="nft-visibility" defaultChecked />
-=======
-                      <Switch 
-                      id="nft-visibility" 
-                      checked={!!notifications?.inApp?.nft-visibility}
-                        onCheckedChange={(value)=>{
-                          setNotifications((prev: any)=>({
-                            ...prev,
-                            email:{
-                              ...prev.email,
-                              comments: value,
-                            },
-                          }));
-                        }}
-                      />
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -912,29 +703,10 @@ const onSubmit = (data: ProfileFormValues) => {
                           Wait for optimal gas fees when minting NFTs
                         </p>
                       </div>
-<<<<<<< HEAD
                       <Switch id="gas-optimization" defaultChecked />
                     </div>
                   </div>
                 </div>
-=======
-                      <Switch 
-                      id="gas-optimization" 
-                      checked={!!notifications?.inApp?.gas-optimization}
-                        onCheckedChange={(value)=>{
-                          setNotifications((prev: any)=>({
-                            ...prev,
-                            email:{
-                              ...prev.email,
-                              comments: value,
-                            },
-                          }));
-                        }}
-                      defaultChecked />
-                    </div>
-                  </div>
-                </div> */}
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Transaction History</h3>
@@ -993,12 +765,12 @@ const onSubmit = (data: ProfileFormValues) => {
                   </div>
                 </div>
               </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+            </Card >
+          </div >
+        </TabsContent >
 
         {/* Privacy Settings */}
-        <TabsContent value="privacy" className="mt-0">
+        < TabsContent value="privacy" className="mt-0" >
           <div className="grid grid-cols-1 gap-8">
             <Card>
               <CardHeader>
@@ -1025,26 +797,19 @@ const onSubmit = (data: ProfileFormValues) => {
                           Make your profile visible to all users
                         </p>
                       </div>
-<<<<<<< HEAD
-                      <Switch id="profile-visibility" defaultChecked />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-=======
-                      <Switch 
-                      id="profile-visibility"
-                      checked={privacy.profileVisible}
-                        onCheckedChange={(value)=>
+                      <Switch
+                        id="profile-visibility"
+                        checked={privacy.profileVisible}
+                        onCheckedChange={(value) =>
                           setPrivacy({
                             ...privacy,
-                           profileVisible: value,
+                            profileVisible: value,
                           })
                         }
                       />
                     </div>
 
-                    {/* <div className="flex items-center justify-between">
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+                    <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <label
                           htmlFor="story-comments"
@@ -1056,24 +821,8 @@ const onSubmit = (data: ProfileFormValues) => {
                           Allow users to comment on your stories
                         </p>
                       </div>
-<<<<<<< HEAD
                       <Switch id="story-comments" defaultChecked />
                     </div>
-=======
-                      <Switch id="story-comments"
-                      checked={!!notifications?.privacy?.allowcomments}
-                        onCheckedChange={(value)=>{
-                          setNotifications((prev: any)=>({
-                            ...prev,
-                            email:{
-                              ...prev.email,
-                              comments: value,
-                            },
-                          }));
-                        }} 
-                      />
-                    </div> */}
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
@@ -1087,24 +836,17 @@ const onSubmit = (data: ProfileFormValues) => {
                           Show your activity in other users' feeds
                         </p>
                       </div>
-<<<<<<< HEAD
-                      <Switch id="show-activity" defaultChecked />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-=======
-                      <Switch id="show-activity" 
-                      checked={privacy.activityVisible}
-                        onCheckedChange={(value)=>
+                      <Switch id="show-activity"
+                        checked={privacy.activityVisible}
+                        onCheckedChange={(value) =>
                           setPrivacy({
                             ...privacy,
-                           activityVisible: value,
-                        })}
+                            activityVisible: value,
+                          })}
                       />
                     </div>
 
-                    {/* <div className="flex items-center justify-between">
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+                    <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <label
                           htmlFor="show-reading"
@@ -1116,8 +858,7 @@ const onSubmit = (data: ProfileFormValues) => {
                           Show stories you've read on your profile
                         </p>
                       </div>
-<<<<<<< HEAD
-                      <Switch id="show-reading" />
+                      <Switch id="show-reading" defaultChecked />
                     </div>
                   </div>
                 </div>
@@ -1127,29 +868,9 @@ const onSubmit = (data: ProfileFormValues) => {
                   <Separator className="my-4" />
 
                   <div className="space-y-4">
-=======
-                      <Switch id="show-reading"
-                      checked={!!notifications?.privacy?.showReading}
-                        onCheckedChange={(value)=>{
-                          setNotifications((prev: any)=>({
-                            ...prev,
-                            email:{
-                              ...prev.email,
-                              comments: value,
-                            },
-                          }));
-                        }} 
-                      />
-                    </div> */}
-                  </div>
-                </div>
 
-                {/* <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Account Security</h3>
-                  <Separator className="my-4" /> */}
 
-                  {/* <div className="space-y-4">
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <label
@@ -1171,15 +892,9 @@ const onSubmit = (data: ProfileFormValues) => {
                         </Badge>
                         <Switch id="two-factor" />
                       </div>
-<<<<<<< HEAD
                     </div>
 
                     <div className="mt-4">
-=======
-                    </div> */}
-
-                    {/* <div className="mt-4">
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                       <Button
                         variant="outline"
                         className="w-full sm:w-auto flex items-center gap-2"
@@ -1190,21 +905,13 @@ const onSubmit = (data: ProfileFormValues) => {
                       </Button>
                     </div>
                   </div>
-<<<<<<< HEAD
                 </div>
-=======
-                </div> */}
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Data & Privacy</h3>
                   <Separator className="my-4" />
 
-<<<<<<< HEAD
                   <div className="space-y-4">
-=======
-                  {/* <div className="space-y-4">
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <label
@@ -1218,29 +925,10 @@ const onSubmit = (data: ProfileFormValues) => {
                           the platform
                         </p>
                       </div>
-<<<<<<< HEAD
                       <Switch id="data-collection" defaultChecked />
                     </div>
 
                     <div className="flex items-center justify-between">
-=======
-                      <Switch 
-                      id="data-collection" 
-                      checked={!!notifications?.privacy?.dataCollections}
-                        onCheckedChange={(value)=>{
-                          setNotifications((prev: any)=>({
-                            ...prev,
-                            email:{
-                              ...prev.email,
-                              comments: value,
-                            },
-                          }));
-                        }}
-                       />
-                    </div> */}
-
-                    {/* <div className="flex items-center justify-between">
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
                       <div className="space-y-0.5">
                         <label
                           htmlFor="personalization"
@@ -1253,27 +941,9 @@ const onSubmit = (data: ProfileFormValues) => {
                           recommendations
                         </p>
                       </div>
-<<<<<<< HEAD
                       <Switch id="personalization" defaultChecked />
                     </div>
                   </div>
-=======
-                      <Switch 
-                      id="personalization"
-                      checked={!!notifications?.privacy?.personalization}
-                        onCheckedChange={(value)=>{
-                          setNotifications((prev: any)=>({
-                            ...prev,
-                            email:{
-                              ...prev.email,
-                              comments: value,
-                            },
-                          }));
-                        }} 
-                       />
-                    </div>
-                  </div> */}
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 
                   <div className="flex gap-4">
                     <Button
@@ -1289,19 +959,15 @@ const onSubmit = (data: ProfileFormValues) => {
                     </Button>
                   </div>
                 </div>
-              </CardContent>
+              </CardContent >
               <CardFooter className="flex justify-end space-x-4 border-t pt-6">
                 <Button variant="outline">Cancel</Button>
-<<<<<<< HEAD
-                <Button>Save Privacy Settings</Button>
-=======
                 <Button onClick={savePreferences}>Save Privacy Settings</Button>
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
-              </CardFooter>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+              </CardFooter >
+            </Card >
+          </div >
+        </TabsContent >
+      </Tabs >
+    </div >
   );
 }

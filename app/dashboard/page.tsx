@@ -1,25 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-<<<<<<< HEAD
-=======
 import Link from "next/link";
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
 import { DashboardTour } from "@/components/dashboard/DashboardTour";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-<<<<<<< HEAD
-import { 
-  BarChart3, 
-  Wallet, 
-  BookOpen, 
-  Trophy, 
-  Plus, 
-  MoreVertical, 
-  ArrowUpRight 
-} from "lucide-react";
-=======
 import {
   BarChart3,
   Wallet,
@@ -32,7 +18,6 @@ import {
 } from "lucide-react";
 import { useWallet } from "@/hooks/use-wallet";
 import { useCreatorEarnings } from "@/hooks/use-royalties";
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 
 interface ChecklistStep {
   id: string;
@@ -42,12 +27,8 @@ interface ChecklistStep {
 }
 
 export default function DashboardPage() {
-<<<<<<< HEAD
-=======
   const { address } = useWallet();
   const { earnings } = useCreatorEarnings(address || undefined);
-
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
   const [runTour, setRunTour] = useState(false);
 
   const [isChecklistVisible, setIsChecklistVisible] = useState(false);
@@ -84,9 +65,9 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background p-8">
-      <DashboardTour 
-        shouldRun={runTour} 
-        onComplete={handleTourComplete} 
+      <DashboardTour
+        shouldRun={runTour}
+        onComplete={handleTourComplete}
       />
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -101,7 +82,7 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      <OnboardingChecklist 
+      <OnboardingChecklist
         steps={checklistSteps}
         isVisible={isChecklistVisible}
         onDismiss={handleChecklistDismiss}
@@ -112,19 +93,7 @@ export default function DashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
             <span className="text-muted-foreground">
-<<<<<<< HEAD
-                <BarChart3 className="h-4 w-4" />
-            </span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$1,234.56</div>
-            <p className="text-xs text-muted-foreground flex items-center mt-1">
-              <span className="text-green-500 flex items-center mr-1">
-                +20.1% <ArrowUpRight className="h-3 w-3 ml-0.5" />
-              </span>
-              from last month
-=======
-                <DollarSign className="h-4 w-4" />
+              <DollarSign className="h-4 w-4" />
             </span>
           </CardHeader>
           <CardContent>
@@ -139,7 +108,6 @@ export default function DashboardPage() {
               ) : (
                 'Connect wallet to track'
               )}
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
             </p>
           </CardContent>
         </Card>
@@ -197,34 +165,34 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">  
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Stories</CardTitle>
-             
-             <Button className="tour-create-story bg-primary text-primary-foreground">
-                <Plus className="mr-2 h-4 w-4" /> Create New Story
-             </Button>
+
+            <Button className="tour-create-story bg-primary text-primary-foreground">
+              <Plus className="mr-2 h-4 w-4" /> Create New Story
+            </Button>
 
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                        <div className="flex items-center gap-4">
-                            <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                                📚
-                            </div>
-                            <div>
-                                <p className="font-medium">The Lost Algorithm of Atlantis</p>
-                                <p className="text-sm text-muted-foreground">Updated 2 hours ago</p>
-                            </div>
-                        </div>
-                        <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                        </Button>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                      📚
                     </div>
-                ))}
+                    <div>
+                      <p className="font-medium">The Lost Algorithm of Atlantis</p>
+                      <p className="text-sm text-muted-foreground">Updated 2 hours ago</p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -235,12 +203,12 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4 text-sm">
-                <div className="p-3 bg-primary/10 rounded-lg text-primary border border-primary/20">
-                    <strong>💡 Pro Tip:</strong> Minting your story as an NFT allows you to earn royalties every time it is resold.
-                </div>
-                <div className="p-3 bg-muted rounded-lg border">
-                    <strong>Writing with AI:</strong> Try using the "Fantasy" prompt preset to generate immersive worlds quickly.
-                </div>
+              <div className="p-3 bg-primary/10 rounded-lg text-primary border border-primary/20">
+                <strong>💡 Pro Tip:</strong> Minting your story as an NFT allows you to earn royalties every time it is resold.
+              </div>
+              <div className="p-3 bg-muted rounded-lg border">
+                <strong>Writing with AI:</strong> Try using the "Fantasy" prompt preset to generate immersive worlds quickly.
+              </div>
             </div>
           </CardContent>
         </Card>

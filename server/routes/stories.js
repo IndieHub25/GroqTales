@@ -128,12 +128,7 @@ router.get('/', async (req, res) => {
  *               genre:
  *                 type: string
  *                 required: true
-<<<<<<< HEAD
- *               author:
- *                 type: string
- *                 required: true
-=======
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
+
  *     responses:
  *       201:
  *         description: Story created successfully.
@@ -145,25 +140,15 @@ router.get('/', async (req, res) => {
  *         description: Internal server error.
  */
 // POST /api/v1/stories/create - Create new story
-<<<<<<< HEAD
-router.post('/create',authRequired, async (req, res) => {
-  try {
-    const { title, content, genre, author } = req.body;
-=======
 router.post('/create', authRequired, async (req, res) => {
   try {
     const { title, content, genre } = req.body;
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
 
     const story = new Story({
       title,
       content,
       genre,
-<<<<<<< HEAD
-      author,
-=======
       author: req.user.id,
->>>>>>> c5e035fd8c574bf110626ad9d85b39c59dd7f2d9
     });
 
     await story.save();
