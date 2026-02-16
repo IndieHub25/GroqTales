@@ -107,7 +107,7 @@ export function HeroSection({
                 e.currentTarget.style.boxShadow = '6px 6px 0px #000';
               }}
             >
-              START CREATING
+              CREATE STORY
             </a>
             <button
               onClick={connectWallet}

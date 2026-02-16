@@ -82,7 +82,7 @@ export function CTASection() {
               transform: 'rotate(-1deg)',
             }}
           >
-            JOIN THE REVOLUTION
+            CREATE STORY
           </a>
 
           {/* Secondary Info Box */}

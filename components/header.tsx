@@ -8,6 +8,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
+    { href: '/create/ai-story', label: 'CREATE' },
     { href: '/genres', label: 'GENRES' },
     { href: '/community', label: 'COMMUNITY' },
     { href: '/nft-gallery', label: 'NFT GALLERY' },

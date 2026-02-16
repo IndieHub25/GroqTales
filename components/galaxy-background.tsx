@@ -148,11 +148,10 @@ export const GalaxyBackground = () => {
         </>
       )}
 
-      {/* Animated stars - use CSS animation instead of framer-motion for each star */}
-      {stars.map((star, i) => (
+      {/* Animated stars - use CSS animation instead of framer-motion for each star */}\n      {stars.map((star, i) => (
         <div
           key={i}
-          className="absolute rounded-full animate-twinkle"
+          className="absolute rounded-full"
           style={{
             left: `${star.x}%`,
             top: `${star.y}%`,
@@ -160,8 +159,7 @@ export const GalaxyBackground = () => {
             height: star.size,
             backgroundColor: star.color,
             boxShadow: `0 0 ${star.size * 2}px ${star.color}`,
-            animationDelay: `${star.delay}s`,
-            animationDuration: `${3 + (i % 4)}s`,
+            opacity: 0.6,
           }}
         />
       ))}
