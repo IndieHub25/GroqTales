@@ -1,0 +1,31 @@
+# Prettier ignore file
+# Ignore build outputs
+.next/
+dist/
+build/
+coverage/
+
+# Ignore dependency directories
+node_modules/
+
+# Ignore specific file types
+*.min.js
+*.min.css
+
+# Ignore generated files
+package-lock.json
+yarn.lock
+
+# Ignore environment files
+.env*
+
+# Ignore logs
+*.log
+
+# Ignore specific directories
+public/
+.git/
+.vscode/
+
+# Ignore markdown generated files
+CHANGELOG.md

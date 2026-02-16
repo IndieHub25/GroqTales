@@ -1,0 +1,56 @@
+# ZAP Security Scan Rules for GroqTales
+# Format: RULE_ID	THRESHOLD	[IGNORE/WARN/FAIL]
+
+# High priority security rules
+10023	HIGH	FAIL	# Application Error Disclosure
+10024	HIGH	FAIL	# Generic Padding Oracle
+10025	HIGH	FAIL	# Expression Language Injection
+10026	HIGH	FAIL	# HTTP Parameter Override
+10027	HIGH	FAIL	# Information Disclosure - Debug Error Messages
+10028	HIGH	FAIL	# Open Redirect
+10029	HIGH	FAIL	# Cookie Poisoning
+10030	HIGH	FAIL	# User Controllable Charset
+10031	HIGH	FAIL	# User Controllable HTML Element Attribute (Potential XSS)
+10032	HIGH	FAIL	# Viewstate Scanner
+10033	HIGH	FAIL	# Directory Browsing
+10034	HIGH	FAIL	# Heartbleed OpenSSL Vulnerability
+10035	HIGH	FAIL	# Strict-Transport-Security Header Not Set
+10036	HIGH	FAIL	# HTTP Server Response Header
+10037	HIGH	FAIL	# Server Leaks Information via "X-Powered-By" HTTP Response Header Field(s)
+10038	HIGH	FAIL	# Content Security Policy (CSP) Header Not Set
+10039	HIGH	FAIL	# X-Frame-Options Header Not Set
+10040	HIGH	FAIL	# X-Content-Type-Options Header Missing
+10041	HIGH	FAIL	# X-XSS-Protection Header Not Set
+10042	HIGH	FAIL	# Authentication Request Identified
+10043	HIGH	FAIL	# User Controllable JavaScript Event (XSS)
+10044	HIGH	FAIL	# Big Redirect Detected (Potential Sensitive Information Leak)
+10045	HIGH	FAIL	# Source Code Disclosure - /WEB-INF folder
+10046	HIGH	FAIL	# Generic Padding Oracle
+10047	HIGH	FAIL	# HTTPS Content Available via HTTP
+10048	HIGH	FAIL	# Remote Code Execution - Shell Shock
+10049	HIGH	FAIL	# Content Security Policy (CSP) Header Not Set
+
+# Medium priority rules - warnings
+10050	MEDIUM	WARN	# Retrieved from Cache
+10051	MEDIUM	WARN	# Relative Path Confusion
+10052	MEDIUM	WARN	# X-ChromeLogger-Data (XCOLD) Header Information Leak
+10053	MEDIUM	WARN	# Apache Range Header DoS (CVE-2011-3192)
+10054	MEDIUM	WARN	# Cookie Without Secure Flag
+10055	MEDIUM	WARN	# CSP Scanner
+10056	MEDIUM	WARN	# X-Debug-Token Information Leak
+10057	MEDIUM	WARN	# Username Hash Found
+10058	MEDIUM	WARN	# X-AspNet-Version Response Header
+10059	MEDIUM	WARN	# X-Debug-Token Information Leak
+10060	MEDIUM	WARN	# Secure Pages Include Mixed Content
+
+# Low priority rules - informational
+10061	LOW	IGNORE	# Timestamp Disclosure
+10062	LOW	IGNORE	# PII Disclosure
+10063	LOW	IGNORE	# Feature Policy Header Not Set
+10064	LOW	IGNORE	# Permissions Policy Header Not Set
+10065	LOW	IGNORE	# Server Leaks Version Information via "Server" HTTP Response Header Field
+10066	LOW	IGNORE	# HTTP to HTTPS Insecure Transition in Form Post
+10067	LOW	IGNORE	# HTTPS to HTTP Insecure Transition in Form Post
+10068	LOW	IGNORE	# Modern Web Application
+10069	LOW	IGNORE	# Missing Anti-clickjacking Header
+10070	LOW	IGNORE	# Incomplete or No Cache-control and Pragma HTTP Header Set

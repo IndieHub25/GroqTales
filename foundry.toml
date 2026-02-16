@@ -1,0 +1,20 @@
+[profile.default]
+  src = 'contracts'
+  out = 'out'
+  libs = ['lib']
+  solc_version = '0.8.17'
+  optimizer = true
+  optimizer_runs = 200
+
+[profile.ci]
+  fuzz_runs = 1000
+  invariant_runs = 100
+  invariant_depth = 100
+
+[rpc_endpoints]
+  # Placeholder for Monad testnet/mainnet RPC - to be updated when available
+  monad_testnet = 'https://monad-testnet-rpc.example.com'
+
+[etherscan]
+  # Placeholder for Monad block explorer API key - to be updated when available
+  monad_testnet = { key = '${MONAD_API_KEY}' }

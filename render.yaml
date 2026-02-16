@@ -1,0 +1,83 @@
+# Render deployment configuration for GroqTales Backend
+# This configuration sets up the backend API and SDK services on Render
+
+services:
+  # Main Backend API Service
+  - type: web
+    name: groqtales-backend-api
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build:backend
+    startCommand: npm run start:backend
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://groq-tales.vercel.app/
+      - key: API_VERSION
+        value: v1
+    domains:
+      - groqtales-api.onrender.com
+
+  # SDK Service (for future SDK implementations)
+  - type: web
+    name: groqtales-sdk-service
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build:sdk
+    startCommand: npm run start:sdk
+    healthCheckPath: /sdk/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3002
+      - key: GROQ_API_KEY
+        sync: false
+      - key: SDK_VERSION
+        value: v1.0.0
+      - key: CORS_ORIGIN
+        value: https://groq-tales.vercel.app/
+    domains:
+      - groqtales-sdk.onrender.com
+
+  # Background Worker Service
+  - type: worker
+    name: groqtales-worker
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm run start:worker
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GROQ_API_KEY
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+
+databases:
+  # Redis for caching and session management
+  - name: groqtales-redis
+    databaseName: groqtales_cache
+    user: groqtales_user
+    region: oregon
+    plan: starter
