@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
+import { ConnectWalletButton } from '@/components/connect-wallet-button';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -40,15 +41,7 @@ export function Header() {
         </nav>
 
         {/* Desktop Connect Wallet Button */}
-        <button
-          className="hidden md:block font-display text-lg font-bold text-white uppercase px-8 py-3 transition-all hover:opacity-80 tracking-wide"
-          style={{
-            backgroundColor: '#8B0000',
-            border: 'none',
-          }}
-        >
-          CONNECT WALLET
-        </button>
+        <ConnectWalletButton />
 
         {/* Mobile Menu Button */}
         <button
@@ -78,15 +71,9 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
-            <button
-              className="font-display text-lg font-bold text-white uppercase px-6 py-3 transition-all hover:opacity-80 tracking-wide mt-4 w-full text-left"
-              style={{
-                backgroundColor: '#8B0000',
-                border: '2px solid #8B0000',
-              }}
-            >
-              CONNECT WALLET
-            </button>
+            <div className="mt-4">
+              <ConnectWalletButton />
+            </div>
           </nav>
         </div>
       )}

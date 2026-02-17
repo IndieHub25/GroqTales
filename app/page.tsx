@@ -1,19 +1,14 @@
 'use client';
 
 import { HeroSection, TrendingSection, CTASection } from '@/components/home';
-import { useCallback } from 'react';
+import { useWeb3 } from '@/components/providers/web3-provider';
 
 export default function Home() {
-  // Placeholder wallet connection function
-  // Update with actual Web3 provider when integrated
-  const handleConnectWallet = useCallback(async () => {
-    // TODO: Implement actual wallet connection logic
-    console.warn('Wallet connection hook not yet implemented');
-  }, []);
+  const { connectWallet } = useWeb3();
 
   return (
     <main className="flex min-h-screen flex-col relative overflow-hidden">
-      <HeroSection connectWallet={handleConnectWallet} isConnected={false} />
+      <HeroSection connectWallet={connectWallet} isConnected={false} />
       <TrendingSection />
       <CTASection />
     </main>
