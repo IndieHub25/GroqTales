@@ -81,7 +81,7 @@ export function StoryCard({
   const isGrid = viewMode === 'grid';
 
   const handleViewNFT = () => {
-    router.push(`/story/${story.id}`);
+    router.push(`/stories/${story.id}`);
   };
 
   const handleCreateSimilar = () => {

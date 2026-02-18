@@ -48,10 +48,10 @@ function createMockClient(): MockClient {
         insertOne: async () => ({ insertedId: 'mock-id' }),
         updateOne: async () => ({ modifiedCount: 1 }),
         deleteOne: async () => ({ deletedCount: 1 }),
-        createIndex: async () => {},
-        drop: async () => {},
+        createIndex: async () => { },
+        drop: async () => { },
       }),
-      createCollection: async () => {},
+      createCollection: async () => { },
     }),
   };
 }
@@ -61,55 +61,61 @@ if (shouldMockDb || forceMock) {
   clientPromise = Promise.resolve(createMockClient());
 } else {
   if (!process.env.MONGODB_URI) {
-    throw new Error('Please add your MongoDB URI to .env.local');
-  }
-  const uri = process.env.MONGODB_URI;
-
-  // If SRV lookup has historically failed and a fallback non-SRV URI is provided, prefer it.
-  const fallbackUri = process.env.MONGODB_FALLBACK_URI; // e.g., mongodb://username:password@host:27017/dbname?replicaSet=...
-  const finalUri =
-    uri.startsWith('mongodb+srv://') && fallbackUri ? fallbackUri : uri;
-
-  // Use retry logic if enabled (Issue #166)
-  const useRetryLogic = process.env.DB_USE_RETRY !== 'false'; // default true
-
-  let client: MongoClient;
-
-  if (useRetryLogic) {
-    // Use new retry connection logic with exponential backoff
-    const maxRetries = parseInt(process.env.DB_MAX_RETRIES || '5');
-    const retryDelayMs = parseInt(process.env.DB_RETRY_DELAY_MS || '2000');
-
-    clientPromise = connectWithRetry({
-      uri: finalUri,
-      maxRetries,
-      retryDelayMs,
-    });
-
-    // Setup graceful shutdown handlers once
-    if (typeof window === 'undefined') {
-      setupGracefulShutdown();
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('MONGODB_URI missing. Using mock database.');
+      clientPromise = Promise.resolve(createMockClient());
+    } else {
+      throw new Error('Please add your MongoDB URI to .env.local');
     }
   } else {
-    // Legacy connection logic (no retry)
-    const options = {
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    } as any;
+    const uri = process.env.MONGODB_URI;
 
-    if (process.env.NODE_ENV === 'development') {
-      const globalWithMongo = global as typeof globalThis & {
-        _mongoClientPromise?: Promise<MongoClient>;
-      };
-      if (!globalWithMongo._mongoClientPromise) {
-        client = new MongoClient(finalUri, options);
-        globalWithMongo._mongoClientPromise = client.connect();
+    // If SRV lookup has historically failed and a fallback non-SRV URI is provided, prefer it.
+    const fallbackUri = process.env.MONGODB_FALLBACK_URI; // e.g., mongodb://username:password@host:27017/dbname?replicaSet=...
+    const finalUri =
+      uri.startsWith('mongodb+srv://') && fallbackUri ? fallbackUri : uri;
+
+    // Use retry logic if enabled (Issue #166)
+    const useRetryLogic = process.env.DB_USE_RETRY !== 'false'; // default true
+
+    let client: MongoClient;
+
+    if (useRetryLogic) {
+      // Use new retry connection logic with exponential backoff
+      const maxRetries = parseInt(process.env.DB_MAX_RETRIES || '5');
+      const retryDelayMs = parseInt(process.env.DB_RETRY_DELAY_MS || '2000');
+
+      clientPromise = connectWithRetry({
+        uri: finalUri,
+        maxRetries,
+        retryDelayMs,
+      });
+
+      // Setup graceful shutdown handlers once
+      if (typeof window === 'undefined') {
+        setupGracefulShutdown();
       }
-      clientPromise = globalWithMongo._mongoClientPromise;
     } else {
-      client = new MongoClient(finalUri, options);
-      clientPromise = client.connect();
+      // Legacy connection logic (no retry)
+      const options = {
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+      } as any;
+
+      if (process.env.NODE_ENV === 'development') {
+        const globalWithMongo = global as typeof globalThis & {
+          _mongoClientPromise?: Promise<MongoClient>;
+        };
+        if (!globalWithMongo._mongoClientPromise) {
+          client = new MongoClient(finalUri, options);
+          globalWithMongo._mongoClientPromise = client.connect();
+        }
+        clientPromise = globalWithMongo._mongoClientPromise;
+      } else {
+        client = new MongoClient(finalUri, options);
+        clientPromise = client.connect();
+      }
     }
   }
 }

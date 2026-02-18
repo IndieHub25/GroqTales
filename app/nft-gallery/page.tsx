@@ -5,15 +5,15 @@ import {
   Heart,
   Eye,
   ShoppingCart,
+  Star,
   Search,
   Filter,
-  TrendingUp,
-  Star,
   Palette,
-  BookOpen,
   Users,
+  BookOpen,
 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import {
   Select,
   SelectContent,
@@ -37,6 +37,77 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
+import { getAllReadingProgress, ReadingProgress } from '@/hooks/use-reading-progress';
+import { cn } from '@/lib/utils';
+
+function ReadingProgressRing({ storyId, className }: { storyId: string; className?: string }) {
+  const [progress, setProgress] = useState<ReadingProgress | null>(null);
+
+  useEffect(() => {
+    const allProgress = getAllReadingProgress();
+    if (allProgress[storyId]) {
+      setProgress(allProgress[storyId]);
+    }
+  }, [storyId]);
+
+  if (!progress || progress.percentage <= 0) return null;
+
+  const radius = 16;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (progress.percentage / 100) * circumference;
+
+  return (
+    <div className={cn("relative h-10 w-10 flex items-center justify-center bg-black/60 rounded-full border-2 border-white/20 backdrop-blur-sm", className)}>
+      <svg className="h-full w-full -rotate-90">
+        <circle
+          cx="20"
+          cy="20"
+          r={radius}
+          stroke="currentColor"
+          strokeWidth="3"
+          fill="transparent"
+          className="text-white/20"
+        />
+        <circle
+          cx="20"
+          cy="20"
+          r={radius}
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          fill="transparent"
+          className="text-primary transition-all duration-500 ease-out"
+        />
+      </svg>
+      <span className="absolute text-[10px] font-black text-white">{progress.percentage}%</span>
+    </div>
+  );
+}
+
+function ReadingProgressBadge({ storyId }: { storyId: string }) {
+  const [progress, setProgress] = useState<ReadingProgress | null>(null);
+
+  useEffect(() => {
+    const allProgress = getAllReadingProgress();
+    if (allProgress[storyId]) {
+      setProgress(allProgress[storyId]);
+    }
+  }, [storyId]);
+
+  if (!progress || progress.percentage <= 0) return null;
+
+  return (
+    <div className="bg-primary/90 backdrop-blur-md text-white px-4 py-2 rounded-lg border-2 border-black flex items-center justify-between shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+      <div className="flex items-center gap-2">
+        <BookOpen className="h-4 w-4" />
+        <span className="font-black uppercase text-xs">Reading Progress</span>
+      </div>
+      <span className="font-black text-sm">{progress.percentage}%</span>
+    </div>
+  );
+}
 
 interface NFTStory {
   id: string;
@@ -56,7 +127,7 @@ interface NFTStory {
 
 const featuredNFTs: NFTStory[] = [
   {
-    id: '1',
+    id: 'top-1',
     title: "The Last Dragon's Tale",
     author: 'Elena Stormweaver',
     authorAvatar:
@@ -74,7 +145,7 @@ const featuredNFTs: NFTStory[] = [
     rarity: 'Legendary',
   },
   {
-    id: '2',
+    id: 'top-2',
     title: 'Neon Shadows',
     author: 'Marcus Cyberpunk',
     authorAvatar:
@@ -92,7 +163,7 @@ const featuredNFTs: NFTStory[] = [
     rarity: 'Epic',
   },
   {
-    id: '3',
+    id: 'top-3',
     title: 'The Quantum Paradox',
     author: 'Dr. Sarah Chen',
     authorAvatar:
@@ -112,24 +183,33 @@ const featuredNFTs: NFTStory[] = [
 ];
 
 function generateAdditionalNFTs(): NFTStory[] {
-  const stableNFTs: NFTStory[] = [
-    {
-      id: 'nft-4',
-      title: 'The Crystal Prophecy',
-      author: 'Marcus Brightwater',
-      authorAvatar:
-        'https://api.dicebear.com/7.x/bottts/svg?seed=Marcus&backgroundColor=e0f2fe',
-      coverImage:
-        'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=1200&fit=crop&q=80',
-      price: '1.8 ETH',
-      likes: 456,
-      views: 2340,
-      genre: 'Fantasy',
-      sales: 23,
-      description:
-        'A mystical tale of ancient prophecies and crystal magic that spans across realms.',
-      rarity: 'Epic',
-    },
+  const genres = [
+    'Fantasy',
+    'Sci-Fi',
+    'Horror',
+    'Romance',
+    'Adventure',
+    'Historical',
+    'Educational',
+    'Magical Realism',
+  ];
+
+  const generated = Array.from({ length: 90 }, (_, i) => ({
+    id: `story-${i + 1}`,
+    title: `Epic Story #${i + 4}`,
+    author: `Author ${i + 4}`,
+    authorAvatar: `https://api.dicebear.com/7.x/bottts/svg?seed=Author${i + 4}&backgroundColor=fef3c7`,
+    coverImage: `https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=800&h=1200&fit=crop&q=80`,
+    price: `${(Math.random() * 5).toFixed(1)} ETH`,
+    likes: Math.floor(Math.random() * 1000),
+    views: Math.floor(Math.random() * 10000),
+    genre: genres[i % genres.length],
+    sales: Math.floor(Math.random() * 50),
+    description: 'A mystical tale of ancient prophecies and crystal magic that spans across realms.',
+    rarity: i % 10 === 0 ? 'Legendary' : i % 5 === 0 ? 'Epic' : i % 3 === 0 ? 'Rare' : 'Common',
+  }));
+
+  const stableNFTs = [
     {
       id: 'nft-5',
       title: 'Neon Shadows',
@@ -284,7 +364,7 @@ function generateAdditionalNFTs(): NFTStory[] {
     },
   ];
 
-  return stableNFTs;
+  return [...stableNFTs, ...generated];
 }
 
 function NFTCard({
@@ -318,11 +398,10 @@ function NFTCard({
       transition={{ duration: 0.3 }}
       className="group"
     >
-      <Card 
+      <Card
         className="overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-[1.02] cursor-pointer"
         onClick={(e) => {
           e.stopPropagation();
-          console.log('Card clicked!');
           onClick(nft);
         }}
       >
@@ -341,11 +420,15 @@ function NFTCard({
           {nft.rarity && (
             <Badge
               variant="outline"
-              className={`absolute top-2 right-2 ${getRarityColor(nft.rarity)}`}
+              className={cn("absolute top-2 right-2", getRarityColor(nft.rarity))}
             >
               {nft.rarity}
             </Badge>
           )}
+
+          {/* Progress Ring Overlay */}
+          <ReadingProgressRing storyId={nft.id} className="absolute top-12 left-2" />
+
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
         </div>
 
@@ -394,13 +477,22 @@ function NFTCard({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onLike(nft.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onLike(nft.id);
+              }}
               className="flex-1"
             >
-              <Heart className="w-4 h-4 mr-1" />
+              <Heart className="w-4 h-4 mr-1 transition-colors group-hover:text-red-500" />
               Like
             </Button>
-            <Button onClick={() => onPurchase(nft.id)} className="flex-1">
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onPurchase(nft.id);
+              }}
+              className="flex-1"
+            >
               <ShoppingCart className="w-4 h-4 mr-1" />
               Buy Now
             </Button>
@@ -424,156 +516,126 @@ function NFTDetailModal({
   onLike: (id: string) => void;
   onPurchase: (id: string) => void;
 }) {
-  console.log('Modal render - isOpen:', isOpen, 'nft:', nft?.title);
   if (!nft) return null;
 
   const getRarityColor = (rarity?: string) => {
     switch (rarity) {
       case 'Legendary':
-        return 'bg-yellow-500 text-yellow-900 hover:bg-yellow-600';
+        return 'bg-yellow-500 text-yellow-900';
       case 'Epic':
-        return 'bg-purple-500 text-white hover:bg-purple-600';
+        return 'bg-purple-500 text-white';
       case 'Rare':
-        return 'bg-blue-500 text-white hover:bg-blue-600';
+        return 'bg-blue-500 text-white';
       default:
-        return 'bg-gray-500 text-white hover:bg-gray-600';
+        return 'bg-gray-500 text-white';
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900 text-white border-gray-700">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-white">{nft.title}</DialogTitle>
-          <DialogDescription className="text-gray-300">
-            by {nft.author}
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border-4 border-black p-0 rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        <DialogHeader className="p-6 border-b-4 border-black bg-primary">
+          <DialogTitle className="text-3xl font-black text-white uppercase italic tracking-tighter">
+            {nft.title}
+          </DialogTitle>
+          <DialogDescription className="text-primary-foreground/80 font-bold uppercase text-xs">
+            Created by {nft.author}
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 py-4">
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden">
           {/* NFT Image Section */}
-          <div className="space-y-4">
-            <div className="relative rounded-lg overflow-hidden border-2 border-gray-600">
+          <div className="p-6 border-r-4 border-black flex flex-col gap-6">
+            <div className="relative border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group overflow-hidden">
               <img
                 src={nft.coverImage}
                 alt={nft.title}
-                className="w-full h-auto object-cover max-h-[500px]"
+                className="w-full h-auto object-cover aspect-[2/3] transition-transform duration-500 group-hover:scale-105"
               />
               {nft.isTop10 && (
-                <div className="absolute top-3 left-3 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full font-bold text-sm flex items-center">
+                <div className="absolute top-4 left-4 bg-yellow-400 border-2 border-black px-3 py-1 font-black text-xs uppercase flex items-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                   <Star className="w-4 h-4 mr-1" />
-                  Top 10
+                  Featured
                 </div>
               )}
               {nft.rarity && (
-                <div className={`absolute top-3 right-3 px-3 py-1 rounded-full font-bold text-sm ${
-                  nft.rarity === 'Legendary' ? 'bg-yellow-500 text-yellow-900' :
-                  nft.rarity === 'Epic' ? 'bg-purple-500 text-white' :
-                  nft.rarity === 'Rare' ? 'bg-blue-500 text-white' :
-                  'bg-gray-500 text-white'
-                }`}>
+                <div className={cn(
+                  "absolute top-4 right-4 border-2 border-black px-3 py-1 font-black text-xs uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
+                  getRarityColor(nft.rarity)
+                )}>
                   {nft.rarity}
                 </div>
               )}
+
+              <div className="absolute bottom-4 left-4 right-4">
+                <ReadingProgressBadge storyId={nft.id} />
+              </div>
             </div>
-            
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <Button 
-                onClick={() => onLike(nft.id)}
+
+            <div className="flex gap-4 mt-auto">
+              <Button
                 variant="outline"
-                className="flex-1"
+                onClick={() => onLike(nft.id)}
+                className="flex-1 border-4 border-black font-black uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all"
               >
                 <Heart className="w-4 h-4 mr-2" />
-                Like ({nft.likes})
+                Like
               </Button>
-              <Button 
+              <Button
                 onClick={() => onPurchase(nft.id)}
-                className="flex-1"
+                className="flex-1 border-4 border-black font-black uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all"
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
-                Buy Now - {nft.price}
+                Collect
               </Button>
             </div>
+
+            <Link href={`/stories/${nft.id}`} className="mt-2 text-center">
+              <Button variant="link" className="font-black text-primary underline">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Read Full Story
+              </Button>
+            </Link>
           </div>
-          
-          {/* NFT Details Section */}
-          <div className="space-y-6">
-            {/* Description */}
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Description</h3>
-              <p className="text-gray-700 dark:text-gray-300">{nft.description}</p>
+
+          {/* Details Section */}
+          <div className="p-8 flex flex-col gap-8 bg-slate-50 dark:bg-slate-800/50">
+            <div className="space-y-4">
+              <h3 className="text-xl font-black uppercase italic border-b-4 border-black pb-2 inline-block">Story Summary</h3>
+              <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed italic">
+                "{nft.description}"
+              </p>
             </div>
-            
-            {/* Stats */}
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Story Stats</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-                  <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-                    <Heart className="w-4 h-4 text-red-500" />
-                    <span className="font-medium">Likes</span>
-                  </div>
-                  <div className="text-xl font-bold mt-1">{nft.likes}</div>
-                </div>
-                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-                  <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-                    <Eye className="w-4 h-4 text-blue-500" />
-                    <span className="font-medium">Views</span>
-                  </div>
-                  <div className="text-xl font-bold mt-1">{nft.views}</div>
-                </div>
-                {nft.sales && (
-                  <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-                    <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-                      <ShoppingCart className="w-4 h-4 text-green-500" />
-                      <span className="font-medium">Sales</span>
-                    </div>
-                    <div className="text-xl font-bold mt-1">{nft.sales}</div>
-                  </div>
-                )}
-                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-                  <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-                    <Palette className="w-4 h-4 text-purple-500" />
-                    <span className="font-medium">Genre</span>
-                  </div>
-                  <div className="text-xl font-bold mt-1">{nft.genre}</div>
-                </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white dark:bg-slate-900 border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <div className="text-xs font-black uppercase text-slate-500 mb-1">Rarity</div>
+                <div className="text-lg font-black uppercase tracking-tight">{nft.rarity || 'Common'}</div>
+              </div>
+              <div className="bg-white dark:bg-slate-900 border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <div className="text-xs font-black uppercase text-slate-500 mb-1">Price</div>
+                <div className="text-lg font-black text-primary">{nft.price}</div>
+              </div>
+              <div className="bg-white dark:bg-slate-900 border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <div className="text-xs font-black uppercase text-slate-500 mb-1">Likes</div>
+                <div className="text-lg font-black">{nft.likes.toLocaleString()}</div>
+              </div>
+              <div className="bg-white dark:bg-slate-900 border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <div className="text-xs font-black uppercase text-slate-500 mb-1">Views</div>
+                <div className="text-lg font-black">{nft.views.toLocaleString()}</div>
               </div>
             </div>
-            
-            {/* Additional Information */}
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Additional Information</h3>
-              <div className="space-y-3 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400 font-medium">NFT ID:</span>
-                  <span className="font-mono bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">{nft.id}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400 font-medium">Price:</span>
-                  <span className="font-bold text-green-600 dark:text-green-400 text-lg">{nft.price}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 font-medium">Rarity:</span>
-                  <span className={`font-medium px-2 py-1 rounded ${
-                    (nft.rarity || 'Common') === 'Legendary' ? 'bg-yellow-500 text-yellow-900' :
-                    (nft.rarity || 'Common') === 'Epic' ? 'bg-purple-500 text-white' :
-                    (nft.rarity || 'Common') === 'Rare' ? 'bg-blue-500 text-white' :
-                    'bg-gray-500 text-white'
-                  }`}>
-                    {nft.rarity || 'Common'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 font-medium">Status:</span>
-                  <span className={`font-medium px-2 py-1 rounded ${
-                    nft.isTop10 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-500 text-white'
-                  }`}>
-                    {nft.isTop10 ? 'Featured' : 'Available'}
-                  </span>
-                </div>
+
+            <div className="border-4 border-black p-6 bg-yellow-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="flex items-center gap-3 mb-2">
+                <Users className="h-5 w-5" />
+                <h4 className="font-black uppercase text-sm">Collector Perks</h4>
               </div>
+              <ul className="text-xs font-bold space-y-2 list-disc list-inside">
+                <li>Exclusive full story access</li>
+                <li>Limited edition cover art</li>
+                <li>Support the creator directly</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -856,7 +918,7 @@ export default function NFTGalleryPage() {
             Showing {sortedNFTs.length} of {nfts.length} stories
           </p>
           <div className="flex gap-2">
-            <Button 
+            <Button
               onClick={() => {
                 console.log('Test button clicked');
                 const firstNFT = nfts[0];
@@ -864,7 +926,7 @@ export default function NFTGalleryPage() {
                   setSelectedNFT(firstNFT);
                   setIsModalOpen(true);
                 }
-              }} 
+              }}
               variant="outline"
             >
               Test Modal
@@ -879,7 +941,7 @@ export default function NFTGalleryPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <AnimatePresence>
           {sortedNFTs.map((nft) => (
             <NFTCard

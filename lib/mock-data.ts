@@ -19,22 +19,22 @@ export const generateNftEntries = (count: number) => {
     {
       name: 'Alex Johnson',
       username: '@alexwrites',
-      avatar: '/avatars/avatar-1.png',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Alex',
     },
     {
       name: 'Sara Chen',
       username: '@sarastories',
-      avatar: '/avatars/avatar-2.png',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Sara',
     },
     {
       name: 'Marcus Lee',
       username: '@marcusworld',
-      avatar: '/avatars/avatar-3.png',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Marcus',
     },
     {
       name: 'Emma Davis',
       username: '@emmacraft',
-      avatar: '/avatars/avatar-4.png',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Emma',
     },
   ];
 
@@ -44,14 +44,13 @@ export const generateNftEntries = (count: number) => {
     author: authors[i % authors.length]!.name,
     authorUsername: authors[i % authors.length]!.username,
     authorAvatar: authors[i % authors.length]!.avatar,
-    coverImage: `/covers/cover-${(i % 12) + 1}.jpg`,
+    coverImage: `https://images.unsplash.com/photo-${1500000000000 + i}?w=800&h=1200&fit=crop&q=80`,
     price: `${(Math.random() * 2 + 0.05).toFixed(2)} ETH`,
     likes: Math.floor(Math.random() * 500),
     views: Math.floor(Math.random() * 2000) + 100,
     genre: genres[i % genres.length],
-    description: `This is a sample description for story #${
-      i + 1
-    }. It showcases the plot and themes of this interesting story.`,
+    description: `This is a sample description for story #${i + 1
+      }. It showcases the plot and themes of this interesting story.`,
     createdAt: new Date(
       Date.now() - Math.floor(Math.random() * 60 * 24 * 60 * 60 * 1000)
     ),
@@ -64,8 +63,7 @@ export const topNftStories = [
     id: 'top-1',
     title: 'The Last Guardian',
     author: 'Eliza Thompson',
-    authorAvatar: '/avatars/avatar-5.png',
-    coverImage: '/covers/cover-featured-1.jpg',
+    coverImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=1200&fit=crop&q=80',
     price: '2.35 ETH',
     likes: 1243,
     views: 8754,
@@ -79,8 +77,7 @@ export const topNftStories = [
     id: 'top-2',
     title: 'Starlight Echoes',
     author: 'Morgan Chen',
-    authorAvatar: '/avatars/avatar-6.png',
-    coverImage: '/covers/cover-featured-2.jpg',
+    coverImage: 'https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=800&h=1200&fit=crop&q=80',
     price: '1.87 ETH',
     likes: 932,
     views: 6152,
@@ -94,8 +91,7 @@ export const topNftStories = [
     id: 'top-3',
     title: 'Whispers in the Walls',
     author: 'James Rivera',
-    authorAvatar: '/avatars/avatar-7.png',
-    coverImage: '/covers/cover-featured-3.jpg',
+    coverImage: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=800&h=1200&fit=crop&q=80',
     price: '1.65 ETH',
     likes: 875,
     views: 5421,

@@ -20,6 +20,7 @@ import { FeaturedCreators } from '@/components/featured-creators';
 import { useWeb3 } from '@/components/providers/web3-provider';
 import { TrendingStories } from '@/components/trending-stories';
 import { Button } from '@/components/ui/button';
+import { ContinueReadingWidget } from '@/components/continue-reading-widget';
 
 export default function Home() {
   const { account, connectWallet } = useWeb3();

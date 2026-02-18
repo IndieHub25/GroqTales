@@ -14,26 +14,44 @@ export async function POST(req: Request) {
   if (isMockDb) {
     return NextResponse.json({ success: true });
   }
-  await connectMongoose();
-  const { storyId, type, duration } = await req.json();
-  const allowedTypes = ['VIEW', 'LIKE', 'BOOKMARK', 'SHARE', 'TIME_SPENT'] as const;
+  try {
+    const { storyId, type, duration } = await req.json();
+    const allowedTypes = [
+      'VIEW',
+      'LIKE',
+      'BOOKMARK',
+      'SHARE',
+      'TIME_SPENT',
+    ] as const;
 
-  if (typeof storyId !== 'string' || !storyId) {
-    return NextResponse.json({ error: 'Invalid storyId' }, { status: 400 });
-  }
-  if (!allowedTypes.includes(type)) {
-    return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
-  }
-  if (type === 'TIME_SPENT' && (typeof duration !== 'number' || duration < 0)) {
-    return NextResponse.json({ error: 'Invalid duration' }, { status: 400 });
-  }
+    if (typeof storyId !== 'string' || !storyId) {
+      return NextResponse.json({ error: 'Invalid storyId' }, { status: 400 });
+    }
+    if (!allowedTypes.includes(type)) {
+      return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
+    }
+    if (
+      type === 'TIME_SPENT' &&
+      (typeof duration !== 'number' || duration < 0)
+    ) {
+      return NextResponse.json({ error: 'Invalid duration' }, { status: 400 });
+    }
 
-  await UserInteraction.create({
-    userId: session.user.id,
-    storyId,
-    type,
-    value: type === 'TIME_SPENT' ? duration : 1
-  });
+    await UserInteraction.create({
+      userId: session.user.id,
+      storyId,
+      type,
+      value: type === 'TIME_SPENT' ? duration : 1,
+    });
 
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Analytics recording error:', error);
+    // Return 200 even on error to prevent front-end from blocking but log it
+    // Or return 500 if we want the client to know
+    return NextResponse.json(
+      { success: false, error: 'Failed to record interaction' },
+      { status: 500 }
+    );
+  }
 }
