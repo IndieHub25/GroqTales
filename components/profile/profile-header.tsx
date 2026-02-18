@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +26,7 @@ export function ProfileHeader({ user, isOwner, isEditing, onEditToggle }: Profil
   const displayName = user.firstName
     ? `${user.firstName} ${user.lastName || ""}`
     : user.username || `${user.walletAddress.slice(0, 6)}...`;
+
 
   return (
     <div className="relative w-full mb-8">

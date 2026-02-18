@@ -489,39 +489,84 @@ export default function AIStoryGenerator({
 
     console.log('Story Parameters:', storyParams);
 
-    // Simulate API call
-    setTimeout(() => {
-      const mockStory = `In the neon-soaked streets of Neo-Tokyo, where the rain never stopped and the holograms danced like ghosts, ${
-        mainCharacterName || 'Kael'
-      } tightened ${
-        mainCharacterName ? 'their' : 'his'
-      } grip on the data-drive. "They said it couldn't be done," ${
-        mainCharacterName ? 'they' : 'he'
-      } muttered, the cybernetic implant in ${
-        mainCharacterName ? 'their' : 'his'
-      } left eye whirring softly.
+    // Real API call to Groq backend
+    try {
+      const response = await fetch('/api/groq', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'generate',
+          prompt,
+          genre: selectedGenres.join(', '),
+          length: storyLength,
+          options: {
+            tone,
+            characters: {
+              name: mainCharacterName,
+              count: characterCount,
+              traits: characterTraits,
+              age: characterAge,
+              background: characterBackground,
+              type: protagonistType,
+            },
+            setting: {
+              timePeriod,
+              location: locationType,
+              worldBuilding: worldBuildingDepth,
+              atmosphere,
+            },
+            style: {
+              voice: narrativeVoice,
+              writingStyle,
+              readingLevel,
+              mood,
+            },
+            plot: {
+              type: plotType,
+              conflict: conflictType,
+              arc: storyArc,
+              pacing,
+              ending: endingType,
+              twists: plotTwists,
+            },
+            themes: {
+              primary: primaryTheme,
+              secondary: secondaryThemes,
+            },
+          },
+        }),
+      });
 
-The corporation known as Omni-Corp had eyes everywhere, but they didn't have this. A code so pure, so chaotic, it could rewrite reality itself.
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate story');
+      }
 
-Suddenly, a shadow detached itself from the alley wall. "Hand it over, ${
-        mainCharacterName || 'Kael'
-      }," a voice rasped, metallic and cold. It was Unit 734, a hunter-killer droid with a reputation for leaving no witnesses.
-
-${mainCharacterName || 'Kael'} smirked, pulling ${
-        mainCharacterName ? 'their' : 'his'
-      } plasma-pistol from its holster. "Come and get it, tin can."
-
-The air crackled with energy as the first shot was fired...`;
-
-      setGeneratedStory(mockStory);
-      setIsGenerating(false);
+      const data = await response.json();
+      setGeneratedStory(data.result);
       toast({
         title: 'BOOM! STORY GENERATED!',
         description: 'Your epic tale is ready for review!',
         className:
           'font-bangers bg-green-400 text-black border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]',
       });
-    }, 3000);
+    } catch (error) {
+      console.error('Story generation error:', error);
+      toast({
+        title: 'OOPS! GENERATION FAILED!',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Something went wrong. Please try again!',
+        variant: 'destructive',
+        className:
+          'font-bangers border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleMint = async () => {
@@ -792,10 +837,9 @@ The air crackled with energy as the first shot was fired...`;
                         onClick={() => toggleGenre(g)}
                         className={`
                           font-bangers text-lg px-4 py-2 rounded-lg border-4 border-black transition-all transform hover:-translate-y-1
-                          ${
-                            selectedGenres.includes(g)
-                              ? 'bg-blue-400 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rotate-1'
-                              : 'bg-white text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                          ${selectedGenres.includes(g)
+                            ? 'bg-blue-400 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rotate-1'
+                            : 'bg-white text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
                           }
                         `}
                       >
@@ -904,11 +948,10 @@ The air crackled with energy as the first shot was fired...`;
                               <button
                                 key={trait}
                                 onClick={() => toggleTrait(trait)}
-                                className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${
-                                  characterTraits.includes(trait)
+                                className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${characterTraits.includes(trait)
                                     ? 'bg-blue-400 text-white'
                                     : 'bg-white text-black hover:bg-gray-100'
-                                }`}
+                                  }`}
                               >
                                 {trait}
                               </button>
@@ -1524,11 +1567,10 @@ The air crackled with energy as the first shot was fired...`;
                               <button
                                 key={theme}
                                 onClick={() => toggleTheme(theme.toLowerCase())}
-                                className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${
-                                  secondaryThemes.includes(theme.toLowerCase())
+                                className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${secondaryThemes.includes(theme.toLowerCase())
                                     ? 'bg-pink-400 text-white'
                                     : 'bg-white text-black hover:bg-gray-100'
-                                }`}
+                                  }`}
                               >
                                 {theme}
                               </button>
@@ -1882,11 +1924,10 @@ The air crackled with energy as the first shot was fired...`;
                                     ]);
                                   }
                                 }}
-                                className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${
-                                  avoidCliches.includes(trope.toLowerCase())
+                                className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${avoidCliches.includes(trope.toLowerCase())
                                     ? 'bg-red-400 text-white'
                                     : 'bg-white text-black hover:bg-gray-100'
-                                }`}
+                                  }`}
                               >
                                 {trope}
                               </button>
@@ -1924,11 +1965,10 @@ The air crackled with energy as the first shot was fired...`;
                                     ]);
                                   }
                                 }}
-                                className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${
-                                  includeTropes.includes(trope.toLowerCase())
+                                className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${includeTropes.includes(trope.toLowerCase())
                                     ? 'bg-green-400 text-white'
                                     : 'bg-white text-black hover:bg-gray-100'
-                                }`}
+                                  }`}
                               >
                                 {trope}
                               </button>

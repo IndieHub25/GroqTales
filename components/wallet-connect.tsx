@@ -50,7 +50,7 @@ export default function WalletConnect() {
     disconnectWallet,
     networkName,
     ensName,
-    switchNetwork,
+    // switchNetwork,
   } = useWeb3();
 
   const { toast } = useToast();

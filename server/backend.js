@@ -177,8 +177,10 @@ app.use('/api/v1/stories', require('./routes/stories'));
 app.use('/api/v1/comics', require('./routes/comics'));
 app.use('/api/v1/nft', require('./routes/nft'));
 app.use('/api/v1/users', require('./routes/users'));
+
 app.use('/api/v1/ai', require('./routes/ai'));
 app.use('/api/v1/drafts', require('./routes/drafts'));
+
 
 // SDK Routes (for future SDK implementations)
 app.use('/sdk/v1', require('./routes/sdk'));

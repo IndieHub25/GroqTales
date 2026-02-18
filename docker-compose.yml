@@ -1,78 +1,32 @@
 services:
-  nextjs-app:
+  mongo:
+    image: mongo:7
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:v1.0.0
+    command: anvil --host 0.0.0.0 --port 8545
+    ports:
+      - "8545:8545"
+
+  server:
     build:
       context: .
-      dockerfile: Dockerfile
-      network: host
-    container_name: groqtales_nextjs_dev
-    ports:
-      - '3000:3000'
-      - '5000:5000'
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
-    env_file:
-      - .env.local
-      - .env.docker
-    environment:
-      - NODE_ENV=development
-      - PORT=5000
-      - CHOKIDAR_USEPOLLING=true
-      - NEXT_PUBLIC_URL=http://localhost:3000
-      - MONGODB_URI=mongodb://mongodb:27017/${MONGODB_DB_NAME:-groqtales}
-    command: npm run dev
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    networks:
-      - groqtales-network
     depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-  mongodb:
-    image: mongo:6.0
-    container_name: groqtales_mongodb
-    ports:
-      - '27017:27017'
-    volumes:
-      - mongodb_data:/data/db
-      - mongodb_config:/data/configdb
+      - mongo
+      - anvil
     environment:
-      - MONGO_INITDB_DATABASE=${MONGODB_DB_NAME:-groqtales}
-    healthcheck:
-      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    networks:
-      - groqtales-network
-
-  redis:
-    image: redis:7-alpine
-    container_name: groqtales_redis
+      NODE_ENV: development
+      MONGODB_URI: mongodb://mongo:27017/groqtales
+      NEXT_PUBLIC_RPC_URL: http://anvil:8545
+    command: sh -c "node scripts/seed.js && npm start"
     ports:
-      - '6379:6379'
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    networks:
-      - groqtales-network
+      - "3000:3000"
+      - "3001:3001"
 
 volumes:
-  mongodb_data:
-  mongodb_config:
-
-networks:
-  groqtales-network:
-    driver: bridge
+  mongo_data:

@@ -52,32 +52,32 @@ interface Web3ContextType {
   connecting: boolean;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
-  networkName: string;
-  ensName: string | null;
-  switchNetwork: (chainId: number) => Promise<void>;
-  mintNFTOnBase: (
-    metadata: any,
-    recipient?: string
-  ) => Promise<{
-    tokenId: string;
-    transactionHash: string;
-    metadata: {
-      content: string;
-      [key: string]: any;
-    };
-    ipfsHash: string;
-    tokenURI: string;
-    fallbackUrls: string[];
-  }>;
-  buyNFTOnBase: (
-    tokenId: string,
-    price: string
-  ) => Promise<{ transactionHash: string; tokenId: string }>;
-  sellNFTOnBase: (
-    tokenId: string,
-    price: string
-  ) => Promise<{ transactionHash: string }>;
-  getNFTListings: () => Promise<NFT[]>;
+  // networkName: string;
+  // ensName: string | null;
+  // switchNetwork: (chainId: number) => Promise<void>;
+  // mintNFTOnBase: (
+  //   metadata: any,
+  //   recipient?: string
+  // ) => Promise<{
+  //   tokenId: string;
+  //   transactionHash: string;
+  //   metadata: {
+  //     content: string;
+  //     [key: string]: any;
+  //   };
+  //   ipfsHash: string;
+  //   tokenURI: string;
+  //   fallbackUrls: string[];
+  // }>;
+  // buyNFTOnBase: (
+  //   tokenId: string,
+  //   price: string
+  // ) => Promise<{ transactionHash: string; tokenId: string }>;
+  // sellNFTOnBase: (
+  //   tokenId: string,
+  //   price: string
+  // ) => Promise<{ transactionHash: string }>;
+  // getNFTListings: () => Promise<NFT[]>;
 }
 
 // Create context with default values
@@ -89,20 +89,20 @@ const Web3Context = createContext<Web3ContextType>({
   connecting: false,
   connectWallet: async () => {},
   disconnectWallet: () => {},
-  networkName: '',
-  ensName: null,
-  switchNetwork: async () => {},
-  mintNFTOnBase: async () => ({
-    tokenId: '',
-    transactionHash: '',
-    metadata: { content: '' },
-    ipfsHash: '',
-    tokenURI: '',
-    fallbackUrls: [],
-  }),
-  buyNFTOnBase: async () => ({ transactionHash: '', tokenId: '' }),
-  sellNFTOnBase: async () => ({ transactionHash: '' }),
-  getNFTListings: async () => [],
+  // networkName: '',
+  // ensName: null,
+  // switchNetwork: async () => {},
+  // mintNFTOnBase: async () => ({
+  //   tokenId: '',
+  //   transactionHash: '',
+  //   metadata: { content: '' },
+  //   ipfsHash: '',
+  //   tokenURI: '',
+  //   fallbackUrls: [],
+  // }),
+  // buyNFTOnBase: async () => ({ transactionHash: '', tokenId: '' }),
+  // sellNFTOnBase: async () => ({ transactionHash: '' }),
+  // getNFTListings: async () => [],
 });
 
 // Networks mapping
@@ -144,145 +144,145 @@ export const Web3Provider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // Function to switch network
-  const switchNetwork = async (targetChainId: number) => {
-    if (!window.ethereum) {
-      toast({
-        title: 'No Wallet Found',
-        description: 'Please install MetaMask or another Web3 wallet',
-        variant: 'destructive',
-      });
-      return;
-    }
+  // const switchNetwork = async (targetChainId: number) => {
+  //   if (!window.ethereum) {
+  //     toast({
+  //       title: 'No Wallet Found',
+  //       description: 'Please install MetaMask or another Web3 wallet',
+  //       variant: 'destructive',
+  //     });
+  //     return;
+  //   }
 
-    try {
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: `0x${targetChainId.toString(16)}` }],
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Network Switch Failed',
-        description: error.message || 'Failed to switch network',
-        variant: 'destructive',
-      });
-      throw error;
-    }
-  };
+  //   try {
+  //     await window.ethereum.request({
+  //       method: 'wallet_switchEthereumChain',
+  //       params: [{ chainId: `0x${targetChainId.toString(16)}` }],
+  //     });
+  //   } catch (error: any) {
+  //     toast({
+  //       title: 'Network Switch Failed',
+  //       description: error.message || 'Failed to switch network',
+  //       variant: 'destructive',
+  //     });
+  //     throw error;
+  //   }
+  // };
 
-  // Function to mint NFT on Base
-  const mintNFTOnBase = async (metadata: any, recipient?: string) => {
-    try {
-      // Mock implementation for demo
-      const tokenId = Math.floor(Math.random() * 10000).toString();
-      const transactionHash = `0x${Math.random().toString(16).substring(2)}`;
+  // // Function to mint NFT on Base
+  // const mintNFTOnBase = async (metadata: any, recipient?: string) => {
+  //   try {
+  //     // Mock implementation for demo
+  //     const tokenId = Math.floor(Math.random() * 10000).toString();
+  //     const transactionHash = `0x${Math.random().toString(16).substring(2)}`;
 
-      return {
-        tokenId,
-        transactionHash,
-        metadata: { content: metadata.content || '', ...metadata },
-        ipfsHash: 'QmExample',
-        tokenURI: 'https://ipfs.io/ipfs/QmExample',
-        fallbackUrls: ['https://gateway.pinata.cloud/ipfs/QmExample'],
-      };
-    } catch (error: any) {
-      toast({
-        title: 'Minting Failed',
-        description: error.message || 'Failed to mint NFT',
-        variant: 'destructive',
-      });
-      throw error;
-    }
-  };
+  //     return {
+  //       tokenId,
+  //       transactionHash,
+  //       metadata: { content: metadata.content || '', ...metadata },
+  //       ipfsHash: 'QmExample',
+  //       tokenURI: 'https://ipfs.io/ipfs/QmExample',
+  //       fallbackUrls: ['https://gateway.pinata.cloud/ipfs/QmExample'],
+  //     };
+  //   } catch (error: any) {
+  //     toast({
+  //       title: 'Minting Failed',
+  //       description: error.message || 'Failed to mint NFT',
+  //       variant: 'destructive',
+  //     });
+  //     throw error;
+  //   }
+  // };
 
-  // Function to buy NFT on Base
-  const buyNFTOnBase = async (tokenId: string, price: string) => {
-    try {
-      // Mock implementation for demo
-      const transactionHash = `0x${Math.random().toString(16).substring(2)}`;
+  // // Function to buy NFT on Base
+  // const buyNFTOnBase = async (tokenId: string, price: string) => {
+  //   try {
+  //     // Mock implementation for demo
+  //     const transactionHash = `0x${Math.random().toString(16).substring(2)}`;
 
-      toast({
-        title: 'Purchase Successful',
-        description: `NFT #${tokenId} purchased for ${price} ETH`,
-      });
+  //     toast({
+  //       title: 'Purchase Successful',
+  //       description: `NFT #${tokenId} purchased for ${price} ETH`,
+  //     });
 
-      return { transactionHash, tokenId };
-    } catch (error: any) {
-      toast({
-        title: 'Purchase Failed',
-        description: error.message || 'Failed to purchase NFT',
-        variant: 'destructive',
-      });
-      throw error;
-    }
-  };
+  //     return { transactionHash, tokenId };
+  //   } catch (error: any) {
+  //     toast({
+  //       title: 'Purchase Failed',
+  //       description: error.message || 'Failed to purchase NFT',
+  //       variant: 'destructive',
+  //     });
+  //     throw error;
+  //   }
+  // };
 
-  // Function to sell NFT on Base
-  const sellNFTOnBase = async (tokenId: string, price: string) => {
-    try {
-      // Mock implementation for demo
-      const transactionHash = `0x${Math.random().toString(16).substring(2)}`;
+  // // Function to sell NFT on Base
+  // const sellNFTOnBase = async (tokenId: string, price: string) => {
+  //   try {
+  //     // Mock implementation for demo
+  //     const transactionHash = `0x${Math.random().toString(16).substring(2)}`;
 
-      toast({
-        title: 'Listed for Sale',
-        description: `NFT #${tokenId} listed for ${price} ETH`,
-      });
+  //     toast({
+  //       title: 'Listed for Sale',
+  //       description: `NFT #${tokenId} listed for ${price} ETH`,
+  //     });
 
-      return { transactionHash };
-    } catch (error: any) {
-      toast({
-        title: 'Listing Failed',
-        description: error.message || 'Failed to list NFT for sale',
-        variant: 'destructive',
-      });
-      throw error;
-    }
-  };
+  //     return { transactionHash };
+  //   } catch (error: any) {
+  //     toast({
+  //       title: 'Listing Failed',
+  //       description: error.message || 'Failed to list NFT for sale',
+  //       variant: 'destructive',
+  //     });
+  //     throw error;
+  //   }
+  // };
 
   // Function to get NFT listings
-  const getNFTListings = async (): Promise<NFT[]> => {
-    try {
-      // Mock NFT data for demo
-      const mockNFTs: NFT[] = Array.from({ length: 10 }, (_, i) => ({
-        id: `nft-${i + 1}`,
-        tokenId: (i + 1).toString(),
-        title: `GroqTales NFT #${i + 1}`,
-        description: `A unique digital story created with AI technology`,
-        price: (Math.random() * 5 + 0.1).toFixed(2),
-        seller: `0x${Math.random().toString(16).substring(2, 42)}`,
-        owner: `0x${Math.random().toString(16).substring(2, 42)}`,
-        image: `https://picsum.photos/400/400?random=${i + 1}`,
-        status:
-          Math.random() > 0.3
-            ? 'listed'
-            : Math.random() > 0.5
-              ? 'unlisted'
-              : 'sold',
-        metadata: {
-          attributes: [
-            {
-              trait_type: 'Type',
-              value: Math.random() > 0.5 ? 'Comic' : 'Text',
-            },
-            {
-              trait_type: 'Rarity',
-              value: ['Common', 'Uncommon', 'Rare', 'Legendary'][
-                Math.floor(Math.random() * 4)
-              ],
-            },
-          ],
-        },
-      }));
+  // const getNFTListings = async (): Promise<NFT[]> => {
+  //   try {
+  //     // Mock NFT data for demo
+  //     const mockNFTs: NFT[] = Array.from({ length: 10 }, (_, i) => ({
+  //       id: `nft-${i + 1}`,
+  //       tokenId: (i + 1).toString(),
+  //       title: `GroqTales NFT #${i + 1}`,
+  //       description: `A unique digital story created with AI technology`,
+  //       price: (Math.random() * 5 + 0.1).toFixed(2),
+  //       seller: `0x${Math.random().toString(16).substring(2, 42)}`,
+  //       owner: `0x${Math.random().toString(16).substring(2, 42)}`,
+  //       image: `https://picsum.photos/400/400?random=${i + 1}`,
+  //       status:
+  //         Math.random() > 0.3
+  //           ? 'listed'
+  //           : Math.random() > 0.5
+  //             ? 'unlisted'
+  //             : 'sold',
+  //       metadata: {
+  //         attributes: [
+  //           {
+  //             trait_type: 'Type',
+  //             value: Math.random() > 0.5 ? 'Comic' : 'Text',
+  //           },
+  //           {
+  //             trait_type: 'Rarity',
+  //             value: ['Common', 'Uncommon', 'Rare', 'Legendary'][
+  //               Math.floor(Math.random() * 4)
+  //             ],
+  //           },
+  //         ],
+  //       },
+  //     }));
 
-      return mockNFTs;
-    } catch (error: any) {
-      toast({
-        title: 'Failed to Load NFTs',
-        description: error.message || 'Failed to fetch NFT listings',
-        variant: 'destructive',
-      });
-      throw error;
-    }
-  };
+  //     return mockNFTs;
+  //   } catch (error: any) {
+  //     toast({
+  //       title: 'Failed to Load NFTs',
+  //       description: error.message || 'Failed to fetch NFT listings',
+  //       variant: 'destructive',
+  //     });
+  //     throw error;
+  //   }
+  // };
 
   // Function to connect wallet
   const connectWallet = async () => {
@@ -317,23 +317,23 @@ export const Web3Provider = ({ children }: { children: React.ReactNode }) => {
         const balanceEth = (balanceWei / 1e18).toFixed(4);
 
         // Check for ENS name on Ethereum mainnet
-        let name = null;
-        if (chainIdNum === 1) {
-          try {
-            // This is a mock for demonstration - in production you'd use an actual ENS lookup
-            if (accounts[0].toLowerCase().includes('0x')) {
-              name = null; // Would lookup actual ENS name here
-            }
-          } catch (error) {
-            console.error('ENS lookup failed:', error);
-          }
-        }
+        // let name = null;
+        // if (chainIdNum === 1) {
+        //   try {
+        //     // This is a mock for demonstration - in production you'd use an actual ENS lookup
+        //     if (accounts[0].toLowerCase().includes('0x')) {
+        //       name = null; // Would lookup actual ENS name here
+        //     }
+        //   } catch (error) {
+        //     console.error('ENS lookup failed:', error);
+        //   }
+        // }
 
         setAccount(accounts[0]);
         setChainId(chainIdNum);
         setBalance(balanceEth);
         setConnected(true);
-        setEnsName(name);
+        //setEnsName(name);
         localStorage.setItem('walletConnected', 'true');
 
         toast({
@@ -357,26 +357,26 @@ export const Web3Provider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // Check for existing connection on mount
-  useEffect(() => {
-    const checkConnection = async () => {
-      if (
-        window.ethereum &&
-        localStorage.getItem('walletConnected') === 'true'
-      ) {
-        try {
-          const accounts = await window.ethereum.request({
-            method: 'eth_accounts',
-          });
-          if (accounts && accounts.length > 0) {
-            connectWallet();
-          }
-        } catch (error) {
-          console.error('Error checking connection:', error);
-        }
-      }
-    };
-    checkConnection();
-  }, []);
+  // useEffect(() => {
+  //   const checkConnection = async () => {
+  //     if (
+  //       window.ethereum &&
+  //       localStorage.getItem('walletConnected') === 'true'
+  //     ) {
+  //       try {
+  //         const accounts = await window.ethereum.request({
+  //           method: 'eth_accounts',
+  //         });
+  //         if (accounts && accounts.length > 0) {
+  //           connectWallet();
+  //         }
+  //       } catch (error) {
+  //         console.error('Error checking connection:', error);
+  //       }
+  //     }
+  //   };
+  //   checkConnection();
+  // }, []);
 
   // Set up event listeners for wallet events
   useEffect(() => {
@@ -418,21 +418,21 @@ export const Web3Provider = ({ children }: { children: React.ReactNode }) => {
   }, [account]);
 
   // Mock data for demo purposes
-  useEffect(() => {
-    // If no real wallet is connected, use mock data after a delay
-    if (!window.ethereum && !connected) {
-      const timer = setTimeout(() => {
-        const mockAccount = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
-        setAccount(mockAccount);
-        setChainId(1); // Ethereum Mainnet
-        setBalance('2.5432');
-        setConnected(true);
-        setEnsName('groq.eth');
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-    return undefined;
-  }, [connected]);
+  // useEffect(() => {
+  //   // If no real wallet is connected, use mock data after a delay
+  //   if (!window.ethereum && !connected) {
+  //     const timer = setTimeout(() => {
+  //       const mockAccount = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
+  //       setAccount(mockAccount);
+  //       setChainId(1); // Ethereum Mainnet
+  //       setBalance('2.5432');
+  //       setConnected(true);
+  //       setEnsName('groq.eth');
+  //     }, 2000);
+  //     return () => clearTimeout(timer);
+  //   }
+  //   return undefined;
+  // }, [connected]);
 
   const value = {
     account,
@@ -444,11 +444,11 @@ export const Web3Provider = ({ children }: { children: React.ReactNode }) => {
     disconnectWallet,
     networkName,
     ensName,
-    switchNetwork,
-    mintNFTOnBase,
-    buyNFTOnBase,
-    sellNFTOnBase,
-    getNFTListings,
+    // switchNetwork,
+    // mintNFTOnBase,
+    // buyNFTOnBase,
+    // sellNFTOnBase,
+    // getNFTListings,
   };
 
   return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>;

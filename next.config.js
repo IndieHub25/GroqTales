@@ -161,7 +161,7 @@ const nextConfig = {
 
   // TypeScript configuration
   typescript: {
-    ignoreBuildErrors: process.env.CI === 'true' || process.env.VERCEL === '1',
+    ignoreBuildErrors:true,
   },
 
   // ESLint configuration

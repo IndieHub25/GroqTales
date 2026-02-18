@@ -78,7 +78,6 @@ export function Footer() {
                   </div>
                 </div>
               </Link>
-              
               <div className="text-center sm:text-left">
                 <h3 className="text-xl font-black text-foreground dark:text-white uppercase mb-2">
                   GroqTales
@@ -87,12 +86,10 @@ export function Footer() {
                   Empowering creators with AI-driven storytelling and Web3 ownership.
                 </p>
               </div>
-              
               <div className="inline-flex items-center gap-2 text-xs font-black text-foreground dark:text-slate-300 uppercase tracking-wide bg-primary/10 dark:bg-primary/5 px-4 py-2 border-2 border-primary/30 dark:border-primary/20">
                 <Sparkles className="w-3 h-3" />
                 Create • Mint • Own
               </div>
-
               <div className="flex gap-3 pt-2" role="group" aria-label="Social media links">
                 {socialLinks.map((link) => (
                   <Link
@@ -171,6 +168,7 @@ export function Footer() {
                 {[
                   { href: '/docs', label: 'Documentation' },
                   { href: '/faq', label: 'FAQ' },
+                  { href: '/feedback', label: 'Feedback' },
                 ].map((link) => (
                   <li key={link.href}>
                     <Link
