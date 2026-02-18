@@ -349,10 +349,9 @@ Codebase integrity restoration and build stabilization after widespread comment 
 ### Files Affected (Representative)
 
 `components/ui/{chart.tsx,pagination.tsx,skeleton.tsx,calendar.tsx,carousel.tsx}`
-`components/story-summary-backup.tsx`
 `hooks/{use-groq.ts,use-monad.ts,use-story-analysis.ts,use-story-summary.ts}`
 `src/blockchain/onchain-agent/app/hooks/useAgent.ts`
-`lib/{api-utils.ts,constants.ts,logger-broken.ts,mock-data-backup.ts,transaction-components.ts}`
+`lib/{api-utils.ts,constants.ts,transaction-components.ts}`
 `app/stories/page.tsx`
 `src/blockchain/onchain-agent/app/api/agent/{route.new.ts,create-agent.ts,prepare-agentkit.ts}`
 
