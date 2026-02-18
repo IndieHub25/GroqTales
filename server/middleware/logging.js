@@ -16,7 +16,7 @@ const loggingMiddleware = (req, res, next) => {
 
   // Monitor when response is finished
   res.on('finish', () => {
-    const duration = Date.now() - req.startTime;
+    const duration = req.startTime ? Date.now() - req.startTime : 0;
     const logLevel = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warn' : 'info';
 
     logger[logLevel]('Request completed', {
