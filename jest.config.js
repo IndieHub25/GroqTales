@@ -28,7 +28,7 @@ const customJestConfig = {
   // Where Jest should look for tests
   testMatch: [
     '<rootDir>/tests/**/*.test.{ts,tsx}',
-    '<rootDir>/components/**/**tests**/**/*.test.{ts,tsx}',
+    '<rootDir>/components/**/__tests__/**/*.test.{ts,tsx}',
   ],
 
   // Ignore build + dependencies

@@ -158,7 +158,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/bcryptjs": "^2.4.6",
-    "@types/jest": "^30.0.0",
+    "@types/jest": "^29.5.12",
     "@types/node": "^20.17.30",
     "@types/react": "^18.2.57",
     "@types/react-dom": "^18.2.19",

@@ -125,8 +125,31 @@ const nextConfig = {
   },
   async rewrites() {
     const envUrl = process.env.NEXT_PUBLIC_API_URL;
-    const apiUrl =
-      envUrl && envUrl.startsWith('http') ? envUrl : 'http://localhost:3001';
+    let apiUrl = 'http://localhost:3001';
+
+    if (envUrl) {
+      try {
+        const url = new URL(envUrl);
+        const allowedHosts = [
+          'localhost',
+          'groqtales.com',
+          'www.groqtales.com',
+          'api.groqtales.com',
+          'groqtales.vercel.app',
+        ];
+
+        // Ensure we only allow specific hosts to prevent arbitrary redirects
+        if (allowedHosts.includes(url.hostname)) {
+          apiUrl = envUrl;
+        } else {
+          console.warn(
+            `NEXT_PUBLIC_API_URL host ${url.hostname} not in allowlist. Using default.`
+          );
+        }
+      } catch (e) {
+        console.warn('Invalid NEXT_PUBLIC_API_URL provided. Using default.');
+      }
+    }
 
     return [
       {
@@ -158,7 +181,8 @@ const nextConfig = {
 
   // TypeScript configuration
   typescript: {
-    ignoreBuildErrors: true,
+    // We want type errors to fail the build in CI
+    ignoreBuildErrors: false,
   },
 
   // ESLint configuration
