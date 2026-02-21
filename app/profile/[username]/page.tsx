@@ -1,132 +1,101 @@
-"use client";
+'use client';
+import { useParams } from 'next/navigation';
+import React, { useState } from 'react';
 
-import { useEffect, useState } from "react";
-import { useWeb3 } from "@/components/providers/web3-provider";
-import { ProfileHeader } from "@/components/profile/profile-header";
-import { ProfileStats } from "@/components/profile/profile-stats";
+import {
+  ProfileContentTabs,
+  ProfileLayout,
+} from '@/components/profile/profile-layout';
+import { ProfileInfoForm } from '@/components/profile/profile-info-form';
+import { useWeb3 } from '@/components/providers/web3-provider';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { EditableProfileFields, UserProfileUI } from '@/types/profile';
 
-import { StoryCard } from "@/components/profile/story-card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useParams } from "next/navigation";
-
-
-
+function buildInitialProfile(walletFromUrl: string): UserProfileUI {
+  return {
+    name: '',
+    username: walletFromUrl,
+    avatar: '',
+    bio: '',
+    website: '',
+    twitter: '',
+    github: '',
+    email: '',
+    joinDate: '',
+    isVerified: false,
+    storiesCount: 0,
+    followers: 0,
+    following: 0,
+    walletAddress: walletFromUrl,
+    badges: [],
+    totalViews: 0,
+    totalLikes: 0,
+  };
+}
 export default function ProfilePage() {
-  const { account, connected} = useWeb3();
-  const [profileData, setProfileData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const params = useParams();
+  const { account } = useWeb3();
+  const walletFromUrl = (params?.username as string) || '';
 
+  const [userData, setUserData] = useState<UserProfileUI>(() =>
+    buildInitialProfile(walletFromUrl)
+  );
+  const [isEditing, setIsEditing] = useState(false);
 
-  const walletFromUrl = typeof params?.username === "string" ? params.username : "";
-  const isOwner = connected &&
-    account?.toLowerCase() === walletFromUrl?.toLowerCase();
-
-  useEffect(() => {
-    // 1. Create the controller
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    const fetchProfile = async () => {
-
-      if (!walletFromUrl){
-        setLoading(false);
-        return;
-      }
-        
-        try {
-          setLoading(true);
-          setError(false);
-
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile/${walletFromUrl}`, { signal }); 
-          if (!response.ok) throw new Error("Failed to load");
-          const json = await response.json();
-          if(!json.success){
-            throw new Error(json.error?.message || "Failed");
-          }
-          setProfileData(json.data);
-          //setError(false);
-        } catch (err: any) {
-          if (err.name === 'AbortError') return;
-          console.error("Profile fetch failed:", err);
-
-          setError(true);
-        } finally {
-          if (!signal.aborted) {
-            setLoading(false);
-          }
-        }
-
-      };
-    fetchProfile();
-    return () => {
-      controller.abort();
-    };
-  }, [walletFromUrl]);
-  // Show Loading Skeleton while fetching
-  if (loading) {
-    return <div className="container mx-auto p-20"><Skeleton className="h-40 w-full" /></div>;
-  }
-  if (error) {
-    return <div className="p-20 text-white">Failed to load profile.</div>;
-  }
-
-  if (!profileData) {
-    return <div className="p-20 text-white">User not found.</div>;
-  }
+  const isOwner =
+    !!account && account.toLowerCase() === walletFromUrl.toLowerCase();
+  const handleAvatarChange = (newAvatar: string) => {
+    setUserData((prev) => ({ ...prev, avatar: newAvatar }));
+  };
+  const handleProfileSave = (updatedData: EditableProfileFields) => {
+    setUserData((prev) => ({ ...prev, ...updatedData }));
+    setIsEditing(false);
+  };
 
 
   return (
-    <main className="min-h-screen bg-black text-slate-200 pb-20">
-
-      <ProfileHeader user={profileData?.user} isOwner={isOwner} />
-
-      <div className="container mx-auto px-4">
-        <ProfileStats stats={profileData?.stats} />
-
-        <div className="mt-8">
-          <Tabs defaultValue="stories" className="w-full">
-
-            <div className="flex justify-center md:justify-start mb-6">
-              <TabsList className="bg-slate-900 border border-slate-800">
-                <TabsTrigger value="stories">Stories</TabsTrigger>
-                <TabsTrigger value="collections">Collections</TabsTrigger>
-                <TabsTrigger value="activity">Activity</TabsTrigger>
-              </TabsList>
-            </div>
-
-            <TabsContent value="stories" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Map through the REAL stories from your API */}
-                {profileData?.stories?.map((story: any, idx: number) => (
-                  <StoryCard key={story._id || idx} story={story} />
-                ))}
-              </div>
-
-              {profileData?.stories?.length === 0 && (
-                <div className="text-center py-20 text-slate-500">
-                  <p className="text-lg">No stories told yet.</p>
-                  <button className="mt-4 text-violet-400 hover:underline">Create your first story</button>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="collections">
-              <div className="p-10 text-center text-slate-500 bg-slate-900/30 rounded-lg border border-slate-800 border-dashed">
-                Collections feature coming soon.
-              </div>
-            </TabsContent>
-
-            <TabsContent value="activity">
-              <div className="p-10 text-center text-slate-500 bg-slate-900/30 rounded-lg border border-slate-800 border-dashed">
-                Activity feed coming soon.
-              </div>
-            </TabsContent>
-          </Tabs> 
-        </div>
-      </div> 
-     </main> 
+    <ProfileLayout
+      userData={userData}
+      isOwner={isOwner}
+      isEditing={isEditing}
+      onEditToggle={() => setIsEditing((v) => !v)}
+      onAvatarChange={handleAvatarChange}
+    >
+      {isOwner && isEditing ? (
+        <Card className="border-2 border-slate-200 dark:border-slate-800 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)] dark:shadow-none">
+          <CardHeader>
+            <CardTitle className="text-2xl font-black uppercase italic">
+              Edit Profile
+            </CardTitle>
+            <CardDescription>
+              Update your personal information and public profile.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ProfileInfoForm
+              initialData={{
+                name: userData.name,
+                username: userData.username,
+                bio: userData.bio,
+                website: userData.website,
+                twitter: userData.twitter,
+                github: userData.github,
+                email: userData.email,
+              }}
+              isEditing={true}
+              onSave={handleProfileSave}
+            />
+          </CardContent>
+        </Card>
+      ) : (
+        <ProfileContentTabs />
+      )}
+    </ProfileLayout>
   );
 }
