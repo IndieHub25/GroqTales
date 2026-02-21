@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 1.3.6 (latest), 1.3.5 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
-
-## [Live]
+Active full support: 1.3.5 (latest), 1.3.0 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
 
 ## [1.3.5] - 2026-02-21
+
+### Documentation & Professional Standards
+
+- **Created Professional Pull Request Template (`temp.md`)**: Implemented a standardized, professional PR template for Indie Hub Org members.
+- **Indie Hub Org Alignment**: Added mandatory acknowledgement for official membership and professional work line.
+- **Clean Documentation**: High-quality, emoji-free, and streamlined template for internal project contributions.
 
 ### Homepage & Footer UI Refinements — Readability, Layout, and Spline Background
 
