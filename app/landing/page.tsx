@@ -20,12 +20,12 @@ import React, { useState, useEffect } from 'react';
 
 import { LoadingAnimation } from '@/components/loading-animation';
 import { Button } from '@/components/ui/button';
+import { useWeb3 } from '@/components/providers/web3-provider';
 
 export default function LandingPage() {
   const router = useRouter();
+  const { connectWallet: web3Connect, connecting, connected, account: web3Account } = useWeb3();
   const [isLoading, setIsLoading] = useState(true);
-  const [account, setAccount] = useState<string | null>(null);
-  const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
     // Simulate loading
@@ -36,30 +36,15 @@ export default function LandingPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  const connectWallet = async () => {
-    setIsConnecting(true);
-
+  const handleConnectWallet = async () => {
     try {
-      // Check if MetaMask is installed
-      if (typeof window.ethereum !== 'undefined') {
-        // Request account access
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts',
-        });
-        setAccount(accounts[0]);
-
-        // Redirect to home page after successful login
-        setTimeout(() => {
-          router.push('/');
-        }, 1000);
-      } else {
-        alert('Please install MetaMask to use this feature!');
-      }
+      await web3Connect();
+      // Redirect to home page after successful login
+      setTimeout(() => {
+        router.push('/');
+      }, 1000);
     } catch (error) {
-      console.error('Error connecting to MetaMask', error);
-      alert('Failed to connect to MetaMask.');
-    } finally {
-      setIsConnecting(false);
+      console.error('Error connecting wallet:', error);
     }
   };
 
@@ -98,7 +83,7 @@ export default function LandingPage() {
             share, and monetize their content through NFTs.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            {account ? (
+            {web3Account ? (
               <Button
                 size="lg"
                 className="theme-gradient-bg text-white border-0 hover:opacity-90"
@@ -112,16 +97,16 @@ export default function LandingPage() {
             ) : (
               <Button
                 size="lg"
-                onClick={connectWallet}
-                disabled={isConnecting}
+                onClick={handleConnectWallet}
+                disabled={connecting}
                 className="theme-gradient-bg text-white border-0 hover:opacity-90"
               >
-                {isConnecting ? (
+                {connecting ? (
                   <LoadingAnimation message="Connecting..." />
                 ) : (
                   <>
                     <Wallet className="mr-2 h-5 w-5" />
-                    Connect with MetaMask
+                    Connect Wallet
                   </>
                 )}
               </Button>
