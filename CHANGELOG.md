@@ -17,7 +17,7 @@ Active full support: 1.3.5 (latest), 1.3.0 (previous). Security maintenance (cri
 - **Indie Hub Org Alignment**: Added mandatory acknowledgement for official membership and professional work line.
 - **Clean Documentation**: High-quality, emoji-free, and streamlined template for internal project contributions.
 
-### Homepage & Footer UI Refinements — Readability, Layout, and Spline Background
+### Homepage & Footer UI Refinements
 
 #### Changed
 - **Spline 3D Background**: Transitioned from hero-only to a `fixed` full-page background, visible through semi-transparent sections.
@@ -27,10 +27,7 @@ Active full support: 1.3.5 (latest), 1.3.0 (previous). Security maintenance (cri
 - **Footer Brand**: Replaced logo image/container with bold italic "GroqTales" branded text.
 - **Footer Layout**: Moved copyright and status info below the neon sign for a more balanced design.
 
----
-
-## [1.3.5] - 2026-02-21
-### Security Policy Refresh — 2026-02-21
+### Security Policy Refresh
 
 - **Updated `SECURITY.md`** to reflect current version matrix (1.3.5 latest, 1.3.0 previous, 1.1.0 maintenance, < 1.1.0 EoSS)
 - Removed duplicate severity classification tables — consolidated into single authoritative table
@@ -42,7 +39,7 @@ Active full support: 1.3.5 (latest), 1.3.0 (previous). Security maintenance (cri
 - Increased coordinated disclosure window from 30 → 90 days for complex High/Critical issues
 - Added **Sensitive Information Disclosure** to AI Security Scope (OWASP LLM top 10)
 
-### Documentation & DevOps Refresh — 2026-02-21
+### Documentation & DevOps Refresh
 
 - **Merged `README.Docker.md` into `README.md`**: Consolidated all Docker setup, service maps, and deployment guides into the main readme for better visibility
 - **Created `docs/SPLINE_GUIDE.md`**: Detailed contributor guide for working with Spline 3D models, including model protection policies, performance rules, and technical implementation details
