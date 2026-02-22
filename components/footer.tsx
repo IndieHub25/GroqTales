@@ -4,7 +4,6 @@ import {
   Github,
   Linkedin,
   ExternalLink,
-  Sparkles,
   PenSquare,
   Frame,
   FileText,
@@ -15,18 +14,34 @@ import {
   Cookie,
   Mail,
   Users,
-  Heart,
   Zap,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { AdminLoginModal } from './admin-login-modal';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
   const [showAdminModal, setShowAdminModal] = useState(false);
+  const [healthStatus, setHealthStatus] = useState<'loading' | 'ok' | 'degraded' | 'down'>('loading');
+
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const res = await fetch('/api/health/db', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setHealthStatus(data.status === 'ok' ? 'ok' : data.status === 'degraded' ? 'degraded' : 'down');
+        } else {
+          setHealthStatus('down');
+        }
+      } catch {
+        setHealthStatus('down');
+      }
+    };
+    checkHealth();
+  }, []);
 
   const socialLinks = [
     {
@@ -65,30 +80,23 @@ export function Footer() {
             {/* Brand Section */}
             <div className="space-y-6 flex flex-col items-center sm:items-start">
               <Link href="/" className="group inline-block">
-                <div className="relative">
-                  <div className="absolute -inset-2 bg-primary/20 dark:bg-primary/10 blur opacity-75 group-hover:opacity-100 transition" />
-                  <div className="relative bg-card dark:bg-slate-900 border-4 border-foreground dark:border-slate-700 p-3 shadow-[6px_6px_0px_0px_var(--shadow-color)] group-hover:-translate-y-1 group-hover:shadow-[8px_8px_0px_0px_var(--shadow-color)] transition-all duration-300">
-                    <Image
-                      src="/logo.png"
-                      alt="GroqTales Logo"
-                      width={80}
-                      height={80}
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
+                <h2
+                  className="comic-display text-4xl sm:text-5xl italic"
+                  style={{
+                    fontWeight: 900,
+                    fontStyle: 'italic',
+                    color: 'var(--foreground)',
+                    textShadow: '3px 3px 0px var(--shadow-color)',
+                    letterSpacing: '2px',
+                  }}
+                >
+                  GroqTales
+                </h2>
               </Link>
               <div className="text-center sm:text-left">
-                <h3 className="text-xl font-black text-foreground dark:text-white uppercase mb-2">
-                  GroqTales
-                </h3>
                 <p className="text-sm font-bold text-foreground/70 dark:text-slate-400 leading-relaxed max-w-xs">
                   Empowering creators with AI-driven storytelling and Web3 ownership.
                 </p>
-              </div>
-              <div className="inline-flex items-center gap-2 text-xs font-black text-foreground dark:text-slate-300 uppercase tracking-wide bg-primary/10 dark:bg-primary/5 px-4 py-2 border-2 border-primary/30 dark:border-primary/20">
-                <Sparkles className="w-3 h-3" />
-                Create • Mint • Own
               </div>
               <div className="flex gap-3 pt-2" role="group" aria-label="Social media links">
                 {socialLinks.map((link) => (
@@ -207,32 +215,66 @@ export function Footer() {
 
           {/* Divider */}
           <div className="border-t-4 border-foreground dark:border-slate-700 my-8" />
-
-          {/* Footer Bottom - Copyright & Credits */}
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-bold uppercase">
-            <div className="flex flex-col sm:flex-row items-center gap-4 text-center">
-              <p className="flex items-center gap-2 text-foreground dark:text-slate-400">
-                <Heart className="w-4 h-4 text-red-500 fill-current" />
-                <span>&copy; {currentYear} GroqTales</span>
-              </p>
-              <span className="hidden sm:inline text-foreground/30">•</span>
-              <p className="flex items-center gap-2 text-foreground dark:text-slate-400">
-                <span>Powered by</span>
-                <span className="text-primary dark:text-accent font-black">Monad</span>
-                <span>×</span>
-                <span className="text-primary dark:text-accent font-black">Groq AI</span>
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 animate-pulse rounded-full" />
-              <span className="text-green-600 dark:text-green-400 font-black">
-                Online
-              </span>
-            </div>
-          </div>
         </div>
 
+      </div>
+
+      {/* ═══════════════════════════════════════
+          NEON "GROQTALES" BRANDING — Full-width
+          Spans the entire screen on all devices
+          ═══════════════════════════════════════ */}
+      <div className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] py-8 md:py-10 text-center select-none overflow-hidden bg-foreground/[0.03] dark:bg-white/[0.02]">
+        <h2
+          className="neon-sign comic-display text-5xl xs:text-6xl sm:text-7xl md:text-[6rem] lg:text-[7rem] xl:text-[8rem] leading-none tracking-[0.1em] sm:tracking-[0.15em] md:tracking-[0.2em] whitespace-nowrap"
+          aria-hidden="true"
+        >
+          GROQTALES
+        </h2>
+
+        {/* Copyright, Powered by, Online — below neon sign */}
+        <div className="mt-6 md:mt-8 flex flex-col items-center gap-3 text-xs font-bold uppercase">
+          <p className="flex items-center gap-2 text-foreground/70 dark:text-slate-400">
+            <span>&copy; {currentYear} GroqTales</span>
+          </p>
+          <p className="flex items-center gap-2 text-foreground/70 dark:text-slate-400">
+            <span>Powered by</span>
+            <span className="text-primary dark:text-accent font-black">Monad</span>
+            <span>×</span>
+            <span className="text-primary dark:text-accent font-black">Groq AI</span>
+          </p>
+          <div className="flex items-center gap-2">
+            <span
+              className={`w-2 h-2 rounded-full ${
+                healthStatus === 'ok'
+                  ? 'bg-green-500 animate-pulse'
+                  : healthStatus === 'degraded'
+                    ? 'bg-yellow-500 animate-pulse'
+                    : healthStatus === 'down'
+                      ? 'bg-red-500'
+                      : 'bg-gray-400 animate-pulse'
+              }`}
+            />
+            <span
+              className={`font-black ${
+                healthStatus === 'ok'
+                  ? 'text-green-600 dark:text-green-400'
+                  : healthStatus === 'degraded'
+                    ? 'text-yellow-600 dark:text-yellow-400'
+                    : healthStatus === 'down'
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-gray-500 dark:text-gray-400'
+              }`}
+            >
+              {healthStatus === 'ok'
+                ? 'Online'
+                : healthStatus === 'degraded'
+                  ? 'Degraded'
+                  : healthStatus === 'down'
+                    ? 'Offline'
+                    : 'Checking…'}
+            </span>
+          </div>
+        </div>
       </div>
 
       <AdminLoginModal open={showAdminModal} onOpenChange={setShowAdminModal} />

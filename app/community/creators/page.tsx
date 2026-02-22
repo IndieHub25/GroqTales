@@ -359,7 +359,7 @@ export default function CreatorsPage() {
                 <div>{renderBadge(creator.badge)}</div>
               </div>
 
-              <p className="text-sm mt-2 line-clamp-2">{creator.bio}</p>
+              <p className="text-sm mt-2 mb-3 line-clamp-2">{creator.bio}</p>
 
               <div className="flex flex-wrap gap-1 mt-3">
                 {creator.tags.map((tag: string) => (
@@ -402,10 +402,10 @@ export default function CreatorsPage() {
 
               {creator.achievements.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-xs text-muted-foreground mb-1">
+                  <p className="text-sm text-muted-foreground mb-3">
                     Achievements:
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mb-5">
                     {creator.achievements
                       .slice(0, 2)
                       .map((achievement: string, idx: number) => (
@@ -549,12 +549,14 @@ export default function CreatorsPage() {
         )}
 
       <div className="mt-12 p-6 border rounded-lg bg-muted/10">
-        <h2 className="text-xl font-bold mb-3">Become a Featured Creator</h2>
-        <p className="mb-4 text-muted-foreground">
-          Want to be featured among our top creators? Start publishing quality
-          stories, engage with the community, and mint your content as NFTs to
-          increase your visibility and followers.
-        </p>
+        <div className="flex items-center justify-center flex-col mb-5">
+          <h2 className="text-xl font-bold mb-3">Become a Featured Creator</h2>
+          <p className="mb-4 text-muted-foreground text-center px-20">
+            Want to be featured among our top creators? Start publishing quality
+            stories, engage with the community, and mint your content as NFTs to
+            increase your visibility and followers.
+          </p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="p-4 rounded-lg bg-muted/20 flex flex-col items-center text-center">
             <BookOpen className="h-8 w-8 text-primary mb-2" />
@@ -578,7 +580,7 @@ export default function CreatorsPage() {
             </p>
           </div>
         </div>
-        <div className="flex justify-center">
+        <div className="flex justify-center mt-5">
           <Button className="theme-gradient-bg text-white">
             <BookOpen className="h-4 w-4 mr-2" />
             Start Creating

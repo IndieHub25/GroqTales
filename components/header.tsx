@@ -152,20 +152,21 @@ export function Header() {
             className="flex items-center space-x-2 mr-2 sm:mr-6 group relative"
           >
             <motion.div
-              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileHover={{ scale: 1.08, rotate: 3 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-              className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center doodle-wiggle overflow-hidden border-2 border-white/20"
+              className="w-10 h-10 sm:w-11 sm:h-11 relative flex-shrink-0 doodle-wiggle"
             >
-              <div className="relative w-full h-full">
-                <Image
-                  src="/logo.png"
-                  alt="GroqTales Logo"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
+              <Image
+                src="/logo.png"
+                alt="GroqTales Logo"
+                fill
+                className="object-contain drop-shadow-lg"
+                priority
+              />
             </motion.div>
+            <span className="hidden sm:block comic-display text-xl sm:text-2xl text-white tracking-wider drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
+              GROQTALES
+            </span>
           </Link>
 
           <nav role="navigation" aria-label="Primary navigation" className="hidden xl:flex items-center space-x-2">

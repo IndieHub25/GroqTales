@@ -25,20 +25,24 @@ const logger = winston.createLogger({
   defaultMeta: {
     service: 'groqtales-api',
     environment: process.env.NODE_ENV || 'development',
-    version: process.env.API_VERSION || 'v1'
+    version: process.env.API_VERSION || 'v1',
   },
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.printf(({ level, message, timestamp, requestId, userId, ...meta }) => {
-          const requestIdStr = requestId ? ` [${requestId}]` : '';
-          const userIdStr = userId ? ` (user: ${userId})` : '';
-          const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
-          return `${timestamp} [${level}]${requestIdStr}${userIdStr}: ${message}${metaStr}`;
-        })
+        winston.format.printf(
+          ({ level, message, timestamp, requestId, userId, ...meta }) => {
+            const requestIdStr = requestId ? ` [${requestId}]` : '';
+            const userIdStr = userId ? ` (user: ${userId})` : '';
+            const metaStr = Object.keys(meta).length
+              ? ` ${JSON.stringify(meta)}`
+              : '';
+            return `${timestamp} [${level}]${requestIdStr}${userIdStr}: ${message}${metaStr}`;
+          }
+        )
       ),
-      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug'
+      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
     }),
     new DailyRotateFile({
       filename: path.join(logsDir, 'error-%DATE%.log'),
@@ -46,32 +50,32 @@ const logger = winston.createLogger({
       level: 'error',
       maxSize: '20m',
       maxDays: '14d',
-      format: winston.format.json()
+      format: winston.format.json(),
     }),
     new DailyRotateFile({
       filename: path.join(logsDir, 'combined-%DATE%.log'),
       datePattern: 'YYYY-MM-DD',
       maxSize: '20m',
       maxDays: '30d',
-      format: winston.format.json()
-    })
+      format: winston.format.json(),
+    }),
   ],
   exceptionHandlers: [
     new DailyRotateFile({
       filename: path.join(logsDir, 'exceptions-%DATE%.log'),
       datePattern: 'YYYY-MM-DD',
       maxSize: '20m',
-      maxDays: '14d'
-    })
+      maxDays: '14d',
+    }),
   ],
   rejectionHandlers: [
     new DailyRotateFile({
       filename: path.join(logsDir, 'rejections-%DATE%.log'),
       datePattern: 'YYYY-MM-DD',
       maxSize: '20m',
-      maxDays: '14d'
-    })
-  ]
+      maxDays: '14d',
+    }),
+  ],
 });
 
 module.exports = logger;
