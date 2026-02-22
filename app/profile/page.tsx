@@ -28,6 +28,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 // Sample user data
 // const userData = {
@@ -133,7 +134,7 @@ const StoryCard = ({ story }: any) => (
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [stories, setStories] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -155,12 +156,58 @@ export default function ProfilePage() {
           setError(true);
         }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
     loadProfile();
     return () => controller.abort();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-32 text-center">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <Skeleton className="h-40 w-full rounded-2xl" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-32 w-full rounded-xl" />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-64 w-full rounded-xl" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-32 text-center text-slate-400">
+        <h2 className="text-2xl font-bold mb-4">Error</h2>
+        <p>Failed to load profile data. Please try again later.</p>
+        <Button onClick={() => window.location.reload()} className="mt-8">
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="container mx-auto px-4 py-32 text-center text-slate-400">
+        <h2 className="text-2xl font-bold mb-4">Profile Not Found</h2>
+        <p>You must be logged in to view your profile.</p>
+        <Button asChild className="mt-8">
+          <Link href="/">Back to Home</Link>
+        </Button>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
       <FloatingDoodles />

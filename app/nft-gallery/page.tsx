@@ -109,20 +109,6 @@ function useReducedMotion(): boolean {
   return reduced;
 }
 
-// Dynamically import icons to reduce bundle
-const IconsLoadable = dynamic(
-  () =>
-    import('lucide-react').then((mod) => ({
-      default: () => (
-        <div style={{ display: 'flex', gap: '4px' }}>
-          <span>♥</span> <span>👁</span> <span>🛒</span> <span>🔍</span>
-          <span>⚙</span> <span>📈</span> <span>⭐</span> <span>🎨</span>
-        </div>
-      ),
-    })),
-  { ssr: true }
-);
-
 // Simple icon replacements to reduce bundle
 const Heart = ({ className = '' }: { className?: string }) => (
   <span className={className}>♥</span>

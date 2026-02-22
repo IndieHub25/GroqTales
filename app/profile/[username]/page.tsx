@@ -9,6 +9,7 @@ import { StoryCard } from '@/components/profile/story-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 
 export default function ProfilePage() {
   const { account, connected } = useWeb3();
@@ -111,9 +112,11 @@ export default function ProfilePage() {
               {profileData?.stories?.length === 0 && (
                 <div className="text-center py-20 text-slate-500">
                   <p className="text-lg">No stories told yet.</p>
-                  <button className="mt-4 text-violet-400 hover:underline">
-                    Create your first story
-                  </button>
+                  <Link href="/create/ai-story">
+                    <button className="mt-4 text-violet-400 hover:underline">
+                      Create your first story
+                    </button>
+                  </Link>
                 </div>
               )}
             </TabsContent>

@@ -100,6 +100,7 @@ export default function SettingsPage() {
     showWallet: false,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | string | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -147,6 +148,9 @@ export default function SettingsPage() {
           userData.preferences?.privacy ?? {
             profileVisible: true,
             activityVisible: true,
+            storiesVisible: true,
+            showEmail: false,
+            showWallet: false,
           }
         );
 
@@ -159,8 +163,11 @@ export default function SettingsPage() {
         });
       } catch (err) {
         console.error(err);
+        setError(err instanceof Error ? err : String(err));
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
     hydrate();
@@ -193,7 +200,50 @@ export default function SettingsPage() {
       console.error('Failed to save preferences:', err);
     }
   };
-  if (loading || !user) return <div className="p-8">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="container max-w-5xl mx-auto py-32 px-4 text-center">
+        <div className="space-y-4">
+          <div className="h-8 w-48 bg-slate-800 animate-pulse rounded mx-auto" />
+          <div className="h-4 w-64 bg-slate-800 animate-pulse rounded mx-auto" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+            <div className="h-64 bg-slate-800 animate-pulse rounded-xl" />
+            <div className="h-64 bg-slate-800 animate-pulse rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container max-w-5xl mx-auto py-32 px-4 text-center">
+        <Shield className="w-16 h-16 text-red-400 mx-auto mb-6 opacity-50" />
+        <h2 className="text-2xl font-bold mb-4">Settings Unavailable</h2>
+        <p className="text-muted-foreground mb-8">
+          We encountered an error while loading your preferences.
+        </p>
+        <Button onClick={() => window.location.reload()}>
+          Retry Settings
+        </Button>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="container max-w-5xl mx-auto py-32 px-4 text-center">
+        <AtSign className="w-16 h-16 text-blue-400 mx-auto mb-6 opacity-50" />
+        <h2 className="text-2xl font-bold mb-4">Profile Not Found</h2>
+        <p className="text-muted-foreground mb-8">
+          Please log in to manage your account settings.
+        </p>
+        <Button asChild>
+          <Link href="/">Return Home</Link>
+        </Button>
+      </div>
+    );
+  }
   return (
     <div className="container max-w-5xl mx-auto py-12 px-4 min-h-screen">
       <div className="mb-8">
@@ -357,11 +407,10 @@ export default function SettingsPage() {
                             </FormControl>
                             <FormDescription>
                               <span
-                                className={`${
-                                  (field.value?.length || 0) > 200
-                                    ? 'text-warning'
-                                    : ''
-                                }`}
+                                className={`${(field.value?.length || 0) > 200
+                                  ? 'text-warning'
+                                  : ''
+                                  }`}
                               >
                                 {field.value?.length || 0}
                               </span>
