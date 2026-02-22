@@ -11,14 +11,6 @@ import { useProPanelStore, selectUI } from '@/store/proPanelStore';
 import { GenreCard } from './GenreCard';
 import type { GenrePresetMeta } from '@/lib/constants/proPanelDefaults';
 
-// Map genre card IDs → closest built-in preset key (if one exists)
-const GENRE_TO_PRESET: Record<string, string> = {
-  fantasy: 'epic-fantasy',
-  'sci-fi': 'sci-fi-adventure',
-  mystery: 'cozy-mystery',
-  thriller: 'fast-thriller',
-};
-
 // Genre-specific default parameters applied on selection
 const GENRE_DEFAULTS: Record<string, {
   settingType: string;
@@ -58,10 +50,9 @@ export function GenreGrid({ presets }: GenreGridProps) {
 
     setSelectedGenre(presetId);
 
-    // Load the matching built-in preset if one exists for this genre
-    const presetKey = GENRE_TO_PRESET[presetId];
-    if (presetKey && savedPresets[presetKey]) {
-      loadPreset(presetKey);
+    // Load the preset if it exists in saved presets
+    if (savedPresets[presetId]) {
+      loadPreset(presetId);
     }
 
     // Auto-route parameters based on genre
