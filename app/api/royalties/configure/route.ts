@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+
+
+import { createClient } from '@/lib/supabase/server';
 import dbConnect from '@/lib/dbConnect';
 import { configureRoyalty, getRoyaltyConfig } from '@/lib/royalty-service';
 
@@ -12,10 +12,11 @@ import { configureRoyalty, getRoyaltyConfig } from '@/lib/royalty-service';
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || !session.user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: 'Unauthorized: Wallet not connected' },
         { status: 401 }
       );
     }
@@ -55,14 +56,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (nftId && !mongoose.Types.ObjectId.isValid(nftId)) {
+    if (nftId && typeof nftId !== 'string') {
       return NextResponse.json(
         { success: false, error: 'Invalid nftId' },
         { status: 400 }
       );
     }
 
-    if (storyId && !mongoose.Types.ObjectId.isValid(storyId)) {
+    if (storyId && typeof storyId !== 'string') {
       return NextResponse.json(
         { success: false, error: 'Invalid storyId' },
         { status: 400 }
@@ -100,8 +101,10 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session || !session.user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }

@@ -19,32 +19,34 @@ export interface IStory extends Document {
 const StorySchema = new Schema<IStory>({
   title: { type: String, required: true, maxlength: 100 },
   content: { type: String, required: true },
-  authorWallet: { 
-    type: String, 
-    required: true, 
-    lowercase: true, 
+  authorWallet: {
+    type: String,
+    required: true,
+    lowercase: true,
     trim: true,
-    index: true 
+    index: true
   },
   ipfsHash: { type: String },
   coverImage: { type: String },
-  status: { 
-    type: String, 
-    enum: ['draft', 'publishing', 'minted', 'failed', 'published'], 
+  status: {
+    type: String,
+    enum: ['draft', 'publishing', 'minted', 'failed', 'published'],
     default: 'draft',
-    index: true 
+    index: true
   },
   nftTxHash: { type: String },
   nftTokenId: { type: String },
-  tags: { type: [String], index: true }, 
+  tags: { type: [String], index: true },
   likesCount: { type: Number, default: 0 },
   viewsCount: { type: Number, default: 0 },
-}, { 
+}, {
   timestamps: true,
-  strict: false 
+  strict: false
 });
 
 StorySchema.index({ authorWallet: 1, status: 1 });
 
-export const Story: Model<IStory> = mongoose.models.Story || mongoose.model<IStory>('Story', StorySchema);
+// export const Story: Model<IStory> = mongoose.models.Story || mongoose.model<IStory>('Story', StorySchema);
+// export default Story;
+export const Story = null as any;
 export default Story;

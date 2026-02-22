@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { UserInteraction } from '../../../../models/UserInteraction';
-import { connectMongoose } from '@/lib/db';
-import { auth } from '@/auth/auth';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: Request) {
-  const session = await auth();
+  const supabase = createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   if (isMockDb) {
     return NextResponse.json({ success: true });
   }
-  await connectMongoose();
+
   const { storyId, type, duration } = await req.json();
   const allowedTypes = ['VIEW', 'LIKE', 'BOOKMARK', 'SHARE', 'TIME_SPENT'] as const;
 
@@ -28,12 +28,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid duration' }, { status: 400 });
   }
 
-  await UserInteraction.create({
-    userId: session.user.id,
-    storyId,
-    type,
-    value: type === 'TIME_SPENT' ? duration : 1
-  });
+  const { error } = await supabase
+    .from('user_interactions')
+    .insert({
+      user_id: session.user.id,
+      story_id: storyId,
+      interaction_type: type,
+      value: type === 'TIME_SPENT' ? duration : 1
+    });
+
+  if (error) {
+    console.error('Failed to log interaction', error);
+    return NextResponse.json({ error: 'Failed to record interaction' }, { status: 500 });
+  }
 
   return NextResponse.json({ success: true });
 }
