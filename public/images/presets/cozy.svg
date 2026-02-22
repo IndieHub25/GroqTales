@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="cozy-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8d6e63"/>
+      <stop offset="50%" style="stop-color:#6d4c41"/>
+      <stop offset="100%" style="stop-color:#4e342e"/>
+    </linearGradient>
+  </defs>
+  <rect fill="url(#cozy-grad)" width="400" height="300"/>
+  <rect x="150" y="150" width="100" height="100" rx="5" fill="#ffecb3" opacity="0.3"/>
+  <ellipse cx="200" cy="200" rx="80" ry="60" fill="#ffe082" opacity="0.2"/>
+  <circle cx="200" cy="100" r="50" fill="#ffcc80" opacity="0.15"/>
+  <text x="200" y="170" font-family="serif" font-size="48" fill="#fff8e1" text-anchor="middle" opacity="0.9">☕</text>
+  <text x="200" y="220" font-family="serif" font-size="18" fill="#fff8e1" text-anchor="middle" opacity="0.6">cozy mystery</text>
+</svg>

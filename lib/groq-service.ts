@@ -17,6 +17,7 @@ import {
   setCachedResponse,
   type CacheCategory,
 } from './ai-cache';
+import type { ProParameters } from '@/lib/schemas/proPanelSchemas';
 
 export interface StoryGenerationParams {
   genre?: string;
@@ -908,4 +909,209 @@ export async function generateContentCustom(
     }
     throw new Error('Failed to generate content');
   }
+}
+
+/**
+ * Generate story content using Pro Panel configuration
+ * Maps ProParameters to Groq API parameters and builds optimized prompts
+ */
+export async function generateStoryWithProConfig(
+  prompt: string,
+  proConfig: ProParameters,
+  options: {
+    title?: string;
+    apiKey?: string;
+  } = {}
+): Promise<string> {
+  try {
+    const groqApiKey = options.apiKey || process.env.GROQ_API_KEY;
+    if (!groqApiKey) {
+      throw new Error('GROQ_API_KEY environment variable is not set');
+    }
+
+    // --- Security: sanitize & validate prompt ---
+    const { sanitized: sanitizedPrompt } = sanitizeInput(prompt);
+    const promptValidation = validateInput(sanitizedPrompt);
+    if (!promptValidation.isValid) {
+      logSecurityEvent({
+        type: 'injection_attempt',
+        details: { field: 'prompt', reason: promptValidation.reason, pattern: promptValidation.matchedPattern },
+      });
+      throw new Error(`Invalid input for prompt: ${promptValidation.reason}`);
+    }
+
+    // Build the system prompt based on Pro Panel configuration
+    const systemPromptContent = buildProPanelSystemPrompt(proConfig, options.title);
+    const hardenedSystemPrompt = buildHardenedSystemPrompt(systemPromptContent);
+
+    // Build the user prompt with Pro Panel context
+    const enhancedUserPrompt = buildProPanelUserPrompt(sanitizedPrompt, proConfig);
+
+    // Map Pro Panel model settings to Groq API parameters
+    const { modelSettings } = proConfig;
+    
+    const requestBody: Record<string, unknown> = {
+      model: modelSettings.modelSelection,
+      messages: [
+        {
+          role: 'system',
+          content: hardenedSystemPrompt,
+        },
+        {
+          role: 'user',
+          content: wrapUserContent(enhancedUserPrompt),
+        },
+      ],
+      max_tokens: modelSettings.maxTokens,
+      temperature: modelSettings.temperature,
+      top_p: modelSettings.topP,
+    };
+
+    // Add optional parameters if they have non-default values
+    if (modelSettings.frequencyPenalty !== 0) {
+      requestBody.frequency_penalty = modelSettings.frequencyPenalty;
+    }
+    if (modelSettings.presencePenalty !== 0) {
+      requestBody.presence_penalty = modelSettings.presencePenalty;
+    }
+    if (modelSettings.stopSequences.length > 0) {
+      requestBody.stop = modelSettings.stopSequences;
+    }
+
+    const response = await fetch(
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${groqApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Groq API error: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+    const result = data.choices[0]?.message?.content || 'Generation failed';
+
+    // --- Security: validate output ---
+    const outputCheck = validateOutput(result);
+    if (!outputCheck.isSafe) {
+      logSecurityEvent({
+        type: 'output_flagged',
+        details: { flags: outputCheck.flags },
+      });
+      throw new Error('Generated content was blocked due to security policy violations.');
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Pro Panel content generation error:', error);
+    if (error instanceof Error && error.message.startsWith('Invalid input')) {
+      throw error;
+    }
+    throw new Error('Failed to generate story with Pro Panel configuration');
+  }
+}
+
+/**
+ * Build system prompt from Pro Panel configuration
+ */
+function buildProPanelSystemPrompt(config: ProParameters, title?: string): string {
+  const { storyStructure, characters, world, toneStyle, theme, length, advanced } = config;
+  
+  const parts: string[] = [
+    'You are an expert creative writer crafting a compelling story.',
+    '',
+    '## Writing Style Requirements:',
+    `- Primary tone: ${toneStyle.primaryTone}`,
+    `- Prose style: ${toneStyle.proseStyle}`,
+    `- Vocabulary level: ${toneStyle.vocabularyLevel}`,
+    `- Violence level: ${toneStyle.violenceLevel}`,
+    `- Romance level: ${toneStyle.romanceLevel}`,
+    '',
+    '## Story Structure:',
+    `- Narrative style: ${storyStructure.narrativeStyle}`,
+    `- Pacing: ${storyStructure.pacing}`,
+    `- Act structure: ${storyStructure.actStructure}`,
+    `- Resolution style: ${storyStructure.resolutionStyle}`,
+    '',
+    '## Character Guidelines:',
+    `- Supporting cast size: ${characters.supportingCastSize}`,
+    `- Character growth arc: ${characters.characterGrowthArc}`,
+    `- Dialogue style: ${characters.dialogueStyle}`,
+    `- Protagonist should have depth level: ${characters.protagonistDepth}/100`,
+    '',
+    '## World Building:',
+    `- Setting type: ${world.settingType}`,
+    `- Geographic scope: ${world.geographicScope}`,
+    `- Technology level: ${world.technologyLevel}`,
+    '',
+    '## Themes:',
+    `- Primary theme: ${theme.primaryTheme}`,
+    theme.secondaryThemes.length > 0 ? `- Secondary themes: ${theme.secondaryThemes.join(', ')}` : '',
+    '',
+    '## Format:',
+    `- Target audience: ${advanced.targetAudience}`,
+    `- Point of view: ${advanced.pointOfView}`,
+    `- Tense: ${advanced.tenseConsistency}`,
+    `- Format type: ${length.formatType}`,
+    `- Target word count: approximately ${length.targetWordCount} words`,
+    length.prologueIncluded ? '- Include a prologue' : '',
+    length.epilogueIncluded ? '- Include an epilogue' : '',
+    '',
+    advanced.unreliableNarrator ? '- Use an unreliable narrator technique' : '',
+    advanced.experimentalTechniques.length > 0 
+      ? `- Incorporate these techniques: ${advanced.experimentalTechniques.join(', ')}` 
+      : '',
+    advanced.genreMashup.length > 0 
+      ? `- Genre blend: ${advanced.genreMashup.join(' + ')}` 
+      : '',
+    '',
+    title ? `The story title is: "${title}"` : '',
+  ];
+
+  // Add custom instructions if provided
+  if (advanced.customInstructions) {
+    parts.push('', '## Additional Instructions:', advanced.customInstructions);
+  }
+
+  return parts.filter(Boolean).join('\n');
+}
+
+/**
+ * Build user prompt with Pro Panel context
+ */
+function buildProPanelUserPrompt(basePrompt: string, config: ProParameters): string {
+  const { storyStructure, characters, toneStyle, theme, length } = config;
+  
+  const contextParts: string[] = [
+    `Write a story based on this premise: ${basePrompt}`,
+    '',
+    'Key requirements:',
+    `- Maintain ${storyStructure.pacing} pacing throughout`,
+    `- Build conflict intensity to ${storyStructure.conflictIntensity}%`,
+    `- Use ${toneStyle.metaphorDensity > 50 ? 'rich' : 'minimal'} metaphorical language`,
+    `- Emotional intensity at ${toneStyle.emotionalIntensity}%`,
+    `- Focus on the theme of ${theme.primaryTheme}`,
+  ];
+
+  // Add content warnings note if present
+  if (config.advanced.contentWarnings.length > 0) {
+    contextParts.push(`- Be mindful of sensitive topics: ${config.advanced.contentWarnings.join(', ')}`);
+  }
+
+  // Add seed phrase for consistency if provided
+  if (config.advanced.seedPhrase) {
+    contextParts.push(`- Maintain consistency with this seed: "${config.advanced.seedPhrase}"`);
+  }
+
+  contextParts.push('', 'Begin the story:');
+
+  return contextParts.join('\n');
 }

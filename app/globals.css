@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Space+Grotesk:wght@300;400;500;600;700&family=Permanent+Marker&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -41,6 +41,10 @@
   /* Sharp corners for comic look */
 
   --font-comic: 'Comic Neue', cursive;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-marker: 'Permanent Marker', cursive;
+  --font-condensed: 'Roboto Condensed', sans-serif;
+  --font-noir-title: 'Playfair Display', serif;
 
   /* Gen-Z Accent Colors */
   --color-fire: #ff6600;
@@ -261,6 +265,37 @@
 
   .box-comic-shadow {
     box-shadow: 4px 4px 0px 0px var(--shadow-color);
+  }
+
+  /* ── Page-Turn Animation for Dossier Panel ── */
+  @keyframes page-turn-out {
+    0% {
+      transform: perspective(2000px) rotateY(0deg) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: perspective(2000px) rotateY(-12deg) scale(0.98);
+      opacity: 0;
+    }
+  }
+
+  @keyframes page-turn-in {
+    0% {
+      transform: perspective(2000px) rotateY(10deg) scale(0.98);
+      opacity: 0;
+    }
+    100% {
+      transform: perspective(2000px) rotateY(0deg) scale(1);
+      opacity: 1;
+    }
+  }
+
+  .dossier-page-enter {
+    animation: page-turn-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .dossier-page-exit {
+    animation: page-turn-out 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
   }
 
   /* Comic Glow Effect for UX Polish */
@@ -510,4 +545,188 @@
       transition-duration: 0.01ms !important;
     }
   }
+
+  /* ==========================================================================
+     Pro Panel - Noir Dossier Styling
+     ========================================================================== */
+
+  /* Text stroke utility for noir headers */
+  .text-stroke-black {
+    -webkit-text-stroke: 2px black;
+    text-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+  }
+
+  /* Tab clip path */
+  .clip-tab {
+    clip-path: polygon(0% 0%, 90% 0%, 100% 20%, 100% 100%, 0% 100%);
+  }
+
+  /* Jagged bottom clip path */
+  .clip-jagged-bottom {
+    clip-path: polygon(
+      0% 0%,
+      100% 0%,
+      100% 90%,
+      95% 100%,
+      85% 95%,
+      75% 100%,
+      65% 95%,
+      55% 100%,
+      45% 95%,
+      35% 100%,
+      25% 95%,
+      15% 100%,
+      5% 95%,
+      0% 100%
+    );
+  }
+
+  /* Halftone dot pattern background */
+  .halftone-bg {
+    background-image: radial-gradient(#222 1.5px, transparent 1.5px);
+    background-size: 8px 8px;
+  }
+
+  /* Mugshot scanline overlay */
+  .mugshot-overlay {
+    background-image:
+      linear-gradient(
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0) 90%,
+        rgba(0, 0, 0, 0.5) 90%,
+        rgba(0, 0, 0, 0.5) 100%
+      ),
+      linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.1) 1px,
+        transparent 1px
+      );
+    background-size: 100% 20px, 40px 100%;
+  }
+
+  /* Noir dossier paper texture */
+  .noir-paper-texture {
+    background-color: #E5E5E5;
+    background-image:
+      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px),
+      linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Pro Panel genre card styles */
+  .pro-panel-genre-card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .pro-panel-genre-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 6px 6px 0px 0px rgba(0,0,0,1);
+  }
+
+  .pro-panel-genre-card:active {
+    transform: translateY(0);
+    box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
+  }
+
+  /* Noir fingerprint decorative corner */
+  .noir-fingerprint::after {
+    content: '🔍';
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 3rem;
+    opacity: 0.08;
+    transform: rotate(12deg);
+    pointer-events: none;
+  }
+
+  /* ── Additional Pro Panel Noir Utilities ── */
+
+  /* Sidebar panel styling */
+  .noir-sidebar-panel {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Section label tab */
+  .noir-section-label {
+    display: inline-block;
+    background: #8a0000;
+    color: white;
+    padding: 0.375rem 1rem;
+    font-family: var(--font-marker);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.875rem;
+    clip-path: polygon(0% 0%, 90% 0%, 100% 20%, 100% 100%, 0% 100%);
+  }
+
+  /* Dark-themed input */
+  .noir-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    padding: 0.75rem 1rem;
+    font-family: var(--font-condensed);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .noir-input:focus {
+    border-color: #8a0000;
+    outline: none;
+  }
+
+  .noir-input::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Compact range slider for sidebar */
+  input[type="range"].accent-noir-primary {
+    accent-color: #8a0000;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    cursor: pointer;
+  }
+
+  /* Pro Panel accordion refinements */
+  .pro-panel-accordion [data-state="open"] > [role="region"] {
+    animation: accordion-down 0.2s ease-out;
+  }
+
+  .pro-panel-accordion [data-state="closed"] > [role="region"] {
+    animation: accordion-up 0.2s ease-out;
+  }
+
+  /* Noir sticky sidebar */
+  @media (min-width: 1024px) {
+    .noir-sticky-sidebar {
+      position: sticky;
+      top: 1rem;
+    }
+  }
+
+  /* Bold slanted thick marker style for titles/headings */
+  .font-marker {
+    font-family: var(--font-marker);
+    font-weight: 700;
+    transform: skewX(-4deg);
+    -webkit-text-stroke: 0.5px currentColor;
+    paint-order: stroke fill;
+  }
+
+  /* Emoji color utilities — forces native emojis to white or black */
+  .emoji-white {
+    filter: grayscale(1) brightness(100);
+  }
+  .emoji-dark {
+    filter: grayscale(1) brightness(0);
+  }
+
 }

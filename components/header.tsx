@@ -161,6 +161,7 @@ export function Header() {
                   src="/logo.png"
                   alt="GroqTales Logo"
                   fill
+                  sizes="64px"
                   className="object-cover"
                   priority
                 />
@@ -280,6 +281,7 @@ export function Header() {
                         src="/logo.png"
                         alt="Logo"
                         fill
+                        sizes="32px"
                         className="object-contain"
                       />
                     </div>

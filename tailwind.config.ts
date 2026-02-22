@@ -53,6 +53,11 @@ const config: Config = {
           DEFAULT: 'var(--card)',
           foreground: 'var(--card-foreground)',
         },
+        // Noir Dossier palette
+        'noir-primary': '#8a0000',
+        'background-light': '#f8f5f5',
+        'background-dark': '#050505',
+        'noir-paper': '#E5E5E5',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -61,11 +66,17 @@ const config: Config = {
       },
       fontFamily: {
         comic: ['var(--font-comic)', 'cursive'],
+        display: ['var(--font-display)', 'sans-serif'],
+        marker: ['var(--font-marker)', 'cursive'],
+        condensed: ['var(--font-condensed)', 'sans-serif'],
+        'noir-title': ['var(--font-noir-title)', 'serif'],
       },
       boxShadow: {
         comic: '4px 4px 0px 0px #000000',
         'comic-hover': '2px 2px 0px 0px #000000',
         'comic-lg': '8px 8px 0px 0px #000000',
+        'comic-red': '8px 8px 0px 0px #8a0000',
+        'comic-xl': '12px 12px 0px 0px #000000',
       },
       borderWidth: {
         '3': '3px',

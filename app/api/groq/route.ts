@@ -7,7 +7,10 @@ import {
   improveStoryContent,
   testGroqConnection,
   testGroqSpecialModel,
+  generateStoryWithProConfig,
 } from '@/lib/groq-service';
+import { ParametersSchema } from '@/lib/schemas/proPanelSchemas';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -22,6 +25,8 @@ export async function POST(request: NextRequest) {
       options,
       focus,
       apiKey,
+      proConfig, // Pro Panel configuration
+      title,     // Story title for Pro Panel generation
     } = body;
     // Create updated options with API key if provided
     const updatedOptions = apiKey ? { ...options, apiKey } : options;
@@ -34,14 +39,33 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
-        result = await generateStoryContent({
-          theme: prompt,
-          genre,
-          length,
-          tone: updatedOptions?.tone,
-          characters: updatedOptions?.characters,
-          setting: updatedOptions?.setting,
-        });
+        
+        // If proConfig is provided, use Pro Panel generation
+        if (proConfig) {
+          // Validate the proConfig
+          const validationResult = ParametersSchema.safeParse(proConfig);
+          if (!validationResult.success) {
+            return NextResponse.json(
+              { error: 'Invalid Pro Panel configuration', details: validationResult.error.errors },
+              { status: 400 }
+            );
+          }
+          
+          result = await generateStoryWithProConfig(prompt, validationResult.data, {
+            title,
+            apiKey: updatedOptions?.apiKey,
+          });
+        } else {
+          // Use standard generation
+          result = await generateStoryContent({
+            theme: prompt,
+            genre,
+            length,
+            tone: updatedOptions?.tone,
+            characters: updatedOptions?.characters,
+            setting: updatedOptions?.setting,
+          });
+        }
         break;
       case 'analyze':
         if (!content) {
