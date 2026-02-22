@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Active full support: 1.3.5 (latest), 1.3.0 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
 
-## [1.4.0] - 2026-02-22
+## [1.3.5] - 2026-02-21
 
 ### Major Architecture Change: Supabase Migration
 
@@ -21,8 +21,6 @@ Active full support: 1.3.5 (latest), 1.3.0 (previous). Security maintenance (cri
 - **Legacy Removal**: Safely commented out `Mongoose` schemas and active connections to prevent build collisions while keeping types intact.
 - **Improved Data Integrity**: Shifted to explicit Row Level Security (RLS) rules and robust primary/foreign key mappings (UUID).
 - **Dependency Fixes**: Fixed broken 404 package dependencies (e.g. `concat-stream` github link) preventing fresh installations.
-
-## [1.3.5] - 2026-02-21
 
 ### Fixed
 
