@@ -182,7 +182,7 @@ function PostActions({
         <Button
           variant={post.userVote === 'down' ? 'destructive' : 'ghost'}
           size="sm"
-          className="h-9 w-9 p-0"
+          className="flex items-center justify-center h-9 px-2 sm:px-3"
           onClick={() =>
             onVote(post.id, post.userVote === 'down' ? null : 'down')
           }
