@@ -7,9 +7,158 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 1.1.2 (latest), 1.1.1 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+Active full support: 1.3.5 (latest), 1.3.0 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
 
-## [Unreleased]
+## [1.3.5] - 2026-02-21
+
+### Fixed
+
+- **Vercel Deployment Crash (Spline 3D)**: Added `transpilePackages` for `@splinetool/react-spline` and `@splinetool/runtime` in `next.config.js` so Next.js properly compiles Spline's class inheritance chain through its SWC pipeline instead of treating them as pre-compiled externals
+- **Resilient Spline Loading**: Added `.catch()` fallback to the Spline dynamic import in `app/page.tsx` — if the 3D model fails to load in any environment, the page gracefully degrades to the gradient background instead of crashing
+- **Featured Creators Validation**: `components/featured-creators.tsx` now validates creator-shaped objects (requires `username`/`followersCount`/`profileImage`) instead of fabricating metadata; non-matching items are filtered out
+- **Footer Health Indicator**: Wired the static "Online" indicator in `components/footer.tsx` to the real `/api/health/db` endpoint — now dynamically shows Online/Degraded/Offline/Checking state
+- **Trending Stories Error Handling**: `components/trending-stories.tsx` now surfaces the actual error message (instead of hiding it behind "No Stories Yet") and provides a Retry button
+- **Spline Guide Markdown**: Added `text` language identifiers to unlabeled fenced code blocks in `docs/SPLINE_GUIDE.md` (markdownlint MD040)
+- **Changelog Deduplication**: Merged duplicate `## [1.3.5]` headers into a single section
+- **Feed API Static Render Fix**: Added `export const dynamic = 'force-dynamic'` to `app/api/feed/route.ts` — route uses `request.url` for query params, which requires dynamic rendering
+- **Missing 404 Page**: Created `app/not-found.tsx` with comic-style 404 page matching the site theme
+- **ServiceWorker 404**: Created `public/sw.js` minimal stub to prevent registration failure
+- **Dialog Accessibility**: Added hidden `DialogDescription` to `components/ui/dialog.tsx` to satisfy Radix `aria-describedby` requirement
+- **Hero Background**: Replaced Spline 3D with `background.jpeg` for the hero section — works in both light and dark modes with overlay
+- **Global Loading Screen**: Created `app/loading.tsx` using the existing `LoadingScreen` component for consistent loading across all pages
+- **Scroll Indicator Accessibility**: Added `aria-hidden="true"` to the decorative scroll indicator in `app/page.tsx`
+- **Trending Stories HTTP Errors**: `components/trending-stories.tsx` now surfaces 4xx/5xx responses as errors instead of silently showing empty state
+- **Trending Stories AbortController**: Added `AbortController` cleanup to prevent state updates on unmounted components
+- **Featured Creators HTML Validity**: Used `Button asChild` pattern in `components/featured-creators.tsx` to avoid invalid `<a><button>` nesting
+- **Animated Genre Marquee**: Replaced the 6-genre icon grid with a 12-genre animated marquee using real genre images, infinite right-to-left scrolling, hover-pause, edge fade masks, and `prefers-reduced-motion` support
+- **Adventure Image Fix**: Replaced broken europeanstudios.com hotlink with working Unsplash adventure image
+- **Genre Page Overhaul**: Rewrote `app/genres/page.tsx` — genre cards now have real images, expand/collapse famous works, "Write a Story" CTAs, and an interactive "Finding Your Genre" quiz (4 questions, emoji, progress bar, results)
+- **Documentation Page Overhaul**: Rewrote `app/docs/page.tsx` — step cards with numbered badges, quick links grid, expandable FAQ accordion with emojis, wallet setup guide, minting flow, and community CTA banner
+- **Duplicate Trending Header**: Removed redundant "Trending Stories" heading from `components/trending-stories.tsx` since the home page already provides its own "Trending Now" header
+- **Community Loading Screen**: Updated Community Hub page to use full-screen loading with `fullScreen` and `size="lg"` props, consistent with the global loading screen
+
+### Documentation & Professional Standards
+
+- **Created Professional Pull Request Template (`temp.md`)**: Implemented a standardized, professional PR template for Indie Hub Org members.
+- **Indie Hub Org Alignment**: Added mandatory acknowledgement for official membership and professional work line.
+- **Clean Documentation**: High-quality, emoji-free, and streamlined template for internal project contributions.
+
+### Homepage & Footer UI Refinements — Readability, Layout, and Spline Background
+
+#### Changed
+- **Spline 3D Background**: Transitioned from hero-only to a `fixed` full-page background, visible through semi-transparent sections.
+- **CTA Section**: Removed gradient background, simplified to `bg-background/90` with backdrop-blur.
+- **CTA Button**: Removed sparkle icon, enforced pure comic-style theme with Bangers font.
+- **Neon Sign**: Optimized glow radii and colors for significantly improved readability.
+- **Footer Brand**: Replaced logo image/container with bold italic "GroqTales" branded text.
+- **Footer Layout**: Moved copyright and status info below the neon sign for a more balanced design.
+
+### Security Policy Refresh — 2026-02-21
+
+- **Updated `SECURITY.md`** to reflect current version matrix (1.3.5 latest, 1.3.0 previous, 1.1.0 maintenance, < 1.1.0 EoSS)
+- Removed duplicate severity classification tables — consolidated into single authoritative table
+- Added **Response Timeline SLA** table (acknowledgement → fix → disclosure)
+- Added **"What to Include in a Report"** guidance section
+- Documented actual security stack: Helmet, `express-rate-limit`, Zod, `express-validator`, SIWE
+- Added **Current Technology Stack** table with versions for Node.js, Next.js, Express, MongoDB, TypeScript, and more
+- Expanded **Protecting Your Data** section with HTTPS, JWT, MongoDB encryption, and SIWE details
+- Increased coordinated disclosure window from 30 → 90 days for complex High/Critical issues
+- Added **Sensitive Information Disclosure** to AI Security Scope (OWASP LLM top 10)
+
+### Documentation & DevOps Refresh — 2026-02-21
+
+- **Merged `README.Docker.md` into `README.md`**: Consolidated all Docker setup, service maps, and deployment guides into the main readme for better visibility
+- **Created `docs/SPLINE_GUIDE.md`**: Detailed contributor guide for working with Spline 3D models, including model protection policies, performance rules, and technical implementation details
+- **Linked Spline Guide in README**: Added a dedicated section and Table of Contents entry for the Spline 3D Guide
+- **Updated README Version**: Bounded project version badge to v1.3.5 in documentation
+- **Deleted `README.Docker.md`**: Removed redundant file after merging content into main README
+
+### Professional Website Redesign — Premium Theme, Neon Branding, Centered 3D Hero
+
+#### Added
+- **Neon "GROQTALES" Footer Branding**: Large Bangers-font branded heading at the bottom of the footer with a custom `neon-flicker` CSS animation that simulates a faulty neon sign — random blinks, flickers, and steady glow intervals
+- **`.neon-sign` CSS utility**: Theme-aware neon glow effect (warm red/orange glow in light mode, cyan/pink bloom in dark mode)
+- **`@keyframes neon-flicker`**: Multi-step opacity animation with 30+ keyframe stops for realistic neon sign behavior
+- **Header Wordmark**: "GROQTALES" text in Bangers font displayed next to the logo in the header
+- **IntersectionObserver for Spline**: Tracks hero section visibility to control Spline model opacity in lower sections
+- **Dark Premium Background**: Sitewide `dark-premium-bg` class applied to main layout wrapper — elegant radial gradients on deep navy
+- **Feed API Fallback**: `/api/feed/route.ts` now returns 6 high-quality fallback stories when MongoDB is unavailable, ensuring trending stories section always renders
+- **Full-width Neon Sign**: GROQTALES neon branding now spans the entire screen width on all devices (phone, tablet, laptop, TV) using `w-screen -ml-[50vw]` breakout technique
+- **Fixed Spline 3D**: Model is now `position: fixed` at viewport center — stays in place permanently while content scrolls over it
+- **Spline Color Fix**: Removed heavy gradient overlay that was washing out 3D model colors; replaced with thin bottom-only fade
+- **Content Layering**: All sections below hero use `bg-background/95 backdrop-blur-sm` for frosted glass effect over the fixed Spline
+- **Deferred Spline Loading**: 3D model now loads 1.5s after page paint, fades in smoothly via `onLoad` callback — page content renders instantly
+- **Hero Gradient**: Instant animated gradient background (`hero-gradient` CSS class) shows while Spline lazy-loads
+- **Removed Badge**: Removed "⚡ AI-Powered Web3 Storytelling" badge from hero section
+
+#### Changed
+- **`app/page.tsx`**: Complete hero section redesign — Spline 3D model now centered as full-width background with overlay text (Create/Mint/Share), removed halftone overlay, speech bubble, and star decorations
+- **`components/header.tsx`**: Removed circular container (`rounded-full`, `bg-white/10`, `border-2 border-white/20`) from logo — direct placement with `drop-shadow-lg` and clean sizing
+- **`components/footer.tsx`**: Added neon "GROQTALES" branding section at the bottom of the footer
+- **`app/globals.css`**: Added neon-flicker animation, `.neon-sign` utility class, consolidated `.dark-premium-bg` styles
+- **`app/layout.tsx`**: Added `dark:dark-premium-bg` class to main wrapper for sitewide dark theme upgrade, updated favicon to `logo.png`
+
+#### Removed
+- Circular logo container in header (rounded-full border styling)
+- Halftone dot overlay from home page  
+- Speech bubble ("BOOM! 💥") and decorative Star from hero section
+- Star icon import from home page
+- Old multi-size favicon references replaced with single `logo.png`
+
+#### Files Modified
+- `app/page.tsx` — Complete hero section rewrite
+- `app/globals.css` — Neon animation and premium background utilities
+- `app/layout.tsx` — Dark premium background and favicon
+- `components/header.tsx` — Clean logo placement
+- `components/footer.tsx` — Neon branding element
+- `VERSION` — 1.3.5
+- `CHANGELOG.md` — This entry
+
+---
+
+## [1.3.0] - 2026-02-21
+
+### Major Home Page Redesign — Professional Comic Style with Spline 3D
+
+#### Added
+- **Spline 3D Hero**: Integrated `@splinetool/react-spline` to load the storybook 3D model from `public/storybook.spline` in the hero section
+- **Bangers Display Font**: Added Google Fonts 'Bangers' for comic display headings via `--font-display` CSS variable
+- **Stats Bar Section**: Live platform statistics fetched from `/api/health/db` with animated counters and graceful fallback defaults
+- **How It Works Section**: Three-step visual flow (Create → Mint → Share) with comic panel styling
+- **Why GroqTales Section**: Feature showcase with Lightning-Fast AI, True Ownership, and Vibrant Community cards
+- **Explore Genres Grid**: Six genre cards (Sci-Fi, Fantasy, Mystery, Romance, Horror, Adventure) linking to genre pages
+- **Gradient CTA Section**: Full-width call-to-action with `var(--gradient-cta)` background
+- **New CSS Utilities**: `halftone-overlay`, `speed-lines`, `comic-panel`, `scribble-underline`, `ink-splatter`, `comic-display`, `animate-float`, `animate-wiggle`
+- **`spin-slow` animation**: 8-second infinite rotation in `tailwind.config.ts`
+- **Comic color palette**: `--comic-yellow`, `--comic-red`, `--comic-blue`, `--comic-purple`, `--comic-green`, `--comic-orange`, `--comic-pink`, `--comic-cyan` CSS custom properties
+
+#### Changed
+- **`globals.css`**: Complete rewrite — removed duplicate CSS variable blocks (were overriding the comic theme with generic shadcn defaults), unified color system for light (warm cream #fef9ef) and dark (deep navy #0a0e1a) themes, fixed dark mode `--shadow-color` from white (#f8fafc) to dark rgba value
+- **`app/page.tsx`**: Complete rewrite with Spline 3D hero, 6 content sections, all data fetched from real API endpoints
+- **`trending-stories.tsx`**: Replaced `getMockTrendingStories()` with real `fetch('/api/feed?limit=6')` call; maps API response to StoryCard props with graceful empty state
+- **`featured-creators.tsx`**: Replaced `getMockCreators()` with real API fetch; hides section gracefully when no creators found
+- **`app/layout.tsx`**: Removed `comic-dots-animation.js` script tag (replaced by Spline 3D)
+- **`tailwind.config.ts`**: Added `spin-slow` keyframes and animation
+
+#### Removed
+- `comic-dots-animation.js` script reference from layout (file still exists in public/)
+- All hardcoded mock data from `trending-stories.tsx` and `featured-creators.tsx`
+- Duplicate `:root` and `.dark` CSS variable blocks from `globals.css`
+
+#### Dependencies
+- Added `@splinetool/react-spline` and `@splinetool/runtime` (installed with `--legacy-peer-deps`)
+
+#### Files Modified
+- `app/globals.css` — Complete CSS theme rewrite
+- `app/page.tsx` — Complete home page rewrite
+- `app/layout.tsx` — Removed comic-dots-animation script
+- `components/trending-stories.tsx` — API-connected, no mock data
+- `components/featured-creators.tsx` — API-connected, no mock data
+- `tailwind.config.ts` — Added spin-slow animation
+- `package.json` — Version 1.3.0, new dependencies
+- `VERSION` — 1.3.0
+
+---
 
 ### Off-Chain Royalty Tracking & Creator Revenue Dashboard (Issue #334)
 
@@ -58,7 +207,7 @@ Active full support: 1.1.2 (latest), 1.1.1 (previous). Security maintenance (cri
 
 ---
 
-### ✨ Accessibility Improvements - WCAG 2.1 AA Compliance
+###  Accessibility Improvements - WCAG 2.1 AA Compliance
 
 #### Keyboard Navigation & Focus Management
 - **Skip Link**: Added keyboard-accessible skip link to jump to main content

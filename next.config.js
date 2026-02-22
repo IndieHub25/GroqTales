@@ -10,6 +10,9 @@ const nextConfig = {
   swcMinify: true,
   poweredByHeader: false,
 
+  // Transpile Spline packages to fix "Super constructor null" error in production
+  transpilePackages: ['@splinetool/react-spline', '@splinetool/runtime'],
+
   // Performance optimizations
   compress: true,
   optimizeFonts: true,
@@ -123,10 +126,10 @@ const nextConfig = {
       },
     ];
   },
-  async rewrites() { 
+  async rewrites() {
     const envUrl = process.env.NEXT_PUBLIC_API_URL;
-    const apiUrl = (envUrl && envUrl.startsWith('http')) 
-      ? envUrl 
+    const apiUrl = (envUrl && envUrl.startsWith('http'))
+      ? envUrl
       : 'http://localhost:3001';
 
     return [
@@ -159,7 +162,7 @@ const nextConfig = {
 
   // TypeScript configuration
   typescript: {
-    ignoreBuildErrors:true,
+    ignoreBuildErrors: true,
   },
 
   // ESLint configuration

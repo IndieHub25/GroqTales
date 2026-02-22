@@ -1,87 +1,118 @@
 @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ─────────────────────────────────────────────
+   LIGHT THEME — Warm Comic Book
+   Cream paper, ink-black borders, warm accents
+   ───────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #000000;
+  --background: #fef9ef;
+  --foreground: #1a1a2e;
 
   --card: #ffffff;
-  --card-foreground: #000000;
+  --card-foreground: #1a1a2e;
 
   --popover: #ffffff;
-  --popover-foreground: #000000;
+  --popover-foreground: #1a1a2e;
 
-  /* AA Compliant Pink (Contrast ~4.5:1 against white) */
-  --primary: #d60055;
-  /* Hot Pink - Gen-Z Fave */
+  --primary: #e63946;
   --primary-foreground: #ffffff;
 
-  --secondary: #00ffff;
-  /* Cyan - Electric Vibes */
-  --secondary-foreground: #000000;
-
-  --muted: #f5f5f5;
-  --muted-foreground: #000000;
-
-  --accent: #7b2cbf;
-  /* Purple - Aesthetic */
-  --accent-foreground: #ffffff;
-
-  --destructive: #ff0000;
-  --destructive-foreground: #ffffff;
-
-  --border: #000000;
-  --input: #ffffff;
-  --ring: #ff0066;
-
-  --radius: 0px;
-  /* Sharp corners for comic look */
-
-  --font-comic: 'Comic Neue', cursive;
-
-  /* Gen-Z Accent Colors */
-  --color-fire: #ff6600;
-  --color-vibe: #00ff88;
-  --color-slay: #ff0066;
-  --color-lowkey: #9d4edd;
-
-  --shadow-color: #000000;
-}
-
-/* Dark Mode Variables */
-.dark {
-  --background: #0f172a;
-  --foreground: #f8fafc;
-
-  --card: #1e293b;
-  --card-foreground: #f8fafc;
-
-  --popover: #1e293b;
-  --popover-foreground: #f8fafc;
-
-  --primary: #ff0066;
-  --primary-foreground: #ffffff;
-
-  --secondary: #00cccc;
+  --secondary: #457b9d;
   --secondary-foreground: #ffffff;
 
-  --muted: #334155;
-  --muted-foreground: #cbd5e1;
+  --muted: #f1e8d8;
+  --muted-foreground: #6b6b7b;
 
-  --accent: #9d4edd;
+  --accent: #6c3fc5;
+  --accent-foreground: #ffffff;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --border: #1a1a2e;
+  --input: #fef9ef;
+  --ring: #e63946;
+
+  --radius: 0px;
+
+  --font-comic: 'Comic Neue', cursive;
+  --font-display: 'Bangers', cursive;
+
+  --shadow-color: #1a1a2e;
+
+  /* Comic accent palette */
+  --comic-yellow: #fbbf24;
+  --comic-red: #e63946;
+  --comic-blue: #457b9d;
+  --comic-purple: #6c3fc5;
+  --comic-green: #2d9c68;
+  --comic-orange: #f97316;
+  --comic-pink: #ec4899;
+  --comic-cyan: #06b6d4;
+
+  /* Gradient accents */
+  --gradient-hero: linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #e63946 100%);
+  --gradient-card: linear-gradient(135deg, #fef9ef 0%, #f1e8d8 100%);
+  --gradient-cta: linear-gradient(135deg, #e63946 0%, #6c3fc5 100%);
+
+  /* Spline container */
+  --spline-bg: #fef3c7;
+}
+
+/* ─────────────────────────────────────────────
+   DARK THEME — Premium Ink Night
+   Deep navy, neon comic accents, subtle glows
+   ───────────────────────────────────────────── */
+.dark {
+  --background: #0a0e1a;
+  --foreground: #f0f0f5;
+
+  --card: #131829;
+  --card-foreground: #f0f0f5;
+
+  --popover: #131829;
+  --popover-foreground: #f0f0f5;
+
+  --primary: #ff4d6d;
+  --primary-foreground: #ffffff;
+
+  --secondary: #38bdf8;
+  --secondary-foreground: #ffffff;
+
+  --muted: #1e2540;
+  --muted-foreground: #94a3b8;
+
+  --accent: #a78bfa;
   --accent-foreground: #ffffff;
 
   --destructive: #ef4444;
-  --destructive-foreground: #f8fafc;
+  --destructive-foreground: #f0f0f5;
 
-  --border: #334155;
-  --input: #1e293b;
-  --ring: #ff0066;
+  --border: #2a3150;
+  --input: #131829;
+  --ring: #ff4d6d;
 
-  --shadow-color: #f8fafc;
+  --shadow-color: rgba(0, 0, 0, 0.8);
+
+  --comic-yellow: #fbbf24;
+  --comic-red: #ff4d6d;
+  --comic-blue: #38bdf8;
+  --comic-purple: #a78bfa;
+  --comic-green: #34d399;
+  --comic-orange: #fb923c;
+  --comic-pink: #f472b6;
+  --comic-cyan: #22d3ee;
+
+  --gradient-hero: linear-gradient(135deg, #1e2540 0%, #131829 50%, #0a0e1a 100%);
+  --gradient-card: linear-gradient(135deg, #131829 0%, #1e2540 100%);
+  --gradient-cta: linear-gradient(135deg, #ff4d6d 0%, #a78bfa 100%);
+
+  --spline-bg: #0d1220;
 }
 
 @layer base {
@@ -92,7 +123,6 @@
   html {
     font-family: var(--font-comic);
     scroll-behavior: smooth;
-    /* Smooth scrolling */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -101,7 +131,6 @@
     @apply bg-background text-foreground;
     font-family: var(--font-comic);
     overflow-x: hidden;
-    /* Prevent horizontal scroll */
     position: relative;
   }
 
@@ -115,13 +144,10 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
-    /* Gen-Z comic style - bold outline text */
     color: var(--foreground);
-    text-shadow: 2px 2px 0px var(--background);
     line-height: 1.2;
   }
 
-  /* Gen-Z comic text styles */
   p,
   span,
   div,
@@ -131,7 +157,6 @@
     font-weight: 600;
   }
 
-  /* Special Gen-Z emphasis */
   strong,
   b {
     color: var(--primary) !important;
@@ -146,12 +171,10 @@
     font-weight: 700;
   }
 
-  /* Optimize animations and transitions */
   * {
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Smooth transitions for interactive elements */
   a,
   button,
   input,
@@ -159,100 +182,86 @@
   textarea {
     transition: all 0.2s ease-in-out;
   }
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 20 14.3% 4.1%;
-    --card: 0 0% 100%;
-    --card-foreground: 20 14.3% 4.1%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 20 14.3% 4.1%;
-    --primary: 24 9.8% 10%;
-    --primary-foreground: 60 9.1% 97.8%;
-    --secondary: 60 4.8% 95.9%;
-    --secondary-foreground: 24 9.8% 10%;
-    --muted: 60 4.8% 95.9%;
-    --muted-foreground: 25 5.3% 44.7%;
-    --accent: 60 4.8% 95.9%;
-    --accent-foreground: 24 9.8% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 60 9.1% 97.8%;
-    --border: 20 5.9% 90%;
-    --input: 20 5.9% 90%;
-    --ring: 20 14.3% 4.1%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-  }
-  .dark {
-    --background: 20 14.3% 4.1%;
-    --foreground: 60 9.1% 97.8%;
-    --card: 20 14.3% 4.1%;
-    --card-foreground: 60 9.1% 97.8%;
-    --popover: 20 14.3% 4.1%;
-    --popover-foreground: 60 9.1% 97.8%;
-    --primary: 60 9.1% 97.8%;
-    --primary-foreground: 24 9.8% 10%;
-    --secondary: 12 6.5% 15.1%;
-    --secondary-foreground: 60 9.1% 97.8%;
-    --muted: 12 6.5% 15.1%;
-    --muted-foreground: 24 5.4% 63.9%;
-    --accent: 12 6.5% 15.1%;
-    --accent-foreground: 60 9.1% 97.8%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 60 9.1% 97.8%;
-    --border: 12 6.5% 15.1%;
-    --input: 12 6.5% 15.1%;
-    --ring: 24 5.7% 82.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
 }
 
 @layer components {
   .comic-container {
-    @apply bg-card border-4 border-foreground p-6 shadow-[8px_8px_0px_0px_var(--foreground)];
+    @apply bg-card border-4 border-foreground p-6;
+    box-shadow: 8px 8px 0px 0px var(--shadow-color);
   }
 
   .comic-button {
-    @apply px-6 py-3 bg-primary text-white font-bold border-4 border-foreground shadow-[4px_4px_0px_0px_var(--foreground)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_var(--foreground)] transition-all active:translate-x-[4px] active:translate-y-[4px] active:shadow-none uppercase tracking-wider;
+    @apply px-6 py-3 text-white font-bold border-4 border-foreground uppercase tracking-wider;
+    background-color: var(--primary);
+    box-shadow: 4px 4px 0px 0px var(--shadow-color);
     will-change: transform, box-shadow;
     transform: translateZ(0);
-    /* GPU acceleration */
+  }
+
+  .comic-button:hover {
+    transform: translate(2px, 2px) translateZ(0);
+    box-shadow: 2px 2px 0px 0px var(--shadow-color);
+  }
+
+  .comic-button:active {
+    transform: translate(4px, 4px) translateZ(0);
+    box-shadow: none;
   }
 
   .comic-button-secondary {
-    @apply px-6 py-3 bg-secondary text-secondary-foreground font-bold border-4 border-foreground shadow-[4px_4px_0px_0px_var(--foreground)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_var(--foreground)] transition-all active:translate-x-[4px] active:translate-y-[4px] active:shadow-none uppercase tracking-wider;
+    @apply px-6 py-3 font-bold border-4 border-foreground uppercase tracking-wider;
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+    box-shadow: 4px 4px 0px 0px var(--shadow-color);
     will-change: transform, box-shadow;
     transform: translateZ(0);
-    /* GPU acceleration */
+  }
+
+  .comic-button-secondary:hover {
+    transform: translate(2px, 2px) translateZ(0);
+    box-shadow: 2px 2px 0px 0px var(--shadow-color);
   }
 
   .comic-input {
-    @apply w-full px-4 py-2 bg-background border-4 border-foreground font-bold focus:outline-none focus:shadow-[4px_4px_0px_0px_var(--foreground)] transition-shadow placeholder:text-muted-foreground;
+    @apply w-full px-4 py-2 bg-background border-4 border-foreground font-bold focus:outline-none transition-shadow placeholder:text-muted-foreground;
     will-change: box-shadow;
   }
 
+  .comic-input:focus {
+    box-shadow: 4px 4px 0px 0px var(--shadow-color);
+  }
+
   .comic-card {
-    @apply bg-card border-4 border-foreground p-4 shadow-[6px_6px_0px_0px_var(--foreground)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_var(--foreground)] transition-all;
+    @apply bg-card border-4 p-4 transition-all;
+    border-color: var(--border);
+    box-shadow: 6px 6px 0px 0px var(--shadow-color);
     will-change: transform, box-shadow;
     transform: translateZ(0);
-    /* GPU acceleration */
+  }
+
+  .comic-card:hover {
+    transform: translateY(-4px) translateZ(0);
+    box-shadow: 8px 10px 0px 0px var(--shadow-color);
   }
 
   .comic-badge {
-    @apply px-3 py-1 bg-accent text-accent-foreground font-bold border-2 border-foreground text-xs uppercase shadow-[2px_2px_0px_0px_var(--foreground)];
+    @apply px-3 py-1 font-bold border-2 border-foreground text-xs uppercase;
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+    box-shadow: 2px 2px 0px 0px var(--shadow-color);
+  }
+
+  /* Display heading style using Bangers font */
+  .comic-display {
+    font-family: var(--font-display);
+    letter-spacing: 3px;
+    line-height: 1.1;
   }
 }
 
 @layer utilities {
   .text-comic-shadow {
-    text-shadow: 2px 2px 0px var(--shadow-color);
+    text-shadow: 3px 3px 0px var(--shadow-color);
   }
 
   .text-shadow-comic {
@@ -274,10 +283,31 @@
     100% {
       box-shadow: 6px 6px 0px 0px var(--foreground);
     }
+  /* Halftone dot pattern overlay */
+  .halftone-overlay {
+    background-image: radial-gradient(circle, var(--foreground) 1px, transparent 1px);
+    background-size: 16px 16px;
+    opacity: 0.04;
+    pointer-events: none;
   }
 
-  .comic-card:hover {
-    animation: comic-glow 2s infinite ease-in-out;
+  /* Comic panel border */
+  .comic-panel {
+    border: 4px solid var(--foreground);
+    box-shadow: 8px 8px 0px 0px var(--shadow-color);
+    position: relative;
+  }
+
+  /* Speed lines effect */
+  .speed-lines {
+    background-image:
+      repeating-linear-gradient(90deg,
+        transparent,
+        transparent 8px,
+        var(--foreground) 8px,
+        var(--foreground) 9px);
+    opacity: 0.05;
+    pointer-events: none;
   }
 
   /* Smooth scroll utilities */
@@ -292,30 +322,27 @@
     perspective: 1000px;
   }
 
-  /* Prevent layout shift */
   .no-layout-shift {
     contain: layout style paint;
   }
 
-  /* Gen-Z Comic Text Styles - SLAY! */
+  /* Comic text highlight styles */
   .text-pop {
-    color: #ff0000 !important;
+    color: var(--comic-red) !important;
     font-weight: 900;
     text-transform: uppercase;
-    text-shadow:
-      2px 2px 0px var(--shadow-color),
-      -1px -1px 0px var(--background);
+    text-shadow: 2px 2px 0px var(--shadow-color), -1px -1px 0px var(--background);
   }
 
   .text-vibe {
-    color: #0000ff !important;
+    color: var(--comic-blue) !important;
     font-weight: 800;
     font-style: italic;
-    text-shadow: 1px 1px 0px #ffff00;
+    text-shadow: 1px 1px 0px var(--comic-yellow);
   }
 
   .text-fire {
-    background: linear-gradient(45deg, #ff0000, #ff6600, #ffff00);
+    background: linear-gradient(45deg, var(--comic-red), var(--comic-orange), var(--comic-yellow));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -323,26 +350,7 @@
     text-transform: uppercase;
   }
 
-  .text-no-cap {
-    color: var(--foreground) !important;
-    font-weight: 700;
-    letter-spacing: 1px;
-  }
-
-  /* Gen-Z Background Styles */
-  .bg-lowkey {
-    background-color: var(--muted) !important;
-  }
-
-  .bg-highkey {
-    background: linear-gradient(135deg, #ff0000 0%, #0000ff 100%) !important;
-  }
-
-  .bg-vibes {
-    background: linear-gradient(45deg, #ffff00, #ff00ff, #00ffff) !important;
-  }
-
-  /* Comic Speech Bubble */
+  /* Speech Bubble */
   .speech-bubble {
     position: relative;
     background: var(--card);
@@ -378,28 +386,18 @@
     margin-left: -17px;
   }
 
-  /* Thought Bubble */
-  .thought-bubble {
-    position: relative;
-    background: var(--card);
-    border: 4px solid var(--foreground);
-    border-radius: 50%;
-    padding: 30px;
-    box-shadow: 6px 6px 0px var(--shadow-color);
-  }
-
-  /* Action Text - POW! BAM! BOOM! */
+  /* Action Text — POW! BAM! BOOM! */
   .action-text {
+    font-family: var(--font-display);
     font-size: 3rem;
     font-weight: 900;
-    color: #ff0000;
+    color: var(--comic-red);
     text-transform: uppercase;
     text-shadow:
       4px 4px 0px var(--shadow-color),
-      -2px -2px 0px #fff,
-      2px -2px 0px #fff,
-      -2px 2px 0px #fff,
-      2px 2px 0px #fff;
+      -2px -2px 0px var(--background),
+      2px -2px 0px var(--background),
+      -2px 2px 0px var(--background);
     letter-spacing: 4px;
     transform: rotate(-5deg);
   }
@@ -408,7 +406,7 @@
   .sticker {
     display: inline-block;
     padding: 8px 16px;
-    background: #ffff00;
+    background: var(--comic-yellow);
     border: 3px solid var(--foreground);
     border-radius: 12px;
     box-shadow: 4px 4px 0px var(--shadow-color);
@@ -417,33 +415,33 @@
     color: #000000 !important;
   }
 
-  /* Premium Dark Theme Background */
-  .dark-premium-bg {
-    background-color: #020617;
-    background-image:
-      radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
-      radial-gradient(at 50% 0%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
-      radial-gradient(
-        at 100% 0%,
-        rgba(59, 130, 246, 0.08) 0px,
-        transparent 50%
-      ),
-      radial-gradient(
-        at 0% 100%,
-        rgba(139, 92, 246, 0.08) 0px,
-        transparent 50%
-      ),
-      radial-gradient(
-        at 50% 100%,
-        rgba(59, 130, 246, 0.08) 0px,
-        transparent 50%
-      ),
-      radial-gradient(
-        at 100% 100%,
-        rgba(59, 130, 246, 0.08) 0px,
-        transparent 50%
-      );
-    background-attachment: fixed;
+
+
+  /* Scribble/sketch underline effect */
+  .scribble-underline {
+    text-decoration: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='8' viewBox='0 0 100 8'%3E%3Cpath d='M0 5 Q 25 0, 50 5 T 100 5' stroke='%23e63946' fill='none' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-position: bottom;
+    background-repeat: repeat-x;
+    background-size: 100px 8px;
+    padding-bottom: 6px;
+  }
+
+  .dark .scribble-underline {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='8' viewBox='0 0 100 8'%3E%3Cpath d='M0 5 Q 25 0, 50 5 T 100 5' stroke='%23ff4d6d' fill='none' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+
+  /* Ink splatter decorative */
+  .ink-splatter::before {
+    content: '';
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--comic-yellow);
+    opacity: 0.15;
+    filter: blur(40px);
+    pointer-events: none;
   }
 
   /* Accessibility utilities */
@@ -479,7 +477,6 @@
     z-index: 9999;
   }
 
-  /* Visible focus for keyboard users compliant with WCAG */
   a:focus-visible,
   button:focus-visible,
   input:focus-visible,
@@ -490,13 +487,68 @@
     box-shadow: none;
   }
 
-  /* Performance: CSS twinkle animation for stars (replaces framer-motion per-star animations) */
+  /* Comic glow animation */
+  @keyframes comic-glow {
+    0% {
+      box-shadow: 6px 6px 0px 0px var(--shadow-color);
+    }
+
+    50% {
+      box-shadow: 6px 6px 0px 0px var(--shadow-color), 0px 0px 20px 2px var(--primary);
+    }
+
+    100% {
+      box-shadow: 6px 6px 0px 0px var(--shadow-color);
+    }
+  }
+
+  /* Floating animation */
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  /* Wiggle animation */
+  @keyframes wiggle {
+
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+
+    25% {
+      transform: rotate(2deg);
+    }
+
+    75% {
+      transform: rotate(-2deg);
+    }
+  }
+
+  .animate-wiggle {
+    animation: wiggle 3s ease-in-out infinite;
+  }
+
+  /* Twinkle animation for stars */
   @keyframes twinkle {
+
     0%,
     100% {
       opacity: 0.2;
       transform: scale(1);
     }
+
     50% {
       opacity: 1;
       transform: scale(1.5);
@@ -507,11 +559,191 @@
     animation: twinkle ease-in-out infinite;
   }
 
+  /* ═══════════════════════════════════════
+     NEON SIGN FLICKER ANIMATION
+     Simulates a faulty neon sign that blinks,
+     flickers randomly, and sometimes stays steady.
+     ═══════════════════════════════════════ */
+  @keyframes neon-flicker {
+    0% {
+      opacity: 1;
+    }
+
+    2% {
+      opacity: 0.8;
+    }
+
+    4% {
+      opacity: 1;
+    }
+
+    8% {
+      opacity: 0.4;
+    }
+
+    9% {
+      opacity: 1;
+    }
+
+    12% {
+      opacity: 0.2;
+    }
+
+    14% {
+      opacity: 0.9;
+    }
+
+    16% {
+      opacity: 1;
+    }
+
+    20% {
+      opacity: 1;
+    }
+
+    24% {
+      opacity: 0.6;
+    }
+
+    25% {
+      opacity: 1;
+    }
+
+    30% {
+      opacity: 1;
+    }
+
+    42% {
+      opacity: 1;
+    }
+
+    43% {
+      opacity: 0.3;
+    }
+
+    44% {
+      opacity: 0.8;
+    }
+
+    45% {
+      opacity: 0.2;
+    }
+
+    46% {
+      opacity: 1;
+    }
+
+    55% {
+      opacity: 1;
+    }
+
+    57% {
+      opacity: 0.5;
+    }
+
+    58% {
+      opacity: 1;
+    }
+
+    70% {
+      opacity: 1;
+    }
+
+    72% {
+      opacity: 0.7;
+    }
+
+    73% {
+      opacity: 0.4;
+    }
+
+    74% {
+      opacity: 1;
+    }
+
+    78% {
+      opacity: 1;
+    }
+
+    80% {
+      opacity: 0.3;
+    }
+
+    82% {
+      opacity: 1;
+    }
+
+    90% {
+      opacity: 1;
+    }
+
+    92% {
+      opacity: 0.6;
+    }
+
+    93% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  /* Light theme neon sign — readable, subtle glow */
+  .neon-sign {
+    font-family: var(--font-display);
+    letter-spacing: 12px;
+    color: var(--comic-red);
+    text-shadow:
+      0 0 4px rgba(230, 57, 70, 0.5),
+      0 0 10px rgba(230, 57, 70, 0.3),
+      0 0 20px rgba(249, 115, 22, 0.15);
+    animation: neon-flicker 6s ease-in-out infinite;
+  }
+
+  /* Dark theme neon sign — softer glow, more readable */
+  .dark .neon-sign {
+    color: #7dd3e8;
+    text-shadow:
+      0 0 4px rgba(34, 211, 238, 0.4),
+      0 0 12px rgba(34, 211, 238, 0.25),
+      0 0 24px rgba(244, 114, 182, 0.15),
+      0 0 40px rgba(244, 114, 182, 0.08);
+  }
+
+  /* Hero gradient — instant background while Spline loads */
+  .hero-gradient {
+    background: linear-gradient(135deg, #fef9ef 0%, #fff7e6 30%, #fef3cd 60%, #fef9ef 100%);
+  }
+
+  .dark .hero-gradient {
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 40%, rgba(99, 102, 241, 0.15) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 75% 30%, rgba(168, 85, 247, 0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 50% 80%, rgba(56, 189, 248, 0.1) 0%, transparent 70%),
+      #0a0e1a;
+  }
+
+  /* Premium dark body background — applied sitewide */
+  .dark-premium-bg {
+    background-color: #0a0e1a;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, rgba(168, 85, 247, 0.06) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(56, 189, 248, 0.06) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(255, 77, 109, 0.05) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+
   /* Respect reduced motion preferences */
   @media (prefers-reduced-motion: reduce) {
+
     .animate-twinkle,
     .animate-pulse,
-    .animate-spin {
+    .animate-spin,
+    .animate-float,
+    .animate-wiggle {
       animation: none !important;
     }
 
@@ -522,5 +754,51 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+  }
+}
+
+/* ═══════════════════════════════════════
+   GENRE MARQUEE — Infinite scroll right-to-left
+   ═══════════════════════════════════════ */
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.genre-marquee-wrapper {
+  width: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.genre-marquee {
+  display: flex;
+  gap: 1.5rem;
+  width: max-content;
+  animation: marquee-scroll 40s linear infinite;
+  padding: 0.5rem 0;
+}
+
+.genre-marquee:hover {
+  animation-play-state: paused;
+}
+
+.genre-marquee-card {
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .genre-marquee {
+    animation: none !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
   }
 }
