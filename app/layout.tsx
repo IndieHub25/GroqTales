@@ -9,6 +9,8 @@ import { Inter, Comic_Neue } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from '@vercel/analytics/next';
 
 import ClientLayout from '@/components/client-layout';
 import { Footer } from '@/components/footer';
@@ -229,6 +231,8 @@ export default function RootLayout({
           </QueryProvider>
         </Web3Provider>
         <BackToTop />
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
