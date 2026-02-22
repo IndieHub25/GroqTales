@@ -60,6 +60,10 @@ temp.md
 *.wav
 *.flac
 
+# Font demo files
+another-danger-rohit/
+another-danger-rohit.zip
+
 # Generated files
 /public/sitemap*.xml
 /public/robots.txt
