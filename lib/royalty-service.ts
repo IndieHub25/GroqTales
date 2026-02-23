@@ -1,6 +1,4 @@
-import RoyaltyConfig, { IRoyaltyConfig } from '../models/RoyaltyConfig';
-import RoyaltyTransaction, { IRoyaltyTransaction } from '../models/RoyaltyTransaction';
-import CreatorEarnings, { ICreatorEarnings } from '../models/CreatorEarnings';
+import { createClient } from '@/lib/supabase/server';
 
 const WALLET_REGEX = /^0x[a-fA-F0-9]{40}$/;
 
@@ -17,10 +15,8 @@ interface ConfigureRoyaltyParams {
   royaltyPercentage: number;
 }
 
-export async function configureRoyalty(
-  params: ConfigureRoyaltyParams
-): Promise<IRoyaltyConfig> {
-  const { nftId, storyId, creatorWallet, royaltyPercentage } = params;
+export async function configureRoyalty(params: ConfigureRoyaltyParams) {
+  const { storyId, creatorWallet, royaltyPercentage } = params;
 
   if (!isValidWallet(creatorWallet)) {
     throw new Error('Invalid creator wallet address');
@@ -30,30 +26,30 @@ export async function configureRoyalty(
     throw new Error('Royalty percentage must be between 0 and 50');
   }
 
-  if (!nftId && !storyId) {
-    throw new Error('Either nftId or storyId is required');
+  if (!storyId) {
+    throw new Error('storyId is required for Supabase royalty configs');
   }
 
-  // Filter on nftId or storyId alone to ensure unique config per asset
-  const filter: Record<string, unknown> = {};
-  if (nftId) {
-    filter.nftId = nftId;
-  } else if (storyId) {
-    filter.storyId = storyId;
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('royalty_configs')
+    .upsert(
+      {
+        story_id: storyId,
+        creator_percentage: royaltyPercentage,
+        platform_percentage: 2.5, // default
+        updated_at: new Date().toISOString()
+      },
+      { onConflict: 'story_id' }
+    )
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to configure royalty: ${error.message}`);
   }
 
-  const config = await RoyaltyConfig.findOneAndUpdate(
-    filter,
-    {
-      ...filter,
-      creatorWallet: creatorWallet.toLowerCase(),
-      royaltyPercentage,
-      isActive: true,
-    },
-    { upsert: true, new: true, runValidators: true }
-  );
-
-  return config;
+  return data;
 }
 
 // ── Record Royalty Transaction ─────────────────────────────────────
@@ -66,63 +62,70 @@ interface RecordTransactionParams {
   txHash?: string;
 }
 
-export async function recordRoyaltyTransaction(
-  params: RecordTransactionParams
-): Promise<IRoyaltyTransaction> {
-  const { nftId, salePrice, sellerWallet, buyerWallet, txHash } = params;
+export async function recordRoyaltyTransaction(params: RecordTransactionParams) {
+  const { nftId, salePrice, txHash } = params;
 
   if (salePrice <= 0) {
     throw new Error('Sale price must be greater than 0');
   }
 
-  if (!isValidWallet(sellerWallet) || !isValidWallet(buyerWallet)) {
-    throw new Error('Invalid wallet address');
+  const supabase = createClient();
+
+  // Look up royalty config for this story (mapping nftId to storyId temporarily)
+  const { data: config, error: configError } = await (supabase
+    .from('royalty_configs')
+    .select('*')
+    .eq('story_id', nftId)
+    .single() as any);
+
+  if (configError || !config) {
+    throw new Error('No active royalty configuration found for this NFT/Story');
   }
 
-  // Look up royalty config for this NFT
-  const config = await RoyaltyConfig.findOne({
-    nftId,
-    isActive: true,
-  });
+  const royaltyAmount = salePrice * (config.creator_percentage / 100);
 
-  if (!config) {
-    throw new Error('No active royalty configuration found for this NFT');
+  // Step 1: Create transaction
+  const { data: transaction, error: txError } = await supabase
+    .from('royalty_transactions')
+    .insert({
+      story_id: nftId,
+      amount: salePrice,
+      currency: 'MON',
+      type: 'secondary_sale',
+      tx_hash: txHash,
+      status: 'completed'
+    })
+    .select()
+    .single();
+
+  if (txError) {
+    throw new Error(`Failed to record transaction: ${txError.message}`);
   }
 
-  const royaltyAmount = salePrice * (config.royaltyPercentage / 100);
+  // Step 2: Update creator earnings
+  // In a robust system this would use an RPC call or edge function for atomicity
+  const { data: existingEarnings } = await (supabase
+    .from('creator_earnings')
+    .select('*')
+    .eq('wallet_address', params.sellerWallet)
+    .single() as any);
 
-  // Step 1: Create transaction as pending
-  const transaction = await RoyaltyTransaction.create({
-    nftId,
-    salePrice,
-    royaltyAmount,
-    royaltyPercentage: config.royaltyPercentage,
-    sellerWallet: sellerWallet.toLowerCase(),
-    buyerWallet: buyerWallet.toLowerCase(),
-    creatorWallet: config.creatorWallet,
-    txHash,
-    status: 'pending',
-  });
-
-  try {
-    // Step 2: Update creator earnings atomically
-    await CreatorEarnings.findOneAndUpdate(
-      { creatorWallet: config.creatorWallet },
-      {
-        $inc: { totalEarned: royaltyAmount, pendingPayout: royaltyAmount, totalSales: 1 },
-        $set: { lastUpdated: new Date() },
-      },
-      { upsert: true }
-    );
-
-    // Step 3: Mark transaction as completed
-    transaction.status = 'completed';
-    await transaction.save();
-  } catch (earningsError) {
-    // If earnings update fails, mark transaction as failed
-    transaction.status = 'failed';
-    await transaction.save();
-    throw earningsError;
+  if (existingEarnings) {
+    await supabase
+      .from('creator_earnings')
+      .update({
+        total_earned: Number(existingEarnings.total_earned || 0) + royaltyAmount,
+        available_to_claim: Number(existingEarnings.available_to_claim || 0) + royaltyAmount,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', existingEarnings.id);
+  } else {
+    // We would need creator_id (uuid) ideally, but we default to null if not found
+    await supabase.from('creator_earnings').insert({
+      wallet_address: params.sellerWallet,
+      total_earned: royaltyAmount,
+      available_to_claim: royaltyAmount
+    });
   }
 
   return transaction;
@@ -138,18 +141,30 @@ const DEFAULT_EARNINGS = {
   lastUpdated: null,
 };
 
-export async function getCreatorEarnings(
-  walletAddress: string
-): Promise<ICreatorEarnings | typeof DEFAULT_EARNINGS> {
+export async function getCreatorEarnings(walletAddress: string) {
   if (!isValidWallet(walletAddress)) {
     throw new Error('Invalid wallet address');
   }
 
-  const earnings = await CreatorEarnings.findOne({
-    creatorWallet: walletAddress.toLowerCase(),
-  });
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('creator_earnings')
+    .select('*')
+    .eq('wallet_address', walletAddress.toLowerCase())
+    .single();
 
-  return earnings || { ...DEFAULT_EARNINGS, creatorWallet: walletAddress.toLowerCase() };
+  if (error || !data) {
+    return { ...DEFAULT_EARNINGS, creatorWallet: walletAddress.toLowerCase() };
+  }
+
+  return {
+    totalEarned: data.total_earned || 0,
+    pendingPayout: data.available_to_claim || 0,
+    paidOut: (data.total_earned || 0) - (data.available_to_claim || 0),
+    totalSales: 0, // Not explicitly tracked in simple schema
+    lastUpdated: data.updated_at,
+    creatorWallet: data.wallet_address
+  };
 }
 
 // ── Get Creator Transactions ───────────────────────────────────────
@@ -160,18 +175,10 @@ interface TransactionQueryOptions {
   status?: 'pending' | 'completed' | 'failed';
 }
 
-interface PaginatedTransactions {
-  transactions: IRoyaltyTransaction[];
-  total: number;
-  page: number;
-  totalPages: number;
-  limit: number;
-}
-
 export async function getCreatorTransactions(
   walletAddress: string,
   options: TransactionQueryOptions = {}
-): Promise<PaginatedTransactions> {
+) {
   if (!isValidWallet(walletAddress)) {
     throw new Error('Invalid wallet address');
   }
@@ -180,24 +187,29 @@ export async function getCreatorTransactions(
   const limit = Math.min(100, Math.max(1, options.limit || 10));
   const skip = (page - 1) * limit;
 
-  const filter: Record<string, unknown> = {
-    creatorWallet: walletAddress.toLowerCase(),
-  };
+  const supabase = createClient();
+
+  let query = supabase
+    .from('royalty_transactions')
+    .select('*, stories!inner(creator_wallet_address)', { count: 'exact' })
+    .eq('stories.creator_wallet_address', walletAddress.toLowerCase());
+
   if (options.status) {
-    filter.status = options.status;
+    query = query.eq('status', options.status);
   }
 
-  const [transactions, total] = await Promise.all([
-    RoyaltyTransaction.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    RoyaltyTransaction.countDocuments(filter),
-  ]);
+  const { data: transactions, count, error } = await query
+    .order('created_at', { ascending: false })
+    .range(skip, skip + limit - 1);
+
+  if (error) {
+    throw new Error(`Failed to fetch transactions: ${error.message}`);
+  }
+
+  const total = count || 0;
 
   return {
-    transactions: transactions as IRoyaltyTransaction[],
+    transactions: transactions || [],
     total,
     page,
     totalPages: Math.ceil(total / limit) || 1,
@@ -213,28 +225,16 @@ interface GetConfigParams {
   creatorWallet?: string;
 }
 
-export async function getRoyaltyConfig(
-  params: GetConfigParams
-): Promise<IRoyaltyConfig | IRoyaltyConfig[] | null> {
-  const filter: Record<string, unknown> = {};
+export async function getRoyaltyConfig(params: GetConfigParams) {
+  const supabase = createClient();
+  let query = supabase.from('royalty_configs').select('*');
 
-  if (params.nftId) filter.nftId = params.nftId;
-  if (params.storyId) filter.storyId = params.storyId;
-  if (params.creatorWallet) {
-    if (!isValidWallet(params.creatorWallet)) {
-      throw new Error('Invalid wallet address');
-    }
-    filter.creatorWallet = params.creatorWallet.toLowerCase();
+  if (params.storyId || params.nftId) {
+    query = query.eq('story_id', params.storyId || params.nftId);
+    const { data: singleData } = await query.single();
+    return singleData || null;
   }
 
-  if (Object.keys(filter).length === 0) {
-    throw new Error('At least one filter parameter is required');
-  }
-
-  // Single lookup for nftId or storyId, list for creatorWallet
-  if (params.nftId || params.storyId) {
-    return RoyaltyConfig.findOne(filter);
-  }
-
-  return RoyaltyConfig.find(filter);
+  const { data } = await query;
+  return data || [];
 }

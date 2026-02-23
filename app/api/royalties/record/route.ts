@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+
+import { createClient } from '@/lib/supabase/server';
 import dbConnect from '@/lib/dbConnect';
 import { recordRoyaltyTransaction } from '@/lib/royalty-service';
 
@@ -10,15 +9,16 @@ import { recordRoyaltyTransaction } from '@/lib/royalty-service';
  * Record a royalty transaction when an NFT sale occurs.
  * Protected: requires authenticated session or internal API key.
  */
-export async function POST(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    // Allow access if: user is authenticated OR internal API key matches
-    const session = await getServerSession(authOptions);
-    const apiKey = request.headers.get('x-internal-api-key');
-    const expectedKey = process.env.INTERNAL_API_KEY;
-    const isInternalCall = expectedKey && apiKey === expectedKey;
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
 
-    if (!session && !isInternalCall) {
+    // Internal API bypass (for webhooks or system services)
+    const authHeader = req.headers.get('authorization');
+    const isSystemCall = authHeader === `Bearer ${process.env.INTERNAL_API_KEY} `;
+
+    if (!isSystemCall && (!session || !session.user)) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     let body;
     try {
-      body = await request.json();
+      body = await req.json();
     } catch {
       return NextResponse.json(
         { success: false, error: 'Invalid JSON' },
@@ -47,9 +47,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!mongoose.Types.ObjectId.isValid(nftId)) {
+    if (typeof nftId !== 'string') {
       return NextResponse.json(
-        { success: false, error: 'Invalid nftId' },
+        { success: false, error: 'Invalid nftId format' },
         { status: 400 }
       );
     }

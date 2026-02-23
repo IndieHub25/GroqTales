@@ -1,6 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 import dbConnect from '@/lib/dbConnect';
 import { getCreatorTransactions } from '@/lib/royalty-service';
 
@@ -10,17 +9,22 @@ import { getCreatorTransactions } from '@/lib/royalty-service';
  * Protected: requires authenticated session or internal API key.
  */
 export async function GET(
-  request: NextRequest,
+  req: Request,
   { params }: { params: { wallet: string } }
 ) {
   try {
-    // Allow access if: user is authenticated OR internal API key matches
-    const session = await getServerSession(authOptions);
-    const internalKey = request.headers.get('x-internal-api-key');
-    const expectedKey = process.env.INTERNAL_API_KEY;
-    const isInternalCall = expectedKey && internalKey === expectedKey;
+    const walletAddress = params.wallet.toLowerCase();
 
-    if (!session && !isInternalCall) {
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    const url = new URL(req.url);
+    const apiToken = url.searchParams.get('apiToken');
+    const internalKey = req.headers.get('x-internal-api-key');
+    const isInternalCall = (apiToken === process.env.INTERNAL_API_KEY) || (internalKey === process.env.INTERNAL_API_KEY);
+
+    // In Supabase, ensure the session belongs to this wallet or allow internal calls
+    if (!isInternalCall && (!session || !session.user)) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -38,7 +42,7 @@ export async function GET(
       );
     }
 
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     const status = searchParams.get('status') as

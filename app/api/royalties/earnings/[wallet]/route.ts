@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+
 import dbConnect from '@/lib/dbConnect';
 import { getCreatorEarnings } from '@/lib/royalty-service';
+import { createClient } from '@/lib/supabase/server';
 
 /**
  * GET /api/royalties/earnings/[wallet]
@@ -10,13 +10,17 @@ import { getCreatorEarnings } from '@/lib/royalty-service';
  * Protected: requires authenticated session or internal API key.
  */
 export async function GET(
-  request: NextRequest,
+  req: Request,
   { params }: { params: { wallet: string } }
 ) {
   try {
+    const walletAddress = params.wallet.toLowerCase();
+
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
     // Allow access if: user is authenticated OR internal API key matches
-    const session = await getServerSession(authOptions);
-    const internalKey = request.headers.get('x-internal-api-key');
+    const internalKey = (req as NextRequest).headers.get('x-internal-api-key');
     const expectedKey = process.env.INTERNAL_API_KEY;
     const isInternalCall = expectedKey && internalKey === expectedKey;
 

@@ -31,8 +31,9 @@ const RoyaltyConfigSchema = new Schema<IRoyaltyConfig>({
 
 RoyaltyConfigSchema.index({ creatorWallet: 1, storyId: 1 });
 
-export const RoyaltyConfig: Model<IRoyaltyConfig> =
-  mongoose.models.RoyaltyConfig ||
-  mongoose.model<IRoyaltyConfig>('RoyaltyConfig', RoyaltyConfigSchema);
+// export const RoyaltyConfig: Model<IRoyaltyConfig> =
+//   mongoose.models.RoyaltyConfig ||
+//   mongoose.model<IRoyaltyConfig>('RoyaltyConfig', RoyaltyConfigSchema);
 
+export const RoyaltyConfig = null as any;
 export default RoyaltyConfig;

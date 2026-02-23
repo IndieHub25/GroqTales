@@ -46,7 +46,7 @@ describe('Footer', () => {
 
   it('displays the GroqTales brand name', () => {
     render(<Footer />);
-    expect(screen.getByText('GroqTales', { selector: 'h3' })).toBeInTheDocument();
+    expect(screen.getByText('GroqTales', { selector: 'h2' })).toBeInTheDocument();
   });
 
   it('displays the brand tagline', () => {

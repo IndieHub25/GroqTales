@@ -9,6 +9,8 @@ import { Inter, Comic_Neue } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from '@vercel/analytics/next';
 
 import ClientLayout from '@/components/client-layout';
 import { Footer } from '@/components/footer';
@@ -101,22 +103,8 @@ export const metadata: Metadata = {
     'Create, mint, and share AI-generated stories as NFTs on the Monad blockchain.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'https://groqtales.com'),
   icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      {
-        url: '/android-chrome-192x192.png',
-        sizes: '192x192',
-        type: 'image/png',
-      },
-      {
-        url: '/android-chrome-512x512.png',
-        sizes: '512x512',
-        type: 'image/png',
-      },
-    ],
-    apple: '/apple-touch-icon.png',
+    icon: '/logo.png',
+    apple: '/logo.png',
   },
   openGraph: {
     title: 'GroqTales',
@@ -181,11 +169,6 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
         <Script
-          id="comic-dots"
-          src="/comic-dots-animation.js"
-          strategy="afterInteractive"
-        />
-        <Script
           id="performance-fix"
           src="/performance-fix.js"
           strategy="afterInteractive"
@@ -230,7 +213,7 @@ export default function RootLayout({
             >
               <AnimatedLayout>
                 <ClientLayout>
-                  <div className="min-h-screen bg-background flex flex-col">
+                  <div className="min-h-screen bg-background dark:dark-premium-bg flex flex-col">
                     <Header />
                     <main
                       id="main-content"
@@ -248,6 +231,8 @@ export default function RootLayout({
           </QueryProvider>
         </Web3Provider>
         <BackToTop />
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

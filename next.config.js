@@ -10,6 +10,9 @@ const nextConfig = {
   swcMinify: true,
   poweredByHeader: false,
 
+  // Transpile Spline packages to fix "Super constructor null" error in production
+  transpilePackages: ['@splinetool/react-spline', '@splinetool/runtime'],
+
   // Performance optimizations
   compress: true,
   optimizeFonts: true,
