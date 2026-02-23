@@ -24,6 +24,7 @@ Active full support: 1.3.5 (latest), 1.3.0 (previous). Security maintenance (cri
 
 ### Fixed
 
+- **Vercel Deployment Crash (npm ci)**: Switched Vercel install command from `npm ci` to `npm install --legacy-peer-deps` permanently due to persistent ERESOLVE and missing dependency errors in lockfile synchronization within the Vercel build environment.
 - **Vercel Deployment Crash (Spline 3D)**: Added `transpilePackages` for `@splinetool/react-spline` and `@splinetool/runtime` in `next.config.js` so Next.js properly compiles Spline's class inheritance chain through its SWC pipeline instead of treating them as pre-compiled externals
 - **Resilient Spline Loading**: Added `.catch()` fallback to the Spline dynamic import in `app/page.tsx` — if the 3D model fails to load in any environment, the page gracefully degrades to the gradient background instead of crashing
 - **Featured Creators Validation**: `components/featured-creators.tsx` now validates creator-shaped objects (requires `username`/`followersCount`/`profileImage`) instead of fabricating metadata; non-matching items are filtered out
