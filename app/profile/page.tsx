@@ -144,7 +144,7 @@ export default function ProfilePage() {
         setLoading(true);
 
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile`,
+          `/api/v1/users/profile`,
           { credentials: 'include', signal: controller.signal }
         );
         if (!res.ok) throw new Error();

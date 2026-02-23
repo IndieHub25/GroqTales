@@ -117,7 +117,7 @@ export default function SettingsPage() {
     async function hydrate() {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile`,
+          `/api/v1/users/profile`,
           {
             credentials: 'include',
             signal: controller.signal,
@@ -181,7 +181,7 @@ export default function SettingsPage() {
   const savePreferences = async () => {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings/preferences`,
+        `/api/v1/settings/preferences`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },

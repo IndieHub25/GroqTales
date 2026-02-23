@@ -39,7 +39,7 @@ export default function ProfilePage() {
         setError(false);
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile/${walletFromUrl}`,
+          `/api/v1/users/profile/${walletFromUrl}`,
           { signal }
         );
         if (!response.ok) throw new Error('Failed to load');

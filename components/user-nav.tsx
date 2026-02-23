@@ -55,7 +55,7 @@ export function UserNav() {
     const fetchUserData = async () => {
       if (account) {
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile/${account}`);
+          const res = await fetch(`/api/v1/users/profile/${account}`);
           if (res.ok) {
             const data = await res.json();
             setDbUser(data.user);
@@ -92,7 +92,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" aria-label="User menu" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-             <AvatarImage src={dbUser?.avatar || "/avatars/default.png"} alt="User Avatar" />
+             <AvatarImage src={dbUser?.avatar || `https://api.dicebear.com/7.x/personas/svg?seed=${dbUser?.username || "You"}`} alt="User Avatar" />
             <AvatarFallback>{dbUser?.username?.slice(0, 2).toUpperCase() || "U"}</AvatarFallback>
           </Avatar>
         </Button>
@@ -124,7 +124,7 @@ export function UserNav() {
               className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all"
             >
               <Link
-                href="/my-stories"
+                href={`/profile/${account || session?.user?.id}`}
                 className="flex items-center w-full uppercase py-2"
               >
                 <BookOpen className="mr-2 h-4 w-4" />

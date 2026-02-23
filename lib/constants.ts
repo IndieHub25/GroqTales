@@ -13,7 +13,7 @@ export const APP_CONFIG = {
  * API configuration
  */
 export const API_CONFIG = {
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || '/api',
+  baseUrl: '/api',
   timeout: 30000,
   retryAttempts: 3,
   endpoints: {

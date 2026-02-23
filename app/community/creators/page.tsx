@@ -437,7 +437,7 @@ export default function CreatorsPage() {
 
           <div className="flex flex-col min-[400px]:flex-row gap-2 min-[400px]:justify-between mt-6">
             <Button variant="outline" size="sm" asChild className="w-full min-[400px]:w-auto">
-              <Link href={`/community/creators/${creator.id}`}>
+              <Link href={`/profile/${creator.username.replace('@', '')}`}>
                 View Profile
                 <ChevronRight className="ml-1 h-4 w-4" />
               </Link>
