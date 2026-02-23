@@ -3,7 +3,7 @@
 <p align="center">Create, share, and own AI-generated stories and comics as NFTs on the Monad blockchain.</p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.3.5-blue?style=flat-square" alt="Version"/>
+  <img src="https://img.shields.io/badge/version-1.3.7-blue?style=flat-square" alt="Version"/>
   <img src="https://img.shields.io/github/deployments/Drago-03/GroqTales/Production?label=deploy%20(prod)&logo=vercel&style=flat-square" alt="Production Deployment"/>
   <img src="https://img.shields.io/github/deployments/Drago-03/GroqTales/Preview?label=deploy%20(preview)&logo=vercel&style=flat-square" alt="Preview Deployments"/>
   <img src="https://img.shields.io/github/actions/workflow/status/Drago-03/GroqTales/ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"/>
