@@ -80,9 +80,20 @@ export default function WalletConnect() {
     window.open(`${explorerUrl}/address/${account}`, '_blank');
   }, [account, chainId]);
 
-  const handleConnect = async () => {
+  const handleMetaMaskConnect = async () => {
     setShowWalletModal(false);
     await connectWallet();
+  };
+
+  const handleWalletConnect = async () => {
+    setShowWalletModal(false);
+    // Placeholder for actual WalletConnect v2 initialization
+    toast({
+      title: 'WalletConnect Initialization',
+      description: 'Opening mobile QR scan modal...',
+    });
+    console.log("Initiating WalletConnect mobile flow...");
+    // await initiateWalletConnectFlow()
   };
 
   if (!connected) {
@@ -121,7 +132,7 @@ export default function WalletConnect() {
 
             <div className="p-6 space-y-3 relative z-10 bg-white/[0.02]">
               <button 
-                onClick={handleConnect}
+                onClick={handleMetaMaskConnect}
                 className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group"
               >
                 <div className="flex items-center gap-4">
@@ -139,7 +150,7 @@ export default function WalletConnect() {
               </button>
 
               <button 
-                onClick={handleConnect}
+                onClick={handleWalletConnect}
                 className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group"
               >
                 <div className="flex items-center gap-4">

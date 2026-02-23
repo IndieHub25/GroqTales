@@ -26,7 +26,7 @@ export function UserNav() {
   const { toast } = useToast();
   const [dbUser, setDbUser] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
-  const supabase = createClient();
+  const supabase = React.useMemo(() => createClient(), []);
 
   useEffect(() => {
     // Check Supabase session

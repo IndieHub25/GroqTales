@@ -151,9 +151,8 @@ export default function SignInPage() {
             </div>
             
             <div className="space-y-1.5">
-              <div className="flex justify-between items-center ml-1">
+              <div className="flex justify-start items-center ml-1">
                 <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-white/60">Password</Label>
-                <Link href="/forgot-password" className="text-[11px] font-medium text-white/40 hover:text-white transition-colors duration-200">Forgot password?</Link>
               </div>
               <div className={`relative flex items-center transition-all duration-300 rounded-2xl border ${focusedField === 'password' ? 'border-white/40 bg-white/10' : 'border-white/10 bg-white/5'}`}>
                 <Lock className={`absolute left-4 w-4 h-4 transition-colors duration-300 ${focusedField === 'password' ? 'text-white' : 'text-white/40'}`} />

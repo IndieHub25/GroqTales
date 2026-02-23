@@ -1,24 +1,19 @@
-<h1 align="center">GroqTales</h1>
+<h1 align="center">
+  <img src="public/logo.png" alt="GroqTales Logo" width="150" />
+  <br />
+  GroqTales
+</h1>
 <p align="center"><b>AI-Powered Web3 Storytelling Platform</b></p>
 <p align="center">Create, share, and own AI-generated stories and comics as NFTs on the Monad blockchain.</p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.3.7-blue?style=flat-square" alt="Version"/>
-  <img src="https://img.shields.io/github/deployments/Drago-03/GroqTales/Production?label=deploy%20(prod)&logo=vercel&style=flat-square" alt="Production Deployment"/>
-  <img src="https://img.shields.io/github/deployments/Drago-03/GroqTales/Preview?label=deploy%20(preview)&logo=vercel&style=flat-square" alt="Preview Deployments"/>
-  <img src="https://img.shields.io/github/actions/workflow/status/Drago-03/GroqTales/ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"/>
-  <img src="https://img.shields.io/github/last-commit/Drago-03/GroqTales?style=flat-square" alt="Last Commit"/>
-  <img src="https://img.shields.io/github/commit-activity/m/Drago-03/GroqTales?style=flat-square" alt="Commit Activity"/>
   <img src="https://img.shields.io/github/issues/Drago-03/GroqTales?style=flat-square" alt="Open Issues"/>
   <img src="https://img.shields.io/github/issues-pr/Drago-03/GroqTales?style=flat-square" alt="Open PRs"/>
   <img src="https://img.shields.io/github/license/Drago-03/GroqTales?style=flat-square" alt="License"/>
-  <img src="https://img.shields.io/badge/status-active-brightgreen?style=flat-square" alt="Active"/>
-  <img src="https://img.shields.io/badge/contributions-welcome-blueviolet?style=flat-square" alt="Contributions Welcome"/>
   <img src="https://img.shields.io/badge/website-groqtales.xyz-0052cc?style=flat-square" alt="Website"/>
   <a href="mailto:mantejarora@gmail.com"><img src="https://img.shields.io/badge/contact-mantejarora%40gmail.com-orange?style=flat-square" alt="Contact Us"/></a>
   <a href="https://discord.gg/JK29FZRm"><img src="https://img.shields.io/discord/1245696768829601812?label=Discord&logo=discord&style=flat-square" alt="Discord"/></a>
 </p>
-
 <p align="center">
   <img src="https://img.shields.io/badge/SWOC'26-Open%20Source-orange?style=flat-square" alt="SWOC'26"/>
   <img src="https://img.shields.io/badge/OSGC'26-Open%20Source-purple?style=flat-square" alt="OSGC'26"/>
@@ -31,6 +26,18 @@
   <img src="https://img.shields.io/badge/Open%20Source%20Community-Welcome-0052cc?style=flat-square" alt="Open Source Community"/>
   <img src="https://img.shields.io/badge/Investment%20Partners-Applications%20Open-0052cc?style=flat-square" alt="Investment Partners"/>
 </p>
+  <b>Built by Indie Hub</b> ✨
+</p>
+
+<div align="center">
+  <a href="https://github.com/IndieHub25/GroqTales/stargazers">
+    <img src="https://img.shields.io/github/stars/IndieHub25/GroqTales?style=social" alt="Star on GitHub" />
+  </a>
+  <br />
+  ⭐ <b>If you like this project, please consider giving it a star!</b> ⭐
+</div>
+
+<br />
 
 <p align="center">
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&duration=4000&pause=600&color=F97316&center=true&vCenter=true&width=800&lines=---+AI-powered+Web3+Storytelling+on+the+Monad+Blockchain+---" alt="Animated Divider" />

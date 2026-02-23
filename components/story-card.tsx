@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, memo } from 'react';
 
-import StoryCommentsDialog from '@/components/story-comments-dialog';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -59,7 +59,6 @@ export const StoryCard = memo(function StoryCard({
   isAdmin = false,
 }: StoryCardProps) {
   const router = useRouter();
-  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -100,18 +99,19 @@ export const StoryCard = memo(function StoryCard({
     <>
       <div 
         className={cn(
-          "relative perspective-1000 w-full",
+          "relative w-full",
           isGrid ? "h-[420px]" : "h-[200px]"
         )}
+        style={{ perspective: '1000px' }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => { setIsHovered(false); setIsFlipped(false); }}
       >
         <motion.div
-          className="w-full h-full relative preserve-3d cursor-pointer"
+          className="w-full h-full relative cursor-pointer"
           animate={{ rotateY: isFlipped ? 180 : 0, scale: isHovered ? 1.02 : 1 }}
           transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
           style={{ transformStyle: 'preserve-3d' }}
-          onClick={() => isGrid && setIsFlipped(!isFlipped)}
+          onClick={() => isGrid ? setIsFlipped(!isFlipped) : handleViewNFT()}
         >
           {/* Front of Card */}
           <div 
@@ -222,14 +222,6 @@ export const StoryCard = memo(function StoryCard({
         </motion.div>
       </div>
 
-      <StoryCommentsDialog
-        isOpen={isCommentsOpen}
-        onClose={() => setIsCommentsOpen(false)}
-        storyTitle={story.title}
-        storyId={story.id}
-        isWalletConnected={isWalletConnected}
-        isAdmin={isAdmin}
-      />
     </>
   );
 });

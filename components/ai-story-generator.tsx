@@ -789,7 +789,7 @@ export default function AIStoryGenerator({
                 )}
               </AnimatePresence>
 
-              <div className={`flex-1 relative ${activeTab === "input" ? "block" : "hidden lg:block"} space-y-8 mt-0`}>
+              <div className={`flex-1 relative ${activeTab === "input" ? "block" : "hidden"} space-y-8 mt-0`}>
                 {/* Core Prompt Section */}
                 <div className="space-y-4">
                   <label className="font-semibold tracking-wide text-2xl flex items-center gap-2">
@@ -800,7 +800,7 @@ export default function AIStoryGenerator({
                     <div className="absolute -inset-1 bg-black rounded-2xl translate-x-2 translate-y-2 group-hover:translate-x-1 group-hover:translate-y-1 transition-transform" />
                     <Textarea
                       placeholder="Enter your prompt here... (e.g., A cyberpunk detective hunting a ghost in the machine)"
-                      className="relative bg-white border border-white/10 rounded-xl p-6 text-lg font-medium min-h-[150px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0 selection:bg-emerald-500 hover:bg-emerald-400 text-black selection:text-black"
+                      className="relative bg-white border border-white/10 rounded-xl p-6 text-lg font-medium min-h-[150px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0 selection:bg-emerald-500 hover:border-emerald-400 text-black selection:text-black"
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                     />
@@ -2048,7 +2048,7 @@ export default function AIStoryGenerator({
                 <div className="flex justify-end pt-4">
                   <Button
                     onClick={handleGenerate}
-                    className="bg-rose-500/20 text-rose-300 hover:bg-red-600 text-white font-semibold tracking-wide text-3xl px-10 py-8 rounded-2xl border border-white/10 shadow-2xl shadow-black/50 active:translate-x-[4px] active:translate-y-[4px] active:shadow-2xl shadow-black/50 transition-all w-full md:w-auto group"
+                    className="bg-rose-500/20 hover:bg-red-600 text-white font-semibold tracking-wide text-3xl px-10 py-8 rounded-2xl border border-white/10 shadow-2xl shadow-black/50 active:translate-x-[4px] active:translate-y-[4px] active:shadow-2xl active:shadow-black/50 transition-all w-full md:w-auto group"
                   >
                     <Sparkles className="mr-3 h-8 w-8 group-hover:animate-spin" />
                     GENERATE STORY!

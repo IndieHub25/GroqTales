@@ -68,11 +68,11 @@ export async function GET(req: Request) {
       data: stories,
       meta: { page, limit, type: userId ? 'personalized' : 'trending' },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Feed Error:', error);
     return NextResponse.json({
       data: [],
-      meta: { page: 1, limit: 6, type: 'error' }
-    });
+      meta: { page: 1, limit: 6, type: 'error', message: error?.message || 'Internal Server Error' }
+    }, { status: 500 });
   }
 }

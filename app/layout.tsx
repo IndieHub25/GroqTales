@@ -234,9 +234,11 @@ export default function RootLayout({
                       tabIndex={-1}
                       className="container mx-auto px-4 py-6 flex-grow focus:outline-2 focus:outline-primary"
                     >
-                      <GlobalLoadingWrapper>
-                        {children}
-                      </GlobalLoadingWrapper>
+                      <React.Suspense fallback={null}>
+                        <GlobalLoadingWrapper>
+                          {children}
+                        </GlobalLoadingWrapper>
+                      </React.Suspense>
                     </main>
                     <Footer version={appVersion} />
                   </div>

@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import LoadingScreen from '@/components/loading-screen';
 
 export function GlobalLoadingWrapper({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const isInitialMount = React.useRef(true);
 
@@ -41,7 +40,7 @@ export function GlobalLoadingWrapper({ children }: { children: React.ReactNode }
       mounted = false;
       clearTimeout(timer);
     };
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   return (
     <>

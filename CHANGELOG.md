@@ -11,6 +11,12 @@ Active full support: 1.3.7 (latest), 1.3.5 (previous). Security maintenance (cri
 
 ## [1.3.7] - 2026-02-24
 
+### Bug Fixes & Documentation
+
+- **Merge Conflicts Resolved**: Resolved UI and structural conflicts in `app/dashboard/page.tsx`, `app/nft-gallery/page.tsx`, `app/stories/[id]/page.tsx`, `components/ai-story-generator.tsx`, `components/community-feed.tsx`, and `components/header.tsx` by adopting the latest local cinematic UI redesigns over `origin/main`.
+- **README Modernization**: Replaced top deployment badges with a clean GroqTales logo-centered layout, added "Built by Indie Hub" credit, and integrated a GitHub stargazers request to improve premium branding.
+- **Wiki Standardization**: Injected the GroqTales logo header systematically across all Markdown files in the `wiki/` directory for visual consistency.
+
 ### Major Features - Cinematic Page Overhauls & Auth Flow
 
 - **Authentication Shift**: Migrated explicit "Connect Wallet" main navigation interaction to a comprehensive, dedicated Auth flow using Supabase.

@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Heart, ThumbsUp, ThumbsDown, Eye, Share, PenSquare, 
-  MessageSquare, Award, Star, Calendar, Cpu, VerifiedIcon, BookOpen, Hexagon
+  MessageSquare, Award, Star, Calendar, Cpu, VerifiedIcon, BookOpen, Hexagon, Sparkles
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -40,6 +40,7 @@ export default function StoryPage({ params }: { params: { id: string } }) {
   const [downvotes, setDownvotes] = useState(0);
   const [isSharing, setIsSharing] = useState(false);
   const [readingMode, setReadingMode] = useState(false);
+  const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
 
   const { toast } = useToast();
   const { account } = useWeb3();
@@ -73,7 +74,8 @@ export default function StoryPage({ params }: { params: { id: string } }) {
       }
     };
     fetchData();
-  }, [params.id, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.id]);
 
   const handleVote = (type: 'upvote' | 'downvote') => {
     if (!account) { toast({ title: 'Wallet Required', description: 'Connect your wallet to vote.' }); return; }
@@ -109,7 +111,18 @@ export default function StoryPage({ params }: { params: { id: string } }) {
 
   const handleCommentLike = (commentId: string) => {
     if (!account) { toast({ title: 'Wallet Required', description: 'Connect wallet to like.' }); return; }
-    setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes: c.likes + 1 } : c));
+    
+    setLikedComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(commentId)) {
+        newSet.delete(commentId);
+        setComments(current => current.map(c => c.id === commentId ? { ...c, likes: Math.max(0, c.likes - 1) } : c));
+      } else {
+        newSet.add(commentId);
+        setComments(current => current.map(c => c.id === commentId ? { ...c, likes: c.likes + 1 } : c));
+      }
+      return newSet;
+    });
   };
 
   const handleShare = async () => {
@@ -358,7 +371,7 @@ export default function StoryPage({ params }: { params: { id: string } }) {
                               </div>
                               <p className="text-white/80 text-sm leading-relaxed mb-3">{comment.text}</p>
                               <Button variant="ghost" size="sm" onClick={() => handleCommentLike(comment.id)} disabled={!account} className="h-8 px-2 text-white/50 hover:text-emerald-400 hover:bg-white/5 -ml-2 rounded-lg">
-                                <Heart className={`h-3.5 w-3.5 mr-1.5 ${comment.likes > 0 ? 'fill-current text-emerald-400' : ''}`} /> {comment.likes}
+                                <Heart className={`h-3.5 w-3.5 mr-1.5 ${likedComments.has(comment.id) ? 'fill-current text-emerald-400' : ''}`} /> {comment.likes}
                               </Button>
                             </div>
                           </div>

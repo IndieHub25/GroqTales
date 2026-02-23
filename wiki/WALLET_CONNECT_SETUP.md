@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://www.groqtales.xyz/groq_tales_logo.png" alt="GroqTales Logo" width="150" />
+</p>
+
 # Setting Up WalletConnect for GroqTales
 
 This document provides guidance on how to properly set up WalletConnect for your GroqTales

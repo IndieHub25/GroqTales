@@ -79,13 +79,11 @@ export default function SignUpPage() {
 
   const handleGoogleSignUp = async () => {
     try {
+      localStorage.setItem('preferred_role', selectedRole || 'both');
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: {
-            preferred_role: selectedRole || 'both'
-          }
         },
       });
       if (error) throw error;

@@ -105,7 +105,10 @@ export default function CommunityFeed() {
 
   useEffect(() => {
     fetch('/api/feed?limit=20')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+        return r.json();
+      })
       .then(json => {
         const data = json.data || [];
         const mapped = data.map((story: any, i: number) => ({
@@ -132,9 +135,10 @@ export default function CommunityFeed() {
       .catch(err => {
         console.error('Failed to load feed:', err);
         setLoading(false);
-        toast({ title: 'Error loading feed', variant: 'destructive' });
+        toast({ title: 'Error loading feed', description: err.message, variant: 'destructive' });
       });
-  }, [toast]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleVote = (id: string, vote: 'up'|'down'|null) => {
     setPosts(prev => prev.map(p => {
@@ -148,7 +152,7 @@ export default function CommunityFeed() {
     }));
   };
 
-  const filtered = posts.filter(p => filter === 'all' || p.type === filter.slice(0, -1));
+  const filtered = posts.filter(p => filter === 'all' || p.type === (filter.endsWith('s') ? filter.slice(0, -1) : filter));
 
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-emerald-500/30">
