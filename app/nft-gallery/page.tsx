@@ -532,7 +532,7 @@ const NFTDetailModal = memo(function NFTDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 border-slate-200 dark:border-slate-800">
+      <DialogContent className="max-w-6xl p-8 max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 border-slate-200 dark:border-slate-800">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-foreground">{nft.title}</DialogTitle>
           <DialogDescription className="text-muted-foreground">
@@ -543,7 +543,7 @@ const NFTDetailModal = memo(function NFTDetailModal({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 py-4">
           {/* NFT Image Section */}
           <div className="space-y-4">
-            <div className="relative rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-800 aspect-[2/3] max-h-[500px]">
+            <div className="relative rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-800 aspect-[2/3] max-h-[500px] w-full">
               <Image
                 src={nft.coverImage}
                 alt={nft.title}
@@ -680,8 +680,6 @@ export default function NFTGalleryPage() {
   const [loading, setLoading] = useState(true);
   const [selectedNFT, setSelectedNFT] = useState<NFTStory | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-
 
   const { toast } = useToast();
   const { account, connected, connectWallet } = useWeb3();
@@ -844,8 +842,8 @@ export default function NFTGalleryPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2 flex items-center space-x-2">
-          <Palette className="h-8 w-8 text-primary" />
+        <h1 className="text-4xl font-bold mb-2 flex items-center gap-8">
+          <Palette className="h-8 w-8 mb-2 text-primary" />
           <span>NFT Story Gallery</span>
         </h1>
         <p className="text-muted-foreground">
@@ -854,7 +852,7 @@ export default function NFTGalleryPage() {
         </p>
       </div>
 
-      <div className="mb-8 space-y-4">
+      <div className="mb-14 space-y-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
@@ -948,10 +946,10 @@ export default function NFTGalleryPage() {
           <p className="text-sm text-muted-foreground">
             Showing {sortedNFTs.length} of {nfts.length} stories
           </p>
-          <div className="flex gap-2">
+          <div className="flex flex-row items-center gap-2">
             {!connected && (
               <Button onClick={connectWallet} variant="outline">
-                <Users className="w-4 h-4 mr-2" />
+                <Users className="w-4 h-4 mr-2 mb-2" />
                 Connect Wallet
               </Button>
             )}
@@ -959,7 +957,7 @@ export default function NFTGalleryPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence>
           {sortedNFTs.map((nft) => (
             <NFTCard

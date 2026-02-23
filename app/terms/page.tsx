@@ -9,11 +9,11 @@ import { Separator } from '@/components/ui/separator';
 import LegalHeader from "@/components/LegalHeader";
 
 // Floating GitHub button component
-const FloatingGithub = () => (
+export const FloatingGithub = () => (
   <Link
     href="https://github.com/Drago-03/GroqTales.git"
     target="_blank"
-    className="fixed bottom-24 right-6 p-3 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-50"
+    className="fixed bottom-28 right-10 p-3 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-50"
   >
     <Github className="w-6 h-6 text-white" />
   </Link>

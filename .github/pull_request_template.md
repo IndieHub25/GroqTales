@@ -2,7 +2,7 @@
 > Pull requests that do **not** follow this template may be **closed and marked as blocked** until updated.
 
 ---
-## 📝 Description
+## Description
 
 **Issue Reference (e.g. Fixes #123):** ---
 
@@ -17,7 +17,7 @@
 
 ---
 
-## 🏗️ Type of Change
+## Type of Change
 
 Select the relevant categories:
 
@@ -33,7 +33,7 @@ Select the relevant categories:
 
 ---
 
-## ⚙️ Technical Checklist
+## Technical Checklist
 
 Tick everything that applies. Leave non‑applicable items unchecked.
 
@@ -72,7 +72,7 @@ Tick everything that applies. Leave non‑applicable items unchecked.
 
 ---
 
-## 🧪 Testing Evidence
+## Testing Evidence
 
 Describe how you tested these changes. Include commands and logs where possible.
 
@@ -93,7 +93,7 @@ If this PR affects UI flows, also describe the manual test steps you followed.
 
 ---
 
-## 📸 Visual Proof (for UI / UX changes)
+## Visual Proof (for UI / UX changes)
 
 > Required for all visual changes. Attach screenshots or a short screen recording (GIF / video) that clearly shows:
 > - Before vs After (if applicable)
@@ -102,19 +102,19 @@ If this PR affects UI flows, also describe the manual test steps you followed.
 
 ---
 
-## 👤 Contributor Status
+## Contributor Status
 
 Tick all that apply to you for this PR:
 
 - [ ] I am an **open source indie contributor**.
 - [ ] I am an **ECWoC’26 contributor**.
-- [ ] I am an **OSGC’26 contributor**.
+- [ ] I am an **OSCG’26 contributor**.
 - [ ] I am a **SWOC’26 contributor**.
 - [ ] I am a **DSWOC'26 contributor**.
 
 ---
 
-## 🔁 Review & Impact
+## Review & Impact
 
 **Breaking Changes**
 - [ ] This PR introduces a breaking change (API / contract / DB).
@@ -130,7 +130,7 @@ Tick all that apply to you for this PR:
 
 ---
 
-## ✅ Final Acknowledgements (Mandatory or will be marked invalid)
+## Final Acknowledgements (Mandatory or will be marked invalid)
 
 You must check all of the following before requesting review. These are **required**:
 
