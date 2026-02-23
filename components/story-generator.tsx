@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2, BookOpen, Sparkles } from 'lucide-react';
+import { Loader2, BookOpen, Sparkles, Copy, Check } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,7 @@ export function StoryGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isMinting, setIsMinting] = useState(false);
   const [generatedStory, setGeneratedStory] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
   const { address } = useWallet();
 
@@ -128,6 +129,42 @@ export function StoryGenerator() {
     }
   };
 
+  const copyToClipboard = (text: string) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text)
+        .then(() => { setIsCopied(true); setTimeout(() => setIsCopied(false), 2000); })
+        .catch(() => fallbackCopy(text));
+    } else {
+      fallbackCopy(text);
+    }
+  };
+
+  const fallbackCopy = (text: string) => {
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      try {
+        textarea.focus();
+        textarea.select();
+        const success = document.execCommand('copy');
+        if (!success) throw new Error('execCommand failed');
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      } finally {
+        document.body.removeChild(textarea);
+      }
+    } catch {
+      toast({
+        title: 'Copy Failed',
+        description: 'Could not copy automatically. Please select the text and copy manually.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <Card className="p-6">
       <div className="space-y-4">
@@ -180,7 +217,20 @@ export function StoryGenerator() {
 
         {generatedStory && (
           <div className="mt-6 space-y-4">
-            <h3 className="text-lg font-semibold">Generated Story</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Generated Story</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copyToClipboard(generatedStory)}
+              >
+                {isCopied ? (
+                  <><Check className="mr-1 h-4 w-4" />Copied!</>
+                ) : (
+                  <><Copy className="mr-1 h-4 w-4" />Copy Story</>
+                )}
+              </Button>
+            </div>
             <div className="prose max-w-none bg-secondary/50 p-4 rounded-lg">
               <p>{generatedStory}</p>
             </div>

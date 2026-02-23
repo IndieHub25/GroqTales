@@ -21,7 +21,10 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch (e) {
-    return NextResponse.json({ success: false, error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: 'Invalid JSON' },
+      { status: 400 }
+    );
   }
 
   const { storyId } = body;
@@ -46,7 +49,10 @@ export async function POST(req: Request) {
   // }
 
   if (existingStory.status !== 'draft') {
-    return NextResponse.json({ success: false, error: 'Story is already published or processing' }, { status: 409 });
+    return NextResponse.json(
+      { success: false, error: 'Story is already published or processing' },
+      { status: 409 }
+    );
   }
 
   if (!existingStory.ipfs_hash) {
@@ -95,6 +101,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, storyId });
 
+    return NextResponse.json({ success: true, storyId });
   } catch (error: any) {
     console.error("Publish Error:", error);
 

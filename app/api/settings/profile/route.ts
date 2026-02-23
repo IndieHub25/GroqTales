@@ -38,7 +38,10 @@ export async function PATCH(req: Request) {
     const { username, displayName, bio, website, location, primaryGenre } = body;
 
     if (bio && bio.length > 500) {
-      return NextResponse.json({ error: "Bio exceeds 500 characters" }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Bio exceeds 500 characters' },
+        { status: 400 }
+      );
     }
 
     // Checking if username is taken would require a DB query if we enforced unique usernames across all users.

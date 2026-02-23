@@ -243,7 +243,7 @@ export default function StoryPage({ params }: { params: { id: string } }) {
   // Handle share
   const handleShare = async () => {
     setIsSharing(true);
-    
+
     trackInteraction('SHARE');
 
     try {
@@ -539,7 +539,10 @@ export default function StoryPage({ params }: { params: { id: string } }) {
                             >
                               <div className="flex space-x-4">
                                 <Avatar>
-                                  <AvatarImage src={comment.authorAvatar} alt={`${comment.author}'s avatar`} />
+                                  <AvatarImage
+                                    src={comment.authorAvatar}
+                                    alt={`${comment.author}'s avatar`}
+                                  />
                                   <AvatarFallback>
                                     {comment.author[0]}
                                   </AvatarFallback>

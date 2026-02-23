@@ -19,6 +19,8 @@ import {
   Target,
   Shield,
   Lightbulb,
+  Copy,
+  Check,
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
@@ -185,6 +187,7 @@ export default function AIStoryGenerator({
   const [activeTab, setActiveTab] = useState('input');
   const [isMinting, setIsMinting] = useState(false);
   const [mintSuccess, setMintSuccess] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   // Draft Recovery State
   const [recoveredDraft, setRecoveredDraft] = useState<StoryDraft | null>(null);
@@ -601,6 +604,47 @@ export default function AIStoryGenerator({
     }, 3000);
   };
 
+  const copyToClipboard = (text: string) => {
+    // Try modern Clipboard API first
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          setIsCopied(true);
+          setTimeout(() => setIsCopied(false), 2000);
+        })
+        .catch(() => fallbackCopy(text));
+    } else {
+      fallbackCopy(text);
+    }
+  };
+
+  const fallbackCopy = (text: string) => {
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      const success = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      if (success) {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      } else {
+        throw new Error('execCommand failed');
+      }
+    } catch {
+      toast({
+        title: 'COPY FAILED!',
+        description: 'Could not copy automatically. Please select the text and copy manually.',
+        variant: 'destructive',
+        className: 'font-bangers border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]',
+      });
+    }
+  };
+
   const resetForm = () => {
     setPrompt('');
     setSelectedGenres([]);
@@ -949,8 +993,8 @@ export default function AIStoryGenerator({
                                 key={trait}
                                 onClick={() => toggleTrait(trait)}
                                 className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${characterTraits.includes(trait)
-                                    ? 'bg-blue-400 text-white'
-                                    : 'bg-white text-black hover:bg-gray-100'
+                                  ? 'bg-blue-400 text-white'
+                                  : 'bg-white text-black hover:bg-gray-100'
                                   }`}
                               >
                                 {trait}
@@ -1568,8 +1612,8 @@ export default function AIStoryGenerator({
                                 key={theme}
                                 onClick={() => toggleTheme(theme.toLowerCase())}
                                 className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${secondaryThemes.includes(theme.toLowerCase())
-                                    ? 'bg-pink-400 text-white'
-                                    : 'bg-white text-black hover:bg-gray-100'
+                                  ? 'bg-pink-400 text-white'
+                                  : 'bg-white text-black hover:bg-gray-100'
                                   }`}
                               >
                                 {theme}
@@ -1925,8 +1969,8 @@ export default function AIStoryGenerator({
                                   }
                                 }}
                                 className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${avoidCliches.includes(trope.toLowerCase())
-                                    ? 'bg-red-400 text-white'
-                                    : 'bg-white text-black hover:bg-gray-100'
+                                  ? 'bg-red-400 text-white'
+                                  : 'bg-white text-black hover:bg-gray-100'
                                   }`}
                               >
                                 {trope}
@@ -1966,8 +2010,8 @@ export default function AIStoryGenerator({
                                   }
                                 }}
                                 className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${includeTropes.includes(trope.toLowerCase())
-                                    ? 'bg-green-400 text-white'
-                                    : 'bg-white text-black hover:bg-gray-100'
+                                  ? 'bg-green-400 text-white'
+                                  : 'bg-white text-black hover:bg-gray-100'
                                   }`}
                               >
                                 {trope}
@@ -2087,12 +2131,25 @@ export default function AIStoryGenerator({
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center flex-wrap gap-3">
                       <Button
                         onClick={() => setActiveTab('input')}
                         className="font-bangers text-xl border-4 border-black bg-white hover:bg-gray-100"
                       >
                         EDIT PARAMETERS
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          if (generatedStory) copyToClipboard(generatedStory);
+                        }}
+                        disabled={!generatedStory}
+                        className="font-bangers text-xl border-4 border-black bg-blue-400 hover:bg-blue-500 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                      >
+                        {isCopied ? (
+                          <><Check className="mr-2 h-5 w-5" /> COPIED!</>
+                        ) : (
+                          <><Copy className="mr-2 h-5 w-5" />COPY STORY</>
+                        )}
                       </Button>
                       <Button
                         onClick={() => setActiveTab('mint')}

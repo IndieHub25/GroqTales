@@ -18,11 +18,7 @@ export default function RoyaltiesDashboardPage() {
   const [activeTab, setActiveTab] = useState('transactions');
 
   // Fetch transactions for chart (all completed, up to 100)
-  const { transactions } = useCreatorTransactions(
-    address || undefined,
-    1,
-    100
-  );
+  const { transactions } = useCreatorTransactions(address || undefined, 1, 100);
 
   if (!address) {
     return (

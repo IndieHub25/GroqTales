@@ -110,8 +110,15 @@ export async function GET(req: Request) {
     }
 
     const { searchParams } = new URL(req.url);
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10) || 10));
+    const limit = Math.min(
+      100,
+      Math.max(1, parseInt(searchParams.get('limit') || '10', 10) || 10)
+    );
+
+    const parsedPage = parseInt(searchParams.get('page') || '1', 10) || 1;
+    const hardCap = 1000000;
+    const maxByOverflow = Math.floor(Number.MAX_SAFE_INTEGER / limit);
+    const page = Math.max(1, Math.min(parsedPage, hardCap, maxByOverflow));
 
     const userId = session?.user?.id;
 
@@ -138,9 +145,8 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       data: stories,
-      meta: { page, limit, type: userId ? 'personalized' : 'trending' }
+      meta: { page, limit, type: userId ? 'personalized' : 'trending' },
     });
-
   } catch (error) {
     console.error('Feed Error:', error);
     // Even on total failure, return fallback data

@@ -31,8 +31,14 @@ import { useToast } from '@/components/ui/use-toast';
 // These avoid runtime errors when `framer-motion` isn't installed or during SSR,
 // but will use real `framer-motion` components if the package is available.
 
-const MotionDiv = React.forwardRef(function MotionDiv(props: any, ref: any) {
-  const [Comp, setComp] = useState<any>(() => (innerProps: any) => <div {...innerProps} ref={ref} />);
+const DefaultMotionDiv = React.forwardRef<HTMLDivElement, any>((props, ref) => (
+  <div {...props} ref={ref} />
+));
+DefaultMotionDiv.displayName = 'DefaultMotionDiv';
+
+const MotionDiv = React.forwardRef<HTMLDivElement, any>((props, ref) => {
+  const [Comp, setComp] = useState<any>(() => DefaultMotionDiv);
+
 
   useEffect(() => {
     let mounted = true;
@@ -56,8 +62,17 @@ const MotionDiv = React.forwardRef(function MotionDiv(props: any, ref: any) {
 
 const motion = { div: MotionDiv, motion: { div: MotionDiv } };
 
-const AnimatePresence = ({ children, ...rest }: { children: React.ReactNode } & any) => {
-  const [Comp, setComp] = useState<any>(() => ({ children }: any) => <>{children}</>);
+const DefaultAnimatePresence = ({ children }: { children: React.ReactNode }) => (
+  <>{children}</>
+);
+DefaultAnimatePresence.displayName = 'DefaultAnimatePresence';
+
+const AnimatePresence = ({
+  children,
+  ...rest
+}: { children: React.ReactNode } & any) => {
+  const [Comp, setComp] = useState<any>(() => DefaultAnimatePresence);
+
 
   useEffect(() => {
     let mounted = true;
@@ -94,27 +109,37 @@ function useReducedMotion(): boolean {
   return reduced;
 }
 
-// Dynamically import icons to reduce bundle
-const IconsLoadable = dynamic(() => import('lucide-react').then(mod => ({
-  default: () => (
-    <div style={{ display: 'flex', gap: '4px' }}>
-      <span>♥</span> <span>👁</span> <span>🛒</span> <span>🔍</span>
-      <span>⚙</span> <span>📈</span> <span>⭐</span> <span>🎨</span>
-    </div>
-  )
-})), { ssr: true });
-
 // Simple icon replacements to reduce bundle
-const Heart = ({ className = '' }: { className?: string }) => <span className={className}>♥</span>;
-const Eye = ({ className = '' }: { className?: string }) => <span className={className}>👁</span>;
-const ShoppingCart = ({ className = '' }: { className?: string }) => <span className={className}>🛒</span>;
-const Search = ({ className = '' }: { className?: string }) => <span className={className}>🔍</span>;
-const Filter = ({ className = '' }: { className?: string }) => <span className={className}>⚙</span>;
-const TrendingUp = ({ className = '' }: { className?: string }) => <span className={className}>📈</span>;
-const Star = ({ className = '' }: { className?: string }) => <span className={className}>⭐</span>;
-const Palette = ({ className = '' }: { className?: string }) => <span className={className}>🎨</span>;
-const BookOpen = ({ className = '' }: { className?: string }) => <span className={className}>📖</span>;
-const Users = ({ className = '' }: { className?: string }) => <span className={className}>👥</span>;
+const Heart = ({ className = '' }: { className?: string }) => (
+  <span className={className}>♥</span>
+);
+const Eye = ({ className = '' }: { className?: string }) => (
+  <span className={className}>👁</span>
+);
+const ShoppingCart = ({ className = '' }: { className?: string }) => (
+  <span className={className}>🛒</span>
+);
+const Search = ({ className = '' }: { className?: string }) => (
+  <span className={className}>🔍</span>
+);
+const Filter = ({ className = '' }: { className?: string }) => (
+  <span className={className}>⚙</span>
+);
+const TrendingUp = ({ className = '' }: { className?: string }) => (
+  <span className={className}>📈</span>
+);
+const Star = ({ className = '' }: { className?: string }) => (
+  <span className={className}>⭐</span>
+);
+const Palette = ({ className = '' }: { className?: string }) => (
+  <span className={className}>🎨</span>
+);
+const BookOpen = ({ className = '' }: { className?: string }) => (
+  <span className={className}>📖</span>
+);
+const Users = ({ className = '' }: { className?: string }) => (
+  <span className={className}>👥</span>
+);
 
 interface NFTStory {
   id: string;
@@ -365,7 +390,7 @@ function generateAdditionalNFTs(): NFTStory[] {
   return stableNFTs;
 }
 
-const NFTCard = memo(function NFTCard({
+const NFTCard = memo(({
   nft,
   onLike,
   onPurchase,
@@ -375,7 +400,8 @@ const NFTCard = memo(function NFTCard({
   onLike: (id: string) => void;
   onPurchase: (id: string) => void;
   onClick: (nft: NFTStory) => void;
-}) {
+}) => {
+
   const prefersReducedMotion = useReducedMotion();
 
   const getRarityColor = (rarity?: string) => {
@@ -400,10 +426,7 @@ const NFTCard = memo(function NFTCard({
     };
 
   return (
-    <motion.div
-      {...cardMotionProps}
-      className="group"
-    >
+    <motion.div {...cardMotionProps} className="group">
       <Card
         className="overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-[1.02] cursor-pointer"
         onClick={(e) => {
@@ -485,13 +508,22 @@ const NFTCard = memo(function NFTCard({
             <Button
               variant="outline"
               size="sm"
-              onClick={(e) => { e.stopPropagation(); onLike(nft.id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onLike(nft.id);
+              }}
               className="flex-1"
             >
               <Heart className="w-4 h-4 mr-1" />
               Like
             </Button>
-            <Button onClick={(e) => { e.stopPropagation(); onPurchase(nft.id); }} className="flex-1">
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onPurchase(nft.id);
+              }}
+              className="flex-1"
+            >
               <ShoppingCart className="w-4 h-4 mr-1" />
               Buy Now
             </Button>
@@ -501,8 +533,9 @@ const NFTCard = memo(function NFTCard({
     </motion.div>
   );
 });
+NFTCard.displayName = 'NFTCard';
 
-const NFTDetailModal = memo(function NFTDetailModal({
+const NFTDetailModal = memo(({
   nft,
   isOpen,
   onClose,
@@ -514,7 +547,8 @@ const NFTDetailModal = memo(function NFTDetailModal({
   onClose: () => void;
   onLike: (id: string) => void;
   onPurchase: (id: string) => void;
-}) {
+}) => {
+
   if (!nft) return null;
 
   const getRarityColor = (rarity?: string) => {
@@ -534,7 +568,9 @@ const NFTDetailModal = memo(function NFTDetailModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl p-8 max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 border-slate-200 dark:border-slate-800">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-foreground">{nft.title}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-foreground">
+            {nft.title}
+          </DialogTitle>
           <DialogDescription className="text-muted-foreground">
             by {nft.author}
           </DialogDescription>
@@ -559,11 +595,16 @@ const NFTDetailModal = memo(function NFTDetailModal({
                 </div>
               )}
               {nft.rarity && (
-                <div className={`absolute top-3 right-3 px-3 py-1 rounded-full font-bold text-sm ${nft.rarity === 'Legendary' ? 'bg-yellow-500 text-yellow-900' :
-                  nft.rarity === 'Epic' ? 'bg-purple-500 text-white' :
-                    nft.rarity === 'Rare' ? 'bg-blue-500 text-white' :
-                      'bg-gray-500 text-white'
-                  }`}>
+                <div
+                  className={`absolute top-3 right-3 px-3 py-1 rounded-full font-bold text-sm ${nft.rarity === 'Legendary'
+                    ? 'bg-yellow-500 text-yellow-900'
+                    : nft.rarity === 'Epic'
+                      ? 'bg-purple-500 text-white'
+                      : nft.rarity === 'Rare'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-500 text-white'
+                    }`}
+                >
                   {nft.rarity}
                 </div>
               )}
@@ -579,10 +620,7 @@ const NFTDetailModal = memo(function NFTDetailModal({
                 <Heart className="w-4 h-4 mr-2" />
                 Like ({nft.likes})
               </Button>
-              <Button
-                onClick={() => onPurchase(nft.id)}
-                className="flex-1"
-              >
+              <Button onClick={() => onPurchase(nft.id)} className="flex-1">
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Buy Now - {nft.price}
               </Button>
@@ -594,7 +632,9 @@ const NFTDetailModal = memo(function NFTDetailModal({
             {/* Description */}
             <div>
               <h3 className="text-lg font-semibold mb-2">Description</h3>
-              <p className="text-slate-700 dark:text-slate-300">{nft.description}</p>
+              <p className="text-slate-700 dark:text-slate-300">
+                {nft.description}
+              </p>
             </div>
 
             {/* Stats */}
@@ -636,30 +676,53 @@ const NFTDetailModal = memo(function NFTDetailModal({
 
             {/* Additional Information */}
             <div>
-              <h3 className="text-lg font-semibold mb-3">Additional Information</h3>
+              <h3 className="text-lg font-semibold mb-3">
+                Additional Information
+              </h3>
               <div className="space-y-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800">
                 <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">NFT ID:</span>
-                  <span className="font-mono bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded">{nft.id}</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">
+                    NFT ID:
+                  </span>
+                  <span className="font-mono bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded">
+                    {nft.id}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">Price:</span>
-                  <span className="font-bold text-green-600 dark:text-green-400 text-lg">{nft.price}</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">
+                    Price:
+                  </span>
+                  <span className="font-bold text-green-600 dark:text-green-400 text-lg">
+                    {nft.price}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground font-medium">Rarity:</span>
-                  <span className={`font-medium px-2 py-1 rounded ${(nft.rarity || 'Common') === 'Legendary' ? 'bg-yellow-500 text-yellow-900' :
-                    (nft.rarity || 'Common') === 'Epic' ? 'bg-purple-500 text-white' :
-                      (nft.rarity || 'Common') === 'Rare' ? 'bg-blue-500 text-white' :
-                        'bg-gray-500 text-white'
-                    }`}>
+                  <span className="text-muted-foreground font-medium">
+                    Rarity:
+                  </span>
+                  <span
+                    className={`font-medium px-2 py-1 rounded ${(nft.rarity || 'Common') === 'Legendary'
+                      ? 'bg-yellow-500 text-yellow-900'
+                      : (nft.rarity || 'Common') === 'Epic'
+                        ? 'bg-purple-500 text-white'
+                        : (nft.rarity || 'Common') === 'Rare'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-500 text-white'
+                      }`}
+                  >
                     {nft.rarity || 'Common'}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground font-medium">Status:</span>
-                  <span className={`font-medium px-2 py-1 rounded ${nft.isTop10 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-500 text-white'
-                    }`}>
+                  <span className="text-muted-foreground font-medium">
+                    Status:
+                  </span>
+                  <span
+                    className={`font-medium px-2 py-1 rounded ${nft.isTop10
+                      ? 'bg-yellow-400 text-yellow-900'
+                      : 'bg-gray-500 text-white'
+                      }`}
+                  >
                     {nft.isTop10 ? 'Featured' : 'Available'}
                   </span>
                 </div>
@@ -856,8 +919,13 @@ export default function NFTGalleryPage() {
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <label htmlFor="search-input" className="sr-only">Search stories or authors</label>
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" aria-hidden="true" />
+              <label htmlFor="search-input" className="sr-only">
+                Search stories or authors
+              </label>
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4"
+                aria-hidden="true"
+              />
               <Input
                 id="search-input"
                 placeholder="Search stories or authors..."

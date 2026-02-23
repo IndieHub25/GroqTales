@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
-import LegalHeader from "@/components/LegalHeader";
+import LegalHeader from '@/components/LegalHeader';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -49,14 +49,16 @@ export default function PrivacyPage() {
       <div className="container mx-auto px-4 py-12 relative z-10">
         <div className="max-w-4xl mx-auto">
           <LegalHeader />
-          <h1 className="
+          <h1
+            className="
             text-4xl md:text-5xl
             font-black
             text-center
             mb-6
             text-black
             dark:text-white
-          ">
+          "
+          >
             Privacy Policy
           </h1>
           <p className="text-muted-foreground text-center mb-12">
