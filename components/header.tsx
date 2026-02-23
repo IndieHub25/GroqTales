@@ -82,7 +82,7 @@ export function Header() {
         : 'hover:bg-accent/20 text-muted-foreground';
     }
     return pathname === path
-      ? 'bg-primary/10 text-primary font-medium'
+      ? 'bg-primary/10 text-primary font-medium underline decoration-sky-500 underline-offset-4 decoration-3'
       : 'hover:bg-accent/20 text-muted-foreground';
   };
 
@@ -216,7 +216,7 @@ export function Header() {
                           <Link
                             href={subItem.href}
                             aria-current={pathname === subItem.href ? 'page' : undefined}
-                            className="flex items-center w-full text-foreground/90 hover:text-foreground hover:bg-white/5 comic-text"
+                            className={cn("flex items-center w-full text-foreground/90 hover:text-foreground hover:bg-white/5 comic-text",isActive(subItem.href!))}
                           >
                             {subItem.icon && subItem.icon}
                             {subItem.label}
@@ -229,7 +229,9 @@ export function Header() {
                   <Link
                     href={item.href}
                     aria-current={pathname === item.href ? 'page' : undefined}
-                    className={`px-4 py-2 text-sm rounded-md transition-all duration-200 flex items-center text-white hover:text-white/80 hover:bg-white/10 backdrop-blur-sm comic-pop comic-text`}
+                    className={cn('px-4 py-2 text-sm rounded-md transition-all duration-200 flex items-center text-white hover:text-white/80 hover:bg-white/10 backdrop-blur-sm comic-pop comic-text',
+                      isActive(item.href!))
+                    }
                   >
                     {item.icon}
                     {item.label}
@@ -310,7 +312,7 @@ export function Header() {
                               key={subItem.href}
                               href={subItem.href}
                               onClick={() => setSheetOpen(false)}
-                              className="px-6 py-3 text-lg hover:bg-white/10 rounded-md transition-colors comic-text flex items-center"
+                              className={cn("px-6 py-3 text-lg hover:bg-white/10 rounded-md transition-colors comic-text flex items-center",isActive(subItem.href!))}
                             >
                               {subItem.icon}
                               {subItem.label}
@@ -324,7 +326,7 @@ export function Header() {
                             onClick={() => setSheetOpen(false)}
                             className={cn(
                               'px-4 py-3 text-lg hover:bg-white/10 rounded-md transition-colors comic-text flex items-center',
-                              'bg-primary/20 text-primary'
+                              'bg-primary/20 text-primary',isActive(item.href!)
                             )}
                           >
                             {item.icon}
