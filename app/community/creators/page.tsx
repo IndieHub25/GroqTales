@@ -314,7 +314,7 @@ export default function CreatorsPage() {
     >
       <Card className="overflow-hidden transition-all duration-300 hover:shadow-md relative">
         {creator.featured && (
-          <div className="absolute top-3 right-3 z-10">
+          <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 scale-90 sm:scale-100 origin-top-right">
             <Badge className="bg-purple-500/20 text-purple-600 border-purple-500">
               <Star className="h-3 w-3 mr-1 fill-purple-500" />
               Featured
@@ -322,8 +322,8 @@ export default function CreatorsPage() {
           </div>
         )}
 
-        <CardContent className="p-6">
-          <div className="flex items-start space-x-4">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col min-[450px]:flex-row items-center min-[450px]:items-start space-y-4 min-[450px]:space-y-0 min-[450px]:space-x-4 text-center min-[450px]:text-left">
             <div className="relative">
               <Avatar className="w-20 h-20">
                 <AvatarImage src={creator.avatar} alt={`${creator.name}'s profile picture`} />
@@ -348,10 +348,10 @@ export default function CreatorsPage() {
               )}
             </div>
 
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
+            <div className="flex-1 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="font-semibold text-lg">{creator.name}</h3>
+                  <h3 className="font-semibold text-lg leading-tight">{creator.name}</h3>
                   <p className="text-sm text-muted-foreground">
                     {creator.username}
                   </p>
@@ -369,7 +369,7 @@ export default function CreatorsPage() {
                 ))}
               </div>
 
-              <div className="grid grid-cols-4 gap-2 mt-4">
+              <div className="grid grid-cols-2 min-[400px]:grid-cols-4 gap-2 mt-4">
                 <div className="flex flex-col items-center border rounded-md p-2">
                   <span className="text-xs text-muted-foreground">
                     Followers
@@ -429,8 +429,8 @@ export default function CreatorsPage() {
             </div>
           </div>
 
-          <div className="flex justify-between mt-6">
-            <Button variant="outline" size="sm" asChild>
+          <div className="flex flex-col min-[400px]:flex-row gap-2 min-[400px]:justify-between mt-6">
+            <Button variant="outline" size="sm" asChild className="w-full min-[400px]:w-auto">
               <Link href={`/community/creators/${creator.id}`}>
                 View Profile
                 <ChevronRight className="ml-1 h-4 w-4" />
@@ -439,7 +439,7 @@ export default function CreatorsPage() {
             <Button
               variant="default"
               size="sm"
-              className="theme-gradient-bg text-white border-0"
+              className="theme-gradient-bg text-white border-0 w-full min-[400px]:w-auto"
             >
               Follow
             </Button>
