@@ -128,9 +128,9 @@ function AIStoryContent() {
                 <Sparkles className="w-4 h-4 text-emerald-400" />
                 <span className="text-xs font-medium tracking-wider uppercase text-white/80">Groq AI Studio</span>
               </motion.div>
-              
+
               <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-white/90 to-white/50">
-                Architect Your <br className="hidden md:block"/> Universe
+                Architect Your <br className="hidden md:block" /> Universe
               </h1>
               <p className="text-lg text-white/50 max-w-xl leading-relaxed">
                 Configure your narrative parameters below. Our neural engine will synthesize your specifications into a cohesive, mintable legacy.
@@ -157,7 +157,11 @@ function AIStoryContent() {
           <div className="relative">
             {/* Subtle glow behind the generator */}
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-purple-500/5 blur-3xl -z-10 rounded-[3rem]" />
-            <AIStoryGenerator className="relative z-10" />
+            <AIStoryGenerator
+              className="relative z-10"
+              initialPrompt={searchParams.get('prompt') || ''}
+              initialGenre={searchParams.get('genre') || ''}
+            />
           </div>
 
         </div>
