@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Sparkles, BookText, Cpu } from 'lucide-react';
+import Image from 'next/image';
 import React from 'react';
 
 import { ClientOnly } from '@/components/client-only';
@@ -50,112 +50,46 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
         <div className={`relative ${currentSize.container}`}>
           {/* Central loading icon */}
           <div className="absolute inset-0 flex items-center justify-center">
+            
+            {/* Outer spinning aura */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+              className="absolute inset-[-20%] rounded-full border-[2px] border-dashed border-emerald-500/30 opacity-70 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]"
+            />
+            <motion.div
+              animate={{ rotate: -360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+              className="absolute inset-[-10%] rounded-full border-[2px] border-dotted border-blue-500/30 opacity-70 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]"
+            />
+
             <motion.div
               animate={{
-                scale: [1, 1.05, 1],
-                rotate: [0, 5, 0, -5, 0],
+                scale: [1, 1.1, 1],
+                filter: [
+                  'drop-shadow(0 0 15px rgba(16,185,129,0.4))',
+                  'drop-shadow(0 0 40px rgba(16,185,129,0.9))',
+                  'drop-shadow(0 0 15px rgba(16,185,129,0.4))',
+                ]
               }}
               transition={{
-                duration: 3,
+                duration: 2,
                 repeat: Infinity,
                 ease: 'easeInOut',
               }}
-              className="bg-primary/20 dark:bg-primary/10 rounded-full p-3"
+              className="relative rounded-full p-6 flex items-center justify-center bg-black/60 backdrop-blur-xl border border-white/20 shadow-[0_0_30px_rgba(0,0,0,0.8)]"
             >
-              <BookText className={`text-primary ${currentSize.icon}`} />
+              <div className="relative w-20 h-20 md:w-32 md:h-32">
+                <Image 
+                  src="/logo.png" 
+                  alt="Loading" 
+                  fill 
+                  className="object-contain drop-shadow-[0_0_12px_rgba(255,255,255,1)]" 
+                  priority 
+                />
+              </div>
             </motion.div>
           </div>
-
-          {/* Orbiting elements */}
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: 'linear',
-            }}
-            className="absolute inset-0"
-          >
-            {/* Top dot */}
-            <motion.div
-              className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2"
-              animate={{
-                scale: [1, 1.2, 1],
-                boxShadow: [
-                  '0 0 0 0 rgba(147, 51, 234, 0.2)',
-                  '0 0 0 4px rgba(147, 51, 234, 0.2)',
-                  '0 0 0 0 rgba(147, 51, 234, 0.2)',
-                ],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                delay: 0,
-              }}
-            >
-              <div className={`${currentSize.dot} bg-primary rounded-full`} />
-            </motion.div>
-
-            {/* Right dot */}
-            <motion.div
-              className="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2"
-              animate={{
-                scale: [1, 1.2, 1],
-                boxShadow: [
-                  '0 0 0 0 rgba(147, 51, 234, 0.2)',
-                  '0 0 0 4px rgba(147, 51, 234, 0.2)',
-                  '0 0 0 0 rgba(147, 51, 234, 0.2)',
-                ],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                delay: 0.5,
-              }}
-            >
-              <div className={`${currentSize.dot} bg-primary rounded-full`} />
-            </motion.div>
-
-            {/* Bottom dot */}
-            <motion.div
-              className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2"
-              animate={{
-                scale: [1, 1.2, 1],
-                boxShadow: [
-                  '0 0 0 0 rgba(147, 51, 234, 0.2)',
-                  '0 0 0 4px rgba(147, 51, 234, 0.2)',
-                  '0 0 0 0 rgba(147, 51, 234, 0.2)',
-                ],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                delay: 1,
-              }}
-            >
-              <div className={`${currentSize.dot} bg-primary rounded-full`} />
-            </motion.div>
-
-            {/* Left dot */}
-            <motion.div
-              className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2"
-              animate={{
-                scale: [1, 1.2, 1],
-                boxShadow: [
-                  '0 0 0 0 rgba(147, 51, 234, 0.2)',
-                  '0 0 0 4px rgba(147, 51, 234, 0.2)',
-                  '0 0 0 0 rgba(147, 51, 234, 0.2)',
-                ],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                delay: 1.5,
-              }}
-            >
-              <div className={`${currentSize.dot} bg-primary rounded-full`} />
-            </motion.div>
-          </motion.div>
 
           {/* Loading message */}
           <motion.div

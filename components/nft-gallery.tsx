@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -22,6 +23,7 @@ interface Story {
   imageUrl: string;
   price: number;
   salesCount: number;
+  royaltyPercentage?: number;
 }
 export function NFTGallery() {
   const [stories, setStories] = useState<Story[]>([]);
@@ -64,7 +66,14 @@ export function NFTGallery() {
           bestSellers.map((story) => (
             <Card key={story.id} className="overflow-hidden">
               <CardHeader>
-                <CardTitle>{story.title}</CardTitle>
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="truncate">{story.title}</CardTitle>
+                  {story.royaltyPercentage != null && story.royaltyPercentage > 0 && (
+                    <Badge variant="secondary" className="shrink-0 text-[10px]">
+                      {story.royaltyPercentage}% Royalty
+                    </Badge>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="relative w-full h-48 mb-4">

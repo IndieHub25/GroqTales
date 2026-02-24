@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -17,11 +19,13 @@ interface ProfileHeaderProps {
 }
 
 
+
 export function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
   // Logic: Use Name if exists, otherwise use Username, otherwise use a slice of Wallet
   const displayName = user.firstName 
     ? `${user.firstName} ${user.lastName || ""}` 
     : user.username || `${user.walletAddress.slice(0, 6)}...`;
+
 
   return (
     <div className="relative w-full mb-8">
@@ -35,6 +39,7 @@ export function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
             <Avatar className="w-24 h-24 md:w-32 md:h-32 border-4 border-background relative">
               <AvatarImage src={user.avatar} alt={user.username} />
               <AvatarFallback className="text-2xl font-bold bg-slate-800 text-slate-200">
+
                  {displayName.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>

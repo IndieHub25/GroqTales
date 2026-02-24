@@ -395,7 +395,7 @@ export default function AIStoryGenerator({
           description: 'You can only select up to 3 genres, hero!',
           variant: 'destructive',
           className:
-            'font-bangers border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]',
+            'font-semibold tracking-wide border border-white/10 shadow-2xl shadow-black/50',
         });
       }
     }
@@ -428,7 +428,7 @@ export default function AIStoryGenerator({
         description: 'Please enter a prompt to start the adventure!',
         variant: 'destructive',
         className:
-          'font-bangers border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]',
+          'font-semibold tracking-wide border border-white/10 shadow-2xl shadow-black/50',
       });
       return;
     }
@@ -505,17 +505,34 @@ Suddenly, a shadow detached itself from the alley wall. "Hand it over, ${mainCha
 ${mainCharacterName || 'Kael'} smirked, pulling ${mainCharacterName ? 'their' : 'his'
         } plasma-pistol from its holster. "Come and get it, tin can."
 
-The air crackled with energy as the first shot was fired...`;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate story');
+      }
 
-      setGeneratedStory(mockStory);
-      setIsGenerating(false);
+      const data = await response.json();
+      setGeneratedStory(data.result);
       toast({
         title: 'BOOM! STORY GENERATED!',
         description: 'Your epic tale is ready for review!',
         className:
-          'font-bangers bg-green-400 text-black border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]',
+          'font-semibold tracking-wide bg-green-400 text-black border border-white/10 shadow-2xl shadow-black/50',
       });
-    }, 3000);
+    } catch (error) {
+      console.error('Story generation error:', error);
+      toast({
+        title: 'OOPS! GENERATION FAILED!',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Something went wrong. Please try again!',
+        variant: 'destructive',
+        className:
+          'font-semibold tracking-wide border border-white/10 shadow-2xl shadow-black/50',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleMint = async () => {
@@ -525,7 +542,7 @@ The air crackled with energy as the first shot was fired...`;
         description: 'Please connect your wallet to mint this masterpiece!',
         variant: 'destructive',
         className:
-          'font-bangers border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]',
+          'font-semibold tracking-wide border border-white/10 shadow-2xl shadow-black/50',
       });
       return;
     }
@@ -545,7 +562,7 @@ The air crackled with energy as the first shot was fired...`;
         title: 'KAZAM! NFT MINTED!',
         description: 'Your story is now eternal on the blockchain!',
         className:
-          'font-bangers bg-green-400 text-black border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]',
+          'font-semibold tracking-wide bg-green-400 text-black border border-white/10 shadow-2xl shadow-black/50',
       });
     }, 3000);
   };
@@ -560,21 +577,21 @@ The air crackled with energy as the first shot was fired...`;
 
   return (
     <div className={`w-full max-w-5xl mx-auto ${className}`}>
-      <Card className="border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-white dark:bg-gray-900 overflow-hidden rounded-3xl">
-        <CardHeader className="bg-yellow-400 border-b-4 border-black p-6 relative overflow-hidden">
+      <Card className="border border-white/10 shadow-2xl shadow-black/50 bg-white dark:bg-gray-900 overflow-hidden rounded-3xl">
+        <CardHeader className="bg-emerald-500 hover:bg-emerald-400 text-black border-b-4 border-black p-6 relative overflow-hidden">
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:8px_8px]" />
 
           <div className="relative z-10 flex items-center justify-between">
             <CardTitle className="flex items-center space-x-3">
-              <div className="bg-white p-2 rounded-full border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <div className="bg-white p-2 rounded-full border border-white/10 shadow-2xl shadow-black/50">
                 <Wand2 className="h-8 w-8 text-black" />
               </div>
-              <span className="font-bangers text-4xl tracking-wide text-black drop-shadow-sm">
+              <span className="font-semibold tracking-wide text-4xl tracking-wide text-black drop-shadow-sm">
                 STORY MAKER 3000
               </span>
             </CardTitle>
             <div className="hidden md:flex space-x-2">
-              <div className="w-4 h-4 rounded-full bg-red-500 border-2 border-black" />
+              <div className="w-4 h-4 rounded-full bg-rose-500/20 text-rose-300 border-2 border-black" />
               <div className="w-4 h-4 rounded-full bg-yellow-500 border-2 border-black" />
               <div className="w-4 h-4 rounded-full bg-green-500 border-2 border-black" />
             </div>
@@ -591,21 +608,21 @@ The air crackled with energy as the first shot was fired...`;
               <TabsList className="bg-transparent gap-4 p-0 h-auto">
                 <TabsTrigger
                   value="input"
-                  className="font-bangers text-xl px-6 py-2 rounded-xl border-4 border-transparent data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:border-black data-[state=active]:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.5)] text-white hover:text-yellow-400 transition-all"
+                  className="font-semibold tracking-wide text-xl px-6 py-2 rounded-xl border-4 border-transparent data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:border-black data-[state=active]:shadow-[0_0_15px_rgba(255,255,255,0.1)] text-white hover:text-emerald-400 transition-all"
                 >
                   1. INPUT
                 </TabsTrigger>
                 <TabsTrigger
                   value="preview"
                   disabled={!generatedStory && !isGenerating}
-                  className="font-bangers text-xl px-6 py-2 rounded-xl border-4 border-transparent data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:border-black data-[state=active]:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.5)] text-white hover:text-yellow-400 transition-all disabled:opacity-50"
+                  className="font-semibold tracking-wide text-xl px-6 py-2 rounded-xl border-4 border-transparent data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:border-black data-[state=active]:shadow-[0_0_15px_rgba(255,255,255,0.1)] text-white hover:text-emerald-400 transition-all disabled:opacity-50"
                 >
                   2. PREVIEW
                 </TabsTrigger>
                 <TabsTrigger
                   value="mint"
                   disabled={!generatedStory}
-                  className="font-bangers text-xl px-6 py-2 rounded-xl border-4 border-transparent data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:border-black data-[state=active]:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.5)] text-white hover:text-yellow-400 transition-all disabled:opacity-50"
+                  className="font-semibold tracking-wide text-xl px-6 py-2 rounded-xl border-4 border-transparent data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:border-black data-[state=active]:shadow-[0_0_15px_rgba(255,255,255,0.1)] text-white hover:text-emerald-400 transition-all disabled:opacity-50"
                 >
                   3. MINT NFT
                 </TabsTrigger>
@@ -626,18 +643,18 @@ The air crackled with energy as the first shot was fired...`;
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.8, opacity: 0 }}
-                      className="bg-white border-4 border-black rounded-2xl p-8 max-w-md w-full shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]"
+                      className="bg-white border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl shadow-black/50"
                       role="dialog"
                       aria-modal="true"
                       aria-labelledby="draft-recovery-title"
                     >
                       <div className="text-center space-y-6">
-                        <div className="inline-block bg-yellow-400 p-4 rounded-full border-4 border-black">
+                        <div className="inline-block bg-emerald-500 hover:bg-emerald-400 text-black p-4 rounded-full border border-white/10">
                           <Save className="h-8 w-8 text-black" />
                         </div>
 
                         <div>
-                          <h3 id="draft-recovery-title" className="font-bangers text-2xl mb-2">
+                          <h3 id="draft-recovery-title" className="font-semibold tracking-wide text-2xl mb-2">
                             DRAFT RECOVERED!
                           </h3>
                           <p className="text-sm text-muted-foreground">
@@ -704,10 +721,10 @@ The air crackled with energy as the first shot was fired...`;
                               toast({
                                 title: 'DRAFT RESTORED!',
                                 description: 'Your previous work has been recovered.',
-                                className: 'font-bangers bg-green-400 text-black border-4 border-black',
+                                className: 'font-semibold tracking-wide bg-green-400 text-black border border-white/10',
                               });
                             }}
-                            className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bangers px-6 py-3"
+                            className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold tracking-wide px-6 py-3"
                           >
                             RESTORE DRAFT
                           </Button>
@@ -724,10 +741,10 @@ The air crackled with energy as the first shot was fired...`;
                               toast({
                                 title: 'DRAFT DISCARDED',
                                 description: 'Starting fresh!',
-                                className: 'font-bangers bg-gray-400 text-black border-4 border-black',
+                                className: 'font-semibold tracking-wide bg-gray-400 text-black border border-white/10',
                               });
                             }}
-                            className="flex-1 font-bangers border-4 border-black bg-white text-black hover:bg-gray-100"
+                            className="flex-1 font-semibold tracking-wide border border-white/10 bg-white/5 text-white hover:bg-white/5"
                           >
                             DISCARD
                           </Button>
@@ -738,7 +755,7 @@ The air crackled with energy as the first shot was fired...`;
                 )}
               </AnimatePresence>
 
-              <TabsContent value="input" className="space-y-8 mt-0">
+              <div className={`flex-1 relative ${activeTab === "input" ? "block" : "hidden"} space-y-8 mt-0`}>
                 {/* Core Prompt Section */}
                 <div className="space-y-4">
                   <label htmlFor="ai-prompt" className="font-bangers text-2xl flex items-center gap-2">
@@ -750,11 +767,11 @@ The air crackled with energy as the first shot was fired...`;
                     <Textarea
                       id="ai-prompt"
                       placeholder="Enter your prompt here... (e.g., A cyberpunk detective hunting a ghost in the machine)"
-                      className="relative bg-white border-4 border-black rounded-xl p-6 text-lg font-medium min-h-[150px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0 selection:bg-yellow-400 selection:text-black"
+                      className="relative bg-white border border-white/10 rounded-xl p-6 text-lg font-medium min-h-[150px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0 selection:bg-emerald-500 hover:border-emerald-400 text-black selection:text-black"
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                     />
-                    <div className="absolute bottom-4 right-4 text-xs font-bold bg-yellow-400 px-2 py-1 border-2 border-black rounded">
+                    <div className="absolute bottom-4 right-4 text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-black px-2 py-1 border-2 border-black rounded">
                       {prompt.length} CHARS
                     </div>
                   </div>
@@ -762,13 +779,13 @@ The air crackled with energy as the first shot was fired...`;
 
                 {/* Optional Title */}
                 <div className="space-y-4">
-                  <Label className="font-bangers text-xl flex items-center gap-2">
+                  <Label className="font-semibold tracking-wide text-xl flex items-center gap-2">
                     <BookOpen className="w-5 h-5" />
                     STORY TITLE (Optional)
                   </Label>
                   <Input
                     placeholder="Leave blank for auto-generation"
-                    className="border-4 border-black rounded-lg p-4 text-lg font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
+                    className="border border-white/10 rounded-lg p-4 text-lg font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
                     value={storyTitle}
                     onChange={(e) => setStoryTitle(e.target.value)}
                   />
@@ -776,8 +793,8 @@ The air crackled with energy as the first shot was fired...`;
 
                 {/* Genre Selection */}
                 <div className="space-y-4">
-                  <label className="font-bangers text-2xl flex items-center gap-2">
-                    <Zap className="fill-blue-400 stroke-black" />
+                  <label className="font-semibold tracking-wide text-2xl flex items-center gap-2">
+                    <Zap className="fill-blue-400 stroke-current" />
                     CHOOSE YOUR FLAVOR (MAX 3)
                   </label>
                   <div className="flex flex-wrap gap-3">
@@ -801,12 +818,12 @@ The air crackled with energy as the first shot was fired...`;
 
                 {/* Story Length */}
                 <div className="space-y-4">
-                  <Label className="font-bangers text-xl flex items-center gap-2">
+                  <Label className="font-semibold tracking-wide text-xl flex items-center gap-2">
                     <Target className="w-5 h-5" />
                     STORY LENGTH
                   </Label>
                   <Select value={storyLength} onValueChange={setStoryLength}>
-                    <SelectTrigger className="border-4 border-black rounded-lg p-4 text-lg font-bangers">
+                    <SelectTrigger className="border border-white/10 rounded-lg p-4 text-lg font-semibold tracking-wide">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -828,11 +845,11 @@ The air crackled with energy as the first shot was fired...`;
                 </div>
 
                 {/* Advanced Options Accordion */}
-                <div className="bg-gray-50 dark:bg-gray-800 border-4 border-black rounded-2xl p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+                <div className="bg-gray-50 dark:bg-gray-800 border border-white/10 rounded-2xl p-6 shadow-2xl shadow-black/50">
                   <div className="flex items-center gap-2 mb-4">
                     <Settings className="w-6 h-6" />
-                    <h3 className="font-bangers text-2xl">ADVANCED OPTIONS</h3>
-                    <Badge className="bg-yellow-400 text-black border-2 border-black font-bangers">
+                    <h3 className="font-semibold tracking-wide text-2xl">ADVANCED OPTIONS</h3>
+                    <Badge className="bg-emerald-500 hover:bg-emerald-400 text-black text-black border-2 border-black font-semibold tracking-wide">
                       OPTIONAL
                     </Badge>
                   </div>
@@ -841,12 +858,12 @@ The air crackled with energy as the first shot was fired...`;
                     {/* Characters Section */}
                     <AccordionItem
                       value="characters"
-                      className="border-4 border-black rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
+                      className="border border-white/10 rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
                     >
                       <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-blue-50 dark:hover:bg-blue-950 transition-colors">
                         <div className="flex items-center gap-3">
                           <Users className="w-6 h-6 text-blue-500" />
-                          <span className="font-bangers text-xl">
+                          <span className="font-semibold tracking-wide text-xl">
                             CHARACTER CUSTOMIZATION
                           </span>
                         </div>
@@ -975,12 +992,12 @@ The air crackled with energy as the first shot was fired...`;
                     {/* Plot & Structure Section */}
                     <AccordionItem
                       value="plot"
-                      className="border-4 border-black rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
+                      className="border border-white/10 rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
                     >
                       <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-green-50 dark:hover:bg-green-950 transition-colors">
                         <div className="flex items-center gap-3">
                           <Target className="w-6 h-6 text-green-500" />
-                          <span className="font-bangers text-xl">
+                          <span className="font-semibold tracking-wide text-xl">
                             PLOT & STRUCTURE
                           </span>
                         </div>
@@ -1146,12 +1163,12 @@ The air crackled with energy as the first shot was fired...`;
                     {/* Setting & World Section */}
                     <AccordionItem
                       value="setting"
-                      className="border-4 border-black rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
+                      className="border border-white/10 rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
                     >
                       <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-purple-50 dark:hover:bg-purple-950 transition-colors">
                         <div className="flex items-center gap-3">
                           <Map className="w-6 h-6 text-purple-500" />
-                          <span className="font-bangers text-xl">
+                          <span className="font-semibold tracking-wide text-xl">
                             SETTING & WORLD
                           </span>
                         </div>
@@ -1282,12 +1299,12 @@ The air crackled with energy as the first shot was fired...`;
                     {/* Writing Style Section */}
                     <AccordionItem
                       value="style"
-                      className="border-4 border-black rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
+                      className="border border-white/10 rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
                     >
                       <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-orange-50 dark:hover:bg-orange-950 transition-colors">
                         <div className="flex items-center gap-3">
                           <Palette className="w-6 h-6 text-orange-500" />
-                          <span className="font-bangers text-xl">
+                          <span className="font-semibold tracking-wide text-xl">
                             WRITING STYLE & TONE
                           </span>
                         </div>
@@ -1473,12 +1490,12 @@ The air crackled with energy as the first shot was fired...`;
                     {/* Themes Section */}
                     <AccordionItem
                       value="themes"
-                      className="border-4 border-black rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
+                      className="border border-white/10 rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
                     >
                       <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-pink-50 dark:hover:bg-pink-950 transition-colors">
                         <div className="flex items-center gap-3">
                           <Lightbulb className="w-6 h-6 text-pink-500" />
-                          <span className="font-bangers text-xl">
+                          <span className="font-semibold tracking-wide text-xl">
                             THEMES & MESSAGES
                           </span>
                         </div>
@@ -1588,12 +1605,12 @@ The air crackled with energy as the first shot was fired...`;
                     {/* Content Controls Section */}
                     <AccordionItem
                       value="content"
-                      className="border-4 border-black rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
+                      className="border border-white/10 rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
                     >
                       <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-red-50 dark:hover:bg-red-950 transition-colors">
                         <div className="flex items-center gap-3">
                           <Shield className="w-6 h-6 text-red-500" />
-                          <span className="font-bangers text-xl">
+                          <span className="font-semibold tracking-wide text-xl">
                             CONTENT CONTROLS
                           </span>
                         </div>
@@ -1695,12 +1712,12 @@ The air crackled with energy as the first shot was fired...`;
                     {/* Advanced Options Extended Section */}
                     <AccordionItem
                       value="advanced"
-                      className="border-4 border-black rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
+                      className="border border-white/10 rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
                     >
                       <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-cyan-50 dark:hover:bg-cyan-950 transition-colors">
                         <div className="flex items-center gap-3">
                           <Settings className="w-6 h-6 text-cyan-500" />
-                          <span className="font-bangers text-xl">
+                          <span className="font-semibold tracking-wide text-xl">
                             ADVANCED OPTIONS
                           </span>
                         </div>
@@ -1809,12 +1826,12 @@ The air crackled with energy as the first shot was fired...`;
                     {/* Inspiration & References Section */}
                     <AccordionItem
                       value="inspiration"
-                      className="border-4 border-black rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
+                      className="border border-white/10 rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
                     >
                       <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-amber-50 dark:hover:bg-amber-950 transition-colors">
                         <div className="flex items-center gap-3">
                           <Lightbulb className="w-6 h-6 text-amber-500" />
-                          <span className="font-bangers text-xl">
+                          <span className="font-semibold tracking-wide text-xl">
                             INSPIRATION & REFERENCES
                           </span>
                         </div>
@@ -1931,12 +1948,12 @@ The air crackled with energy as the first shot was fired...`;
                     {/* Technical Parameters Section */}
                     <AccordionItem
                       value="technical"
-                      className="border-4 border-black rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
+                      className="border border-white/10 rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
                     >
                       <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-indigo-50 dark:hover:bg-indigo-950 transition-colors">
                         <div className="flex items-center gap-3">
                           <Zap className="w-6 h-6 text-indigo-500" />
-                          <span className="font-bangers text-xl">
+                          <span className="font-semibold tracking-wide text-xl">
                             TECHNICAL PARAMETERS
                           </span>
                         </div>
@@ -1998,22 +2015,22 @@ The air crackled with energy as the first shot was fired...`;
                 <div className="flex justify-end pt-4">
                   <Button
                     onClick={handleGenerate}
-                    className="bg-red-500 hover:bg-red-600 text-white font-bangers text-3xl px-10 py-8 rounded-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all w-full md:w-auto group"
+                    className="bg-rose-500/20 hover:bg-red-600 text-white font-semibold tracking-wide text-3xl px-10 py-8 rounded-2xl border border-white/10 shadow-2xl shadow-black/50 active:translate-x-[4px] active:translate-y-[4px] active:shadow-2xl active:shadow-black/50 transition-all w-full md:w-auto group"
                   >
                     <Sparkles className="mr-3 h-8 w-8 group-hover:animate-spin" />
                     GENERATE STORY!
                   </Button>
                 </div>
-              </TabsContent>
+              </div>
 
               <TabsContent value="preview" className="mt-0">
                 {isGenerating ? (
                   <div className="flex flex-col items-center justify-center py-20 space-y-8">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-20" />
+                      <div className="absolute inset-0 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full animate-ping opacity-20" />
                       <Loader2 className="h-24 w-24 animate-spin text-black" />
                     </div>
-                    <h3 className="font-bangers text-4xl animate-bounce text-center">
+                    <h3 className="font-semibold tracking-wide text-4xl animate-bounce text-center">
                       CRUNCHING DATA...
                       <br />
                       <span className="text-blue-500">MAKING MAGIC!</span>
@@ -2021,15 +2038,15 @@ The air crackled with energy as the first shot was fired...`;
                   </div>
                 ) : (
                   <div className="space-y-8">
-                    <div className="bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-xl relative">
-                      <div className="absolute -top-5 -left-5 bg-yellow-400 border-4 border-black px-4 py-2 font-bangers text-xl rotate-[-5deg] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div className="bg-white border border-white/10 p-8 shadow-2xl shadow-black/50 rounded-xl relative">
+                      <div className="absolute -top-5 -left-5 bg-emerald-500 hover:bg-emerald-400 text-black border border-white/10 px-4 py-2 font-semibold tracking-wide text-xl rotate-[-5deg] shadow-2xl shadow-black/50">
                         YOUR STORY
                       </div>
                       <div className="prose prose-lg max-w-none font-medium leading-relaxed">
                         {generatedStory?.split('\n\n').map((paragraph, i) => (
                           <p
                             key={i}
-                            className="mb-4 first-letter:text-5xl first-letter:font-bangers first-letter:float-left first-letter:mr-3 first-letter:mt-[-10px]"
+                            className="mb-4 first-letter:text-5xl first-letter:font-semibold tracking-wide first-letter:float-left first-letter:mr-3 first-letter:mt-[-10px]"
                           >
                             {paragraph}
                           </p>
@@ -2040,13 +2057,13 @@ The air crackled with energy as the first shot was fired...`;
                     <div className="flex justify-between items-center">
                       <Button
                         onClick={() => setActiveTab('input')}
-                        className="font-bangers text-xl border-4 border-black bg-white hover:bg-gray-100"
+                        className="font-semibold tracking-wide text-xl border border-white/10 bg-white hover:bg-white/5"
                       >
                         EDIT PARAMETERS
                       </Button>
                       <Button
                         onClick={() => setActiveTab('mint')}
-                        className="bg-green-500 hover:bg-green-600 text-white font-bangers text-2xl px-8 py-6 rounded-xl border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all"
+                        className="bg-green-500 hover:bg-green-600 text-white font-semibold tracking-wide text-2xl px-8 py-6 rounded-xl border border-white/10 shadow-2xl shadow-black/50 active:translate-x-[3px] active:translate-y-[3px] active:shadow-2xl shadow-black/50 transition-all"
                       >
                         PROCEED TO MINT <Save className="ml-2 h-6 w-6" />
                       </Button>
@@ -2065,7 +2082,7 @@ The air crackled with energy as the first shot was fired...`;
                       </div>
 
                       <div className="space-y-2">
-                        <h3 className="font-bangers text-4xl">
+                        <h3 className="font-semibold tracking-wide text-4xl">
                           READY TO IMMORTALIZE?
                         </h3>
                         <p className="text-xl font-medium text-muted-foreground max-w-md mx-auto">
@@ -2077,13 +2094,13 @@ The air crackled with energy as the first shot was fired...`;
                       {!connected ? (
                         <Button
                           onClick={connectWallet}
-                          className="bg-black text-white hover:bg-gray-800 font-bangers text-2xl px-10 py-6 rounded-xl border-4 border-transparent hover:border-yellow-400 transition-all shadow-lg"
+                          className="bg-black text-white hover:bg-gray-800 font-semibold tracking-wide text-2xl px-10 py-6 rounded-xl border-4 border-transparent hover:border-yellow-400 transition-all shadow-lg"
                         >
                           CONNECT WALLET FIRST
                         </Button>
                       ) : (
                         <div className="space-y-6">
-                          <div className="bg-gray-100 border-4 border-black p-4 rounded-lg inline-block">
+                          <div className="bg-white/5 border border-white/10 p-4 rounded-lg inline-block">
                             <p className="font-mono text-sm">
                               Connected: {truncateAddress(account)}
                             </p>
@@ -2092,7 +2109,7 @@ The air crackled with energy as the first shot was fired...`;
                           <Button
                             onClick={handleMint}
                             disabled={isMinting}
-                            className="bg-purple-500 hover:bg-purple-600 text-white font-bangers text-3xl px-12 py-8 rounded-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="bg-purple-500 hover:bg-purple-600 text-white font-semibold tracking-wide text-3xl px-12 py-8 rounded-2xl border border-white/10 shadow-2xl shadow-black/50 active:translate-x-[4px] active:translate-y-[4px] active:shadow-2xl shadow-black/50 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                           >
                             {isMinting ? (
                               <span className="flex items-center">
@@ -2101,7 +2118,7 @@ The air crackled with energy as the first shot was fired...`;
                               </span>
                             ) : (
                               <span className="flex items-center">
-                                <Zap className="mr-3 h-8 w-8 fill-yellow-400 stroke-white" />
+                                <Zap className="mr-3 h-8 w-8 fill-emerald-400 stroke-white" />
                                 MINT NFT NOW!
                               </span>
                             )}
@@ -2115,12 +2132,12 @@ The air crackled with energy as the first shot was fired...`;
                       animate={{ scale: 1, opacity: 1 }}
                       className="space-y-8"
                     >
-                      <div className="inline-block bg-green-400 p-8 rounded-full border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                        <Sparkles className="h-20 w-20 text-white stroke-black stroke-2" />
+                      <div className="inline-block bg-green-400 p-8 rounded-full border border-white/10 shadow-2xl shadow-black/50">
+                        <Sparkles className="h-20 w-20 text-white stroke-current stroke-2" />
                       </div>
 
                       <div className="space-y-2">
-                        <h3 className="font-bangers text-5xl text-green-600 drop-shadow-sm">
+                        <h3 className="font-semibold tracking-wide text-5xl text-green-600 drop-shadow-sm">
                           SUCCESS!
                         </h3>
                         <p className="text-xl font-bold">
@@ -2136,13 +2153,13 @@ The air crackled with energy as the first shot was fired...`;
                               '_blank'
                             )
                           }
-                          className="bg-blue-500 hover:bg-blue-600 text-white font-bangers text-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold tracking-wide text-xl border border-white/10 shadow-2xl shadow-black/50"
                         >
                           VIEW ON EXPLORER
                         </Button>
                         <Button
                           onClick={resetForm}
-                          className="bg-white hover:bg-gray-100 text-black font-bangers text-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                          className="bg-white hover:bg-white/5 text-black font-semibold tracking-wide text-xl border border-white/10 shadow-2xl shadow-black/50"
                         >
                           CREATE ANOTHER
                         </Button>

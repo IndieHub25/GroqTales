@@ -1,19 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
 import { DashboardTour } from "@/components/dashboard/DashboardTour";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  BarChart3, 
-  Wallet, 
-  BookOpen, 
-  Trophy, 
-  Plus, 
-  MoreVertical, 
-  ArrowUpRight 
+import {
+  BarChart3,
+  Wallet,
+  BookOpen,
+  Trophy,
+  Plus,
+  MoreVertical,
+  ArrowUpRight,
+  DollarSign,
+  Shield,
+  PenTool
 } from "lucide-react";
+import { useWallet } from "@/hooks/use-wallet";
+import { useCreatorEarnings } from "@/hooks/use-royalties";
 
 interface ChecklistStep {
   id: string;
@@ -23,6 +29,9 @@ interface ChecklistStep {
 }
 
 export default function DashboardPage() {
+  const { address } = useWallet();
+  const { earnings } = useCreatorEarnings(address || undefined);
+
   const [runTour, setRunTour] = useState(false);
 
   const [isChecklistVisible, setIsChecklistVisible] = useState(false);
@@ -87,16 +96,21 @@ export default function DashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
             <span className="text-muted-foreground">
-                <BarChart3 className="h-4 w-4" />
+                <DollarSign className="h-4 w-4" />
             </span>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$1,234.56</div>
+            <div className="text-2xl font-bold">
+              {earnings ? `${(earnings.totalEarned ?? 0).toFixed(4)} ETH` : '0.0000 ETH'}
+            </div>
             <p className="text-xs text-muted-foreground flex items-center mt-1">
-              <span className="text-green-500 flex items-center mr-1">
-                +20.1% <ArrowUpRight className="h-3 w-3 ml-0.5" />
-              </span>
-              from last month
+              {address ? (
+                <Link href="/dashboard/royalties" className="text-primary flex items-center hover:underline">
+                  View details <ArrowUpRight className="h-3 w-3 ml-0.5" />
+                </Link>
+              ) : (
+                'Connect wallet to track'
+              )}
             </p>
           </CardContent>
         </Card>
@@ -198,6 +212,70 @@ export default function DashboardPage() {
                 <div className="p-3 bg-muted rounded-lg border">
                     <strong>Writing with AI:</strong> Try using the "Fantasy" prompt preset to generate immersive worlds quickly.
                 </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Access Control & Security Card */}
+        <Card className="col-span-7 mt-4 border-emerald-500/20 bg-emerald-950/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-emerald-400" />
+              Access Control & Security
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Off-Chain Roles */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">Off-Chain Permissions</h3>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-white/5">
+                    <div className="p-2 rounded-full bg-blue-500/10 text-blue-400">
+                      <BookOpen className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Reader Access</p>
+                      <p className="text-xs text-muted-foreground">Can view stories, bookmark, and comment.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-white/5">
+                    <div className="p-2 rounded-full bg-purple-500/10 text-purple-400">
+                      <PenTool className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Creator Access</p>
+                      <p className="text-xs text-muted-foreground">Can write drafts and manage content.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* On-Chain Stepper */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">On-Chain Actions (Requires Wallet)</h3>
+                <div className="relative border-l-2 border-emerald-500/30 ml-3 pl-6 space-y-6">
+                  <div className="relative">
+                    <span className="absolute -left-[33px] top-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 ring-4 ring-background" />
+                    <p className="font-medium text-sm">Web3 Authentication</p>
+                    <p className="text-xs text-muted-foreground">Sign message with wallet to prove ownership.</p>
+                  </div>
+                  <div className="relative">
+                    <span className="absolute -left-[33px] top-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 ring-4 ring-background" />
+                    <p className="font-medium text-sm">AI Engine Access</p>
+                    <p className="text-xs text-muted-foreground">Unlock Groq AI storytelling tools for creators.</p>
+                  </div>
+                  <div className="relative">
+                    <span className="absolute -left-[33px] top-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 ring-4 ring-background" />
+                    <p className="font-medium text-sm">Mint Story NFT</p>
+                    <p className="text-xs text-muted-foreground">Deploy your story as an NFT to blockchain network.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-200/80 text-xs">
+              <strong>Security Note:</strong> Always verify that you are connected to the official site before signing any transactions. Your email sessions are managed off-chain via Supabase securely. Last login events are tracked in your avatar menu.
             </div>
           </CardContent>
         </Card>

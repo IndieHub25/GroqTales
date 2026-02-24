@@ -27,8 +27,8 @@ try {
   log('Starting custom installation process...');
 
   // Run the standard npm installation
-  log('Running npm ci...');
-  execSync('npm ci', { stdio: 'inherit' });
+  log('Running npm install...');
+  execSync('npm install --legacy-peer-deps', { stdio: 'inherit' });
 
   // Force install problematic dependencies
   log('Installing specific dependencies with fixed versions...');

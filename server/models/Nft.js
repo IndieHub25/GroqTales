@@ -88,6 +88,21 @@ const NftSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    royaltyPercentage: {
+      type: Number,
+      default: 5,
+      min: [0, 'Royalty percentage cannot be negative'],
+      max: [50, 'Royalty percentage cannot exceed 50'],
+    },
+    royaltyRecipient: {
+      type: String,
+      lowercase: true,
+      trim: true,
+    },
+    royaltyConfigId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'RoyaltyConfig',
+    },
   },
   { timestamps: true }
 );

@@ -1,24 +1,19 @@
-<h1 align="center">GroqTales</h1>
+<h1 align="center">
+  <img src="public/logo.png" alt="GroqTales Logo" width="150" />
+  <br />
+  GroqTales
+</h1>
 <p align="center"><b>AI-Powered Web3 Storytelling Platform</b></p>
 <p align="center">Create, share, and own AI-generated stories and comics as NFTs on the Monad blockchain.</p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.2.5-blue?style=flat-square" alt="Version"/>
-  <img src="https://img.shields.io/github/deployments/Drago-03/GroqTales/Production?label=deploy%20(prod)&logo=vercel&style=flat-square" alt="Production Deployment"/>
-  <img src="https://img.shields.io/github/deployments/Drago-03/GroqTales/Preview?label=deploy%20(preview)&logo=vercel&style=flat-square" alt="Preview Deployments"/>
-  <img src="https://img.shields.io/github/actions/workflow/status/Drago-03/GroqTales/ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"/>
-  <img src="https://img.shields.io/github/last-commit/Drago-03/GroqTales?style=flat-square" alt="Last Commit"/>
-  <img src="https://img.shields.io/github/commit-activity/m/Drago-03/GroqTales?style=flat-square" alt="Commit Activity"/>
   <img src="https://img.shields.io/github/issues/Drago-03/GroqTales?style=flat-square" alt="Open Issues"/>
   <img src="https://img.shields.io/github/issues-pr/Drago-03/GroqTales?style=flat-square" alt="Open PRs"/>
   <img src="https://img.shields.io/github/license/Drago-03/GroqTales?style=flat-square" alt="License"/>
-  <img src="https://img.shields.io/badge/status-active-brightgreen?style=flat-square" alt="Active"/>
-  <img src="https://img.shields.io/badge/contributions-welcome-blueviolet?style=flat-square" alt="Contributions Welcome"/>
   <img src="https://img.shields.io/badge/website-groqtales.xyz-0052cc?style=flat-square" alt="Website"/>
   <a href="mailto:mantejarora@gmail.com"><img src="https://img.shields.io/badge/contact-mantejarora%40gmail.com-orange?style=flat-square" alt="Contact Us"/></a>
   <a href="https://discord.gg/JK29FZRm"><img src="https://img.shields.io/discord/1245696768829601812?label=Discord&logo=discord&style=flat-square" alt="Discord"/></a>
 </p>
-
 <p align="center">
   <img src="https://img.shields.io/badge/SWOC'26-Open%20Source-orange?style=flat-square" alt="SWOC'26"/>
   <img src="https://img.shields.io/badge/OSGC'26-Open%20Source-purple?style=flat-square" alt="OSGC'26"/>
@@ -31,6 +26,18 @@
   <img src="https://img.shields.io/badge/Open%20Source%20Community-Welcome-0052cc?style=flat-square" alt="Open Source Community"/>
   <img src="https://img.shields.io/badge/Investment%20Partners-Applications%20Open-0052cc?style=flat-square" alt="Investment Partners"/>
 </p>
+  <b>Built by Indie Hub</b> ✨
+</p>
+
+<div align="center">
+  <a href="https://github.com/IndieHub25/GroqTales/stargazers">
+    <img src="https://img.shields.io/github/stars/IndieHub25/GroqTales?style=social" alt="Star on GitHub" />
+  </a>
+  <br />
+  ⭐ <b>If you like this project, please consider giving it a star!</b> ⭐
+</div>
+
+<br />
 
 <p align="center">
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&duration=4000&pause=600&color=F97316&center=true&vCenter=true&width=800&lines=---+AI-powered+Web3+Storytelling+on+the+Monad+Blockchain+---" alt="Animated Divider" />
@@ -45,10 +52,12 @@
 - [Tech Stack](#tech-stack)
 - [Quick Start](#quick-start)
 - [🛠️ Environment Configuration](#️-environment-configuration)
+- [🐳 Docker](#-docker)
 - [📜 Smart Contracts](#-smart-contracts)
 - [🏗️ System Architecture](#️-system-architecture)
 - [For Developers](#for-developers)
 - [🤝 Contributing](#-contributing)
+- [🎨 Spline 3D Guide](#-spline-3d-guide)
 - [Roadmap](#roadmap)
 - [Contributors](#contributors)
 - [Documentation & Architecture](#documentation--architecture)
@@ -160,6 +169,73 @@ To run this project locally, you must set up your environment variables. Create 
 > [!WARNING]  
 > Never commit your `.env.local` file to version control. Ensure it is listed in your `.gitignore`
 > to prevent leaking sensitive API keys.
+
+---
+
+## 🐳 Docker
+
+GroqTales ships with a production-ready Docker setup. The `docker-compose.yml` spins up all required
+services in one command.
+
+### Services
+
+| Service   | Image                                   | Port(s)        | Purpose                              |
+| --------- | --------------------------------------- | -------------- | ------------------------------------ |
+| `server`  | Built from `Dockerfile` (Node 22)       | `3000`, `3001` | Next.js frontend + Express backend   |
+| `mongo`   | `mongo:7`                               | `27017`        | MongoDB database                     |
+| `anvil`   | `ghcr.io/foundry-rs/foundry:v1.0.0`    | `8545`         | Local Ethereum-compatible dev chain   |
+
+### Quick Start
+
+```bash
+# Build & launch everything (MongoDB, Anvil, app)
+docker compose up --build
+
+# Run in detached mode
+docker compose up --build -d
+
+# View logs
+docker compose logs -f server
+
+# Stop all services
+docker compose down
+```
+
+Your application will be available at **http://localhost:3000** (frontend) and
+**http://localhost:3001** (backend API).
+
+### Building for Cloud Deployment
+
+```bash
+# Build the image
+docker build -t groqtales .
+
+# Cross-platform build (e.g., Mac M-series → amd64 cloud)
+docker build --platform=linux/amd64 -t groqtales .
+
+# Push to your registry
+docker push myregistry.com/groqtales
+```
+
+### Environment Variables
+
+Docker Compose sets these automatically. Override them in a `.env` file or in
+`docker-compose.override.yml`:
+
+| Variable                  | Default (Docker)                    |
+| ------------------------- | ----------------------------------- |
+| `MONGODB_URI`             | `mongodb://mongo:27017/groqtales`   |
+| `NEXT_PUBLIC_RPC_URL`     | `http://anvil:8545`                 |
+| `NODE_ENV`                | `development`                       |
+
+> [!TIP]
+> For production, set `NODE_ENV=production` and add your `GROQ_API_KEY`, `MONAD_RPC_URL`, and other
+> secrets via environment variables — never bake them into the image.
+
+### References
+
+- [Docker's Node.js guide](https://docs.docker.com/language/nodejs/)
+- [Docker Compose getting started](https://docs.docker.com/go/get-started-sharing/)
 
 ---
 
@@ -362,6 +438,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
+## 🎨 Spline 3D Guide
+
+For detailed information on how to work with 3D models, performance rules, and our model protection
+policy, please refer to the [Spline 3D Contributor Guide](docs/SPLINE_GUIDE.md).
+
+---
+
 ## Roadmap
 
 - AI visuals: Integrate Stable Diffusion/DALL·E for comic panels [Phase 2]
@@ -396,6 +479,8 @@ Thanks to these amazing people for making GroqTales better!
 
 - **Architecture Overview:** [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Comprehensive system design
   and technical architecture
+- **Spline 3D Guide:** [SPLINE_GUIDE.md](docs/SPLINE_GUIDE.md) - Essential guide for 3D model
+  contributions and protection policy
 - **Project Wiki:** [GitHub Wiki](https://github.com/IndieHub25/GroqTales/wiki) - Detailed guides
   and documentation
 - **API Documentation:** [Wiki/API](https://github.com/IndieHub25/GroqTales/wiki/API) - Backend API

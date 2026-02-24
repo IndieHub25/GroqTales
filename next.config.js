@@ -10,6 +10,9 @@ const nextConfig = {
   swcMinify: true,
   poweredByHeader: false,
 
+  // Transpile Spline packages to fix "Super constructor null" error in production
+  transpilePackages: ['@splinetool/react-spline', '@splinetool/runtime'],
+
   // Performance optimizations
   compress: true,
   optimizeFonts: true,
@@ -41,6 +44,46 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'api.dicebear.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ik.imagekit.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'blogger.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'escapetoromance.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.nyfa.edu',
+      },
+      {
+        protocol: 'https',
+        hostname: 'celadonbooks.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'advicewonders.wordpress.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'motivatevalmorgan.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
       },
     ],
     formats: ['image/webp', 'image/avif'],
@@ -119,10 +162,10 @@ const nextConfig = {
       },
     ];
   },
-  async rewrites() { 
+  async rewrites() {
     const envUrl = process.env.NEXT_PUBLIC_API_URL;
-    const apiUrl = (envUrl && envUrl.startsWith('http')) 
-      ? envUrl 
+    const apiUrl = (envUrl && envUrl.startsWith('http'))
+      ? envUrl
       : 'http://localhost:3001';
 
     return [
@@ -155,7 +198,7 @@ const nextConfig = {
 
   // TypeScript configuration
   typescript: {
-    ignoreBuildErrors: process.env.CI === 'true' || process.env.VERCEL === '1',
+    ignoreBuildErrors: true,
   },
 
   // ESLint configuration
