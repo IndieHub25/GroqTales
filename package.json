@@ -26,7 +26,7 @@
   "scripts": {
     "dev": "concurrently \"next dev\" \"nodemon server/backend.js\"",
     "build": "cross-env NEXT_PUBLIC_BUILD_MODE=true next build",
-    "cf-build": "npm run build",
+    "cf-build": "cross-env NEXT_PUBLIC_BUILD_MODE=true next build && npx @cloudflare/next-on-pages@1",
     "start": "concurrently \"next start\" \"node server/backend.js\"",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
@@ -155,6 +155,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.12",
     "@playwright/test": "^1.40.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

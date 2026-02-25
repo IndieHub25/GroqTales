@@ -59,6 +59,63 @@ Active full support: 1.3.8 (latest), 1.3.7 (previous). Security maintenance (cri
 4. Run `npm run build` — the build log will print `[next.config.js] Resolved app version: X.Y.Z`
 5. The footer and all other version references will automatically show the correct version in the deployed bundle
 
+### Bug Fix — Cloudflare Pages Deployment Showing "Page Does Not Exist"
+
+**Problem:** Cloudflare Pages deployed successfully but served a blank "page does not exist" error. The Cloudflare build log reported: *"A Wrangler configuration file was found but it does not appear to be valid… make sure the file is valid and contains the `pages_build_output_dir` property."*
+
+**Root Causes (3):**
+1. `wrangler.toml` used the Workers `[build]` table, which is **invalid for Pages**. Cloudflare Pages ignores it.
+2. `wrangler.toml` was missing `pages_build_output_dir` — the mandatory property for Cloudflare Pages. Without it the build step is skipped entirely and Cloudflare serves from `/` (empty).
+3. The `@cloudflare/next-on-pages` adapter was referenced in comments but not installed or invoked — it's required to transform Next.js App Router output into a Cloudflare-compatible format.
+
+**Fix:**
+- `wrangler.toml`: Removed the invalid `[build]` table; added `pages_build_output_dir = ".vercel/output/static"` at the top level (the adapter's output directory).
+- `package.json`: Updated `cf-build` script to `cross-env NEXT_PUBLIC_BUILD_MODE=true next build && npx @cloudflare/next-on-pages@1`. Added `@cloudflare/next-on-pages@^1.13.12` to `devDependencies`.
+- `next.config.js`: Added `setupDevPlatform()` call (guarded to `NODE_ENV === 'development'`) so Cloudflare bindings are available during local dev with `wrangler pages dev`.
+- `public/_headers`: Created Cloudflare Pages `_headers` file for edge-level security headers and static asset caching (mirrors the security headers in `next.config.js`).
+
+**Cloudflare Pages dashboard settings (must be set manually):**
+
+| Setting | Value |
+|---|---|
+| Build command | `npm run cf-build` |
+| Build output directory | `.vercel/output/static` |
+| Root directory | `/` (repo root) |
+| Node.js version | `20` |
+
+### GitHub Actions — Workflows Updated for Cloudflare Pages
+
+#### `deployment.yml` — Full Rewrite
+- Removed all Vercel CLI steps (`vercel pull`, `vercel build`, `vercel deploy`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `VERCEL_TOKEN` secrets)
+- Now uses `cloudflare/wrangler-action@v3` to deploy `.vercel/output/static` to Cloudflare Pages production
+- Build step runs `npm run cf-build` (Next.js build + `@cloudflare/next-on-pages` adapter)
+- Required GitHub secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` (see setup steps below)
+
+#### `cloudflare-preview.yml` — New Workflow
+- Deploys a unique Cloudflare Pages preview URL for every PR targeting `main`
+- Preview URL posted as a PR comment (updates in place on re-push, never duplicates)
+- Cleans up the preview branch deployment when PR is closed
+
+#### `lighthouse-ci.yml` — Fixed Hardcoded Version
+- Removed hardcoded `NEXT_PUBLIC_VERSION: '1.0.0'` from both build and run `env` blocks
+- Added a step to read the canonical version from the `VERSION` file: `APP_VERSION=$(cat VERSION)` → `$GITHUB_ENV`
+
+#### Required GitHub Secrets to Add
+Go to **GitHub → IndieHub25/GroqTales → Settings → Secrets and variables → Actions**:
+
+| Secret Name | Value |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API token with Pages edit permission |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID (from Cloudflare dashboard) |
+| `NEXT_PUBLIC_API_URL` | `https://groqtales-api.onrender.com` |
+| `NEXT_PUBLIC_GROQ_API_KEY` | Your Groq API key |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
+| `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | WalletConnect project ID |
+
+> **How to create a Cloudflare API token:**  
+> Cloudflare dashboard → My Profile → API Tokens → Create Token → use the "Edit Cloudflare Pages" template → scope to your account → copy the token.
+
 ---
 
 ## [1.3.7] - 2026-02-24

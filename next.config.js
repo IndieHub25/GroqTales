@@ -45,6 +45,28 @@ function resolveAppVersion() {
 const APP_VERSION = resolveAppVersion();
 console.log(`[next.config.js] Resolved app version: ${APP_VERSION}`);
 
+/**
+ * Cloudflare Pages adapter integration.
+ *
+ * @cloudflare/next-on-pages transforms the Next.js build output so it can run
+ * on the Cloudflare Pages edge runtime. During local development we also call
+ * setupDevPlatform() so that Cloudflare bindings (KV, D1, R2, etc.) are
+ * available through the same API used in production.
+ *
+ * Guard: only run in development so the production build stays clean.
+ */
+if (process.env.NODE_ENV === 'development') {
+  try {
+    const { setupDevPlatform } = require('@cloudflare/next-on-pages/next-dev');
+    setupDevPlatform().catch(() => {
+      // Non-fatal: Cloudflare bindings simply won't be available in dev
+    });
+  } catch (_) {
+    // Package not installed yet — run `npm install --legacy-peer-deps` to fix.
+    // Local Next.js dev works perfectly without it.
+  }
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Core settings
