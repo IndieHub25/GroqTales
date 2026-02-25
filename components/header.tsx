@@ -113,12 +113,6 @@ export function Header() {
       label: 'Top Creators',
       icon: <Trophy className="h-4 w-4 mr-1.5 text-emerald-400" />,
     },
-    {
-      type: 'link',
-      href: '/contributors',
-      label: 'Contributors',
-      icon: <Users className="h-4 w-4 mr-1.5 text-blue-400" />,
-    },
     { type: 'link', href: '/nft-gallery', label: 'NFT Gallery' },
     { type: 'link', href: '/nft-marketplace', label: 'NFT Marketplace' },
     ...(account
