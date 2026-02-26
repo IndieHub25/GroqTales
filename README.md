@@ -1,35 +1,43 @@
-<h1 align="center">GroqTales</h1>
+<h1 align="center">
+  <img src="public/logo.png" alt="GroqTales Logo" width="150" />
+  <br />
+  GroqTales
+</h1>
 <p align="center"><b>AI-Powered Web3 Storytelling Platform</b></p>
 <p align="center">Create, share, and own AI-generated stories and comics as NFTs on the Monad blockchain.</p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.2.5-blue?style=flat-square" alt="Version"/>
-  <img src="https://img.shields.io/github/deployments/Drago-03/GroqTales/Production?label=deploy%20(prod)&logo=vercel&style=flat-square" alt="Production Deployment"/>
-  <img src="https://img.shields.io/github/deployments/Drago-03/GroqTales/Preview?label=deploy%20(preview)&logo=vercel&style=flat-square" alt="Preview Deployments"/>
-  <img src="https://img.shields.io/github/actions/workflow/status/Drago-03/GroqTales/ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"/>
-  <img src="https://img.shields.io/github/last-commit/Drago-03/GroqTales?style=flat-square" alt="Last Commit"/>
-  <img src="https://img.shields.io/github/commit-activity/m/Drago-03/GroqTales?style=flat-square" alt="Commit Activity"/>
   <img src="https://img.shields.io/github/issues/Drago-03/GroqTales?style=flat-square" alt="Open Issues"/>
   <img src="https://img.shields.io/github/issues-pr/Drago-03/GroqTales?style=flat-square" alt="Open PRs"/>
   <img src="https://img.shields.io/github/license/Drago-03/GroqTales?style=flat-square" alt="License"/>
-  <img src="https://img.shields.io/badge/status-active-brightgreen?style=flat-square" alt="Active"/>
-  <img src="https://img.shields.io/badge/contributions-welcome-blueviolet?style=flat-square" alt="Contributions Welcome"/>
   <img src="https://img.shields.io/badge/website-groqtales.xyz-0052cc?style=flat-square" alt="Website"/>
-  <a href="mailto:support@groqtales.xyz"><img src="https://img.shields.io/badge/contact-support%40groqtales.xyz-orange?style=flat-square" alt="Contact Us"/></a>
+  <a href="mailto:mantejarora@gmail.com"><img src="https://img.shields.io/badge/contact-mantejarora%40gmail.com-orange?style=flat-square" alt="Contact Us"/></a>
   <a href="https://discord.gg/JK29FZRm"><img src="https://img.shields.io/discord/1245696768829601812?label=Discord&logo=discord&style=flat-square" alt="Discord"/></a>
 </p>
-
 <p align="center">
   <img src="https://img.shields.io/badge/SWOC'26-Open%20Source-orange?style=flat-square" alt="SWOC'26"/>
+  <img src="https://img.shields.io/badge/OSGC'26-Open%20Source-purple?style=flat-square" alt="OSGC'26"/>
+  <img src="https://img.shields.io/badge/ECWOC'26-Open%20Source-ff69b4?style=flat-square" alt="ECWOC'26"/>
   <img src="https://img.shields.io/badge/GSSOC'25-Legacy-lightgrey?style=flat-square" alt="GSSOC'25"/>
-  <img src="https://img.shields.io/badge/FOSS%20Hack-Open%20Source-blue?style=flat-square" alt="FOSS Hack"/>
-  <img src="https://img.shields.io/badge/LGM--SOC-Open%20Source-purple?style=flat-square" alt="LGM-SOC"/>
-  <img src="https://img.shields.io/badge/MLH-Open%20Source-red?style=flat-square" alt="MLH"/>
-  <img src="https://img.shields.io/badge/HackinCodes-Open%20Source-green?style=flat-square" alt="HackinCodes"/>
-  <img src="https://img.shields.io/badge/cWoc-Open%20Source-ff69b4?style=flat-square" alt="cWoc"/>
+  <img src="https://img.shields.io/badge/FOSS%20Hack-Legacy-lightgrey?style=flat-square" alt="FOSS Hack"/>
+  <img src="https://img.shields.io/badge/HACKOCTOBER-Legacy-lightgrey?style=flat-square" alt="HACKOCTOBER"/>
   <img src="https://img.shields.io/badge/Indie%20Hub-Main%20Partner-6e5494?style=flat-square" alt="Indie Hub"/>
+  <img src="https://img.shields.io/badge/Indie%20Developers%20Society-Community%20Partner-6e5494?style=flat-square" alt="Indie Developers Society"/>
   <img src="https://img.shields.io/badge/Open%20Source%20Community-Welcome-0052cc?style=flat-square" alt="Open Source Community"/>
+  <img src="https://img.shields.io/badge/Investment%20Partners-Applications%20Open-0052cc?style=flat-square" alt="Investment Partners"/>
 </p>
+  <b>Built by Indie Hub</b> ✨
+</p>
+
+<div align="center">
+  <a href="https://github.com/IndieHub25/GroqTales/stargazers">
+    <img src="https://img.shields.io/github/stars/IndieHub25/GroqTales?style=social" alt="Star on GitHub" />
+  </a>
+  <br />
+  ⭐ <b>If you like this project, please consider giving it a star!</b> ⭐
+</div>
+
+<br />
 
 <p align="center">
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&duration=4000&pause=600&color=F97316&center=true&vCenter=true&width=800&lines=---+AI-powered+Web3+Storytelling+on+the+Monad+Blockchain+---" alt="Animated Divider" />
@@ -44,10 +52,12 @@
 - [Tech Stack](#tech-stack)
 - [Quick Start](#quick-start)
 - [🛠️ Environment Configuration](#️-environment-configuration)
+- [🐳 Docker](#-docker)
 - [📜 Smart Contracts](#-smart-contracts)
 - [🏗️ System Architecture](#️-system-architecture)
 - [For Developers](#for-developers)
 - [🤝 Contributing](#-contributing)
+- [🎨 Spline 3D Guide](#-spline-3d-guide)
 - [Roadmap](#roadmap)
 - [Contributors](#contributors)
 - [Documentation & Architecture](#documentation--architecture)
@@ -108,7 +118,7 @@ world of creative writing, generative AI, and decentralized technology.
 - **AI:** Groq API (story generation), Unsplash API (optional visuals)
 - **Blockchain:** Monad SDK, Solidity Smart Contracts
 - **Database:** MongoDB
-- **Hosting:** Vercel
+- **Hosting:** Cloudflare Pages
 
 ---
 
@@ -159,6 +169,73 @@ To run this project locally, you must set up your environment variables. Create 
 > [!WARNING]  
 > Never commit your `.env.local` file to version control. Ensure it is listed in your `.gitignore`
 > to prevent leaking sensitive API keys.
+
+---
+
+## 🐳 Docker
+
+GroqTales ships with a production-ready Docker setup. The `docker-compose.yml` spins up all required
+services in one command.
+
+### Services
+
+| Service   | Image                                   | Port(s)        | Purpose                              |
+| --------- | --------------------------------------- | -------------- | ------------------------------------ |
+| `server`  | Built from `Dockerfile` (Node 22)       | `3000`, `3001` | Next.js frontend + Express backend   |
+| `mongo`   | `mongo:7`                               | `27017`        | MongoDB database                     |
+| `anvil`   | `ghcr.io/foundry-rs/foundry:v1.0.0`    | `8545`         | Local Ethereum-compatible dev chain   |
+
+### Quick Start
+
+```bash
+# Build & launch everything (MongoDB, Anvil, app)
+docker compose up --build
+
+# Run in detached mode
+docker compose up --build -d
+
+# View logs
+docker compose logs -f server
+
+# Stop all services
+docker compose down
+```
+
+Your application will be available at **http://localhost:3000** (frontend) and
+**http://localhost:3001** (backend API).
+
+### Building for Cloud Deployment
+
+```bash
+# Build the image
+docker build -t groqtales .
+
+# Cross-platform build (e.g., Mac M-series → amd64 cloud)
+docker build --platform=linux/amd64 -t groqtales .
+
+# Push to your registry
+docker push myregistry.com/groqtales
+```
+
+### Environment Variables
+
+Docker Compose sets these automatically. Override them in a `.env` file or in
+`docker-compose.override.yml`:
+
+| Variable                  | Default (Docker)                    |
+| ------------------------- | ----------------------------------- |
+| `MONGODB_URI`             | `mongodb://mongo:27017/groqtales`   |
+| `NEXT_PUBLIC_RPC_URL`     | `http://anvil:8545`                 |
+| `NODE_ENV`                | `development`                       |
+
+> [!TIP]
+> For production, set `NODE_ENV=production` and add your `GROQ_API_KEY`, `MONAD_RPC_URL`, and other
+> secrets via environment variables — never bake them into the image.
+
+### References
+
+- [Docker's Node.js guide](https://docs.docker.com/language/nodejs/)
+- [Docker Compose getting started](https://docs.docker.com/go/get-started-sharing/)
 
 ---
 
@@ -232,7 +309,9 @@ graph TD
 
 ---
 
----
+## 📁 Program Structure
+
+```
 
 GroqTales/
 │
@@ -241,8 +320,7 @@ GroqTales/
 ├── app/                      # Next.js App Router (pages, layouts, routes)
 ├── components/               # Reusable UI components
 ├── config/                   # App-wide configuration files
-├── deployment/
-│   └── vercel/               # Vercel deployment-related configs
+├── deployment/               # Deployment configurations
 ├── docs/                     # Documentation and guides
 ├── hooks/                    # Custom React hooks
 ├── lib/                      # Shared libraries and helper logic
@@ -280,25 +358,57 @@ GroqTales/
 ├── build_log.txt             # Build logs
 ├── foundry.toml              # Foundry configuration (smart contracts)
 ├── lighthouserc.json         # Lighthouse performance config
-├── netlify.toml              # Netlify deployment config
-├── next.config.js            # Next.js configuration
-├── package.json              # Project dependencies & scripts
-├── package-lock.json         # Locked dependency versions
-├── postcss.config.js         # PostCSS configuration
-├── render.yaml               # Render deployment config
-├── tailwind.config.js        # Tailwind CSS configuration (JS)
-├── tailwind.config.ts        # Tailwind CSS configuration (TS)
-├── tsconfig.json             # TypeScript configuration
-└── vercel.json               # Vercel deployment settings
+├── wrangler.toml             # Cloudflare Pages/Workers configuration
+└── MIGRATION-TO-CLOUDFLARE.md # Cloudflare migration guide
+```
 
+## 📸 Screenshots
+
+### 🏠 Landing Page
+
+   Displays the GroqTales homepage introducing AI-powered storytelling with options to create, mint, and share stories as NFTs.
+
+<img width="1911" height="920" alt="Screenshot 2026-01-29 182943" src="https://github.com/user-attachments/assets/822cf8a2-4202-4616-9adb-0ea54971c713" />
+
+
+### ❓ Why GroqTales
+ 
+  Highlights the core features of GroqTales including AI generation, blockchain ownership, and creator community.
+
+
+<img width="1892" height="824" alt="Screenshot 2026-01-29 183000" src="https://github.com/user-attachments/assets/481d54f5-e0f0-44f4-a980-9a735ea34a67" />
+
+
+### 🎭 Story Genres
+
+  Presents available storytelling genres such as Science Fiction, Fantasy, and Romance with key themes and elements.
+
+
+<img width="1910" height="915" alt="Screenshot 2026-01-29 183112" src="https://github.com/user-attachments/assets/07c009f2-603c-48c6-a975-74e3430a434c" />
+
+
+### 👥 Community Feed
+
+  Showcases the community feed where creators share stories, interact, and discover trending content.
+
+
+<img width="1911" height="920" alt="Screenshot 2026-01-29 183127" src="https://github.com/user-attachments/assets/0b4e3e2e-58e9-45d9-9a6b-4da57df97df8" />
+
+
+### 🛒 NFT Marketplace
+
+  Illustrates the NFT marketplace for browsing and uploading comic and text-based story NFTs.
+
+<img width="1913" height="915" alt="Screenshot 2026-01-29 183149" src="https://github.com/user-attachments/assets/a6b4ad86-896d-46b6-a854-31eed5bd0631" />
 
 
 ---
 
 ## 🤝 Contributing
 
-GroqTales is community-powered! We welcome all contributions—whether you're a developer, designer,
-writer, or blockchain enthusiast.
+📌 New contributors: Please read our [CONTRIBUTING.md](CONTRIBUTING.md) to understand issue labels, templates, and workflows.
+GroqTales is community-powered! We welcome all contributions—whether you're a developer, designer, writer, or blockchain enthusiast.
+
 
 **How You Can Help:**
 
@@ -319,14 +429,21 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
+## 🎨 Spline 3D Guide
+
+For detailed information on how to work with 3D models, performance rules, and our model protection
+policy, please refer to the [Spline 3D Contributor Guide](docs/SPLINE_GUIDE.md).
+
+---
+
 ## Roadmap
 
-- AI visuals: Integrate Stable Diffusion/DALL·E for comic panels
-- Multilingual story generation
-- Native marketplace for story NFTs
-- Enhanced wallet security & decentralized data storage
-- Mobile app support
-- More blockchain integrations
+- AI visuals: Integrate Stable Diffusion/DALL·E for comic panels [Phase 2]
+- Multilingual story generation [Phase 4]
+- Native marketplace for story NFTs [Phase 1]
+- Enhanced wallet security & decentralized data storage [Phase 1]
+- Mobile app support [Phase 5]
+- More blockchain integrations [Open for Discussions on Ideas]
 
 ---
 
@@ -353,6 +470,8 @@ Thanks to these amazing people for making GroqTales better!
 
 - **Architecture Overview:** [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Comprehensive system design
   and technical architecture
+- **Spline 3D Guide:** [SPLINE_GUIDE.md](docs/SPLINE_GUIDE.md) - Essential guide for 3D model
+  contributions and protection policy
 - **Project Wiki:** [GitHub Wiki](https://github.com/IndieHub25/GroqTales/wiki) - Detailed guides
   and documentation
 - **API Documentation:** [Wiki/API](https://github.com/IndieHub25/GroqTales/wiki/API) - Backend API

@@ -273,7 +273,20 @@ export function StoryGenerator() {
 
         {generatedStory && (
           <div className="mt-6 space-y-4">
-            <h3 className="text-lg font-semibold">Generated Story</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Generated Story</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copyToClipboard(generatedStory)}
+              >
+                {isCopied ? (
+                  <><Check className="mr-1 h-4 w-4" />Copied!</>
+                ) : (
+                  <><Copy className="mr-1 h-4 w-4" />Copy Story</>
+                )}
+              </Button>
+            </div>
             <div className="prose max-w-none bg-secondary/50 p-4 rounded-lg">
               <p>{generatedStory}</p>
             </div>

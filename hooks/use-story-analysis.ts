@@ -1,100 +1,59 @@
-'use client';
+import { useEffect, useRef, useCallback } from 'react';
 
-import { useState } from 'react';
+type InteractionType = 'VIEW' | 'LIKE' | 'BOOKMARK' | 'SHARE' | 'TIME_SPENT';
 
-interface AnalysisOptions {
-  content: string;
-  title?: string;
-  genre?: string;
-  analysisType?: 'standard' | 'critique' | 'audience' | 'development';
-  model?: string;
-  apiKey?: string;
-}
-interface AnalysisResult {
-  success: boolean;
-  analysis: any;
-  format: 'json' | 'text';
-  analysisType: string;
-}
-interface UseStoryAnalysisResult {
-  analyzeStory: (options: AnalysisOptions) => Promise<AnalysisResult | null>;
-  result: AnalysisResult | null;
-  isLoading: boolean;
-  error: string | null;
-  clearResult: () => void;
-}
-export function useStoryAnalysis(): UseStoryAnalysisResult {
-  const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+export function useStoryAnalytics(storyId: string) {
+  const startTime = useRef<number>(Date.now());
+  const hasRecordedView = useRef(false);
 
-  /**
-   * Analyze a story using Groq API
-
-   */
-  const analyzeStory = async (
-    options: AnalysisOptions
-  ): Promise<AnalysisResult | null> => {
-    const {
-      content,
-      title,
-      genre,
-      analysisType = 'standard',
-      model,
-      apiKey,
-    } = options;
-
-    if (!content) {
-      setError('Story content is required');
-      return null;
-    }
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/story-analysis', {
+  const sendSignal = (type: InteractionType, value: number = 1) => {
+    const data = { storyId, type, value };
+    
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/analytics/record', blob);
+    } else {
+      fetch('/api/analytics/record', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content,
-          title,
-          genre,
-          analysisType,
-          model,
-          apiKey,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to analyze story');
-      }
-      setResult(data);
-      return data;
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
-      return null;
-    } finally {
-      setIsLoading(false);
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        keepalive: true,
+      }).catch((e) => console.error('Analytics error:', e));
     }
   };
 
-  /**
-   * Clear the analysis result
-   */
-  const clearResult = () => {
-    setResult(null);
-    setError(null);
-  };
+  useEffect(() => {
+    if (!storyId) return;
 
-  return {
-    analyzeStory,
-    result,
-    isLoading,
-    error,
-    clearResult,
-  };
+    startTime.current = Date.now();
+
+    if (!hasRecordedView.current) {
+      fetch('/api/analytics/record', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ storyId, type: 'VIEW', value: 1 }),
+      }).catch(console.error);
+      
+      hasRecordedView.current = true;
+    }
+
+    return () => {
+      const durationSeconds = (Date.now() - startTime.current) / 1000;
+      
+      if (durationSeconds > 5) {
+        sendSignal('TIME_SPENT', durationSeconds);
+      }
+    };
+  }, [storyId]);
+
+  const trackInteraction = useCallback((type: InteractionType) => {
+    fetch('/api/analytics/record', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ storyId, type, value: 1 }),
+    }).catch(console.error);
+  }, [storyId]);
+
+  return { trackInteraction };
 }

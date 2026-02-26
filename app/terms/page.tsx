@@ -6,13 +6,14 @@ import React from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import LegalHeader from '@/components/LegalHeader';
 
 // Floating GitHub button component
-const FloatingGithub = () => (
+export const FloatingGithub = () => (
   <Link
     href="https://github.com/Drago-03/GroqTales.git"
     target="_blank"
-    className="fixed bottom-24 right-6 p-3 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-50"
+    className="fixed bottom-28 right-10 p-3 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-50"
   >
     <Github className="w-6 h-6 text-white" />
   </Link>
@@ -35,7 +36,17 @@ export default function TermsPage() {
 
       <div className="container mx-auto px-4 py-12 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent mb-4 text-center">
+          <LegalHeader />
+          <h1
+            className="
+            text-4xl md:text-5xl
+            font-black
+            text-center
+            mb-6
+            text-black
+            dark:text-white
+          "
+          >
             Terms of Service
           </h1>
           <p className="text-muted-foreground text-center mb-12">

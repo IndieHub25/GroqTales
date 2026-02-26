@@ -48,6 +48,7 @@ yarn-error.log*
 .tmp
 .cache/
 temp.md
+mgc.md
 
 # Large media files
 *.mp4
@@ -85,3 +86,5 @@ logs
 .Trashes
 ehthumbs.db
 Thumbs.db
+TODO.md
+.npm-cache

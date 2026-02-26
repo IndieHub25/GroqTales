@@ -27,7 +27,7 @@ services:
       - key: JWT_SECRET
         sync: false
       - key: CORS_ORIGIN
-        value: https://groq-tales.vercel.app/
+        value: https://groqtales.xyz/
       - key: API_VERSION
         value: v1
     domains:
@@ -52,7 +52,7 @@ services:
       - key: SDK_VERSION
         value: v1.0.0
       - key: CORS_ORIGIN
-        value: https://groq-tales.vercel.app/
+        value: https://groqtales.xyz/
     domains:
       - groqtales-sdk.onrender.com
 

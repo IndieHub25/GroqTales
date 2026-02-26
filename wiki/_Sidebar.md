@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://www.groqtales.xyz/groq_tales_logo.png" alt="GroqTales Logo" width="150" />
+</p>
+
 # GroqTales Wiki Navigation
 
 Welcome to the GroqTales Wiki! Use the links below to explore our comprehensive documentation.

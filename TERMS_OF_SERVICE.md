@@ -1,6 +1,6 @@
 # Terms of Service
 
-Last Updated: [Insert Date]
+Last Updated: 26 FEB; 2026
 
 Welcome to GroqTales, an AI-powered Web3 storytelling platform. By accessing or using our website
 and services, you agree to be bound by these Terms of Service ("Terms"). If you do not agree to
