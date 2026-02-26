@@ -20,8 +20,15 @@ export async function handleMintRequest(request: MintRequest): Promise<MintResul
   // Connect to database
   await dbConnect();
 
-  // Check for existing mint record
-  const existingMint = await StoryMint.findOne({ storyHash });
+  // Normalize inputs to lowercase for consistent idempotency
+  const normalizedStoryHash = storyHash.toLowerCase();
+  const normalizedAuthorAddress = authorAddress.toLowerCase();
+
+  // Check for existing mint record - scoped by storyHash + authorAddress
+  const existingMint = await StoryMint.findOne({ 
+    storyHash: normalizedStoryHash,
+    authorAddress: normalizedAuthorAddress 
+  });
 
   if (existingMint) {
     if (existingMint.status === 'MINTED') {
@@ -45,11 +52,11 @@ export async function handleMintRequest(request: MintRequest): Promise<MintResul
     // For FAILED status, allow retry by updating to PENDING
     if (existingMint.status === 'FAILED') {
       const updatedRecord = await StoryMint.findOneAndUpdate(
-        { storyHash, status: 'FAILED' },
+        { storyHash: normalizedStoryHash, authorAddress: normalizedAuthorAddress, status: 'FAILED' },
         {
-          storyHash,
+          storyHash: normalizedStoryHash,
           status: 'PENDING',
-          authorAddress,
+          authorAddress: normalizedAuthorAddress,
           title,
         },
         { new: true }
@@ -57,7 +64,10 @@ export async function handleMintRequest(request: MintRequest): Promise<MintResul
 
       if (!updatedRecord) {
         // Another request already changed the state
-        const currentRecord = await StoryMint.findOne({ storyHash });
+        const currentRecord = await StoryMint.findOne({ 
+          storyHash: normalizedStoryHash,
+          authorAddress: normalizedAuthorAddress 
+        });
 
         return {
           success: false,
@@ -79,9 +89,9 @@ export async function handleMintRequest(request: MintRequest): Promise<MintResul
   // Create new PENDING record for new story
   try {
     const newRecord = await StoryMint.create({
-      storyHash,
+      storyHash: normalizedStoryHash,
       status: 'PENDING',
-      authorAddress,
+      authorAddress: normalizedAuthorAddress,
       title,
     });
 
@@ -94,7 +104,10 @@ export async function handleMintRequest(request: MintRequest): Promise<MintResul
   } catch (err: any) {
     // Handle duplicate key error (concurrent mint request)
     if (err?.code === 11000) {
-      const existingRecord = await StoryMint.findOne({ storyHash });
+      const existingRecord = await StoryMint.findOne({ 
+        storyHash: normalizedStoryHash,
+        authorAddress: normalizedAuthorAddress 
+      });
 
       // Handle FAILED status explicitly in duplicate-key fallback messaging
       let message: string;

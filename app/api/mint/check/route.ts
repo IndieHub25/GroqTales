@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const trimmedHash = storyHash.trim();
+  // Canonicalize storyHash to lowercase for consistent queries
+  const trimmedHash = storyHash.trim().toLowerCase();
   if (!trimmedHash || !isValidStoryHash(trimmedHash)) {
     return NextResponse.json(
       { success: false, error: 'Invalid storyHash format' },
@@ -50,10 +51,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Connect to database
-  await dbConnect();
-
-  // Apply rate limiting per wallet
+  // Apply rate limiting per wallet BEFORE opening DB connection
+  // This prevents rate-limited requests from consuming DB resources
   const rateLimitResult = RateLimiter.checkRateLimit(
     walletAddress,
     RATE_LIMIT_MAX,
@@ -70,6 +69,9 @@ export async function POST(request: NextRequest) {
       { status: 429 }
     );
   }
+
+  // Connect to database AFTER rate limiting check
+  await dbConnect();
 
   try {
     // SECURE: Query is ALWAYS scoped to the wallet address
