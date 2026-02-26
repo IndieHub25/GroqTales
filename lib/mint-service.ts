@@ -25,7 +25,8 @@ export async function handleMintRequest(
     typeof authorAddress !== 'string' ||
     typeof title !== 'string' ||
     !storyHash.trim() ||
-    !authorAddress.trim()
+    !authorAddress.trim() ||
+    !title.trim()
   ) {
     throw new Error(
       'Invalid mint request payload: storyHash, authorAddress, and title are required and must be non-empty strings'
@@ -36,8 +37,9 @@ export async function handleMintRequest(
   await dbConnect();
 
   // Normalize inputs to lowercase for consistent idempotency
-  const normalizedStoryHash = storyHash.toLowerCase();
-  const normalizedAuthorAddress = authorAddress.toLowerCase();
+  // Trim first to preserve idempotency - " hash " and "hash" should be the same
+  const normalizedStoryHash = storyHash.trim().toLowerCase();
+  const normalizedAuthorAddress = authorAddress.trim().toLowerCase();
 
   // Check for existing mint record - scoped by storyHash + authorAddress
   const existingMint = await StoryMint.findOne({
