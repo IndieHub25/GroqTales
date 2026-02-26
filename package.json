@@ -157,7 +157,11 @@
     "postcss": "^8.4.23",
     "tailwindcss": "^3.3.0",
     "typescript": "^5.8.3",
-    "@cloudflare/next-on-pages": "^1.13.12"
+    "@cloudflare/next-on-pages": "^1.13.12",
+    "@types/node": "^20.17.30",
+    "@types/react": "^18.2.57",
+    "@types/react-dom": "^18.2.19",
+    "eslint-config-next": "14.1.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
@@ -166,9 +170,6 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^20.17.30",
-    "@types/react": "^18.2.57",
-    "@types/react-dom": "^18.2.19",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
@@ -176,7 +177,6 @@
     "cross-env": "^10.1.0",
     "css-loader": "^7.1.2",
     "eslint": "^8.56.0",
-    "eslint-config-next": "14.1.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.29.1",
