@@ -25,8 +25,8 @@
   },
   "scripts": {
     "dev": "concurrently \"next dev\" \"nodemon server/backend.js\"",
-    "build": "cross-env NEXT_PUBLIC_BUILD_MODE=true next build",
-    "cf-build": "cross-env NEXT_PUBLIC_BUILD_MODE=true next build && npx @cloudflare/next-on-pages@1",
+    "build": "NEXT_PUBLIC_BUILD_MODE=true next build",
+    "cf-build": "NEXT_PUBLIC_BUILD_MODE=true next build && npx @cloudflare/next-on-pages@1",
     "start": "concurrently \"next start\" \"node server/backend.js\"",
     "lint": "next lint",
     "lint:fix": "next lint --fix",

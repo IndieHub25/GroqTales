@@ -14,6 +14,7 @@ Active full support: 1.3.9 (latest), 1.3.8 (previous). Security maintenance (cri
 ### Bug Fixes & Infrastructure
 
 - **Database Plan Migration**: Updated the PostgreSQL database plan in `render.yaml` from the legacy `starter` tier to the currently supported `free` tier to resolve dynamic deployment issues on Render.
+- **Cloudflare Pages Build Fix**: Resolved `cross-env: not found` error that caused all Cloudflare Pages deployments to fail with exit code 127. `cross-env` was listed in `devDependencies` but Cloudflare's build environment sets `NODE_ENV=production` before `npm install`, skipping devDep installation. Replaced `cross-env NEXT_PUBLIC_BUILD_MODE=true` with POSIX inline syntax (`NEXT_PUBLIC_BUILD_MODE=true next build`) in both `build` and `cf-build` scripts — `wrangler.toml` already injects this variable for preview/production environments, making `cross-env` redundant.
 - **Typewriter Animation Fix**: Resolved a timing bug in the `useTypewriter` hook within the Hero section (`app/page.tsx`). The animation now properly dynamically adjusts speed between the typing and deleting phases by utilizing recursive `setTimeout` logic instead of a fixed-interval `setInterval`, creating a smoother, more realistic typing effect.
 
 ### Infrastructure — Migration from Vercel/Netlify to Cloudflare Pages
