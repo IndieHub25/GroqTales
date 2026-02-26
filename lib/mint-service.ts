@@ -28,9 +28,12 @@ export async function handleMintRequest(
     !authorAddress.trim() ||
     !title.trim()
   ) {
-    throw new Error(
-      'Invalid mint request payload: storyHash, authorAddress, and title are required and must be non-empty strings'
-    );
+    return {
+      success: false,
+      status: 'FAILED',
+      message:
+        'Invalid mint request payload: storyHash, authorAddress, and title are required and must be non-empty strings',
+    };
   }
 
   // Connect to database
@@ -40,6 +43,7 @@ export async function handleMintRequest(
   // Trim first to preserve idempotency - " hash " and "hash" should be the same
   const normalizedStoryHash = storyHash.trim().toLowerCase();
   const normalizedAuthorAddress = authorAddress.trim().toLowerCase();
+  const normalizedTitle = title.trim();
 
   // Check for existing mint record - scoped by storyHash + authorAddress
   const existingMint = await StoryMint.findOne({
@@ -79,7 +83,7 @@ export async function handleMintRequest(
             storyHash: normalizedStoryHash,
             status: 'PENDING',
             authorAddress: normalizedAuthorAddress,
-            title,
+            title: normalizedTitle,
           },
           $unset: {
             error: '',
@@ -121,7 +125,7 @@ export async function handleMintRequest(
       storyHash: normalizedStoryHash,
       status: 'PENDING',
       authorAddress: normalizedAuthorAddress,
-      title,
+      title: normalizedTitle,
     });
 
     return {

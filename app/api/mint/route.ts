@@ -47,10 +47,7 @@ export async function POST(request: NextRequest) {
   // Type validation for string parameters
   const { storyHash, title } = body;
 
-  if (
-    typeof storyHash !== 'string' ||
-    typeof title !== 'string'
-  ) {
+  if (typeof storyHash !== 'string' || typeof title !== 'string') {
     return NextResponse.json(
       {
         success: false,
@@ -94,13 +91,20 @@ export async function POST(request: NextRequest) {
   }
   try {
     // Use the authenticated wallet address for minting
-    const result = await handleMintRequest({ 
-      storyHash: trimmedHash, 
-      authorAddress: walletAddress, 
-      title: title.trim() 
+    const result = await handleMintRequest({
+      storyHash: trimmedHash,
+      authorAddress: walletAddress,
+      title: title.trim(),
     });
 
     if (!result.success) {
+      // Determine appropriate status code based on the error type
+      // Validation errors return 400, business logic conflicts return 409
+      const isValidationError = result.message.includes(
+        'Invalid mint request payload'
+      );
+      const statusCode = isValidationError ? 400 : 409;
+
       return NextResponse.json(
         {
           success: false,
@@ -108,7 +112,7 @@ export async function POST(request: NextRequest) {
           status: result.status,
           record: result.existingRecord,
         },
-        { status: 409 }
+        { status: statusCode }
       );
     }
 
