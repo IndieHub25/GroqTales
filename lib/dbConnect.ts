@@ -1,8 +1,18 @@
 import mongoose from 'mongoose';
 
+// Check if we should use a mock DB (enabled via build-only env var)
+const shouldMockDb =
+  process.env.MONGO_MOCK === 'true' ||
+  process.env.MONGO_MOCK_BUILD === '1' ||
+  process.env.MONGO_MOCK_BUILD === 'true' ||
+  process.env.BUILD_MODE === 'true' ||
+  process.env.NEXT_PUBLIC_BUILD_MODE === 'true' ||
+  process.env.CI === 'true';
+
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
+// Only throw error if we're not in mock mode
+if (!MONGODB_URI && !shouldMockDb) {
   throw new Error(
     'Please define the MONGODB_URI environment variable inside .env.local'
   );
@@ -27,6 +37,19 @@ if (!cached) {
 }
 
 async function dbConnect() {
+  // Use mock in build/CI mode to avoid needing MongoDB connection
+  if (shouldMockDb) {
+    if (cached!.conn) {
+      return cached!.conn;
+    }
+    if (!cached!.promise) {
+      // Return a minimal mock connection
+      cached!.promise = Promise.resolve(mongoose);
+    }
+    cached!.conn = await cached!.promise;
+    return cached!.conn;
+  }
+
   if (cached!.conn) {
     return cached!.conn;
   }

@@ -1,4 +1,5 @@
 import StoryMint, { IStoryMint } from '@/models/StoryMint';
+import dbConnect from '@/lib/dbConnect';
 
 export interface MintRequest {
   storyHash: string;
@@ -15,6 +16,9 @@ export interface MintResult {
 
 export async function handleMintRequest(request: MintRequest): Promise<MintResult> {
   const { storyHash, authorAddress, title } = request;
+
+  // Connect to database
+  await dbConnect();
 
   // Check for existing mint record
   const existingMint = await StoryMint.findOne({ storyHash });
