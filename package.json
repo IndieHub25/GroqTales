@@ -26,7 +26,7 @@
   "scripts": {
     "dev": "concurrently \"next dev\" \"nodemon server/backend.js\"",
     "build": "NEXT_PUBLIC_BUILD_MODE=true next build",
-    "cf-build": "NEXT_PUBLIC_BUILD_MODE=true next build",
+    "cf-build": "rm -rf app/api && NEXT_PUBLIC_BUILD_MODE=true next build",
     "start": "concurrently \"next start\" \"node server/backend.js\"",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
