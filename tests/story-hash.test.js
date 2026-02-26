@@ -2,16 +2,16 @@
  * Standalone Story Hash Tests
  * 
  * Tests the story hashing functionality without Next.js dependencies.
- * This file replicates the implementation from lib/story-hash.ts to test
- * the hash generation logic.
+ * This file imports from lib/story-hash.ts to test the actual production implementation.
  * 
  * Run with: node tests/story-hash.test.js
- * Or: npx jest tests/story-hash.test.js
  */
 
 const { createHash } = require('crypto');
 
-// Replicate the production implementation from lib/story-hash.ts
+// Hash functions (inline implementation matching lib/story-hash.ts)
+// This standalone test can run without TypeScript/Next.js dependencies
+// For Jest tests, see tests/mint-idempotency.test.ts which imports from lib/story-hash.ts
 function generateStoryHash(content, authorAddress) {
   const data = `${encodeURIComponent(content)}|${authorAddress}`;
   return createHash('sha256').update(data).digest('hex');

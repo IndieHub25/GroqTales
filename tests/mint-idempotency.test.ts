@@ -23,21 +23,13 @@ const TEST_WALLET_ADDRESS_2 = '0x9b3a53ba88d8b1f8d2a4f5b7c8e3a1f2b5d6c7e8';
 const VALID_STORY_HASH = 'a'.repeat(64);
 const VALID_STORY_HASH_2 = 'b'.repeat(64);
 
-// Inline hash functions (same implementation as lib/story-hash.ts)
-const { createHash } = require('crypto');
-
-function generateStoryHash(content: string, authorAddress: string): string {
-  const data = `${encodeURIComponent(content)}|${authorAddress}`;
-  return createHash('sha256').update(data).digest('hex');
-}
-
-function generateContentHash(content: string): string {
-  return createHash('sha256').update(content).digest('hex');
-}
-
-function isValidStoryHash(hash: string): boolean {
-  return /^[a-f0-9]{64}$/i.test(hash);
-}
+// Import hash functions from production code to test the actual implementation
+// This ensures tests validate the shipped code, not a duplicated copy
+import {
+  generateStoryHash,
+  generateContentHash,
+  isValidStoryHash,
+} from '../lib/story-hash';
 
 describe('Mint Idempotency API', () => {
   describe('Story Hash Generation', () => {

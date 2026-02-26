@@ -96,13 +96,25 @@ export async function handleMintRequest(request: MintRequest): Promise<MintResul
     if (err?.code === 11000) {
       const existingRecord = await StoryMint.findOne({ storyHash });
 
+      // Handle FAILED status explicitly in duplicate-key fallback messaging
+      let message: string;
+      switch (existingRecord?.status) {
+        case 'MINTED':
+          message = 'Story already minted';
+          break;
+        case 'FAILED':
+          message = 'Previous mint attempt failed. Please try again.';
+          break;
+        case 'PENDING':
+        default:
+          message = 'Mint already in progress';
+          break;
+      }
+
       return {
         success: false,
         status: existingRecord?.status ?? 'PENDING',
-        message:
-          (existingRecord?.status ?? 'PENDING') === 'MINTED'
-            ? 'Story already minted'
-            : 'Mint already in progress',
+        message,
         existingRecord,
       };
     }

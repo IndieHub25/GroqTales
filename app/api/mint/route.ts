@@ -5,18 +5,32 @@ import { handleMintRequest } from '@/lib/mint-service';
 import { RateLimiter } from '@/lib/api-utils';
 import { isValidStoryHash } from '@/lib/story-hash';
 
-interface CustomUser {
-  name?: string | null;
-  email?: string | null;
-  image?: string | null;
-  wallet?: string;
-}
-
 // Rate limit: 60 requests per minute per wallet
 const RATE_LIMIT_MAX = 60;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 
 export async function POST(request: NextRequest) {
+  // CRITICAL: Verify authentication
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized: Please log in to mint stories' },
+      { status: 401 }
+    );
+  }
+
+  // Get wallet address from session (set by wallet connection)
+  // @ts-ignore - NextAuth session can be extended with custom properties
+  const walletAddress = session.user.address || session.user.wallet;
+
+  if (!walletAddress) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized: Wallet not connected' },
+      { status: 401 }
+    );
+  }
+
   let body;
   try {
     body = await request.json();
@@ -30,14 +44,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { storyHash, authorAddress, title } = body;
+  // Type validation for string parameters
+  const { storyHash, title } = body;
 
-  // Validate required parameters
-  if (!storyHash || !title || !authorAddress) {
+  if (
+    typeof storyHash !== 'string' ||
+    typeof title !== 'string'
+  ) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Missing required parameters: storyHash, title, authorAddress',
+        error: 'Missing required parameters: storyHash, title',
       },
       { status: 400 }
     );
@@ -45,7 +62,7 @@ export async function POST(request: NextRequest) {
 
   // Validate storyHash format
   const trimmedHash = storyHash.trim();
-  if (!isValidStoryHash(trimmedHash)) {
+  if (!trimmedHash || !isValidStoryHash(trimmedHash)) {
     return NextResponse.json(
       {
         success: false,
@@ -55,8 +72,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Use the provided wallet address for minting and rate limiting
-  const walletAddress = authorAddress.trim().toLowerCase();
+  // Use the authenticated wallet address for minting and rate limiting
+  const authorAddress = walletAddress.toLowerCase();
 
   // Apply rate limiting per wallet
   const rateLimitResult = RateLimiter.checkRateLimit(

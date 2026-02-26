@@ -4,7 +4,7 @@ This guide walks through testing the idempotency protections added to prevent ac
 
 ## What Was Implemented
 
-1. **Content Hash Tracking** – Each story gets a unique hash before minting (already in `components/ai-story-generator-clean.tsx`)
+1. **Content Hash Tracking** – Each story gets a unique hash before minting (already in `components/story-generator.tsx`)
 2. **Minting Status Check** – `/api/mint/check` endpoint validates minting status before allowing new mints
 3. **Auth & Rate Limiting** – Each wallet is rate-limited and must be authenticated via NextAuth
 4. **Database Scoping** – Mint queries are scoped to `authorAddress` to prevent enumeration attacks
@@ -130,18 +130,18 @@ test('prevent double-minting same story', async ({ page }) => {
   // Generate story
   await page.fill('[placeholder="Enter your story idea"]', 'Test story');
   await page.click('text=Generate Story');
-  await page.waitForText('Story Generated!');
+  await page.locator('text=Story Generated!').waitFor();
   
   // Mint first time
   await page.click('text=Mint Story as NFT');
-  await page.waitForText('NFT Minted Successfully!');
+  await page.locator('text=NFT Minted Successfully!').waitFor();
   
   // Try mint again (same story hash)
   await page.click('text=Mint Story as NFT');
-  await page.waitForText(/Already Minted|Minting In Progress/);
+  await page.locator(/Already Minted|Minting In Progress/).waitFor();
   
   // Verify button is disabled or error is shown
-  expect(await page.isDisabled('[text="Mint Story as NFT"]')).toBe(true);
+  await expect(page.locator('text=Mint Story as NFT')).toBeDisabled();
 });
 ```
 
