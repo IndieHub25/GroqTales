@@ -166,6 +166,7 @@ export function Footer({ version }: { version?: string }) {
               <ul className="space-y-4 pl-0 list-none">
                 {[
                   { href: '/docs', label: 'Documentation' },
+                  { href: '/contributors', label: 'Contributors' },
                   { href: '/faq', label: 'FAQ' },
                   { href: '/feedback', label: 'Feedback' },
                 ].map((link) => (
@@ -219,21 +220,20 @@ export function Footer({ version }: { version?: string }) {
 
             <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 border border-white/10 rounded-full">
               <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  healthStatus === 'ok'
+                className={`w-1.5 h-1.5 rounded-full ${healthStatus === 'ok'
                     ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse'
                     : healthStatus === 'degraded'
                       ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)] animate-pulse'
                       : healthStatus === 'down'
                         ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]'
                         : 'bg-white/30'
-                }`}
+                  }`}
               />
               <span className="text-xs font-medium text-white/50 tracking-wider uppercase">
                 {healthStatus === 'ok' ? 'System Operational' : healthStatus === 'degraded' ? 'Degraded Performance' : healthStatus === 'down' ? 'System Offline' : 'Checking Status...'}
               </span>
             </div>
-            
+
             <div className="text-right">
               <Link
                 href="https://www.indiehub.co.in"
@@ -249,8 +249,9 @@ export function Footer({ version }: { version?: string }) {
           </div>
         </div>
       </div>
-      
-      <style dangerouslySetInnerHTML={{__html: `
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes glitch-1 {
           0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
           20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
