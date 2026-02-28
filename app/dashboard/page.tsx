@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useWallet } from "@/hooks/use-wallet";
 import { useCreatorEarnings } from "@/hooks/use-royalties";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ChecklistStep {
   id: string;
@@ -28,13 +29,32 @@ interface ChecklistStep {
   actionUrl?: string;
 }
 
+interface DashboardStats {
+  storyCount: number;
+  totalLikes: number;
+  totalViews: number;
+}
+
+interface RecentStory {
+  _id: string;
+  title: string;
+  updatedAt?: string;
+  createdAt?: string;
+}
+
 export default function DashboardPage() {
   const { address } = useWallet();
   const { earnings } = useCreatorEarnings(address || undefined);
 
   const [runTour, setRunTour] = useState(false);
-
   const [isChecklistVisible, setIsChecklistVisible] = useState(false);
+  const [dashLoading, setDashLoading] = useState(true);
+  const [stats, setStats] = useState<DashboardStats>({
+    storyCount: 0,
+    totalLikes: 0,
+    totalViews: 0,
+  });
+  const [recentStories, setRecentStories] = useState<RecentStory[]>([]);
 
   const [checklistSteps, setChecklistSteps] = useState<ChecklistStep[]>([
     { id: "profile", label: "Complete your Creator Profile", isCompleted: true },
@@ -56,6 +76,74 @@ export default function DashboardPage() {
     }
   }, []);
 
+  // Fetch real dashboard data
+  useEffect(() => {
+    const controller = new AbortController();
+    async function fetchDashboard() {
+      try {
+        setDashLoading(true);
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const token = typeof window !== 'undefined'
+          ? localStorage.getItem('accessToken')
+          : null;
+
+        if (!token) {
+          setDashLoading(false);
+          return;
+        }
+
+        const headers: Record<string, string> = {
+          Authorization: `Bearer ${token}`,
+        };
+
+        const res = await fetch(`${baseUrl}/api/v1/users/profile`, {
+          headers,
+          credentials: 'include',
+          signal: controller.signal,
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success) {
+            setStats(
+              json.stats || { storyCount: 0, totalLikes: 0, totalViews: 0 }
+            );
+            const stories: RecentStory[] = (json.stories || [])
+              .slice(0, 5)
+              .map((s: any) => ({
+                _id: s._id,
+                title: s.title || 'Untitled Story',
+                updatedAt: s.updatedAt,
+                createdAt: s.createdAt,
+              }));
+            setRecentStories(stories);
+
+            // Update checklist based on real data
+            setChecklistSteps((prev) =>
+              prev.map((step) => {
+                if (step.id === 'story' && (json.stats?.storyCount || 0) > 0) {
+                  return { ...step, isCompleted: true };
+                }
+                if (step.id === 'wallet' && address) {
+                  return { ...step, isCompleted: true };
+                }
+                return step;
+              })
+            );
+          }
+        }
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.error('Dashboard fetch failed:', err);
+        }
+      } finally {
+        if (!controller.signal.aborted) setDashLoading(false);
+      }
+    }
+    fetchDashboard();
+    return () => controller.abort();
+  }, [address]);
+
   const handleTourComplete = () => {
     setRunTour(false);
     localStorage.setItem("has_seen_dashboard_tour", "true");
@@ -65,6 +153,17 @@ export default function DashboardPage() {
     setIsChecklistVisible(false);
     localStorage.setItem("onboarding_dismissed", "true");
   };
+
+  function timeAgo(dateStr?: string): string {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+  }
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -121,29 +220,41 @@ export default function DashboardPage() {
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              +2 new this week
-            </p>
+            {dashLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{stats.storyCount}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Total published stories
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">NFTs Minted</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Views</CardTitle>
             <Trophy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              6 sold on secondary market
-            </p>
+            {dashLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{stats.totalViews}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Across all stories
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Readers</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Likes</CardTitle>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -160,10 +271,16 @@ export default function DashboardPage() {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+573</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              +201 since last hour
-            </p>
+            {dashLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{stats.totalLikes}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Total story likes
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -173,29 +290,55 @@ export default function DashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Stories</CardTitle>
              
-             <Button className="tour-create-story bg-primary text-primary-foreground">
-                <Plus className="mr-2 h-4 w-4" /> Create New Story
-             </Button>
+             <Button asChild className="tour-create-story bg-primary text-primary-foreground">
+                <Link href="/create/ai-story">
+                  <Plus className="mr-2 h-4 w-4" /> Create New Story
+                </Link>
+              </Button>
 
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                        <div className="flex items-center gap-4">
-                            <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                                📚
-                            </div>
-                            <div>
-                                <p className="font-medium">The Lost Algorithm of Atlantis</p>
-                                <p className="text-sm text-muted-foreground">Updated 2 hours ago</p>
-                            </div>
-                        </div>
-                        <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                        </Button>
+              {dashLoading ? (
+                [1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="h-10 w-10 rounded-lg" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-48" />
+                        <Skeleton className="h-3 w-24" />
+                      </div>
                     </div>
-                ))}
+                  </div>
+                ))
+              ) : recentStories.length > 0 ? (
+                recentStories.map((story) => (
+                  <div key={story._id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                        📚
+                      </div>
+                      <div>
+                        <Link href={`/stories/${story._id}`} className="font-medium hover:text-primary transition-colors">
+                          {story.title}
+                        </Link>
+                        <p className="text-sm text-muted-foreground">
+                          Updated {timeAgo(story.updatedAt || story.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                  <p className="font-medium">No stories yet</p>
+                  <p className="text-sm mt-1">Create your first AI-powered story!</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -210,7 +353,7 @@ export default function DashboardPage() {
                     <strong>💡 Pro Tip:</strong> Minting your story as an NFT allows you to earn royalties every time it is resold.
                 </div>
                 <div className="p-3 bg-muted rounded-lg border">
-                    <strong>Writing with AI:</strong> Try using the "Fantasy" prompt preset to generate immersive worlds quickly.
+                    <strong>Writing with AI:</strong> Try using the &quot;Fantasy&quot; prompt preset to generate immersive worlds quickly.
                 </div>
             </div>
           </CardContent>
@@ -221,7 +364,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-emerald-400" />
-              Access Control & Security
+              Access Control &amp; Security
             </CardTitle>
           </CardHeader>
           <CardContent>

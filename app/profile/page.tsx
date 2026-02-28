@@ -143,13 +143,22 @@ export default function ProfilePage() {
       try {
         setLoading(true);
 
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const token = typeof window !== 'undefined'
+          ? localStorage.getItem('accessToken')
+          : null;
+
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         const res = await fetch(
-          `/api/v1/users/profile`,
-          { credentials: 'include', signal: controller.signal }
+          `${baseUrl}/api/v1/users/profile`,
+          { headers, credentials: 'include', signal: controller.signal }
         );
         if (!res.ok) throw new Error();
         const json = await res.json();
-        setProfile(json.user);
+        if (!json.success) throw new Error();
+        setProfile(json.data);
         setStories(json.stories ?? []);
       } catch (err) {
         if ((err as any).name !== 'AbortError') {

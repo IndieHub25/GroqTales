@@ -101,11 +101,18 @@ export default function SettingsPage() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     mode: 'onChange',
   });
+
+  const getToken = () =>
+    typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  const baseUrl = typeof window !== 'undefined'
+    ? (process.env.NEXT_PUBLIC_API_URL || '')
+    : '';
 
   // const onSubmit = (data: ProfileFormValues) => {
   //   // In a real app, this would save the data to the server
@@ -116,9 +123,14 @@ export default function SettingsPage() {
     const controller = new AbortController();
     async function hydrate() {
       try {
+        const token = getToken();
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         const res = await fetch(
-          `/api/v1/users/profile`,
+          `${baseUrl}/api/v1/users/profile`,
           {
+            headers,
             credentials: 'include',
             signal: controller.signal,
           }
@@ -127,7 +139,6 @@ export default function SettingsPage() {
         if (!res.ok) throw new Error('Failed to fetch profile');
 
         const json: ApiResponse<User> = await res.json();
-        //const notifJson = await notifRes.json();
         if (!json.success || !json.data) {
           setLoading(false);
           return;
@@ -159,7 +170,6 @@ export default function SettingsPage() {
           displayName: userData.displayName ?? '',
           email: userData.email ?? '',
           bio: userData.bio ?? '',
-          //primaryGenre: profileJson.user.primaryGenre ?? '',
         });
       } catch (err) {
         console.error(err);
@@ -173,31 +183,63 @@ export default function SettingsPage() {
     hydrate();
     return () => controller.abort();
   }, [form]);
-  const onSubmit = (data: ProfileFormValues) => {
-    // In a real app, this would save the data to the server
-    console.log(data);
-    // Show success message or redirect
+
+  const onSubmit = async (data: ProfileFormValues) => {
+    try {
+      setSaveStatus('saving');
+      const token = getToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${baseUrl}/api/v1/users/update`, {
+        method: 'PATCH',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify({
+          firstName: data.displayName?.split(' ')[0] || data.displayName,
+          lastName: data.displayName?.split(' ').slice(1).join(' ') || '',
+          email: data.email,
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to save profile');
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    } catch (err) {
+      console.error('Profile save failed:', err);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    }
   };
+
   const savePreferences = async () => {
     try {
-      const res = await fetch(
-        `/api/v1/settings/preferences`,
+      setSaveStatus('saving');
+      const token = getToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      // Save notification preferences
+      const notifRes = await fetch(
+        `${baseUrl}/api/v1/settings/notifications`,
         {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           credentials: 'include',
-          body: JSON.stringify({
-            notifications,
-            privacy,
-          }),
+          body: JSON.stringify(notifications),
         }
       );
-      if (!res.ok) {
-        throw new Error('Failed to save preferences');
-      }
-      console.log('Preferences saved');
+      if (!notifRes.ok) throw new Error('Failed to save notification preferences');
+
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (err) {
       console.error('Failed to save preferences:', err);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
     }
   };
   if (loading) {
@@ -463,8 +505,16 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    <div className="flex justify-end">
-                      <Button type="submit">Save Changes</Button>
+                    <div className="flex justify-end gap-3">
+                      {saveStatus === 'saved' && (
+                        <span className="text-sm text-emerald-400 self-center">✓ Changes saved!</span>
+                      )}
+                      {saveStatus === 'error' && (
+                        <span className="text-sm text-red-400 self-center">Failed to save</span>
+                      )}
+                      <Button type="submit" disabled={saveStatus === 'saving'}>
+                        {saveStatus === 'saving' ? 'Saving...' : 'Save Changes'}
+                      </Button>
                     </div>
                   </form>
                 </Form>
@@ -721,10 +771,35 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </CardContent> */}
-              {/* <CardFooter className="flex justify-end space-x-4 border-t pt-6">
-                <Button variant="outline">Reset to Defaults</Button>
-                <Button>Save Preferences</Button>
-              </CardFooter> */}
+              {/* \u003cCardContent\u003e */}
+              <CardFooter className="flex justify-end space-x-4 border-t pt-6">
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setNotifications({
+                      comments: true,
+                      likes: true,
+                      follows: true,
+                      email: true,
+                      push: false,
+                      sms: false,
+                      marketing: false,
+                      updates: true,
+                    })
+                  }
+                >
+                  Reset to Defaults
+                </Button>
+                <Button onClick={savePreferences} disabled={saveStatus === 'saving'}>
+                  {saveStatus === 'saving'
+                    ? 'Saving...'
+                    : saveStatus === 'saved'
+                    ? '✓ Saved!'
+                    : saveStatus === 'error'
+                    ? 'Error — Retry'
+                    : 'Save Preferences'}
+                </Button>
+              </CardFooter>
             </Card>
           </div>
         </TabsContent>
