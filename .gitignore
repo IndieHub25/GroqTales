@@ -48,6 +48,7 @@ yarn-error.log*
 .tmp
 .cache/
 temp.md
+mgc.md
 
 # Large media files
 *.mp4

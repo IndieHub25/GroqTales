@@ -62,11 +62,11 @@ function runChecks() {
   checkEnvVariables();
   checkBuild();
   console.log(
-    '\nAll pre-deployment checks passed! Your project is ready for deployment to Vercel.'
+    '\nAll pre-deployment checks passed! Your project is ready for deployment to Cloudflare Pages.'
   );
   console.log('To deploy, run:');
   console.log('  git push origin main');
-  console.log('Or visit https://vercel.com to manually trigger a deployment.');
+  console.log('Or push to your connected branch to trigger an automatic Cloudflare Pages deploy.');
 }
 
 runChecks();

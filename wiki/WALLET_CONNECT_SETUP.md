@@ -31,12 +31,12 @@ Replace `YOUR_PROJECT_ID_HERE` with the Project ID you copied from WalletConnect
 - For production deployment, make sure to set the environment variable properly in your hosting
   platform.
 
-## Environment Variables in NextJS
+## Environment Variables in Next.js
 
-If you're using Vercel to deploy your application:
+If you're using Cloudflare Pages to deploy your application:
 
-1. Go to your project settings on Vercel
-2. Navigate to the Environment Variables section
+1. Go to your Cloudflare Pages project dashboard
+2. Navigate to **Settings → Environment variables**
 3. Add `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` as the key and your Project ID as the value
 4. Redeploy your application
 

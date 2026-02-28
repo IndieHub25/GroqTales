@@ -118,7 +118,7 @@ world of creative writing, generative AI, and decentralized technology.
 - **AI:** Groq API (story generation), Unsplash API (optional visuals)
 - **Blockchain:** Monad SDK, Solidity Smart Contracts
 - **Database:** MongoDB
-- **Hosting:** Vercel
+- **Hosting:** Cloudflare Pages
 
 ---
 
@@ -320,8 +320,7 @@ GroqTales/
 ├── app/                      # Next.js App Router (pages, layouts, routes)
 ├── components/               # Reusable UI components
 ├── config/                   # App-wide configuration files
-├── deployment/
-│   └── vercel/               # Vercel deployment-related configs
+├── deployment/               # Deployment configurations
 ├── docs/                     # Documentation and guides
 ├── hooks/                    # Custom React hooks
 ├── lib/                      # Shared libraries and helper logic
@@ -359,16 +358,8 @@ GroqTales/
 ├── build_log.txt             # Build logs
 ├── foundry.toml              # Foundry configuration (smart contracts)
 ├── lighthouserc.json         # Lighthouse performance config
-├── netlify.toml              # Netlify deployment config
-├── next.config.js            # Next.js configuration
-├── package.json              # Project dependencies & scripts
-├── package-lock.json         # Locked dependency versions
-├── postcss.config.js         # PostCSS configuration
-├── render.yaml               # Render deployment config
-├── tailwind.config.js        # Tailwind CSS configuration (JS)
-├── tailwind.config.ts        # Tailwind CSS configuration (TS)
-├── tsconfig.json             # TypeScript configuration
-└── vercel.json               # Vercel deployment settings
+├── wrangler.toml             # Cloudflare Pages/Workers configuration
+└── MIGRATION-TO-CLOUDFLARE.md # Cloudflare migration guide
 ```
 
 ## 📸 Screenshots
@@ -541,4 +532,12 @@ tuned!_
 
 ---
 
-<p align="center"><i>Support the project and share it with others.</i></p>
+<h2 align="center">Active At</h2>
+
+<p align="center">
+  <img src="public/OSCG26%20Label.jpg%20(1).jpeg" alt="OSCG'26 — Open Source Community Gathering 2026" width="600" />
+</p>
+
+---
+
+<p align="center"><i>Support the project by giving us a follow & a Star ⭐️ and share it with others.</i></p>

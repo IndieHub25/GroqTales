@@ -1,12 +1,9 @@
-name: Deploy to Production
+name: Deploy to Cloudflare Pages (Production)
+
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
-
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 permissions:
   contents: read
@@ -15,27 +12,47 @@ permissions:
 jobs:
   deploy:
     if: github.repository == 'IndieHub25/GroqTales'
+    name: Build & Deploy to Cloudflare Pages
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://groqtales.xyz
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+      - name: Run Lint
+        run: npm run lint
+        continue-on-error: true
 
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build for Cloudflare Pages
+        # Runs: next build && npx @cloudflare/next-on-pages@1
+        # Output lands in: .vercel/output/static
+        run: npm run cf-build
+        env:
+          NEXT_PUBLIC_BUILD_MODE: 'true'
+          NEXT_PUBLIC_URL: 'https://groqtales.xyz'
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_GROQ_API_KEY: ${{ secrets.NEXT_PUBLIC_GROQ_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID }}
+          NEXT_PUBLIC_IMAGE_URL: 'https://groqtales.xyz/images'
+          NEXT_PUBLIC_SPLASH_IMAGE_URL: 'https://groqtales.xyz/splash.jpg'
+          NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR: '#1a1a2e'
 
-      - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy out --project-name=groqtales --branch=main

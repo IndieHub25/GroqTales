@@ -63,7 +63,7 @@ To configure environment variables for GroqTales:
    by default to prevent accidental exposure of sensitive data.
 
 For production deployments, environment variables are set directly on the hosting platform (e.g.,
-Vercel, Netlify) or in server configuration, not in a file.
+Cloudflare Pages) or in server configuration, not in a file.
 
 ## List of Environment Variables
 
