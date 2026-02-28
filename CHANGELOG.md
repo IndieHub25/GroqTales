@@ -11,6 +11,34 @@ Active full support: 1.3.9 (latest). Security maintenance (critical fixes only):
 
 ## [1.3.9] - 2026-03-01
 
+### Codebase Optimization & Cleanup
+
+#### Deleted — Unnecessary Files & Directories
+
+- **`GroqTales/`**: Removed duplicate nested project scaffold (had its own `package.json`, `next.config.js`, etc.) — never imported by root project.
+- **`path/to/your/`**: Removed accidental placeholder directory containing `file.css` and `file.html`.
+- **`deployment/`**: Removed empty directory (contents were deleted during Cloudflare migration).
+- **`temp.md`**: Removed scratch PR template file.
+- **`app/test-buttons/`**: Removed dev-only test page (`layout.tsx` + `page.tsx`).
+- **`components/nft-purchase.tsx`**: Removed empty 0-byte placeholder file.
+- **`components/ui/tooltip.tsx.backup`**: Removed backup file.
+- **`.zap/`**: Removed ZAP security scan artifact (`rules.tsv`).
+- **`.npm-cache/`**: Removed local npm cache directory.
+- **`.DS_Store`**: Removed macOS filesystem artifact.
+- **Docker files**: Removed `Dockerfile`, `docker-compose.yml`, `.env.docker`, `.dockerignore` — project fully migrated to Cloudflare Pages + Render.
+
+#### Changed — Config Consolidation
+
+- **Merged `tailwind.config.ts` into `tailwind.config.js`**: Moved comic `fontFamily`, `boxShadow`, `borderWidth`, `spin-slow` keyframes, and `shimmer` keyframes/animations into the primary `.js` config. Added `./src/**/*.{js,ts,jsx,tsx,mdx}` to content paths. Deleted the duplicate `tailwind.config.ts`.
+- **Removed `yarn` from `dependencies`**: The project uses npm; `yarn@^1.22.22` was incorrectly listed as a production dependency.
+- **Updated `.gitignore`**: Added `GroqTales/` and `path/` to prevent re-creation of accidental nested dirs. Removed duplicate `.DS_Store` entry.
+
+#### Files Deleted
+`GroqTales/`, `path/`, `deployment/`, `temp.md`, `.zap/`, `.npm-cache/`, `.DS_Store`, `app/test-buttons/`, `components/nft-purchase.tsx`, `components/ui/tooltip.tsx.backup`, `Dockerfile`, `docker-compose.yml`, `.env.docker`, `.dockerignore`, `tailwind.config.ts`
+
+#### Files Modified
+`tailwind.config.js`, `package.json`, `.gitignore`, `CHANGELOG.md`, `VERSION`
+
 ### New Feature — MADHAVA Help Bot (Cloudflare Workers AI)
 
 - **AI Help Bot**: Introduced **MADHAVA**, a floating AI-powered help bot available on every page of the GroqTales platform.

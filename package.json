@@ -151,7 +151,6 @@
     "webpack-bundle-analyzer": "^5.2.0",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0",
-    "yarn": "^1.22.22",
     "zod": "^3.22.4",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.23",

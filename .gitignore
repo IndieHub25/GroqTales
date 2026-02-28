@@ -86,3 +86,7 @@ ehthumbs.db
 Thumbs.db
 TODO.md
 .npm-cache
+
+# Prevent accidental nested dirs
+GroqTales/
+path/
