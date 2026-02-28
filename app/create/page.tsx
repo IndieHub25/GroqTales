@@ -546,32 +546,48 @@ export default function CreateStoryPage() {
     return () => window.clearInterval(autosaveInterval);
   }, [draftKey, persistDraft]);
 
-  // Save on blur-like lifecycle signals.
-  useEffect(() => {
-    const hasAnyDraftData =
-      storyData.title.trim() ||
-      storyData.description.trim() ||
-      storyData.genre.trim() ||
-      storyData.content.trim() ||
-      storyData.coverImage;
-    if (!hasAnyDraftData) return;
+  const handleFieldBlur = useCallback(() => {
+    void persistDraft('blur');
+  }, [persistDraft]);
 
-    const timeout = setTimeout(() => {
-      const draft: StoryDraft = {
-        title: storyData.title,
-        description: storyData.description,
-        genre: storyData.genre,
-        content: storyData.content,
-        coverImageName: storyData.coverImage?.name,
-        updatedAt: Date.now(),
-        version: 1,
-      };
-      try {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-      } catch (error) {
-        console.warn('Autosave failed:', error);
+  const handleRevertToVersion = async (versionId: string) => {
+    if (!draftKey) return;
+
+    try {
+      setIsSyncingDraft(true);
+      const restored = restoreDraftVersion({ draftKey, versionId, maxVersions: MAX_DRAFT_VERSIONS });
+      if (restored) {
+        setStoryData((prev) => ({
+          ...prev,
+          title: restored.current.title,
+          description: restored.current.description,
+          genre: restored.current.genre,
+          content: restored.current.content,
+        }));
+        setDraftVersions(restored.versions);
+        setLastSavedAt(restored.updatedAt);
       }
-    }, 1000); // autosave every 1s after typing stops
+
+      const response = await fetch(DRAFT_SYNC_ENDPOINT, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          draftKey,
+          storyType: storyType || 'text',
+          storyFormat: storyFormat || 'free',
+          ownerWallet: account || null,
+          ownerRole: account ? 'wallet' : 'admin',
+          snapshot: restored?.current,
+          saveReason: 'restore',
+          maxVersions: MAX_DRAFT_VERSIONS,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Restore sync failed');
+      }
 
       const payload = await response.json();
       const remoteDraft = payload?.draft as StoryDraftRecord | undefined;
