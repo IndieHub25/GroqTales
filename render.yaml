@@ -31,7 +31,7 @@ services:
       - key: API_VERSION
         value: v1
     domains:
-      - groqtales-api.onrender.com
+      - groqtales-backend-api.onrender.com
 
   # SDK Service (for future SDK implementations)
   - type: web
@@ -54,7 +54,7 @@ services:
       - key: CORS_ORIGIN
         value: https://groqtales.xyz/
     domains:
-      - groqtales-sdk.onrender.com
+      - groqtales-sdk-service.onrender.com
 
   # Background Worker Service
   - type: worker

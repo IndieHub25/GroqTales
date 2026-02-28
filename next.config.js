@@ -221,8 +221,13 @@ const nextConfig = {
     async rewrites() {
       const envUrl = process.env.NEXT_PUBLIC_API_URL;
       const apiUrl = (envUrl && envUrl.startsWith('http')) ? envUrl : 'http://localhost:3001';
+
+      const sdkEnvUrl = process.env.NEXT_PUBLIC_SDK_URL;
+      const sdkUrl = (sdkEnvUrl && sdkEnvUrl.startsWith('http')) ? sdkEnvUrl : 'http://localhost:3002';
+
       return [
         { source: '/api/:path*', destination: `${apiUrl}/api/:path*` },
+        { source: '/sdk/:path*', destination: `${sdkUrl}/sdk/:path*` },
       ];
     },
   }),

@@ -124,7 +124,7 @@ function.
    ```
 
    Key variables to configure include:
-   - **API Keys for AI Services**: Such as `NEXT_PUBLIC_GROQ_API_KEY` for story generation.
+   - **API Keys for AI Services**: Such as `GROQ_API_KEY` for story generation.
    - **Blockchain Network Settings**: Like `MONAD_RPC_URL` for NFT minting on the Monad blockchain.
    - **WalletConnect Project ID**: `NEXT_PUBLIC_WALLET_CONECT_PROJECT_ID` for wallet integration.
    - **Build Mode**: Set `NEXT_PUBLIC_BUILD_MODE=false` for local development with real connections,
@@ -134,7 +134,7 @@ function.
 
    ```
    NEXT_PUBLIC_WALLET_CONECT_PROJECT_ID=your_wallet_connect_project_id_here
-   NEXT_PUBLIC_GROQ_API_KEY=your_groq_api_key_here
+   GROQ_API_KEY=your_groq_api_key_here
    MONAD_RPC_URL=https://testnet-rpc.monad.xyz
    NEXT_PUBLIC_BUILD_MODE=false
    ```

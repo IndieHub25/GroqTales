@@ -142,7 +142,7 @@ variable includes its purpose, whether it's required, and default or example val
 
 ### AI API Configurations
 
-- **NEXT_PUBLIC_GROQ_API_KEY**
+- **GROQ_API_KEY**
   - **Purpose**: API key for Groq, the primary AI service powering story generation in GroqTales.
   - **Required**: Yes, for AI story generation.
   - **Example**: `your_groq_api_key_here`

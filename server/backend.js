@@ -171,6 +171,17 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Root welcome endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to the GroqTales Backend API',
+    status: 'online',
+    version: process.env.API_VERSION || 'v1',
+    docs: '/api-docs',
+    health: '/api/health'
+  });
+});
+
 // API Routes
 app.use('/api/v1/auth', require('./routes/auth'));
 app.use('/api/v1/stories', require('./routes/stories'));

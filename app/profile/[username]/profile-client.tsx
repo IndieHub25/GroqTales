@@ -24,10 +24,12 @@ export default function ProfileClient({ stories }: { stories: any[] }) {
           {stories.length === 0 && (
             <div className="text-center py-20 text-slate-500">
               <p className="text-lg">No stories told yet.</p>
-              <Link href="/create/ai-story">
-                <button className="mt-4 text-violet-400 hover:underline">
-                  Create your first story
-                </button>
+              <Link
+                href="/create/ai-story"
+                className="inline-block mt-4 text-violet-400 hover:underline"
+                role="button"
+              >
+                Create your first story
               </Link>
             </div>
           )}

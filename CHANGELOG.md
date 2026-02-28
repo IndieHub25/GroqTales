@@ -127,8 +127,8 @@ Go to **GitHub → IndieHub25/GroqTales → Settings → Secrets and variables �
 |---|---|
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API token with Pages edit permission |
 | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID (from Cloudflare dashboard) |
-| `NEXT_PUBLIC_API_URL` | `https://groqtales-api.onrender.com` |
-| `NEXT_PUBLIC_GROQ_API_KEY` | Your Groq API key |
+| `NEXT_PUBLIC_API_URL` | `https://groqtales-backend-api.onrender.com` |
+| `GROQ_API_KEY` | Your Groq API key |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
 | `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | WalletConnect project ID |

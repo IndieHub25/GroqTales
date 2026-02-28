@@ -5,6 +5,18 @@ import { Wallet, User, Settings, LogOut, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
+// Simple deterministic hash to avoid sending raw PII or identifiers to third parties
+const generateSeed = (input?: string) => {
+  if (!input) return "default";
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    const char = input.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(16);
+};
+
 import { useWeb3 } from '@/components/providers/web3-provider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -33,7 +45,7 @@ export function UserNav() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
-        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url });
+        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url, id: session.user.id });
       }
     });
 
@@ -42,7 +54,7 @@ export function UserNav() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session?.user) {
-        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url });
+        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url, id: session.user.id });
       } else if (!account) {
         setDbUser(null);
       }
@@ -92,7 +104,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" aria-label="User menu" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={dbUser?.avatar || `https://api.dicebear.com/7.x/personas/svg?seed=${dbUser?.username || "You"}`} alt="User Avatar" />
+            <AvatarImage src={dbUser?.avatar || `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(generateSeed(dbUser?.id || account || session?.user?.id))}`} alt="User Avatar" />
             <AvatarFallback>{dbUser?.username?.slice(0, 2).toUpperCase() || "U"}</AvatarFallback>
           </Avatar>
         </Button>

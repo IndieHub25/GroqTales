@@ -38,8 +38,15 @@ export default function ProfilePageClient() {
         setLoading(true);
         setError(false);
 
+        const baseUrl =
+          process.env.NEXT_PUBLIC_API_URL ||
+          (typeof window !== 'undefined'
+            ? (window as any).__NEXT_PUBLIC_API_URL
+            : '') ||
+          '';
+
         const response = await fetch(
-          `/api/v1/users/profile/${walletFromUrl}`,
+          `${baseUrl}/api/v1/users/profile/${walletFromUrl}`,
           { signal }
         );
         if (!response.ok) throw new Error('Failed to load');
@@ -112,10 +119,12 @@ export default function ProfilePageClient() {
               {profileData?.stories?.length === 0 && (
                 <div className="text-center py-20 text-slate-500">
                   <p className="text-lg">No stories told yet.</p>
-                  <Link href="/create/ai-story">
-                    <button className="mt-4 text-violet-400 hover:underline">
-                      Create your first story
-                    </button>
+                  <Link
+                    href="/create/ai-story"
+                    className="inline-block mt-4 text-violet-400 hover:underline"
+                    role="button"
+                  >
+                    Create your first story
                   </Link>
                 </div>
               )}
