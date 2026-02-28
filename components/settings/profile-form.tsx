@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {useSession} from "next-auth/react";
+import { createClient } from "@/lib/supabase/client";
 
 type ProfileData = {
   username: string;
@@ -28,7 +28,13 @@ type ProfileData = {
 };
 
 export function ProfileForm() {
-  const {data: session} = useSession();
+  const supabase = createClient();
+  const [sessionUser, setSessionUser] = useState<any>(null);
+
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getUser().then(({ data }) => setSessionUser(data?.user));
+  }, []);
 
   const [isLoading, setIsLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -69,15 +75,15 @@ export function ProfileForm() {
         toast.error("Failed to load profile");
       }
     }
-    if(session){
+    if (sessionUser) {
       loadProfile();
     }
-  }, [session, setValue]);
+  }, [sessionUser, setValue]);
 
   const onSubmit = async (data: ProfileData) => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/settings/profile`, {
+      const res = await fetch(`/api/settings/profile`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -107,10 +113,10 @@ export function ProfileForm() {
           <div className="flex flex-col md:flex-row gap-4 items-start">
             <div>
               <Avatar className="w-24 h-24">
-                <AvatarImage src={avatarUrl || session?.user?.image || "/placeholder-avatar.jpg"} />
+                <AvatarImage src={avatarUrl || sessionUser?.user_metadata?.avatar_url || "/placeholder-avatar.jpg"} />
                 <AvatarFallback>
                   {displayName?.slice(0, 2).toUpperCase() || 
-                  session?.user?.name?.slice(0, 2).toUpperCase() || 
+                  sessionUser?.user_metadata?.name?.slice(0, 2).toUpperCase() || 
 
                 "GT"}
                 </AvatarFallback>

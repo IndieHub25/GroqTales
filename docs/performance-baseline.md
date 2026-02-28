@@ -3,7 +3,7 @@
 **Audit Date:** 2026-02-11
 **Auditor:** Performance Budget Implementation (Issue #335)
 **Framework:** Next.js 14.1.0 (App Router)
-**Deployment:** Vercel
+**Deployment:** Cloudflare Pages
 
 ---
 

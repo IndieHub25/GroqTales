@@ -1,16 +1,15 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 export default function FeedbackPage() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
+    name: '',
+    email: '',
+    message: '',
   });
 
   const [submitted, setSubmitted] = useState(false);
-
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -28,9 +27,9 @@ export default function FeedbackPage() {
     console.log(formData);
     setSubmitted(true);
     setFormData({
-      name: "",
-      email: "",
-      message: "",
+      name: '',
+      email: '',
+      message: '',
     });
     setTimeout(() => {
       setSubmitted(false);
@@ -44,9 +43,11 @@ export default function FeedbackPage() {
           Share Your Feedback
         </h1>
         {submitted && (
-          <div className="mb-6 p-4 rounded-xl border-4 border-green-500 
+          <div
+            className="mb-6 p-4 rounded-xl border-4 border-green-500 
           bg-green-500/10 text-green-600 dark:text-green-400 
-          font-bold text-center uppercase animate-fade-in">
+          font-bold text-center uppercase animate-fade-in"
+          >
             Thank You! Your Feedback Has Been Submitted.
           </div>
         )}

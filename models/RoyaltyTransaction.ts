@@ -54,8 +54,9 @@ const RoyaltyTransactionSchema = new Schema<IRoyaltyTransaction>({
 RoyaltyTransactionSchema.index({ creatorWallet: 1, createdAt: -1 });
 RoyaltyTransactionSchema.index({ nftId: 1, createdAt: -1 });
 
-export const RoyaltyTransaction: Model<IRoyaltyTransaction> =
-  mongoose.models.RoyaltyTransaction ||
-  mongoose.model<IRoyaltyTransaction>('RoyaltyTransaction', RoyaltyTransactionSchema);
+// export const RoyaltyTransaction: Model<IRoyaltyTransaction> =
+//   mongoose.models.RoyaltyTransaction ||
+//   mongoose.model<IRoyaltyTransaction>('RoyaltyTransaction', RoyaltyTransactionSchema);
 
+export const RoyaltyTransaction = null as any;
 export default RoyaltyTransaction;

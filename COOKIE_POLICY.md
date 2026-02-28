@@ -1,6 +1,6 @@
 # Cookie Policy
 
-Last Updated: [Insert Date]
+Last Updated: 26 FEB; 2026
 
 GroqTales ("we", "us", or "our") uses cookies and similar technologies to enhance your experience on
 our website and services ("Platform"). This Cookie Policy explains what cookies are, how we use

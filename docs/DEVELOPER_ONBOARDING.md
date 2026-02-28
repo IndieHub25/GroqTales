@@ -127,7 +127,7 @@ git commit -m "docs: update API documentation"
 
 ### Deployment
 
-- **Frontend**: Vercel (automatic deployments)
+- **Frontend**: Cloudflare Pages (automatic deployments)
 - **Backend**: Render (production API)
 - **CI/CD**: GitHub Actions with automated testing
 

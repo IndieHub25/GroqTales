@@ -19,18 +19,43 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/components/ui/use-toast';
 import { truncateAddress } from '@/lib/utils';
-
+import { createClient } from '@/lib/supabase/client';
 
 export function UserNav() {
   const { account, connectWallet, disconnectWallet } = useWeb3();
   const { toast } = useToast();
   const [dbUser, setDbUser] = useState<any>(null);
+  const [session, setSession] = useState<any>(null);
+  const supabase = React.useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    // Check Supabase session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url });
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session?.user) {
+        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url });
+      } else if (!account) {
+        setDbUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth, account]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       if (account) {
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile/${account}`);
+          const res = await fetch(`/api/v1/users/profile/${account}`);
           if (res.ok) {
             const data = await res.json();
             setDbUser(data.user);
@@ -40,32 +65,24 @@ export function UserNav() {
         }
       }
     };
-    fetchUserData();
+    if (account) fetchUserData();
   }, [account]);
 
-  const handleConnect = async () => {
-    try {
-      await connectWallet();
-    } catch (error) {
-      console.error('Failed to connect wallet:', error);
-      toast({
-        title: 'Connection Failed',
-        description: 'Could not connect wallet. Please try again.',
-        variant: 'destructive',
-      });
-    }
+  const handleLogout = async () => {
+    if (account) await disconnectWallet();
+    if (session) await supabase.auth.signOut();
   };
 
-  if (!account) {
+  if (!account && !session) {
     return (
       <Button
         variant="default"
         size="sm"
-        onClick={handleConnect}
-        aria-label="Connect wallet to login"
-        className="flex items-center gap-2 px-3 sm:px-6 py-1.5 sm:py-2 rounded-none bg-white hover:text-white hover:border-white/50 text-black border-2 sm:border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all duration-200 font-black uppercase tracking-wider text-xs sm:text-sm"
+        asChild
+        aria-label="Login or create account"
+        className="flex items-center gap-2 px-5 py-2 rounded-full border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-semibold shadow-[0_0_15px_rgba(16,185,129,0.2)] hover:bg-emerald-500 hover:text-black hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all duration-300 uppercase tracking-wider text-xs"
       >
-        Login
+        <Link href="/sign-in">Login</Link>
       </Button>
     );
   }
@@ -75,27 +92,27 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" aria-label="User menu" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-             <AvatarImage src={dbUser?.avatar || "/avatars/default.png"} alt="User Avatar" />
+            <AvatarImage src={dbUser?.avatar || `https://api.dicebear.com/7.x/personas/svg?seed=${dbUser?.username || "You"}`} alt="User Avatar" />
             <AvatarFallback>{dbUser?.username?.slice(0, 2).toUpperCase() || "U"}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-64 p-0 overflow-hidden border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-white dark:bg-slate-950"
+        className="w-72 p-0 overflow-hidden border border-white/10 shadow-2xl bg-black/95 backdrop-blur-xl rounded-xl"
         align="end"
       >
-        <DropdownMenuLabel className="bg-yellow-400 dark:bg-yellow-600 text-black dark:text-white italic border-b-4 border-black py-3">
-          User Options
+        <DropdownMenuLabel className="bg-emerald-500/10 text-emerald-400 border-b border-white/10 py-3 font-semibold uppercase tracking-wider text-xs">
+          User Controls
         </DropdownMenuLabel>
 
-        <div className="bg-white dark:bg-slate-950 p-1">
+        <div className="bg-transparent p-1">
           <DropdownMenuGroup>
             <DropdownMenuItem
               asChild
               className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all"
             >
-               <Link
-                href={`/profile/${account}`} 
+              <Link
+                href={`/profile/${account || session?.user?.id}`}
                 className="flex items-center w-full uppercase py-2"
               >
                 <User className="mr-2 h-4 w-4" />
@@ -107,7 +124,7 @@ export function UserNav() {
               className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all"
             >
               <Link
-                href="/my-stories"
+                href={`/profile/${account || session?.user?.id}`}
                 className="flex items-center w-full uppercase py-2"
               >
                 <BookOpen className="mr-2 h-4 w-4" />
@@ -126,26 +143,51 @@ export function UserNav() {
                 <span>My NFTs</span>
               </Link>
             </DropdownMenuItem>
+
+            {/* Additional Wallet Link for Supabase Users lacking Web3 */}
+            {!account && (
+              <DropdownMenuItem
+                onClick={() => connectWallet()}
+                className="cursor-pointer focus:bg-emerald-500/10 focus:text-emerald-400 text-emerald-500 rounded-none transition-all uppercase py-2 font-semibold"
+              >
+                <Wallet className="mr-2 h-4 w-4" />
+                <span>Connect Web3 Wallet</span>
+              </DropdownMenuItem>
+            )}
           </DropdownMenuGroup>
 
-          <DropdownMenuSeparator className="h-1 bg-black mx-0" />
+          <DropdownMenuSeparator className="h-px bg-white/10 mx-0 my-1" />
 
           <DropdownMenuItem
-            onClick={disconnectWallet}
-            className="cursor-pointer text-red-600 focus:bg-red-600 focus:text-white rounded-none transition-all uppercase py-2"
+            onClick={handleLogout}
+            className="cursor-pointer text-red-500 hover:text-white focus:bg-red-500/20 focus:text-red-400 rounded-lg transition-all uppercase py-2"
           >
             <LogOut className="mr-2 h-4 w-4" />
-            <span>Disconnect Wallet</span>
+            <span>Log Out</span>
           </DropdownMenuItem>
         </div>
 
-        <div className="px-4 py-3 bg-muted/20 border-t-4 border-black">
-          <p className="text-xs font-black uppercase text-muted-foreground italic mb-2">
-            Authenticated Wallet:
-          </p>
-          <div className="text-xs font-black uppercase tracking-widest bg-white dark:bg-slate-800 border-4 border-black px-3 py-1.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center">
-            {truncateAddress(account)}
+        <div className="px-4 py-3 bg-white/5 border-t border-white/10 space-y-3">
+          <div>
+            <p className="text-[10px] font-semibold uppercase text-white/50 tracking-wider mb-1">
+              Active Identity
+            </p>
+            <div className="text-xs font-mono uppercase tracking-widest bg-black/50 border border-white/5 rounded-md px-3 py-1.5 overflow-hidden text-ellipsis whitespace-nowrap text-emerald-400">
+              {account ? truncateAddress(account) : session?.user?.email}
+            </div>
           </div>
+
+          {(session?.user?.last_sign_in_at || account) && (
+            <div className="flex flex-col gap-1 border-t border-white/5 pt-2">
+              <p className="text-[10px] font-semibold uppercase text-white/50 tracking-wider">
+                Security Info
+              </p>
+              <div className="text-[10px] text-white/40 leading-snug">
+                Last Login: {session?.user?.last_sign_in_at ? new Date(session.user.last_sign_in_at).toLocaleString() : 'Active Wallet Session'} <br />
+                Access: {account ? 'On-Chain Web3' : 'Off-Chain Auth'}
+              </div>
+            </div>
+          )}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

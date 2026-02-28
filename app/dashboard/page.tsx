@@ -14,7 +14,9 @@ import {
   Plus,
   MoreVertical,
   ArrowUpRight,
-  DollarSign
+  DollarSign,
+  Shield,
+  PenTool
 } from "lucide-react";
 import { useWallet } from "@/hooks/use-wallet";
 import { useCreatorEarnings } from "@/hooks/use-royalties";
@@ -210,6 +212,70 @@ export default function DashboardPage() {
                 <div className="p-3 bg-muted rounded-lg border">
                     <strong>Writing with AI:</strong> Try using the "Fantasy" prompt preset to generate immersive worlds quickly.
                 </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Access Control & Security Card */}
+        <Card className="col-span-7 mt-4 border-emerald-500/20 bg-emerald-950/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-emerald-400" />
+              Access Control & Security
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Off-Chain Roles */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">Off-Chain Permissions</h3>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-white/5">
+                    <div className="p-2 rounded-full bg-blue-500/10 text-blue-400">
+                      <BookOpen className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Reader Access</p>
+                      <p className="text-xs text-muted-foreground">Can view stories, bookmark, and comment.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-white/5">
+                    <div className="p-2 rounded-full bg-purple-500/10 text-purple-400">
+                      <PenTool className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Creator Access</p>
+                      <p className="text-xs text-muted-foreground">Can write drafts and manage content.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* On-Chain Stepper */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">On-Chain Actions (Requires Wallet)</h3>
+                <div className="relative border-l-2 border-emerald-500/30 ml-3 pl-6 space-y-6">
+                  <div className="relative">
+                    <span className="absolute -left-[33px] top-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 ring-4 ring-background" />
+                    <p className="font-medium text-sm">Web3 Authentication</p>
+                    <p className="text-xs text-muted-foreground">Sign message with wallet to prove ownership.</p>
+                  </div>
+                  <div className="relative">
+                    <span className="absolute -left-[33px] top-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 ring-4 ring-background" />
+                    <p className="font-medium text-sm">AI Engine Access</p>
+                    <p className="text-xs text-muted-foreground">Unlock Groq AI storytelling tools for creators.</p>
+                  </div>
+                  <div className="relative">
+                    <span className="absolute -left-[33px] top-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 ring-4 ring-background" />
+                    <p className="font-medium text-sm">Mint Story NFT</p>
+                    <p className="text-xs text-muted-foreground">Deploy your story as an NFT to blockchain network.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-200/80 text-xs">
+              <strong>Security Note:</strong> Always verify that you are connected to the official site before signing any transactions. Your email sessions are managed off-chain via Supabase securely. Last login events are tracked in your avatar menu.
             </div>
           </CardContent>
         </Card>
