@@ -9,8 +9,7 @@ import { Inter, Comic_Neue } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
-import { SpeedInsights } from '@vercel/speed-insights/next';
-import { Analytics } from '@vercel/analytics/next';
+
 
 import ClientLayout from '@/components/client-layout';
 import { Footer } from '@/components/footer';
@@ -49,7 +48,7 @@ const requiredEnvVars = [
 ];
 
 // Validate required environment variables at build time (only in production)
-// Skip validation during build process (CI/Vercel build)
+// Skip validation during build process (CI/Cloudflare build)
 if (
   process.env.NODE_ENV === 'production' &&
   !process.env.CI &&
@@ -62,18 +61,19 @@ if (
   }
 } else {
   // In development or build mode, set default values for missing environment variables
+  // CF_PAGES_URL is automatically set by Cloudflare Pages during builds
+  const cfPagesUrl = process.env.CF_PAGES_URL;
   const defaultEnvVars: Record<string, string> = {
-    NEXT_PUBLIC_URL: process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000',
+    NEXT_PUBLIC_URL: cfPagesUrl ? `https://${cfPagesUrl}` : 'http://localhost:3000',
     // 'NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME': 'GroqTales', // Commented out OnChain references
-    NEXT_PUBLIC_VERSION: '1.0.0',
-    NEXT_PUBLIC_IMAGE_URL: process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}/images`
-      : 'https://groqtales.com/images',
-    NEXT_PUBLIC_SPLASH_IMAGE_URL: process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}/splash.jpg`
-      : 'https://groqtales.com/splash.jpg',
+    // NEXT_PUBLIC_VERSION is injected by next.config.js from the VERSION file at build time.
+    // It does not need a default here — if it is missing the build itself is misconfigured.
+    NEXT_PUBLIC_IMAGE_URL: cfPagesUrl
+      ? `https://${cfPagesUrl}/images`
+      : 'https://groqtales.xyz/images',
+    NEXT_PUBLIC_SPLASH_IMAGE_URL: cfPagesUrl
+      ? `https://${cfPagesUrl}/splash.jpg`
+      : 'https://groqtales.xyz/splash.jpg',
     NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR: '#1a1a2e',
   };
 
@@ -95,20 +95,18 @@ function getQuickBootScript(): string {
   }
 }
 
-// Get app version from root VERSION file
-function getAppVersion(): string {
-  try {
-    const filePath = path.join(process.cwd(), 'VERSION');
-    return fs.readFileSync(filePath, 'utf8').trim();
-  } catch (e) {
-    console.warn('Could not read VERSION file:', e);
-    return '1.0.0';
-  }
-}
-
 // Quick boot script to prevent flashing and improve initial load
 const quickBootScript = getQuickBootScript();
-const appVersion = getAppVersion();
+
+/**
+ * App version is injected by next.config.js at build time from the root VERSION file.
+ * This guarantees the version displayed in the UI always matches the VERSION file,
+ * regardless of where the app is deployed (Cloudflare Pages, Docker, local, etc.).
+ *
+ * Fallback chain (should never be needed in a properly built bundle):
+ *   process.env.NEXT_PUBLIC_VERSION  →  '?.?.?'  (obvious misconfiguration sentinel)
+ */
+const appVersion = process.env.NEXT_PUBLIC_VERSION ?? '?.?.?';
 
 export const metadata: Metadata = {
   title: 'GroqTales - AI-Generated Story NFTs',
@@ -137,23 +135,16 @@ export const viewport = {
   ],
 };
 
-// Disable static optimization for the entire app layout to prevent build-time
-// evaluation of client components that access browser-only globals.
-export const dynamic = 'force-dynamic';
+// Static optimization allows Next.js to pre-render the entire app as static HTML
+// which is required for Cloudflare Pages static export.
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Force dynamic rendering to avoid static export attempting to execute
-  // client-only logic (e.g., window / localStorage usage) during build.
-  // This mitigates build errors like "window is not defined" across pages
-  // that are intentionally client components.
-  // (Next.js will ignore static optimization for this layout subtree.)
-  // Ref: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _forceDynamic: 'force-dynamic' = 'force-dynamic';
+  // Static generation relies on React component pureness.
+  // We removed the _forceDynamic override to allow standard Next.js SSG.
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -249,8 +240,6 @@ export default function RootLayout({
           </QueryProvider>
         </Web3Provider>
         <BackToTop />
-        <SpeedInsights />
-        <Analytics />
       </body>
     </html>
   );

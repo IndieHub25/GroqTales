@@ -7,7 +7,136 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 1.3.7 (latest), 1.3.5 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+Active full support: 1.3.9 (latest), 1.3.8 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+
+## [1.3.9] - 2026-02-28
+
+### Bug Fixes & Infrastructure
+
+- **Cloudflare Pages Static Export Fix**: Resolved `output: 'export'` build failure caused by missing `generateStaticParams()` on dynamic routes. Next.js static export requires every `[param]` route to explicitly return at least one path (e.g. `[{ id: 'default' }]`) or the build fails with a generic missing error.
+  - **`app/nft-marketplace/comic-stories/[id]/page.tsx`**: Added default static params and `dynamicParams = false`.
+  - **`app/nft-marketplace/text-stories/[id]/page.tsx`**: Added default static params and `dynamicParams = false`.
+  - **`app/profile/[username]/page.tsx`**: Added default static params and `dynamicParams = false`.
+  - **`app/stories/[id]/page.tsx`**: Added `dynamicParams = false`.
+  - **`app/genres/[slug]/page.tsx`**: Added `dynamicParams = false`.
+- **Static Prerender Fix (Lucide Icons)**: Fixed `TypeError: u is not a function` occurring during static generation for `/genres/[slug]`. This was caused by importing icons from the `lucide-react` barrel file inside a data object (`genres` array) used across Server and Client boundaries. Replaced with simple inline SVGs.
+- **Static Prerender Fix (Cookies API)**: Fixed `NEXT_STATIC_GEN_BAILOUT` occurring in `app/settings/page.tsx`. `output: export` does not support dynamic Server Components that read cookies using the Supabase client because cookies only exist per-request on a live server. Removed the server-side logic and simplified it to just return `<SettingsClient />` to handle auth purely on the client.
+
+- **Database Plan Migration**: Updated the PostgreSQL database plan in `render.yaml` from the legacy `starter` tier to the currently supported `free` tier to resolve dynamic deployment issues on Render.
+- **Cloudflare Pages Build Fix**: Resolved `cross-env: not found` error that caused all Cloudflare Pages deployments to fail with exit code 127. `cross-env` was listed in `devDependencies` but Cloudflare's build environment sets `NODE_ENV=production` before `npm install`, skipping devDep installation. Replaced `cross-env NEXT_PUBLIC_BUILD_MODE=true` with POSIX inline syntax (`NEXT_PUBLIC_BUILD_MODE=true next build`) in both `build` and `cf-build` scripts — `wrangler.toml` already injects this variable for preview/production environments, making `cross-env` redundant.
+- **Cloudflare Build Dependencies Fix**: Moved `tailwindcss`, `autoprefixer`, `postcss`, `typescript`, `@cloudflare/next-on-pages`, `@types/react`, `@types/react-dom`, `@types/node`, and `eslint-config-next` from `devDependencies` to `dependencies` so they are installed when Cloudflare Pages runs `npm install` with `NODE_ENV=production`.
+- **Static Export for Cloudflare Pages**: Replaced `@cloudflare/next-on-pages` adapter with Next.js static export (`output: 'export'`). The adapter required all routes to use Edge Runtime, which is incompatible with Node.js API routes (MongoDB/Mongoose). Since API routes run on Render, Cloudflare only serves the static frontend. Updated `wrangler.toml` output dir to `out/`, updated `cf-build` script to remove the `app/api` directory before building (to prevent Next.js trying to build Node.js API routes), conditionally disabled headers/redirects/rewrites (unsupported with static export), and added `public/_redirects` for SPA fallback routing.
+- **Typewriter Animation Fix**: Resolved a timing bug in the `useTypewriter` hook within the Hero section (`app/page.tsx`). The animation now properly dynamically adjusts speed between the typing and deleting phases by utilizing recursive `setTimeout` logic instead of a fixed-interval `setInterval`, creating a smoother, more realistic typing effect.
+- **PR CI Workflow**: Added `.github/workflows/pr-ci.yml` — automated GitHub Actions workflow that runs lint, unit tests, and a full Cloudflare Pages build check (without deploying) on every PR targeting `main`.
+- **CI Workflow Fixes**: Fixed all failing GitHub Actions workflows across 7 files — replaced `npm ci` with `npm install --legacy-peer-deps` (3 workflows), removed `cache: 'npm'` that requires a `package-lock.json` committed to the repo (all workflows), and replaced `node-version-file: '.nvmrc'` with explicit `node-version: '20'`.
+- **Preview Comment Fix**: Fixed `cloudflare-preview.yml` PR comment — SHA `.slice(0,7)` was rendering as literal text instead of executing as JS; branch name from `github.head_ref` was injected unsanitized. Both values now computed as proper JS variables via `process.env` with markdown-dangerous characters stripped.
+
+### Infrastructure — Migration from Vercel/Netlify to Cloudflare Pages
+
+#### Removed
+
+- **`vercel.json`**: Vercel deployment config file deleted — Cloudflare Pages is now the primary hosting platform.
+- **`netlify.toml`**: Netlify deployment config file deleted — no longer required.
+- **`deployment/vercel/`**: Entire Vercel-specific deployment directory removed.
+- **`scripts/prepare-vercel.js`**: Vercel pre-build hook script deleted.
+- **`@vercel/analytics`**: Removed from `dependencies` — Vercel-only analytics package stripped.
+- **`@vercel/speed-insights`**: Removed from `dependencies` — Vercel-only performance monitoring stripped.
+- **`<SpeedInsights />`** and **`<Analytics />`** JSX components removed from `app/layout.tsx`.
+
+#### Changed
+
+- **`package.json`**: Version bumped to `1.3.8`; `vercel-build` script replaced with `cf-build` (maps to `npm run build`); `prepare-vercel` script removed.
+- **`app/layout.tsx`**: `VERCEL_URL` environment variable fallbacks replaced with `CF_PAGES_URL` (Cloudflare Pages runtime variable); default image/splash URLs point to `groqtales.xyz`.
+- **`VERSION`**: Updated to `1.3.8`.
+- **`README.md`**: Tech Stack updated (`Hosting: Cloudflare Pages`); Vercel/Netlify references removed.
+- **`docs/`** and **`wiki/`**: All deployment references updated to Cloudflare Pages.
+
+#### Added
+
+- **`wrangler.toml`**: Cloudflare Pages/Workers project configuration added.
+- **`MIGRATION-TO-CLOUDFLARE.md`**: Migration guide documenting how to deploy to Cloudflare Pages, configure env vars, set up the custom domain `groqtales.xyz`, and troubleshoot common issues.
+
+### Bug Fixes / Behavioral Notes
+
+- Analytics and speed monitoring are no longer injected — the removed Vercel packages were no-ops outside of Vercel infrastructure. Cloudflare Web Analytics can be enabled from the Cloudflare dashboard without any code changes.
+- `NEXT_PUBLIC_URL` and related image URL defaults now fall back to `groqtales.xyz` instead of the old `groqtales.com` placeholder.
+
+### Bug Fix — Version Always Displayed as 1.0.0 in Deployed Builds
+
+**Problem:** The deployed app always showed `1.0.0` in the footer and anywhere `appVersion` was consumed, regardless of what the `VERSION` file contained.
+
+**Root Cause:** `app/layout.tsx` was calling `getAppVersion()` which used `fs.readFileSync(path.join(process.cwd(), 'VERSION'), 'utf8')` at **runtime**. Cloud deployment platforms (Cloudflare Pages, etc.) do not guarantee that arbitrary source files are present in the filesystem at runtime — only the compiled `.next/` bundle is deployed. When the read failed, the function returned the hard-coded fallback `'1.0.0'`. Additionally, the `defaultEnvVars` block in the same file also defaulted `NEXT_PUBLIC_VERSION` to `'1.0.0'`.
+
+**Fix:**
+- `next.config.js`: Added a `resolveAppVersion()` function that reads the `VERSION` file and falls back to `package.json.version` **at build time** (Node.js has full filesystem access during the build). The resolved version is exposed as `env.NEXT_PUBLIC_VERSION` which Next.js inlines into the compiled bundle as a constant — behaves like a compile-time `#define`.
+- `app/layout.tsx`: Removed the `getAppVersion()` runtime function entirely. `appVersion` is now `process.env.NEXT_PUBLIC_VERSION ?? '?.?.?'`. The sentinel `'?.?.?'` is intentionally ugly so a misconfigured build is immediately visible rather than silently defaulting to an old version string.
+- Removed the stale `NEXT_PUBLIC_VERSION: '1.0.0'` default from the `defaultEnvVars` block.
+
+**How to keep versions in sync going forward:**
+1. Update the `VERSION` file (single source of truth)
+2. Update `package.json` `"version"` to match
+3. Add a `CHANGELOG.md` entry
+4. Run `npm run build` — the build log will print `[next.config.js] Resolved app version: X.Y.Z`
+5. The footer and all other version references will automatically show the correct version in the deployed bundle
+
+### Bug Fix — Cloudflare Pages Deployment Showing "Page Does Not Exist"
+
+**Problem:** Cloudflare Pages deployed successfully but served a blank "page does not exist" error. The Cloudflare build log reported: *"A Wrangler configuration file was found but it does not appear to be valid… make sure the file is valid and contains the `pages_build_output_dir` property."*
+
+**Root Causes (3):**
+1. `wrangler.toml` used the Workers `[build]` table, which is **invalid for Pages**. Cloudflare Pages ignores it.
+2. `wrangler.toml` was missing `pages_build_output_dir` — the mandatory property for Cloudflare Pages. Without it the build step is skipped entirely and Cloudflare serves from `/` (empty).
+3. The `@cloudflare/next-on-pages` adapter was referenced in comments but not installed or invoked — it's required to transform Next.js App Router output into a Cloudflare-compatible format.
+
+**Fix:**
+- `wrangler.toml`: Removed the invalid `[build]` table; added `pages_build_output_dir = ".vercel/output/static"` at the top level (the adapter's output directory).
+- `package.json`: Updated `cf-build` script to `NEXT_PUBLIC_BUILD_MODE=true next build && npx @cloudflare/next-on-pages@1` (POSIX inline env assignment). Added `@cloudflare/next-on-pages@^1.13.12` to dependencies.
+- `next.config.js`: Added `setupDevPlatform()` call (guarded to `NODE_ENV === 'development'`) so Cloudflare bindings are available during local dev with `wrangler pages dev`.
+- `public/_headers`: Created Cloudflare Pages `_headers` file for edge-level security headers and static asset caching (mirrors the security headers in `next.config.js`).
+
+**Cloudflare Pages dashboard settings (must be set manually):**
+
+| Setting | Value |
+|---|---|
+| Build command | `npm run cf-build` |
+| Build output directory | `.vercel/output/static` |
+| Root directory | `/` (repo root) |
+| Node.js version | `20` |
+
+### GitHub Actions — Workflows Updated for Cloudflare Pages
+
+#### `deployment.yml` — Full Rewrite
+- Removed all Vercel CLI steps (`vercel pull`, `vercel build`, `vercel deploy`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `VERCEL_TOKEN` secrets)
+- Now uses `cloudflare/wrangler-action@v3` to deploy `.vercel/output/static` to Cloudflare Pages production
+- Build step runs `npm run cf-build` (Next.js build + `@cloudflare/next-on-pages` adapter)
+- Required GitHub secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` (see setup steps below)
+
+#### `cloudflare-preview.yml` — New Workflow
+- Deploys a unique Cloudflare Pages preview URL for every PR targeting `main`
+- Preview URL posted as a PR comment (updates in place on re-push, never duplicates)
+- Cleans up the preview branch deployment when PR is closed
+
+#### `lighthouse-ci.yml` — Fixed Hardcoded Version
+- Removed hardcoded `NEXT_PUBLIC_VERSION: '1.0.0'` from both build and run `env` blocks
+- Added a step to read the canonical version from the `VERSION` file: `APP_VERSION=$(cat VERSION)` → `$GITHUB_ENV`
+
+#### Required GitHub Secrets to Add
+Go to **GitHub → IndieHub25/GroqTales → Settings → Secrets and variables → Actions**:
+
+| Secret Name | Value |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API token with Pages edit permission |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID (from Cloudflare dashboard) |
+| `NEXT_PUBLIC_API_URL` | `https://groqtales-api.onrender.com` |
+| `NEXT_PUBLIC_GROQ_API_KEY` | Your Groq API key |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
+| `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | WalletConnect project ID |
+
+> **How to create a Cloudflare API token:**  
+> Cloudflare dashboard → My Profile → API Tokens → Create Token → use the "Edit Cloudflare Pages" template → scope to your account → copy the token.
+
+---
 
 ## [1.3.7] - 2026-02-24
 

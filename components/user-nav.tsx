@@ -92,7 +92,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" aria-label="User menu" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-             <AvatarImage src={dbUser?.avatar || `https://api.dicebear.com/7.x/personas/svg?seed=${dbUser?.username || "You"}`} alt="User Avatar" />
+            <AvatarImage src={dbUser?.avatar || `https://api.dicebear.com/7.x/personas/svg?seed=${dbUser?.username || "You"}`} alt="User Avatar" />
             <AvatarFallback>{dbUser?.username?.slice(0, 2).toUpperCase() || "U"}</AvatarFallback>
           </Avatar>
         </Button>
@@ -111,8 +111,8 @@ export function UserNav() {
               asChild
               className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all"
             >
-               <Link
-                href={`/profile/${account || session?.user?.id}`} 
+              <Link
+                href={`/profile/${account || session?.user?.id}`}
                 className="flex items-center w-full uppercase py-2"
               >
                 <User className="mr-2 h-4 w-4" />
@@ -176,16 +176,16 @@ export function UserNav() {
               {account ? truncateAddress(account) : session?.user?.email}
             </div>
           </div>
-          
+
           {(session?.user?.last_sign_in_at || account) && (
             <div className="flex flex-col gap-1 border-t border-white/5 pt-2">
-               <p className="text-[10px] font-semibold uppercase text-white/50 tracking-wider">
-                 Security Info
-               </p>
-               <div className="text-[10px] text-white/40 leading-snug">
-                 Last Login: {session?.user?.last_sign_in_at ? new Date(session.user.last_sign_in_at).toLocaleString() : 'Active Wallet Session'} <br/>
-                 Access: {account ? 'On-Chain Web3' : 'Off-Chain Auth'}
-               </div>
+              <p className="text-[10px] font-semibold uppercase text-white/50 tracking-wider">
+                Security Info
+              </p>
+              <div className="text-[10px] text-white/40 leading-snug">
+                Last Login: {session?.user?.last_sign_in_at ? new Date(session.user.last_sign_in_at).toLocaleString() : 'Active Wallet Session'} <br />
+                Access: {account ? 'On-Chain Web3' : 'Off-Chain Auth'}
+              </div>
             </div>
           )}
         </div>
