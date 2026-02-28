@@ -841,6 +841,297 @@
   text-decoration: none;
 }
 
+/* ============================================
+   GPU ACCELERATION UTILITIES
+   ============================================ */
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/**
+ * Optimize will-change for specific properties
+ * Remove after animation completes
+ */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+.will-change-transform-opacity {
+  will-change: transform, opacity;
+}
+
+/**
+ * Remove will-change after animation
+ * Apply this class when animation is done
+ */
+.will-change-auto {
+  will-change: auto;
+}
+
+/* ============================================
+   HARDWARE ACCELERATION HELPERS
+   ============================================ */
+
+/**
+ * 3D transform context for better performance
+ */
+.transform-3d {
+  transform-style: preserve-3d;
+  transform: translate3d(0, 0, 0);
+}
+
+/**
+ * Contain paint operations within element
+ */
+.contain-paint {
+  contain: paint;
+}
+
+/**
+ * Contain layout calculations
+ */
+.contain-layout {
+  contain: layout;
+}
+
+/**
+ * Full containment for maximum optimization
+ */
+.contain-strict {
+  contain: strict;
+}
+
+/* ============================================
+   REDUCED MOTION SUPPORT
+   ============================================ */
+
+/**
+ * Disable all animations for users who prefer reduced motion
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Keep essential feedback animations but make them instant */
+  button,
+  a,
+  [role="button"] {
+    transition-duration: 0.05ms !important;
+  }
+}
+
+/* ============================================
+   OPTIMIZED ANIMATION CLASSES
+   ============================================ */
+
+@keyframes fade-in-optimized {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.fade-in-optimized {
+  animation: fade-in-optimized 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes slide-up-optimized {
+  from {
+    transform: translate3d(0, 20px, 0);
+    opacity: 0;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+.slide-up-optimized {
+  animation: slide-up-optimized 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes rotate-optimized {
+  from {
+    transform: rotate3d(0, 0, 1, 0deg);
+  }
+  to {
+    transform: rotate3d(0, 0, 1, 360deg);
+  }
+}
+
+.rotate-optimized {
+  animation: rotate-optimized 20s linear infinite;
+  will-change: transform;
+  transform: translateZ(0); /* Force GPU layer */
+}
+
+@keyframes pulse-optimized {
+  0%, 100% {
+    transform: scale3d(1, 1, 1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale3d(1.05, 1.05, 1);
+    opacity: 1;
+  }
+}
+
+.pulse-optimized {
+  animation: pulse-optimized 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: transform, opacity;
+}
+
+/* ============================================
+   HOVER EFFECTS (OPTIMIZED)
+   ============================================ */
+
+.card-hover-optimized {
+  transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.card-hover-optimized:hover {
+  transform: translate3d(0, -4px, 0) scale(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-hover-optimized:hover {
+    transform: none;
+  }
+}
+
+/**
+ * Button hover effect (optimized)
+ */
+.button-hover-optimized {
+  transition: transform 0.15s cubic-bezier(0.25, 0.1, 0.25, 1);
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.button-hover-optimized:hover {
+  transform: scale3d(1.05, 1.05, 1);
+}
+
+.button-hover-optimized:active {
+  transform: scale3d(0.98, 0.98, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button-hover-optimized:hover,
+  .button-hover-optimized:active {
+    transform: none;
+  }
+}
+
+/* ============================================
+   PERFORMANCE MONITORING
+   ============================================ */
+
+.debug-gpu-layer {
+  outline: 2px solid rgba(255, 0, 0, 0.3);
+  outline-offset: -2px;
+}
+
+.debug-layout-shift {
+  outline: 2px solid rgba(255, 165, 0, 0.5);
+  outline-offset: -2px;
+}
+
+/* ============================================
+   SHADOW OPTIMIZATIONS
+   ============================================ */
+
+.shadow-optimized-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
+}
+
+.shadow-optimized-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.shadow-optimized-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+}
+
+.shadow-transition-optimized {
+  transition: filter 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+  will-change: filter;
+}
+
+/* ============================================
+   INTERSECTION OBSERVER HELPERS
+   ============================================ */
+
+.animate-on-visible {
+  opacity: 0;
+  transform: translate3d(0, 20px, 0);
+  transition: opacity 0.4s cubic-bezier(0.25, 0.1, 0.25, 1),
+              transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.animate-on-visible.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-on-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ============================================
+   ANTI-ALIASING
+   ============================================ */
+
+.text-rendering-optimized {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizelegibility;
+}
+
+/* ============================================
+   COMPOSITE LAYERS
+   ============================================ */
+
+.composite-layer {
+  transform: translateZ(0);
+  will-change: transform;
+  isolation: isolate;
+}
+
+.composite-layer-remove {
+  transform: none;
+  will-change: auto;
+  isolation: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .genre-marquee {
     animation: none !important;

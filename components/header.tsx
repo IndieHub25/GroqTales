@@ -117,13 +117,13 @@ export function Header() {
     { type: 'link', href: '/nft-marketplace', label: 'NFT Marketplace' },
     ...(account
       ? [
-          {
-            type: 'link' as const,
-            href: '/dashboard/royalties',
-            label: 'Earnings',
-            icon: <DollarSign className="h-4 w-4 mr-1.5 colorful-icon" />,
-          },
-        ]
+        {
+          type: 'link' as const,
+          href: '/dashboard/royalties',
+          label: 'Earnings',
+          icon: <DollarSign className="h-4 w-4 mr-1.5 colorful-icon" />,
+        },
+      ]
       : []),
   ];
 
@@ -308,11 +308,13 @@ export function Header() {
                             href={item.href}
                             onClick={() => setSheetOpen(false)}
                             className={cn(
-                              'px-4 py-3 text-lg hover:bg-white/10 rounded-md transition-colors flex items-center text-white/80 hover:text-white',
-                              'bg-emerald-500/10 text-emerald-400'
+                              'px-4 py-3 text-lg hover:bg-white/10 rounded-md transition-colors flex items-center',
+                              pathname === item.href
+                                ? 'bg-primary/20 text-primary font-bold'
+                                : 'text-white/80 hover:text-white'
                             )}
                           >
-                            {item.icon}
+                            {item.icon && <span className="mr-3">{item.icon}</span>}
                             {item.label}
                           </Link>
                         )
