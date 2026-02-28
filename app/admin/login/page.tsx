@@ -199,8 +199,8 @@ function LoginContent() {
                 className="font-mono"
               />
               <p className="text-xs text-muted-foreground">
-                Enter "GT001" with password "admin123" or "admin" with password
-                "groqtales"
+                Enter &quot;GT001&quot; with password &quot;admin123&quot; or &quot;admin&quot; with password
+                &quot;groqtales&quot;
               </p>
             </div>
             <div className="space-y-2">

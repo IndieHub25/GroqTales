@@ -489,55 +489,21 @@ export default function AIStoryGenerator({
 
     console.log('Story Parameters:', storyParams);
 
-    // Real API call to Groq backend
-    try {
-      const response = await fetch('/api/groq', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'generate',
-          prompt,
-          genre: selectedGenres.join(', '),
-          length: storyLength,
-          options: {
-            tone,
-            characters: {
-              name: mainCharacterName,
-              count: characterCount,
-              traits: characterTraits,
-              age: characterAge,
-              background: characterBackground,
-              type: protagonistType,
-            },
-            setting: {
-              timePeriod,
-              location: locationType,
-              worldBuilding: worldBuildingDepth,
-              atmosphere,
-            },
-            style: {
-              voice: narrativeVoice,
-              writingStyle,
-              readingLevel,
-              mood,
-            },
-            plot: {
-              type: plotType,
-              conflict: conflictType,
-              arc: storyArc,
-              pacing,
-              ending: endingType,
-              twists: plotTwists,
-            },
-            themes: {
-              primary: primaryTheme,
-              secondary: secondaryThemes,
-            },
-          },
-        }),
-      });
+    // Simulate API call
+    setTimeout(() => {
+      const mockStory = `In the neon-soaked streets of Neo-Tokyo, where the rain never stopped and the holograms danced like ghosts, ${mainCharacterName || 'Kael'
+        } tightened ${mainCharacterName ? 'their' : 'his'
+        } grip on the data-drive. "They said it couldn't be done," ${mainCharacterName ? 'they' : 'he'
+        } muttered, the cybernetic implant in ${mainCharacterName ? 'their' : 'his'
+        } left eye whirring softly.
+
+The corporation known as Omni-Corp had eyes everywhere, but they didn't have this. A code so pure, so chaotic, it could rewrite reality itself.
+
+Suddenly, a shadow detached itself from the alley wall. "Hand it over, ${mainCharacterName || 'Kael'
+        }," a voice rasped, metallic and cold. It was Unit 734, a hunter-killer droid with a reputation for leaving no witnesses.
+
+${mainCharacterName || 'Kael'} smirked, pulling ${mainCharacterName ? 'their' : 'his'
+        } plasma-pistol from its holster. "Come and get it, tin can."
 
       if (!response.ok) {
         const error = await response.json();
@@ -792,13 +758,14 @@ export default function AIStoryGenerator({
               <div className={`flex-1 relative ${activeTab === "input" ? "block" : "hidden"} space-y-8 mt-0`}>
                 {/* Core Prompt Section */}
                 <div className="space-y-4">
-                  <label className="font-semibold tracking-wide text-2xl flex items-center gap-2">
-                    <MessageSquare className="fill-emerald-400 stroke-current" />
-                    WHAT'S THE STORY, HERO? *
+                  <label htmlFor="ai-prompt" className="font-bangers text-2xl flex items-center gap-2">
+                    <MessageSquare className="fill-yellow-400 stroke-black" />
+                    WHAT&apos;S THE STORY, HERO? *
                   </label>
                   <div className="relative group">
                     <div className="absolute -inset-1 bg-black rounded-2xl translate-x-2 translate-y-2 group-hover:translate-x-1 group-hover:translate-y-1 transition-transform" />
                     <Textarea
+                      id="ai-prompt"
                       placeholder="Enter your prompt here... (e.g., A cyberpunk detective hunting a ghost in the machine)"
                       className="relative bg-white border border-white/10 rounded-xl p-6 text-lg font-medium min-h-[150px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0 selection:bg-emerald-500 hover:border-emerald-400 text-black selection:text-black"
                       value={prompt}
@@ -836,10 +803,10 @@ export default function AIStoryGenerator({
                         key={g}
                         onClick={() => toggleGenre(g)}
                         className={`
-                          font-semibold tracking-wide text-lg px-4 py-2 rounded-lg border border-white/10 transition-all transform hover:-translate-y-1
+                          font-bangers text-lg px-4 py-2 rounded-lg border-4 border-black transition-all transform hover:-translate-y-1
                           ${selectedGenres.includes(g)
-                            ? 'bg-blue-400 text-white shadow-2xl shadow-black/50 rotate-1'
-                            : 'bg-white/5 text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-2xl shadow-black/50'
+                            ? 'bg-blue-400 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rotate-1'
+                            : 'bg-white text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
                           }
                         `}
                       >
@@ -950,7 +917,7 @@ export default function AIStoryGenerator({
                                 onClick={() => toggleTrait(trait)}
                                 className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${characterTraits.includes(trait)
                                     ? 'bg-blue-400 text-white'
-                                    : 'bg-white/5 text-white hover:bg-white/5'
+                                    : 'bg-white text-black hover:bg-gray-100'
                                   }`}
                               >
                                 {trait}
@@ -1569,7 +1536,7 @@ export default function AIStoryGenerator({
                                 onClick={() => toggleTheme(theme.toLowerCase())}
                                 className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${secondaryThemes.includes(theme.toLowerCase())
                                     ? 'bg-pink-400 text-white'
-                                    : 'bg-white/5 text-white hover:bg-white/5'
+                                    : 'bg-white text-black hover:bg-gray-100'
                                   }`}
                               >
                                 {theme}
@@ -1925,8 +1892,8 @@ export default function AIStoryGenerator({
                                   }
                                 }}
                                 className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${avoidCliches.includes(trope.toLowerCase())
-                                    ? 'bg-rose-500/20 text-rose-300 text-white'
-                                    : 'bg-white/5 text-white hover:bg-white/5'
+                                    ? 'bg-red-400 text-white'
+                                    : 'bg-white text-black hover:bg-gray-100'
                                   }`}
                               >
                                 {trope}
@@ -1967,7 +1934,7 @@ export default function AIStoryGenerator({
                                 }}
                                 className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${includeTropes.includes(trope.toLowerCase())
                                     ? 'bg-green-400 text-white'
-                                    : 'bg-white/5 text-white hover:bg-white/5'
+                                    : 'bg-white text-black hover:bg-gray-100'
                                   }`}
                               >
                                 {trope}
