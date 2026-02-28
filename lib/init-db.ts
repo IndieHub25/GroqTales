@@ -10,6 +10,7 @@ async function initializeDatabase() {
     await db.createCollection('comments');
     await db.createCollection('genres');
     await db.createCollection('nfts');
+    await db.createCollection('storymints');
 
     // Create indexes
     const users = db.collection('users');
@@ -33,6 +34,12 @@ async function initializeDatabase() {
     await nfts.createIndex({ storyId: 1 });
     await nfts.createIndex({ tokenId: 1 }, { unique: true });
     await nfts.createIndex({ owner: 1 });
+
+    // StoryMints collection - ensures unique index on storyHash for race-condition safety
+    const storymints = db.collection('storymints');
+    await storymints.createIndex({ storyHash: 1 }, { unique: true });
+    await storymints.createIndex({ status: 1, createdAt: -1 });
+    await storymints.createIndex({ authorAddress: 1, status: 1 });
 
     console.log('Database initialization completed successfully');
   } catch (error) {

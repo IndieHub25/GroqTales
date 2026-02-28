@@ -186,6 +186,15 @@ const nextConfig = {
       };
     }
 
+    // Fix path aliases for webpack - ensures models and other @/* imports resolve correctly
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname),
+      '@/models': require('path').resolve(__dirname, 'models'),
+      '@/lib': require('path').resolve(__dirname, 'lib'),
+      '@/components': require('path').resolve(__dirname, 'components'),
+    };
+
     // Silence warnings for specific packages
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
 
