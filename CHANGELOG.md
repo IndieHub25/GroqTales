@@ -7,7 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 1.3.7 (latest), 1.3.5 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+Active full support: 1.3.8 (latest), 1.3.7 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+
+## [1.3.8] - 2026-02-26
+
+### Infrastructure — Migration from Vercel/Netlify to Cloudflare Pages
+
+#### Removed
+
+- **`vercel.json`**: Vercel deployment config file deleted — Cloudflare Pages is now the primary hosting platform.
+- **`netlify.toml`**: Netlify deployment config file deleted — no longer required.
+- **`deployment/vercel/`**: Entire Vercel-specific deployment directory removed.
+- **`scripts/prepare-vercel.js`**: Vercel pre-build hook script deleted.
+- **`@vercel/analytics`**: Removed from `dependencies` — Vercel-only analytics package stripped.
+- **`@vercel/speed-insights`**: Removed from `dependencies` — Vercel-only performance monitoring stripped.
+- **`<SpeedInsights />`** and **`<Analytics />`** JSX components removed from `app/layout.tsx`.
+
+#### Changed
+
+- **`package.json`**: Version bumped to `1.3.8`; `vercel-build` script replaced with `cf-build` (maps to `npm run build`); `prepare-vercel` script removed.
+- **`app/layout.tsx`**: `VERCEL_URL` environment variable fallbacks replaced with `CF_PAGES_URL` (Cloudflare Pages runtime variable); default image/splash URLs point to `groqtales.xyz`.
+- **`VERSION`**: Updated to `1.3.8`.
+- **`README.md`**: Tech Stack updated (`Hosting: Cloudflare Pages`); Vercel/Netlify references removed.
+- **`docs/`** and **`wiki/`**: All deployment references updated to Cloudflare Pages.
+
+#### Added
+
+- **`wrangler.toml`**: Cloudflare Pages/Workers project configuration added.
+- **`MIGRATION-TO-CLOUDFLARE.md`**: Migration guide documenting how to deploy to Cloudflare Pages, configure env vars, set up the custom domain `groqtales.xyz`, and troubleshoot common issues.
+
+### Bug Fixes / Behavioral Notes
+
+- Analytics and speed monitoring are no longer injected — the removed Vercel packages were no-ops outside of Vercel infrastructure. Cloudflare Web Analytics can be enabled from the Cloudflare dashboard without any code changes.
+- `NEXT_PUBLIC_URL` and related image URL defaults now fall back to `groqtales.xyz` instead of the old `groqtales.com` placeholder.
+
+### Bug Fix — Version Always Displayed as 1.0.0 in Deployed Builds
+
+**Problem:** The deployed app always showed `1.0.0` in the footer and anywhere `appVersion` was consumed, regardless of what the `VERSION` file contained.
+
+**Root Cause:** `app/layout.tsx` was calling `getAppVersion()` which used `fs.readFileSync(path.join(process.cwd(), 'VERSION'), 'utf8')` at **runtime**. Cloud deployment platforms (Cloudflare Pages, etc.) do not guarantee that arbitrary source files are present in the filesystem at runtime — only the compiled `.next/` bundle is deployed. When the read failed, the function returned the hard-coded fallback `'1.0.0'`. Additionally, the `defaultEnvVars` block in the same file also defaulted `NEXT_PUBLIC_VERSION` to `'1.0.0'`.
+
+**Fix:**
+- `next.config.js`: Added a `resolveAppVersion()` function that reads the `VERSION` file and falls back to `package.json.version` **at build time** (Node.js has full filesystem access during the build). The resolved version is exposed as `env.NEXT_PUBLIC_VERSION` which Next.js inlines into the compiled bundle as a constant — behaves like a compile-time `#define`.
+- `app/layout.tsx`: Removed the `getAppVersion()` runtime function entirely. `appVersion` is now `process.env.NEXT_PUBLIC_VERSION ?? '?.?.?'`. The sentinel `'?.?.?'` is intentionally ugly so a misconfigured build is immediately visible rather than silently defaulting to an old version string.
+- Removed the stale `NEXT_PUBLIC_VERSION: '1.0.0'` default from the `defaultEnvVars` block.
+
+**How to keep versions in sync going forward:**
+1. Update the `VERSION` file (single source of truth)
+2. Update `package.json` `"version"` to match
+3. Add a `CHANGELOG.md` entry
+4. Run `npm run build` — the build log will print `[next.config.js] Resolved app version: X.Y.Z`
+5. The footer and all other version references will automatically show the correct version in the deployed bundle
+
+---
 
 ## [1.3.7] - 2026-02-24
 

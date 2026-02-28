@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Custom Installation Script for Vercel Deployment
+ * Custom Installation Script for Cloudflare Pages Deployment
  *
  * This script ensures all required dependencies are correctly installed,
  * regardless of any potential issues with npm or package resolution.

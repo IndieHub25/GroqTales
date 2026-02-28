@@ -77,7 +77,7 @@ Tick everything that applies. Leave non‑applicable items unchecked.
 Describe how you tested these changes. Include commands and logs where possible.
 
 ```text
-Environment: (e.g. local, Vercel preview, Monad testnet)
+Environment: (e.g. local, Cloudflare Pages preview, Monad testnet)
 
 Commands:
 - npm run lint

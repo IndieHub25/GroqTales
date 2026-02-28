@@ -1,0 +1,60 @@
+# ============================================================
+# Cloudflare Pages / Workers configuration for GroqTales
+# Primary hosting platform: Cloudflare Pages
+# Domain: groqtales.xyz
+# ============================================================
+
+name = "groqtales"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# ── Pages build settings ─────────────────────────────────────
+# These are mirrored in the Cloudflare Pages dashboard.
+# Build command : npm run build
+# Output dir    : .next  (handled by @cloudflare/next-on-pages)
+# Node version  : 20
+
+[build]
+command = "npm run build"
+
+# ── Environment variable bindings ────────────────────────────
+# Set secrets in: Cloudflare Pages → Settings → Environment variables
+# Do NOT store real secrets here.
+#
+# Required variables (add in dashboard):
+#   NEXT_PUBLIC_URL                     = https://groqtales.xyz
+#   NEXT_PUBLIC_VERSION                 = 1.3.8
+#   NEXT_PUBLIC_IMAGE_URL               = https://groqtales.xyz/images
+#   NEXT_PUBLIC_SPLASH_IMAGE_URL        = https://groqtales.xyz/splash.jpg
+#   NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR = #1a1a2e
+#   NEXT_PUBLIC_GROQ_API_KEY            = <secret>
+#   SUPABASE_URL                        = <secret>
+#   SUPABASE_ANON_KEY                   = <secret>
+#   SUPABASE_SERVICE_ROLE_KEY           = <secret>
+#   MONGODB_URI                         = <secret>
+#   JWT_SECRET                          = <secret>
+#   NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID = <secret>
+#   MONAD_TEST_RPC_URL                  = <secret>
+#   MINTER_PRIVATE_KEY                  = <secret>  (NEVER commit)
+
+# ── Local dev overrides (wrangler dev) ───────────────────────
+[vars]
+NODE_ENV = "development"
+NEXT_PUBLIC_BUILD_MODE = "false"
+
+# ── Preview environment ──────────────────────────────────────
+[env.preview]
+name = "groqtales-preview"
+
+[env.preview.vars]
+NODE_ENV = "production"
+NEXT_PUBLIC_BUILD_MODE = "true"
+
+# ── Production environment ───────────────────────────────────
+[env.production]
+name = "groqtales"
+
+[env.production.vars]
+NODE_ENV = "production"
+NEXT_PUBLIC_BUILD_MODE = "false"
+NEXT_PUBLIC_URL = "https://groqtales.xyz"

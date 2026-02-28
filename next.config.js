@@ -3,6 +3,48 @@
  * @description Enterprise-grade Next.js configuration with performance and security optimizations
  */
 
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * Read the canonical app version at build time.
+ *
+ * Priority order:
+ *   1. Root VERSION file  (single source of truth — keep this in sync with package.json)
+ *   2. package.json "version" field  (fallback if VERSION is missing)
+ *   3. '0.0.0'  (last-resort sentinel — a value this obvious makes misconfiguration visible)
+ *
+ * The resolved value is injected as NEXT_PUBLIC_VERSION so it is baked
+ * into the JS bundle at build time and available in every environment
+ * (Cloudflare Pages, Vercel, Docker, local) without any filesystem reads at runtime.
+ */
+function resolveAppVersion() {
+  // 1. VERSION file (preferred)
+  try {
+    const versionFilePath = path.resolve(__dirname, 'VERSION');
+    const raw = fs.readFileSync(versionFilePath, 'utf8').trim();
+    if (raw) return raw;
+  } catch (_) {
+    // VERSION file not present — fall through
+  }
+
+  // 2. package.json version
+  try {
+    const pkg = JSON.parse(
+      fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf8')
+    );
+    if (pkg.version) return pkg.version;
+  } catch (_) {
+    // Should never happen in a valid project tree
+  }
+
+  // 3. Sentinel fallback
+  return '0.0.0';
+}
+
+const APP_VERSION = resolveAppVersion();
+console.log(`[next.config.js] Resolved app version: ${APP_VERSION}`);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Core settings
@@ -148,7 +190,10 @@ const nextConfig = {
   },
 
   // Environment variables
+  // NEXT_PUBLIC_VERSION is resolved from the VERSION file at build time so
+  // the correct version is always baked into the bundle — no runtime fs reads.
   env: {
+    NEXT_PUBLIC_VERSION: APP_VERSION,
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
 
