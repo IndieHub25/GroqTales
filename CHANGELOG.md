@@ -7,9 +7,328 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 1.1.2 (latest), 1.1.1 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+Active full support: 1.3.9 (latest), 1.3.8 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
 
-## [Unreleased]
+## [1.3.9] - 2026-02-28
+
+### Bug Fixes & Infrastructure
+
+- **Cloudflare Pages Static Export Fix**: Resolved `output: 'export'` build failure caused by missing `generateStaticParams()` on dynamic routes. Next.js static export requires every `[param]` route to explicitly return at least one path (e.g. `[{ id: 'default' }]`) or the build fails with a generic missing error.
+  - **`app/nft-marketplace/comic-stories/[id]/page.tsx`**: Added default static params and `dynamicParams = false`.
+  - **`app/nft-marketplace/text-stories/[id]/page.tsx`**: Added default static params and `dynamicParams = false`.
+  - **`app/profile/[username]/page.tsx`**: Added default static params and `dynamicParams = false`.
+  - **`app/stories/[id]/page.tsx`**: Added `dynamicParams = false`.
+  - **`app/genres/[slug]/page.tsx`**: Added `dynamicParams = false`.
+- **Static Prerender Fix (Lucide Icons)**: Fixed `TypeError: u is not a function` occurring during static generation for `/genres/[slug]`. This was caused by importing icons from the `lucide-react` barrel file inside a data object (`genres` array) used across Server and Client boundaries. Replaced with simple inline SVGs.
+- **Static Prerender Fix (Cookies API)**: Fixed `NEXT_STATIC_GEN_BAILOUT` occurring in `app/settings/page.tsx`. `output: export` does not support dynamic Server Components that read cookies using the Supabase client because cookies only exist per-request on a live server. Removed the server-side logic and simplified it to just return `<SettingsClient />` to handle auth purely on the client.
+
+- **Database Plan Migration**: Updated the PostgreSQL database plan in `render.yaml` from the legacy `starter` tier to the currently supported `free` tier to resolve dynamic deployment issues on Render.
+- **Cloudflare Pages Build Fix**: Resolved `cross-env: not found` error that caused all Cloudflare Pages deployments to fail with exit code 127. `cross-env` was listed in `devDependencies` but Cloudflare's build environment sets `NODE_ENV=production` before `npm install`, skipping devDep installation. Replaced `cross-env NEXT_PUBLIC_BUILD_MODE=true` with POSIX inline syntax (`NEXT_PUBLIC_BUILD_MODE=true next build`) in both `build` and `cf-build` scripts — `wrangler.toml` already injects this variable for preview/production environments, making `cross-env` redundant.
+- **Cloudflare Build Dependencies Fix**: Moved `tailwindcss`, `autoprefixer`, `postcss`, `typescript`, `@cloudflare/next-on-pages`, `@types/react`, `@types/react-dom`, `@types/node`, and `eslint-config-next` from `devDependencies` to `dependencies` so they are installed when Cloudflare Pages runs `npm install` with `NODE_ENV=production`.
+- **Static Export for Cloudflare Pages**: Replaced `@cloudflare/next-on-pages` adapter with Next.js static export (`output: 'export'`). The adapter required all routes to use Edge Runtime, which is incompatible with Node.js API routes (MongoDB/Mongoose). Since API routes run on Render, Cloudflare only serves the static frontend. Updated `wrangler.toml` output dir to `out/`, updated `cf-build` script to remove the `app/api` directory before building (to prevent Next.js trying to build Node.js API routes), conditionally disabled headers/redirects/rewrites (unsupported with static export), and added `public/_redirects` for SPA fallback routing.
+- **Typewriter Animation Fix**: Resolved a timing bug in the `useTypewriter` hook within the Hero section (`app/page.tsx`). The animation now properly dynamically adjusts speed between the typing and deleting phases by utilizing recursive `setTimeout` logic instead of a fixed-interval `setInterval`, creating a smoother, more realistic typing effect.
+- **PR CI Workflow**: Added `.github/workflows/pr-ci.yml` — automated GitHub Actions workflow that runs lint, unit tests, and a full Cloudflare Pages build check (without deploying) on every PR targeting `main`.
+- **CI Workflow Fixes**: Fixed all failing GitHub Actions workflows across 7 files — replaced `npm ci` with `npm install --legacy-peer-deps` (3 workflows), removed `cache: 'npm'` that requires a `package-lock.json` committed to the repo (all workflows), and replaced `node-version-file: '.nvmrc'` with explicit `node-version: '20'`.
+- **Preview Comment Fix**: Fixed `cloudflare-preview.yml` PR comment — SHA `.slice(0,7)` was rendering as literal text instead of executing as JS; branch name from `github.head_ref` was injected unsanitized. Both values now computed as proper JS variables via `process.env` with markdown-dangerous characters stripped.
+
+### Infrastructure — Migration from Vercel/Netlify to Cloudflare Pages
+
+#### Removed
+
+- **`vercel.json`**: Vercel deployment config file deleted — Cloudflare Pages is now the primary hosting platform.
+- **`netlify.toml`**: Netlify deployment config file deleted — no longer required.
+- **`deployment/vercel/`**: Entire Vercel-specific deployment directory removed.
+- **`scripts/prepare-vercel.js`**: Vercel pre-build hook script deleted.
+- **`@vercel/analytics`**: Removed from `dependencies` — Vercel-only analytics package stripped.
+- **`@vercel/speed-insights`**: Removed from `dependencies` — Vercel-only performance monitoring stripped.
+- **`<SpeedInsights />`** and **`<Analytics />`** JSX components removed from `app/layout.tsx`.
+
+#### Changed
+
+- **`package.json`**: Version bumped to `1.3.8`; `vercel-build` script replaced with `cf-build` (maps to `npm run build`); `prepare-vercel` script removed.
+- **`app/layout.tsx`**: `VERCEL_URL` environment variable fallbacks replaced with `CF_PAGES_URL` (Cloudflare Pages runtime variable); default image/splash URLs point to `groqtales.xyz`.
+- **`VERSION`**: Updated to `1.3.8`.
+- **`README.md`**: Tech Stack updated (`Hosting: Cloudflare Pages`); Vercel/Netlify references removed.
+- **`docs/`** and **`wiki/`**: All deployment references updated to Cloudflare Pages.
+
+#### Added
+
+- **`wrangler.toml`**: Cloudflare Pages/Workers project configuration added.
+- **`MIGRATION-TO-CLOUDFLARE.md`**: Migration guide documenting how to deploy to Cloudflare Pages, configure env vars, set up the custom domain `groqtales.xyz`, and troubleshoot common issues.
+
+### Bug Fixes / Behavioral Notes
+
+- Analytics and speed monitoring are no longer injected — the removed Vercel packages were no-ops outside of Vercel infrastructure. Cloudflare Web Analytics can be enabled from the Cloudflare dashboard without any code changes.
+- `NEXT_PUBLIC_URL` and related image URL defaults now fall back to `groqtales.xyz` instead of the old `groqtales.com` placeholder.
+
+### Bug Fix — Version Always Displayed as 1.0.0 in Deployed Builds
+
+**Problem:** The deployed app always showed `1.0.0` in the footer and anywhere `appVersion` was consumed, regardless of what the `VERSION` file contained.
+
+**Root Cause:** `app/layout.tsx` was calling `getAppVersion()` which used `fs.readFileSync(path.join(process.cwd(), 'VERSION'), 'utf8')` at **runtime**. Cloud deployment platforms (Cloudflare Pages, etc.) do not guarantee that arbitrary source files are present in the filesystem at runtime — only the compiled `.next/` bundle is deployed. When the read failed, the function returned the hard-coded fallback `'1.0.0'`. Additionally, the `defaultEnvVars` block in the same file also defaulted `NEXT_PUBLIC_VERSION` to `'1.0.0'`.
+
+**Fix:**
+- `next.config.js`: Added a `resolveAppVersion()` function that reads the `VERSION` file and falls back to `package.json.version` **at build time** (Node.js has full filesystem access during the build). The resolved version is exposed as `env.NEXT_PUBLIC_VERSION` which Next.js inlines into the compiled bundle as a constant — behaves like a compile-time `#define`.
+- `app/layout.tsx`: Removed the `getAppVersion()` runtime function entirely. `appVersion` is now `process.env.NEXT_PUBLIC_VERSION ?? '?.?.?'`. The sentinel `'?.?.?'` is intentionally ugly so a misconfigured build is immediately visible rather than silently defaulting to an old version string.
+- Removed the stale `NEXT_PUBLIC_VERSION: '1.0.0'` default from the `defaultEnvVars` block.
+
+**How to keep versions in sync going forward:**
+1. Update the `VERSION` file (single source of truth)
+2. Update `package.json` `"version"` to match
+3. Add a `CHANGELOG.md` entry
+4. Run `npm run build` — the build log will print `[next.config.js] Resolved app version: X.Y.Z`
+5. The footer and all other version references will automatically show the correct version in the deployed bundle
+
+### Bug Fix — Cloudflare Pages Deployment Showing "Page Does Not Exist"
+
+**Problem:** Cloudflare Pages deployed successfully but served a blank "page does not exist" error. The Cloudflare build log reported: *"A Wrangler configuration file was found but it does not appear to be valid… make sure the file is valid and contains the `pages_build_output_dir` property."*
+
+**Root Causes (3):**
+1. `wrangler.toml` used the Workers `[build]` table, which is **invalid for Pages**. Cloudflare Pages ignores it.
+2. `wrangler.toml` was missing `pages_build_output_dir` — the mandatory property for Cloudflare Pages. Without it the build step is skipped entirely and Cloudflare serves from `/` (empty).
+3. The `@cloudflare/next-on-pages` adapter was referenced in comments but not installed or invoked — it's required to transform Next.js App Router output into a Cloudflare-compatible format.
+
+**Fix:**
+- `wrangler.toml`: Removed the invalid `[build]` table; added `pages_build_output_dir = ".vercel/output/static"` at the top level (the adapter's output directory).
+- `package.json`: Updated `cf-build` script to `NEXT_PUBLIC_BUILD_MODE=true next build && npx @cloudflare/next-on-pages@1` (POSIX inline env assignment). Added `@cloudflare/next-on-pages@^1.13.12` to dependencies.
+- `next.config.js`: Added `setupDevPlatform()` call (guarded to `NODE_ENV === 'development'`) so Cloudflare bindings are available during local dev with `wrangler pages dev`.
+- `public/_headers`: Created Cloudflare Pages `_headers` file for edge-level security headers and static asset caching (mirrors the security headers in `next.config.js`).
+
+**Cloudflare Pages dashboard settings (must be set manually):**
+
+| Setting | Value |
+|---|---|
+| Build command | `npm run cf-build` |
+| Build output directory | `.vercel/output/static` |
+| Root directory | `/` (repo root) |
+| Node.js version | `20` |
+
+### GitHub Actions — Workflows Updated for Cloudflare Pages
+
+#### `deployment.yml` — Full Rewrite
+- Removed all Vercel CLI steps (`vercel pull`, `vercel build`, `vercel deploy`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `VERCEL_TOKEN` secrets)
+- Now uses `cloudflare/wrangler-action@v3` to deploy `.vercel/output/static` to Cloudflare Pages production
+- Build step runs `npm run cf-build` (Next.js build + `@cloudflare/next-on-pages` adapter)
+- Required GitHub secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` (see setup steps below)
+
+#### `cloudflare-preview.yml` — New Workflow
+- Deploys a unique Cloudflare Pages preview URL for every PR targeting `main`
+- Preview URL posted as a PR comment (updates in place on re-push, never duplicates)
+- Cleans up the preview branch deployment when PR is closed
+
+#### `lighthouse-ci.yml` — Fixed Hardcoded Version
+- Removed hardcoded `NEXT_PUBLIC_VERSION: '1.0.0'` from both build and run `env` blocks
+- Added a step to read the canonical version from the `VERSION` file: `APP_VERSION=$(cat VERSION)` → `$GITHUB_ENV`
+
+#### Required GitHub Secrets to Add
+Go to **GitHub → IndieHub25/GroqTales → Settings → Secrets and variables → Actions**:
+
+| Secret Name | Value |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API token with Pages edit permission |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID (from Cloudflare dashboard) |
+| `NEXT_PUBLIC_API_URL` | `https://groqtales-api.onrender.com` |
+| `NEXT_PUBLIC_GROQ_API_KEY` | Your Groq API key |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
+| `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | WalletConnect project ID |
+
+> **How to create a Cloudflare API token:**  
+> Cloudflare dashboard → My Profile → API Tokens → Create Token → use the "Edit Cloudflare Pages" template → scope to your account → copy the token.
+
+---
+
+## [1.3.7] - 2026-02-24
+
+### Bug Fixes & Documentation
+
+- **Merge Conflicts Resolved**: Resolved UI and structural conflicts in `app/dashboard/page.tsx`, `app/nft-gallery/page.tsx`, `app/stories/[id]/page.tsx`, `components/ai-story-generator.tsx`, `components/community-feed.tsx`, and `components/header.tsx` by adopting the latest local cinematic UI redesigns over `origin/main`.
+- **README Modernization**: Replaced top deployment badges with a clean GroqTales logo-centered layout, added "Built by Indie Hub" credit, and integrated a GitHub stargazers request to improve premium branding.
+- **Wiki Standardization**: Injected the GroqTales logo header systematically across all Markdown files in the `wiki/` directory for visual consistency.
+
+### Major Features - Cinematic Page Overhauls & Auth Flow
+
+- **Authentication Shift**: Migrated explicit "Connect Wallet" main navigation interaction to a comprehensive, dedicated Auth flow using Supabase.
+- **New Auth Pages**: Created highly aesthetic, CRM-style animated `/sign-in` and `/sign-up` pages via Framer Motion matching the comic/GenZ theme.
+- **Multi-modal Login**: Integrated Email/Password, Google OAuth (Gmail), and Web3 Wallet connect options directly within the new Auth interface.
+- **Story Creation**: Refactored `/create/ai-story` into a cinematic glassmorphic interface with clear step-by-step visual indicators and advanced customization accordions. Corrected parser syntax error in tabs.
+- **Story Detail & NFT View**: Redesigned `/stories/[id]` to feature a 3D rotating NFT hero section and an immersive, distraction-free "Reading Mode".
+- **NFT Gallery**: Revamped `/nft-gallery` with a live activity ticker, masonry layout, and fluid hover animations matching the cinematic aesthetic.
+- **Community Feed**: Overhauled `/community` with an integrated XP tracker, "Showcase" section for favorite NFTs, and modern timeline feed. Connected feed to real-time Supabase Database, removing mock data.
+- **Clean Animations**: Integrated `framer-motion` layout animations and unified interaction micro-animations across all reconstructed pages.
+- **Header Responsiveness Fix**: Lowered the breakpoint threshold for the Navigation menu collapse from `xl` to `lg` so that Mac/Standard laptop screens see the full row of navigation items instead of the mobile hamburger menu.
+
+### Security, Loading & Access Control Enhancements
+
+- **Aesthetic Loading Screen**: Added `<GlobalLoadingWrapper>` dynamically inside root layout to transition seamlessly across pages. Elevated the global loading visual with orbital rings.
+- **Next Config Image Security**: Expanded `remotePatterns` in `next.config.js` to whitelist numerous external CDNs.
+- **Access Rules & Steppers**: Added an 'Access Control & Security' card to the Creator Dashboard outlining specific Off-Chain roles (Reader vs Creator) and On-Chain requirements (Minting, AI tools).
+- **Security Notes & Last Login**: Integrated a security warning message on the dashboard and implemented a 'Last Login' timestamp indicator in the User Nav dropdown.
+- **Global Emote Removal**: Stripped all emojis and non-cinematic UI elements from the homepage, auth flows, footer, and genres explorer for a consistent premium aesthetic.
+- **Security Documentation**: Updated `SECURITY.md` to reflect version 1.3.7 as the latest, mapping Supabase Auth changes and new UI rules standard.
+
+## [1.3.5] - 2026-02-21
+
+### Major Architecture Change: Supabase Migration
+
+- **Database Engine**: Fully migrated from MongoDB to PostgreSQL via Supabase.
+- **Authentication**: Replaced NextAuth.js with Supabase Auth (SSR clients + middleware).
+- **Core Models Refactored**:
+  - `stories` & `user_interactions` mapped correctly for the feed.
+  - `royalty_configs`, `creator_earnings`, and `royalty_transactions` fully off-chain tracked via Supabase.
+- **Legacy Removal**: Safely commented out `Mongoose` schemas and active connections to prevent build collisions while keeping types intact.
+- **Improved Data Integrity**: Shifted to explicit Row Level Security (RLS) rules and robust primary/foreign key mappings (UUID).
+- **Dependency Fixes**: Fixed broken 404 package dependencies (e.g. `concat-stream` github link) preventing fresh installations.
+
+### Fixed
+
+- **Vercel Deployment Crash (npm ci)**: Switched Vercel install command from `npm ci` to `npm install --legacy-peer-deps` permanently due to persistent ERESOLVE and missing dependency errors in lockfile synchronization within the Vercel build environment.
+- **Vercel Deployment Crash (Spline 3D)**: Added `transpilePackages` for `@splinetool/react-spline` and `@splinetool/runtime` in `next.config.js` so Next.js properly compiles Spline's class inheritance chain through its SWC pipeline instead of treating them as pre-compiled externals
+- **Resilient Spline Loading**: Added `.catch()` fallback to the Spline dynamic import in `app/page.tsx` — if the 3D model fails to load in any environment, the page gracefully degrades to the gradient background instead of crashing
+- **Featured Creators Validation**: `components/featured-creators.tsx` now validates creator-shaped objects (requires `username`/`followersCount`/`profileImage`) instead of fabricating metadata; non-matching items are filtered out
+- **Footer Health Indicator**: Wired the static "Online" indicator in `components/footer.tsx` to the real `/api/health/db` endpoint — now dynamically shows Online/Degraded/Offline/Checking state
+- **Trending Stories Error Handling**: `components/trending-stories.tsx` now surfaces the actual error message (instead of hiding it behind "No Stories Yet") and provides a Retry button
+- **Spline Guide Markdown**: Added `text` language identifiers to unlabeled fenced code blocks in `docs/SPLINE_GUIDE.md` (markdownlint MD040)
+- **Changelog Deduplication**: Merged duplicate `## [1.3.5]` headers into a single section
+- **Feed API Static Render Fix**: Added `export const dynamic = 'force-dynamic'` to `app/api/feed/route.ts` — route uses `request.url` for query params, which requires dynamic rendering
+- **Missing 404 Page**: Created `app/not-found.tsx` with comic-style 404 page matching the site theme
+- **ServiceWorker 404**: Created `public/sw.js` minimal stub to prevent registration failure
+- **Dialog Accessibility**: Added hidden `DialogDescription` to `components/ui/dialog.tsx` to satisfy Radix `aria-describedby` requirement
+- **Hero Background**: Replaced Spline 3D with `background.jpeg` for the hero section — works in both light and dark modes with overlay
+- **Global Loading Screen**: Created `app/loading.tsx` using the existing `LoadingScreen` component for consistent loading across all pages
+- **Scroll Indicator Accessibility**: Added `aria-hidden="true"` to the decorative scroll indicator in `app/page.tsx`
+- **Trending Stories HTTP Errors**: `components/trending-stories.tsx` now surfaces 4xx/5xx responses as errors instead of silently showing empty state
+- **Trending Stories AbortController**: Added `AbortController` cleanup to prevent state updates on unmounted components
+- **Featured Creators HTML Validity**: Used `Button asChild` pattern in `components/featured-creators.tsx` to avoid invalid `<a><button>` nesting
+- **Animated Genre Marquee**: Replaced the 6-genre icon grid with a 12-genre animated marquee using real genre images, infinite right-to-left scrolling, hover-pause, edge fade masks, and `prefers-reduced-motion` support
+- **Adventure Image Fix**: Replaced broken europeanstudios.com hotlink with working Unsplash adventure image
+- **Genre Page Overhaul**: Rewrote `app/genres/page.tsx` — genre cards now have real images, expand/collapse famous works, "Write a Story" CTAs, and an interactive "Finding Your Genre" quiz (4 questions, emoji, progress bar, results)
+- **Documentation Page Overhaul**: Rewrote `app/docs/page.tsx` — step cards with numbered badges, quick links grid, expandable FAQ accordion with emojis, wallet setup guide, minting flow, and community CTA banner
+- **Duplicate Trending Header**: Removed redundant "Trending Stories" heading from `components/trending-stories.tsx` since the home page already provides its own "Trending Now" header
+- **Community Loading Screen**: Updated Community Hub page to use full-screen loading with `fullScreen` and `size="lg"` props, consistent with the global loading screen
+
+### Documentation & Professional Standards
+
+- **Created Professional Pull Request Template (`temp.md`)**: Implemented a standardized, professional PR template for Indie Hub Org members.
+- **Indie Hub Org Alignment**: Added mandatory acknowledgement for official membership and professional work line.
+- **Clean Documentation**: High-quality, emoji-free, and streamlined template for internal project contributions.
+
+### Homepage & Footer UI Refinements — Readability, Layout, and Spline Background
+
+#### Changed
+- **Spline 3D Background**: Transitioned from hero-only to a `fixed` full-page background, visible through semi-transparent sections.
+- **CTA Section**: Removed gradient background, simplified to `bg-background/90` with backdrop-blur.
+- **CTA Button**: Removed sparkle icon, enforced pure comic-style theme with Bangers font.
+- **Neon Sign**: Optimized glow radii and colors for significantly improved readability.
+- **Footer Brand**: Replaced logo image/container with bold italic "GroqTales" branded text.
+- **Footer Layout**: Moved copyright and status info below the neon sign for a more balanced design.
+
+### Security Policy Refresh — 2026-02-21
+
+- **Updated `SECURITY.md`** to reflect current version matrix (1.3.5 latest, 1.3.0 previous, 1.1.0 maintenance, < 1.1.0 EoSS)
+- Removed duplicate severity classification tables — consolidated into single authoritative table
+- Added **Response Timeline SLA** table (acknowledgement → fix → disclosure)
+- Added **"What to Include in a Report"** guidance section
+- Documented actual security stack: Helmet, `express-rate-limit`, Zod, `express-validator`, SIWE
+- Added **Current Technology Stack** table with versions for Node.js, Next.js, Express, MongoDB, TypeScript, and more
+- Expanded **Protecting Your Data** section with HTTPS, JWT, MongoDB encryption, and SIWE details
+- Increased coordinated disclosure window from 30 → 90 days for complex High/Critical issues
+- Added **Sensitive Information Disclosure** to AI Security Scope (OWASP LLM top 10)
+
+### Documentation & DevOps Refresh — 2026-02-21
+
+- **Merged `README.Docker.md` into `README.md`**: Consolidated all Docker setup, service maps, and deployment guides into the main readme for better visibility
+- **Created `docs/SPLINE_GUIDE.md`**: Detailed contributor guide for working with Spline 3D models, including model protection policies, performance rules, and technical implementation details
+- **Linked Spline Guide in README**: Added a dedicated section and Table of Contents entry for the Spline 3D Guide
+- **Updated README Version**: Bounded project version badge to v1.3.5 in documentation
+- **Deleted `README.Docker.md`**: Removed redundant file after merging content into main README
+
+### Professional Website Redesign — Premium Theme, Neon Branding, Centered 3D Hero
+
+#### Added
+- **Neon "GROQTALES" Footer Branding**: Large Bangers-font branded heading at the bottom of the footer with a custom `neon-flicker` CSS animation that simulates a faulty neon sign — random blinks, flickers, and steady glow intervals
+- **`.neon-sign` CSS utility**: Theme-aware neon glow effect (warm red/orange glow in light mode, cyan/pink bloom in dark mode)
+- **`@keyframes neon-flicker`**: Multi-step opacity animation with 30+ keyframe stops for realistic neon sign behavior
+- **Header Wordmark**: "GROQTALES" text in Bangers font displayed next to the logo in the header
+- **IntersectionObserver for Spline**: Tracks hero section visibility to control Spline model opacity in lower sections
+- **Dark Premium Background**: Sitewide `dark-premium-bg` class applied to main layout wrapper — elegant radial gradients on deep navy
+- **Feed API Fallback**: `/api/feed/route.ts` now returns 6 high-quality fallback stories when MongoDB is unavailable, ensuring trending stories section always renders
+- **Full-width Neon Sign**: GROQTALES neon branding now spans the entire screen width on all devices (phone, tablet, laptop, TV) using `w-screen -ml-[50vw]` breakout technique
+- **Fixed Spline 3D**: Model is now `position: fixed` at viewport center — stays in place permanently while content scrolls over it
+- **Spline Color Fix**: Removed heavy gradient overlay that was washing out 3D model colors; replaced with thin bottom-only fade
+- **Content Layering**: All sections below hero use `bg-background/95 backdrop-blur-sm` for frosted glass effect over the fixed Spline
+- **Deferred Spline Loading**: 3D model now loads 1.5s after page paint, fades in smoothly via `onLoad` callback — page content renders instantly
+- **Hero Gradient**: Instant animated gradient background (`hero-gradient` CSS class) shows while Spline lazy-loads
+- **Removed Badge**: Removed "⚡ AI-Powered Web3 Storytelling" badge from hero section
+
+#### Changed
+- **`app/page.tsx`**: Complete hero section redesign — Spline 3D model now centered as full-width background with overlay text (Create/Mint/Share), removed halftone overlay, speech bubble, and star decorations
+- **`components/header.tsx`**: Removed circular container (`rounded-full`, `bg-white/10`, `border-2 border-white/20`) from logo — direct placement with `drop-shadow-lg` and clean sizing
+- **`components/footer.tsx`**: Added neon "GROQTALES" branding section at the bottom of the footer
+- **`app/globals.css`**: Added neon-flicker animation, `.neon-sign` utility class, consolidated `.dark-premium-bg` styles
+- **`app/layout.tsx`**: Added `dark:dark-premium-bg` class to main wrapper for sitewide dark theme upgrade, updated favicon to `logo.png`
+
+#### Removed
+- Circular logo container in header (rounded-full border styling)
+- Halftone dot overlay from home page  
+- Speech bubble ("BOOM! 💥") and decorative Star from hero section
+- Star icon import from home page
+- Old multi-size favicon references replaced with single `logo.png`
+
+#### Files Modified
+- `app/page.tsx` — Complete hero section rewrite
+- `app/globals.css` — Neon animation and premium background utilities
+- `app/layout.tsx` — Dark premium background and favicon
+- `components/header.tsx` — Clean logo placement
+- `components/footer.tsx` — Neon branding element
+- `VERSION` — 1.3.5
+- `CHANGELOG.md` — This entry
+
+---
+
+## [1.3.0] - 2026-02-21
+
+### Major Home Page Redesign — Professional Comic Style with Spline 3D
+
+#### Added
+- **Spline 3D Hero**: Integrated `@splinetool/react-spline` to load the storybook 3D model from `public/storybook.spline` in the hero section
+- **Bangers Display Font**: Added Google Fonts 'Bangers' for comic display headings via `--font-display` CSS variable
+- **Stats Bar Section**: Live platform statistics fetched from `/api/health/db` with animated counters and graceful fallback defaults
+- **How It Works Section**: Three-step visual flow (Create → Mint → Share) with comic panel styling
+- **Why GroqTales Section**: Feature showcase with Lightning-Fast AI, True Ownership, and Vibrant Community cards
+- **Explore Genres Grid**: Six genre cards (Sci-Fi, Fantasy, Mystery, Romance, Horror, Adventure) linking to genre pages
+- **Gradient CTA Section**: Full-width call-to-action with `var(--gradient-cta)` background
+- **New CSS Utilities**: `halftone-overlay`, `speed-lines`, `comic-panel`, `scribble-underline`, `ink-splatter`, `comic-display`, `animate-float`, `animate-wiggle`
+- **`spin-slow` animation**: 8-second infinite rotation in `tailwind.config.ts`
+- **Comic color palette**: `--comic-yellow`, `--comic-red`, `--comic-blue`, `--comic-purple`, `--comic-green`, `--comic-orange`, `--comic-pink`, `--comic-cyan` CSS custom properties
+
+#### Changed
+- **`globals.css`**: Complete rewrite — removed duplicate CSS variable blocks (were overriding the comic theme with generic shadcn defaults), unified color system for light (warm cream #fef9ef) and dark (deep navy #0a0e1a) themes, fixed dark mode `--shadow-color` from white (#f8fafc) to dark rgba value
+- **`app/page.tsx`**: Complete rewrite with Spline 3D hero, 6 content sections, all data fetched from real API endpoints
+- **`trending-stories.tsx`**: Replaced `getMockTrendingStories()` with real `fetch('/api/feed?limit=6')` call; maps API response to StoryCard props with graceful empty state
+- **`featured-creators.tsx`**: Replaced `getMockCreators()` with real API fetch; hides section gracefully when no creators found
+- **`app/layout.tsx`**: Removed `comic-dots-animation.js` script tag (replaced by Spline 3D)
+- **`tailwind.config.ts`**: Added `spin-slow` keyframes and animation
+
+#### Removed
+- `comic-dots-animation.js` script reference from layout (file still exists in public/)
+- All hardcoded mock data from `trending-stories.tsx` and `featured-creators.tsx`
+- Duplicate `:root` and `.dark` CSS variable blocks from `globals.css`
+
+#### Dependencies
+- Added `@splinetool/react-spline` and `@splinetool/runtime` (installed with `--legacy-peer-deps`)
+
+#### Files Modified
+- `app/globals.css` — Complete CSS theme rewrite
+- `app/page.tsx` — Complete home page rewrite
+- `app/layout.tsx` — Removed comic-dots-animation script
+- `components/trending-stories.tsx` — API-connected, no mock data
+- `components/featured-creators.tsx` — API-connected, no mock data
+- `tailwind.config.ts` — Added spin-slow animation
+- `package.json` — Version 1.3.0, new dependencies
+- `VERSION` — 1.3.0
+
+---
 
 ### Off-Chain Royalty Tracking & Creator Revenue Dashboard (Issue #334)
 
@@ -58,7 +377,7 @@ Active full support: 1.1.2 (latest), 1.1.1 (previous). Security maintenance (cri
 
 ---
 
-### ✨ Accessibility Improvements - WCAG 2.1 AA Compliance
+###  Accessibility Improvements - WCAG 2.1 AA Compliance
 
 #### Keyboard Navigation & Focus Management
 - **Skip Link**: Added keyboard-accessible skip link to jump to main content
@@ -349,10 +668,9 @@ Codebase integrity restoration and build stabilization after widespread comment 
 ### Files Affected (Representative)
 
 `components/ui/{chart.tsx,pagination.tsx,skeleton.tsx,calendar.tsx,carousel.tsx}`
-`components/story-summary-backup.tsx`
 `hooks/{use-groq.ts,use-monad.ts,use-story-analysis.ts,use-story-summary.ts}`
 `src/blockchain/onchain-agent/app/hooks/useAgent.ts`
-`lib/{api-utils.ts,constants.ts,logger-broken.ts,mock-data-backup.ts,transaction-components.ts}`
+`lib/{api-utils.ts,constants.ts,transaction-components.ts}`
 `app/stories/page.tsx`
 `src/blockchain/onchain-agent/app/api/agent/{route.new.ts,create-agent.ts,prepare-agentkit.ts}`
 

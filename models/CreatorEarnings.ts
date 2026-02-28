@@ -24,8 +24,9 @@ const CreatorEarningsSchema = new Schema<ICreatorEarnings>({
   lastUpdated: { type: Date, default: Date.now },
 });
 
-export const CreatorEarnings: Model<ICreatorEarnings> =
-  mongoose.models.CreatorEarnings ||
-  mongoose.model<ICreatorEarnings>('CreatorEarnings', CreatorEarningsSchema);
+// export const CreatorEarnings: Model<ICreatorEarnings> =
+//   mongoose.models.CreatorEarnings ||
+//   mongoose.model<ICreatorEarnings>('CreatorEarnings', CreatorEarningsSchema);
 
+export const CreatorEarnings = null as any;
 export default CreatorEarnings;

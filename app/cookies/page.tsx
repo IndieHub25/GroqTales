@@ -5,18 +5,10 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import LegalHeader from "@/components/LegalHeader";
+import LegalHeader from '@/components/LegalHeader';
 
 // Floating GitHub button component
-const FloatingGithub = () => (
-  <Link
-    href="https://github.com/Drago-03/GroqTales.git"
-    target="_blank"
-    className="fixed bottom-24 right-6 p-3 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-50"
-  >
-    <Github className="w-6 h-6 text-white" />
-  </Link>
-);
+import { FloatingGithub } from '../terms/page';
 
 // Floating doodle elements
 const FloatingDoodles = () => (
@@ -29,7 +21,7 @@ const FloatingDoodles = () => (
 
 const CookieSection = ({ icon: Icon, title, children }: any) => (
   <Card className="mb-8">
-    <CardHeader className="flex flex-row items-center space-x-4">
+    <CardHeader className="flex flex-row items-center space-x-2">
       <div className="p-2 bg-primary/10 rounded-full">
         <Icon className="w-6 h-6 text-primary" />
       </div>
@@ -48,14 +40,16 @@ export default function CookiePolicyPage() {
       <div className="container mx-auto px-4 py-12 relative z-10">
         <div className="max-w-4xl mx-auto">
           <LegalHeader />
-          <h1 className="
+          <h1
+            className="
             text-4xl md:text-5xl
             font-black
             text-center
             mb-6
             text-black
             dark:text-white
-          ">
+          "
+          >
             Cookie Policy
           </h1>
           <p className="text-muted-foreground text-center mb-12">
@@ -137,7 +131,7 @@ export default function CookiePolicyPage() {
             </p>
 
             <div className="mt-4 space-y-4">
-              <p className="font-medium">
+              <p className="text-lg font-medium pt-2">
                 How to manage cookies in your browser:
               </p>
 
@@ -161,7 +155,7 @@ export default function CookiePolicyPage() {
               </div>
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 pt-2">
               <Button variant="outline" className="w-full sm:w-auto">
                 Update Cookie Preferences
               </Button>

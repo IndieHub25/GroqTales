@@ -1,0 +1,75 @@
+# ============================================================
+# Cloudflare Pages configuration for GroqTales
+# Primary hosting: Cloudflare Pages
+# Domain: groqtales.xyz
+#
+# HOW THIS WORKS
+# ─────────────────────────────────────────────────────────────
+# Next.js static export (output: 'export') builds the application
+# into a collection of static HTML/JS/CSS files. It writes the
+# static assets into the `out` directory,
+# which is what `pages_build_output_dir` points to.
+#
+# Build command (set in Cloudflare Pages dashboard):
+#   npm run cf-build
+#
+# Build output directory (set in Cloudflare Pages dashboard):
+#   out
+# ============================================================
+
+name = "groqtales"
+pages_build_output_dir = "out"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# ── Environment variable bindings ────────────────────────────
+# Do NOT store real secrets here.
+# Add all secrets via:
+#   Cloudflare Pages → <project> → Settings → Environment variables
+#
+# Required env vars to add in the dashboard
+# (copy from your .env.local / Vercel project settings):
+#
+#   NEXT_PUBLIC_URL                       = https://groqtales.xyz
+#   NEXT_PUBLIC_VERSION                   = 1.4.0
+#   NEXT_PUBLIC_IMAGE_URL                 = https://groqtales.xyz/images
+#   NEXT_PUBLIC_SPLASH_IMAGE_URL          = https://groqtales.xyz/splash.jpg
+#   NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR   = #1a1a2e
+#   NEXT_PUBLIC_GROQ_API_KEY              = <secret>
+#   NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID = <secret>
+#   NEXT_PUBLIC_API_URL                   = https://groqtales-api.onrender.com
+#   SUPABASE_URL                          = <secret>
+#   SUPABASE_ANON_KEY                     = <secret>
+#   SUPABASE_SERVICE_ROLE_KEY             = <secret>
+#   NEXT_PUBLIC_SUPABASE_URL              = <secret>
+#   NEXT_PUBLIC_SUPABASE_ANON_KEY         = <secret>
+#   MONGODB_URI                           = <secret>
+#   MONGODB_DB_NAME                       = groqtales
+#   JWT_SECRET                            = <secret>
+#   NEXTAUTH_SECRET                       = <secret>
+#   MONAD_TEST_RPC_URL                    = <secret>
+#   MINTER_PRIVATE_KEY                    = <secret>   ← NEVER expose; set as secret
+
+# ── Local dev (wrangler pages dev) ───────────────────────────
+[vars]
+NODE_ENV = "development"
+NEXT_PUBLIC_BUILD_MODE = "false"
+
+# ── Preview environment ──────────────────────────────────────
+[env.preview]
+name = "groqtales-preview"
+
+[env.preview.vars]
+NODE_ENV = "production"
+NEXT_PUBLIC_BUILD_MODE = "true"
+NEXT_PUBLIC_URL = "https://groqtales-preview.pages.dev"
+
+# ── Production environment ───────────────────────────────────
+[env.production]
+name = "groqtales"
+
+[env.production.vars]
+NODE_ENV = "production"
+NEXT_PUBLIC_BUILD_MODE = "false"
+NEXT_PUBLIC_URL = "https://groqtales.xyz"
+NEXT_PUBLIC_VERSION = "1.4.0"

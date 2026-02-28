@@ -10,6 +10,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
 
+
 import ClientLayout from '@/components/client-layout';
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
@@ -19,6 +20,7 @@ import { QueryProvider } from '@/components/query-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import BackToTop from '@/components/back-to-top';
+import { GlobalLoadingWrapper } from '@/components/global-loading-wrapper';
 
 // Optimize font loading
 const inter = Inter({
@@ -46,7 +48,7 @@ const requiredEnvVars = [
 ];
 
 // Validate required environment variables at build time (only in production)
-// Skip validation during build process (CI/Vercel build)
+// Skip validation during build process (CI/Cloudflare build)
 if (
   process.env.NODE_ENV === 'production' &&
   !process.env.CI &&
@@ -59,18 +61,19 @@ if (
   }
 } else {
   // In development or build mode, set default values for missing environment variables
+  // CF_PAGES_URL is automatically set by Cloudflare Pages during builds
+  const cfPagesUrl = process.env.CF_PAGES_URL;
   const defaultEnvVars: Record<string, string> = {
-    NEXT_PUBLIC_URL: process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000',
+    NEXT_PUBLIC_URL: cfPagesUrl ? `https://${cfPagesUrl}` : 'http://localhost:3000',
     // 'NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME': 'GroqTales', // Commented out OnChain references
-    NEXT_PUBLIC_VERSION: '1.0.0',
-    NEXT_PUBLIC_IMAGE_URL: process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}/images`
-      : 'https://groqtales.com/images',
-    NEXT_PUBLIC_SPLASH_IMAGE_URL: process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}/splash.jpg`
-      : 'https://groqtales.com/splash.jpg',
+    // NEXT_PUBLIC_VERSION is injected by next.config.js from the VERSION file at build time.
+    // It does not need a default here — if it is missing the build itself is misconfigured.
+    NEXT_PUBLIC_IMAGE_URL: cfPagesUrl
+      ? `https://${cfPagesUrl}/images`
+      : 'https://groqtales.xyz/images',
+    NEXT_PUBLIC_SPLASH_IMAGE_URL: cfPagesUrl
+      ? `https://${cfPagesUrl}/splash.jpg`
+      : 'https://groqtales.xyz/splash.jpg',
     NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR: '#1a1a2e',
   };
 
@@ -95,28 +98,24 @@ function getQuickBootScript(): string {
 // Quick boot script to prevent flashing and improve initial load
 const quickBootScript = getQuickBootScript();
 
+/**
+ * App version is injected by next.config.js at build time from the root VERSION file.
+ * This guarantees the version displayed in the UI always matches the VERSION file,
+ * regardless of where the app is deployed (Cloudflare Pages, Docker, local, etc.).
+ *
+ * Fallback chain (should never be needed in a properly built bundle):
+ *   process.env.NEXT_PUBLIC_VERSION  →  '?.?.?'  (obvious misconfiguration sentinel)
+ */
+const appVersion = process.env.NEXT_PUBLIC_VERSION ?? '?.?.?';
+
 export const metadata: Metadata = {
   title: 'GroqTales - AI-Generated Story NFTs',
   description:
     'Create, mint, and share AI-generated stories as NFTs on the Monad blockchain.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'https://groqtales.com'),
   icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      {
-        url: '/android-chrome-192x192.png',
-        sizes: '192x192',
-        type: 'image/png',
-      },
-      {
-        url: '/android-chrome-512x512.png',
-        sizes: '512x512',
-        type: 'image/png',
-      },
-    ],
-    apple: '/apple-touch-icon.png',
+    icon: '/logo.png',
+    apple: '/logo.png',
   },
   openGraph: {
     title: 'GroqTales',
@@ -136,23 +135,16 @@ export const viewport = {
   ],
 };
 
-// Disable static optimization for the entire app layout to prevent build-time
-// evaluation of client components that access browser-only globals.
-export const dynamic = 'force-dynamic';
+// Static optimization allows Next.js to pre-render the entire app as static HTML
+// which is required for Cloudflare Pages static export.
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Force dynamic rendering to avoid static export attempting to execute
-  // client-only logic (e.g., window / localStorage usage) during build.
-  // This mitigates build errors like "window is not defined" across pages
-  // that are intentionally client components.
-  // (Next.js will ignore static optimization for this layout subtree.)
-  // Ref: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _forceDynamic: 'force-dynamic' = 'force-dynamic';
+  // Static generation relies on React component pureness.
+  // We removed the _forceDynamic override to allow standard Next.js SSG.
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -160,8 +152,8 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: quickBootScript }} />
 
         {/* Preload critical resources */}
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -179,11 +171,6 @@ export default function RootLayout({
           id="theme-fix"
           src="/theme-fix.js"
           strategy="beforeInteractive"
-        />
-        <Script
-          id="comic-dots"
-          src="/comic-dots-animation.js"
-          strategy="afterInteractive"
         />
         <Script
           id="performance-fix"
@@ -223,23 +210,28 @@ export default function RootLayout({
           <QueryProvider>
             <ThemeProvider
               attribute="class"
-              defaultTheme="system"
-              enableSystem={true}
+              defaultTheme="dark"
+              forcedTheme="dark"
+              enableSystem={false}
               disableTransitionOnChange={false}
               storageKey="groqtales-theme"
             >
               <AnimatedLayout>
                 <ClientLayout>
-                  <div className="min-h-screen bg-background flex flex-col">
+                  <div className="min-h-screen bg-background dark:dark-premium-bg flex flex-col">
                     <Header />
                     <main
                       id="main-content"
                       tabIndex={-1}
                       className="container mx-auto px-4 py-6 flex-grow focus:outline-2 focus:outline-primary"
                     >
-                      {children}
+                      <React.Suspense fallback={null}>
+                        <GlobalLoadingWrapper>
+                          {children}
+                        </GlobalLoadingWrapper>
+                      </React.Suspense>
                     </main>
-                    <Footer />
+                    <Footer version={appVersion} />
                   </div>
                 </ClientLayout>
               </AnimatedLayout>

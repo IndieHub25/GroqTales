@@ -84,7 +84,8 @@ const INJECTION_PATTERNS: { name: string; pattern: RegExp }[] = [
   },
   {
     name: 'developer_mode',
-    pattern: /(enable|enter|activate|switch\s+to)\s+(developer|god|admin|root|sudo)\s+mode/i,
+    pattern:
+      /(enable|enter|activate|switch\s+to)\s+(developer|god|admin|root|sudo)\s+mode/i,
   },
 
   // Delimiter / structural injection
@@ -138,7 +139,8 @@ const SYSTEM_PROMPT_FRAGMENTS: string[] = [
 const DANGEROUS_OUTPUT_PATTERNS: { name: string; pattern: RegExp }[] = [
   {
     name: 'leaked_api_key',
-    pattern: /(?:api[_-]?key|token|secret|password)\s*[=:]\s*["']?[A-Za-z0-9_\-]{20,}/i,
+    pattern:
+      /(?:api[_-]?key|token|secret|password)\s*[=:]\s*["']?[A-Za-z0-9_-]{20,}/i,
   },
   {
     name: 'leaked_env_var',
@@ -175,7 +177,8 @@ export function sanitizeInput(raw: string): SanitizeResult {
   }
 
   // Strip token boundary markers
-  const tokenBoundaryRegex = /<\|(?:im_start|im_end|endoftext|system|user|assistant)\|>/gi;
+  const tokenBoundaryRegex =
+    /<\|(?:im_start|im_end|endoftext|system|user|assistant)\|>/gi;
   if (tokenBoundaryRegex.test(text)) {
     removedPatterns.push('token_boundaries');
     text = text.replace(tokenBoundaryRegex, '');
@@ -189,7 +192,8 @@ export function sanitizeInput(raw: string): SanitizeResult {
   }
 
   // Strip XML-like system tags
-  const xmlTagRegex = /<\/?(system|instruction|prompt|user|assistant|s|human|ai)\s*>/gi;
+  const xmlTagRegex =
+    /<\/?(system|instruction|prompt|user|assistant|s|human|ai)\s*>/gi;
   if (xmlTagRegex.test(text)) {
     removedPatterns.push('xml_system_tags');
     text = text.replace(xmlTagRegex, '');
@@ -251,15 +255,15 @@ export function validateInput(
             inputSnippet: input.substring(0, 50),
           },
         });
-        // Continue checking other patterns or return valid? 
+        // Continue checking other patterns or return valid?
         // Usually dryRun means "would have blocked", so we just log and continue or return valid at the end.
         // Let's just log this specific hit and return invalid ONLY if dryRun is false.
-        
-        // Actually, if we want to catch ALL patterns, we should continue. 
-        // But for simplicity/performance in this specific function, returning the first hit (as valid) is fine 
+
+        // Actually, if we want to catch ALL patterns, we should continue.
+        // But for simplicity/performance in this specific function, returning the first hit (as valid) is fine
         // if we just want to know "it would have failed".
         // However, to be safe, let's just Log and NOT return false.
-        continue; 
+        continue;
       }
 
       return {
@@ -375,7 +379,9 @@ const _securityLog: SecurityEvent[] = [];
  * Log a security event.  In production this should be wired to your
  * observability stack; for now we keep an in-memory ring buffer.
  */
-export function logSecurityEvent(event: Omit<SecurityEvent, 'timestamp'>): void {
+export function logSecurityEvent(
+  event: Omit<SecurityEvent, 'timestamp'>
+): void {
   const entry: SecurityEvent = {
     ...event,
     timestamp: new Date().toISOString(),

@@ -33,7 +33,6 @@ import {
 } from '@/components/ui/sheet';
 import { useToast } from '@/components/ui/use-toast';
 import { UserNav } from '@/components/user-nav';
-import WalletConnect from '@/components/wallet-connect';
 import { cn } from '@/lib/utils';
 
 import { CreateStoryDialog } from './create-story-dialog';
@@ -107,18 +106,12 @@ export function Header() {
 
   const navItems: NavItem[] = [
     { type: 'link', href: '/genres', label: 'Genres' },
+    { type: 'link', href: '/community', label: 'Community Hub' },
     {
-      type: 'dropdown',
-      label: 'Community',
-      icon: <Users className="h-4 w-4 mr-1.5 colorful-icon" />,
-      items: [
-        { href: '/community', label: 'Community Hub' },
-        {
-          href: '/community/creators',
-          label: 'Top Creators',
-          icon: <Trophy className="h-4 w-4 mr-1.5 colorful-icon" />,
-        },
-      ],
+      type: 'link',
+      href: '/community/creators',
+      label: 'Top Creators',
+      icon: <Trophy className="h-4 w-4 mr-1.5 text-emerald-400" />,
     },
     { type: 'link', href: '/nft-gallery', label: 'NFT Gallery' },
     { type: 'link', href: '/nft-marketplace', label: 'NFT Marketplace' },
@@ -140,8 +133,8 @@ export function Header() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        'border-b-4 border-black dark:border-slate-800 sticky top-0 z-50 transition-all duration-300 bg-[#36454F] dark:bg-slate-950/80 dark:backdrop-blur-md',
-        scrolled && 'shadow-[0px_4px_0px_0px_rgba(255,255,255,0.2)]'
+        'border-b border-white/5 sticky top-0 z-50 transition-all duration-300 bg-black/40 backdrop-blur-xl',
+        scrolled && 'shadow-[0_4px_30px_rgba(0,0,0,0.5)] bg-black/60'
       )}
     >
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -152,23 +145,24 @@ export function Header() {
             className="flex items-center space-x-2 mr-2 sm:mr-6 group relative"
           >
             <motion.div
-              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileHover={{ scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-              className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center doodle-wiggle overflow-hidden border-2 border-white/20"
+              className="w-10 h-10 sm:w-11 sm:h-11 relative flex-shrink-0"
             >
-              <div className="relative w-full h-full">
-                <Image
-                  src="/logo.png"
-                  alt="GroqTales Logo"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
+              <Image
+                src="/logo.png"
+                alt="GroqTales Logo"
+                fill
+                className="object-contain drop-shadow-lg"
+                priority
+              />
             </motion.div>
+            <span className="hidden sm:block font-bold text-xl sm:text-2xl text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 tracking-tight">
+              GROQTALES
+            </span>
           </Link>
 
-          <nav role="navigation" aria-label="Primary navigation" className="hidden xl:flex items-center space-x-2">
+          <nav role="navigation" aria-label="Primary navigation" className="hidden lg:flex items-center space-x-2">
             {navItems.map((item, index) => (
               <motion.div
                 key={
@@ -180,13 +174,13 @@ export function Header() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 + 0.1, duration: 0.2 }}
                 whileHover={{ scale: 1.03 }}
-                className="inline-flex items-center comic-text"
+                className="inline-flex items-center font-medium"
               >
                 {item.type === 'dropdown' ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger
                       aria-haspopup="true"
-                      className={`px-4 py-2 text-sm rounded-md transition-all duration-200 flex items-center text-white hover:text-white/80 hover:bg-white/10 backdrop-blur-sm comic-pop comic-text`}
+                      className={`px-4 py-2 text-sm rounded-full transition-all duration-200 flex items-center text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm`}
                     >
                       {item.icon}
                       {item.label}
@@ -200,14 +194,12 @@ export function Header() {
                       className="
                         z-50
                         w-[160px] sm:w-[180px]
-                        bg-white
-                        dark:bg-slate-950
-                        border-2 border-black
-                        shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-                        dark:shadow-white/40
-                        rounded-md
+                        bg-black/90
+                        backdrop-blur-xl
+                        border border-white/10
+                        shadow-2xl
+                        rounded-xl
                         p-2
-                        comic-text font-bold
                       "
                     >
                       {item.items?.map((subItem) => (
@@ -215,7 +207,7 @@ export function Header() {
                           <Link
                             href={subItem.href}
                             aria-current={pathname === subItem.href ? 'page' : undefined}
-                            className="flex items-center w-full text-foreground/90 hover:text-foreground hover:bg-white/5 comic-text"
+                            className="flex items-center w-full text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
                           >
                             {subItem.icon && subItem.icon}
                             {subItem.label}
@@ -228,7 +220,7 @@ export function Header() {
                   <Link
                     href={item.href}
                     aria-current={pathname === item.href ? 'page' : undefined}
-                    className={`px-4 py-2 text-sm rounded-md transition-all duration-200 flex items-center text-white hover:text-white/80 hover:bg-white/10 backdrop-blur-sm comic-pop comic-text`}
+                    className={`px-4 py-2 text-sm rounded-full transition-all duration-200 flex items-center text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm`}
                   >
                     {item.icon}
                     {item.label}
@@ -240,24 +232,21 @@ export function Header() {
         </div>
 
         <div className="flex items-center space-x-2">
-          <div className="hidden xl:block dark:hover:bg-gray-700">
-            <WalletConnect />
-          </div>
           <Button
             variant="outline"
             size="sm"
-            className="hidden xl:flex items-center gap-2 px-3 sm:px-5 py-1.5 sm:py-2 rounded-none bg-white text-black border-2 sm:border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-primary hover:text-white hover:border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all duration-200 comic-pop comic-text-bold dark:hover:border-white/50"
+            className="hidden lg:flex items-center gap-2 px-5 py-2 rounded-full border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-semibold shadow-[0_0_15px_rgba(16,185,129,0.2)] hover:bg-emerald-500 hover:text-black hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all duration-300"
             onClick={handleCreateClick}
             aria-label="Create a new story"
           >
             <PenSquare className="h-4 w-4 mr-2" />
             Create
           </Button>
-          <ModeToggle />
+          {/* <ModeToggle /> Temporarily disabled */}
           <UserNav />
 
           {/* Mobile Menu */}
-          <div className="xl:hidden">
+          <div className="lg:hidden">
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
                 <Button
@@ -271,10 +260,10 @@ export function Header() {
               </SheetTrigger>
               <SheetContent
                 side="right"
-                className="bg-[#36454F] border-l-4 border-black text-white p-0"
+                className="bg-zinc-950/90 backdrop-blur-xl border-l border-white/10 text-white p-0"
               >
-                <SheetHeader className="p-6 border-b-4 border-black">
-                  <SheetTitle className="text-white comic-pop text-xl flex items-center gap-2 text-shadow-comic">
+                <SheetHeader className="p-6 border-b border-white/10">
+                  <SheetTitle className="text-white font-bold text-xl flex items-center gap-2">
                     <div className="w-8 h-8 relative">
                       <Image
                         src="/logo.png"
@@ -287,9 +276,6 @@ export function Header() {
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col p-4 space-y-2">
-                  <div className="mb-4 md:hidden">
-                    <WalletConnect />
-                  </div>
                   {navItems.map((item, index) => (
                     <div
                       key={
@@ -309,7 +295,7 @@ export function Header() {
                               key={subItem.href}
                               href={subItem.href}
                               onClick={() => setSheetOpen(false)}
-                              className="px-6 py-3 text-lg hover:bg-white/10 rounded-md transition-colors comic-text flex items-center"
+                              className="px-6 py-3 text-lg hover:bg-white/10 rounded-md transition-colors flex items-center text-white/80 hover:text-white"
                             >
                               {subItem.icon}
                               {subItem.label}
@@ -322,8 +308,8 @@ export function Header() {
                             href={item.href}
                             onClick={() => setSheetOpen(false)}
                             className={cn(
-                              'px-4 py-3 text-lg hover:bg-white/10 rounded-md transition-colors comic-text flex items-center',
-                              'bg-primary/20 text-primary'
+                              'px-4 py-3 text-lg hover:bg-white/10 rounded-md transition-colors flex items-center text-white/80 hover:text-white',
+                              'bg-emerald-500/10 text-emerald-400'
                             )}
                           >
                             {item.icon}
@@ -336,7 +322,7 @@ export function Header() {
                   <div className="pt-4 mt-4 border-t-2 border-white/10">
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-lg bg-primary/20 hover:bg-primary/30 text-primary border-white/10 comic-pop"
+                      className="w-full justify-start text-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full font-semibold"
                       onClick={() => {
                         setSheetOpen(false);
                         handleCreateClick();

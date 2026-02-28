@@ -314,7 +314,7 @@ export default function CreatorsPage() {
     >
       <Card className="overflow-hidden transition-all duration-300 hover:shadow-md relative">
         {creator.featured && (
-          <div className="absolute top-3 right-3 z-10">
+          <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 scale-90 sm:scale-100 origin-top-right">
             <Badge className="bg-purple-500/20 text-purple-600 border-purple-500">
               <Star className="h-3 w-3 mr-1 fill-purple-500" />
               Featured
@@ -322,15 +322,21 @@ export default function CreatorsPage() {
           </div>
         )}
 
-        <CardContent className="p-6">
-          <div className="flex items-start space-x-4">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col min-[450px]:flex-row items-center min-[450px]:items-start space-y-4 min-[450px]:space-y-0 min-[450px]:space-x-4 text-center min-[450px]:text-left">
             <div className="relative">
               <Avatar className="w-20 h-20">
-                <AvatarImage src={creator.avatar} alt={`${creator.name}'s profile picture`} />
+                <AvatarImage
+                  src={creator.avatar}
+                  alt={`${creator.name}'s profile picture`}
+                />
                 <AvatarFallback>{creator.name.charAt(0)}</AvatarFallback>
               </Avatar>
               {creator.verified && (
-                <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-0.5" aria-label="Verified creator">
+                <div
+                  className="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-0.5"
+                  aria-label="Verified creator"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -348,10 +354,10 @@ export default function CreatorsPage() {
               )}
             </div>
 
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
+            <div className="flex-1 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="font-semibold text-lg">{creator.name}</h3>
+                  <h3 className="font-semibold text-lg leading-tight">{creator.name}</h3>
                   <p className="text-sm text-muted-foreground">
                     {creator.username}
                   </p>
@@ -359,7 +365,7 @@ export default function CreatorsPage() {
                 <div>{renderBadge(creator.badge)}</div>
               </div>
 
-              <p className="text-sm mt-2 line-clamp-2">{creator.bio}</p>
+              <p className="text-sm mt-2 mb-3 line-clamp-2">{creator.bio}</p>
 
               <div className="flex flex-wrap gap-1 mt-3">
                 {creator.tags.map((tag: string) => (
@@ -369,7 +375,7 @@ export default function CreatorsPage() {
                 ))}
               </div>
 
-              <div className="grid grid-cols-4 gap-2 mt-4">
+              <div className="grid grid-cols-2 min-[400px]:grid-cols-4 gap-2 mt-4">
                 <div className="flex flex-col items-center border rounded-md p-2">
                   <span className="text-xs text-muted-foreground">
                     Followers
@@ -402,10 +408,10 @@ export default function CreatorsPage() {
 
               {creator.achievements.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-xs text-muted-foreground mb-1">
+                  <p className="text-sm text-muted-foreground mb-3">
                     Achievements:
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mb-5">
                     {creator.achievements
                       .slice(0, 2)
                       .map((achievement: string, idx: number) => (
@@ -429,9 +435,9 @@ export default function CreatorsPage() {
             </div>
           </div>
 
-          <div className="flex justify-between mt-6">
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/community/creators/${creator.id}`}>
+          <div className="flex flex-col min-[400px]:flex-row gap-2 min-[400px]:justify-between mt-6">
+            <Button variant="outline" size="sm" asChild className="w-full min-[400px]:w-auto">
+              <Link href={`/profile/${creator.username.replace('@', '')}`}>
                 View Profile
                 <ChevronRight className="ml-1 h-4 w-4" />
               </Link>
@@ -439,7 +445,7 @@ export default function CreatorsPage() {
             <Button
               variant="default"
               size="sm"
-              className="theme-gradient-bg text-white border-0"
+              className="theme-gradient-bg text-white border-0 w-full min-[400px]:w-auto"
             >
               Follow
             </Button>
@@ -549,12 +555,14 @@ export default function CreatorsPage() {
         )}
 
       <div className="mt-12 p-6 border rounded-lg bg-muted/10">
-        <h2 className="text-xl font-bold mb-3">Become a Featured Creator</h2>
-        <p className="mb-4 text-muted-foreground">
-          Want to be featured among our top creators? Start publishing quality
-          stories, engage with the community, and mint your content as NFTs to
-          increase your visibility and followers.
-        </p>
+        <div className="flex items-center justify-center flex-col mb-5">
+          <h2 className="text-xl font-bold mb-3">Become a Featured Creator</h2>
+          <p className="mb-4 text-muted-foreground text-center px-20">
+            Want to be featured among our top creators? Start publishing quality
+            stories, engage with the community, and mint your content as NFTs to
+            increase your visibility and followers.
+          </p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="p-4 rounded-lg bg-muted/20 flex flex-col items-center text-center">
             <BookOpen className="h-8 w-8 text-primary mb-2" />
@@ -578,7 +586,7 @@ export default function CreatorsPage() {
             </p>
           </div>
         </div>
-        <div className="flex justify-center">
+        <div className="flex justify-center mt-5">
           <Button className="theme-gradient-bg text-white">
             <BookOpen className="h-4 w-4 mr-2" />
             Start Creating
