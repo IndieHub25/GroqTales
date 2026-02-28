@@ -532,4 +532,12 @@ tuned!_
 
 ---
 
-<p align="center"><i>Support the project and share it with others.</i></p>
+<h2 align="center">Active At</h2>
+
+<p align="center">
+  <img src="public/OSCG26%20Label.jpg%20(1).jpeg" alt="OSCG'26 — Open Source Community Gathering 2026" width="600" />
+</p>
+
+---
+
+<p align="center"><i>Support the project by giving us a follow & a Star ⭐️ and share it with others.</i></p>

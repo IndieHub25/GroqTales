@@ -80,4 +80,4 @@ databases:
     databaseName: groqtales_cache
     user: groqtales_user
     region: oregon
-    plan: starter
+    plan: free

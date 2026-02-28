@@ -1,0 +1,26 @@
+/*
+ * Cloudflare Pages — custom HTTP headers for GroqTales
+ * https://developers.cloudflare.com/pages/configuration/headers/
+ *
+ * These headers mirror the security headers already set in next.config.js
+ * but ensure they are applied at the edge layer by Cloudflare Pages regardless
+ * of whether a given route is served from a static asset or an edge function.
+ */
+
+# ── All routes ───────────────────────────────────────────────
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# ── Static assets — aggressive caching ──────────────────────
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/images/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=3600
+
+# ── Service worker — never cache ─────────────────────────────
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
