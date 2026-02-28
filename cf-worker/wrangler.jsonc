@@ -18,5 +18,8 @@
             "database_name": "groqtales-db",
             "database_id": "fa669053-f525-4996-8cc5-a66ae5c44a19"
         }
-    ]
+    ],
+    "ai": {
+        "binding": "AI"
+    }
 }

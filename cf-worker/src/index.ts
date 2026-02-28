@@ -6,10 +6,12 @@ import stories from './routes/stories';
 import marketplace from './routes/marketplace';
 import rag from './routes/rag';
 import admin from './routes/admin';
+import helpbot from './routes/helpbot';
 
 type Bindings = {
     DB: D1Database;
     KV: KVNamespace;
+    AI: Ai;
     ADMIN_SECRET: string;
 };
 
@@ -25,6 +27,7 @@ app.route('/api/stories', stories);
 app.route('/api/marketplace', marketplace);
 app.route('/api/rag', rag);
 app.route('/api/admin', admin);
+app.route('/api/helpbot', helpbot);
 
 app.get('/', (c) => {
     return c.json({

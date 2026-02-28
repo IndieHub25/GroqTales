@@ -61,9 +61,7 @@ mgc.md
 *.wav
 *.flac
 
-# Generated files
-/public/sitemap*.xml
-/public/robots.txt
+# Generated files (PWA service workers only)
 /public/sw.js
 /public/workbox-*.js
 /public/worker-*.js

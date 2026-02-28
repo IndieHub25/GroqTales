@@ -805,7 +805,7 @@ export default function CreateStoryPage() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // In production, you would make an API call:
-      // await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/stories`, {
+      // await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/stories`, {
       //   method: 'POST',
       //   body: JSON.stringify({ ...metadata, ...nftData }),
       // });

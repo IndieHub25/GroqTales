@@ -36,7 +36,7 @@ export function TrendingStories() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/feed?limit=6&page=1`, { signal });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/feed?limit=6&page=1`, { signal });
       if (res.ok) {
         const json = await res.json();
         const feedData = json.data || json.stories || json;

@@ -1,0 +1,32 @@
+# GroqTales Robots.txt
+# https://groqtales.xyz
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /auth/
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /_next/
+
+# Sitemap
+Sitemap: https://groqtales.xyz/sitemap.xml
+
+# Crawl-delay for polite bots (advisory)
+Crawl-delay: 1
+
+# Block AI scrapers that don't follow ToS
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /

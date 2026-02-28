@@ -33,7 +33,9 @@ export function ProfileForm() {
 
   useEffect(() => {
     if (!supabase) return;
-    supabase.auth.getUser().then(({ data }) => setSessionUser(data?.user));
+    supabase.auth.getSession().then(({ data }) => {
+      setSessionUser(data?.session?.user ?? null);
+    });
   }, []);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +58,11 @@ export function ProfileForm() {
   useEffect(() => {
     async function loadProfile() {
       try {
-        const res = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/settings/profile`);
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData?.session?.access_token;
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/profile`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         if (!res.ok) throw new Error();
 
           const data = await res.json();
@@ -83,9 +89,14 @@ export function ProfileForm() {
   const onSubmit = async (data: ProfileData) => {
     setIsLoading(true);
     try {
-      const res = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/settings/profile`, {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/profile`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(data),
       });
 

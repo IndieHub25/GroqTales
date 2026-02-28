@@ -31,8 +31,8 @@ To maintain quality control and avoid spam natively, the platform employs an aut
 ### Operational Flow
 1. **Default State**: Every story that successfully passes through the ML pipeline and hits the D1 database is hardcoded with a `review_status` of `'under_review'`.
 2. **Cloaking**: Both the Global Feed (`GET /api/stories/feed`) and the NFT Marketplace (`GET /api/marketplace/listings`) strictly filter out any row where the `review_status` is not explicitly `'verified'`. The story exists, but it is entirely invisible to the public.
-3. **Admin Queue**: Authorized administrators (verified via the `role` column in the `profiles` table and an `x-admin-id` header) can call `GET /api/admin/pending`. This pulls a dashboard list of all pending stories, complete with their AI-generated ML Quality Score to help prioritize reviews.
-4. **Verification**: When an admin calls `PUT /api/admin/approve/:id`, the story's status flips to `'verified'`, immediately injecting it into the live feeds and rendering it available for purchase or interaction.
+3. **Admin Queue**: Authorized administrators (verified via the `role` column in the `profiles` table and a Bearer token in the `Authorization` header, e.g., `Authorization: Bearer <token>`) can call `GET /api/admin/pending`. This pulls a dashboard list of all pending stories, complete with their AI-generated ML Quality Score to help prioritize reviews.
+4. **Verification**: When an admin calls `PUT /api/admin/approve/:id` (with the `Authorization: Bearer <token>` header), the story's status flips to `'verified'`, immediately injecting it into the live feeds and rendering it available for purchase or interaction.
 
 ---
 

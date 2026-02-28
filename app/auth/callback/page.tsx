@@ -52,7 +52,7 @@ function CallbackContent() {
             Authentication Failed
           </h2>
           <p className="text-foreground font-bold">{error}</p>
-          <p className="text-muted-foreground mt-4 text-sm mt-8">Redirecting back to login...</p>
+          <p className="text-muted-foreground text-sm mt-8">Redirecting back to login...</p>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-6">

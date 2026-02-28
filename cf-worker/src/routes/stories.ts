@@ -61,10 +61,12 @@ stories.post('/', async (c) => {
 
     try {
         const body = await c.req.json();
-        const { id, title, content, genre, tags, cover_image_url } = body;
+        const { title, content, genre, tags, cover_image_url } = body;
+
+        // Generate story ID server-side — never trust client-provided IDs
+        const storyId = crypto.randomUUID();
 
         // Explicit payload validation before touching AI or DB
-        if (!id || typeof id !== 'string') return c.json({ error: 'Invalid or missing id' }, 400);
         if (!title || typeof title !== 'string') return c.json({ error: 'Invalid or missing title' }, 400);
         if (!content || typeof content !== 'string') return c.json({ error: 'Invalid or missing content' }, 400);
         if (tags !== undefined && !Array.isArray(tags)) return c.json({ error: 'Tags must be an array' }, 400);
@@ -140,7 +142,7 @@ stories.post('/', async (c) => {
             'INSERT INTO stories (id, author_id, title, content, genre, tags, cover_image_url, review_status, seo_keywords, seo_description, ml_quality_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         )
             .bind(
-                id, author_id, title, content, genre || null,
+                storyId, author_id, title, content, genre || null,
                 tags ? JSON.stringify(tags) : null,
                 cover_image_url || null,
                 'under_review',
@@ -153,7 +155,7 @@ stories.post('/', async (c) => {
         // Invalidate feed cache
         await c.env.KV.delete('global-feed');
 
-        return c.json({ success: true, message: 'Story created' }, 201);
+        return c.json({ success: true, message: 'Story created', id: storyId }, 201);
     } catch (error) {
         return c.json({ error: 'Failed to create story or invalid JSON payload' }, 500);
     }

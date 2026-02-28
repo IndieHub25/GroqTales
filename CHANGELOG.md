@@ -7,9 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 1.3.9 (latest), 1.3.8 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+Active full support: 1.3.9 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
 
-## [1.3.9] - 2026-02-28
+## [1.3.9] - 2026-03-01
+
+### New Feature — MADHAVA Help Bot (Cloudflare Workers AI)
+
+- **AI Help Bot**: Introduced **MADHAVA**, a floating AI-powered help bot available on every page of the GroqTales platform.
+  - Uses the `@cf/fblgit/una-cybertron-7b-v2-bf16` model via **Cloudflare Workers AI**.
+  - Contains a comprehensive knowledge base covering every aspect of GroqTales: features, story creation, NFT minting, wallet setup, troubleshooting, project structure, deployment, contributing, security, and more.
+  - Supports multi-turn conversations (last 10 turns retained for context).
+  - Input validation and rate limiting (max 2000 characters per message).
+- **Backend**: Added `ai` binding to `cf-worker/wrangler.jsonc`. Created `cf-worker/src/routes/helpbot.ts` with Hono route at `/api/helpbot/chat`. Updated `cf-worker/src/index.ts` with `AI` binding and helpbot route.
+- **Frontend**: Created `components/madhava-helpbot.tsx` — premium glassmorphic floating chat widget with pulsing FAB, slide-in panel, typing indicator, auto-scroll, and responsive design. Added ~390 lines of styles to `app/globals.css`. Mounted globally in `app/layout.tsx`.
+
+### Code Quality Sweep
+
+- Fixed escaped template literals (`\${}` → `${}`) in **10 components** (20 fetch calls) so `NEXT_PUBLIC_API_URL` interpolates correctly at runtime: `footer.tsx`, `trending-stories.tsx`, `story-generator.tsx`, `user-nav.tsx`, `web3-provider.tsx`, `notifications-settings.tsx`, `privacy-settings.tsx`, `profile-form.tsx`, `story-comments-dialog.tsx`, `create/page.tsx`.
+- **`app/auth/callback/page.tsx`**: Removed duplicate `mt-4` Tailwind class (only `mt-8` remains).
+- **`components/user-nav.tsx`**: Fixed hash function no-op `hash = hash & hash` → `hash |= 0` for proper 32-bit integer coercion.
+- **`cf-worker/src/routes/stories.ts`**: Story IDs are now generated server-side via `crypto.randomUUID()` instead of trusting client-provided `body.id`.
+- **`components/settings/profile-form.tsx`**: Updated from `/api/settings/profile` to `/api/v1/settings/profile`. Added Bearer token auth from Supabase session.
+- **`docs/PIPELINES.md`**: Updated admin auth references from `x-admin-id` header to `Authorization: Bearer <token>`.
+
+### SEO
+
+- **`public/sitemap.xml`** [NEW]: Comprehensive XML sitemap covering 19 URLs with appropriate change frequencies and priorities.
+- **`public/robots.txt`** [NEW]: Proper robots.txt allowing public page crawling, disallowing API/auth/private routes, referencing the sitemap, and blocking AI scrapers.
+- **`.gitignore`**: Removed `sitemap*.xml`, `robots.txt`, and `temp.md` from ignore list so these files are tracked in version control.
 
 ### Bug Fixes & Infrastructure
 

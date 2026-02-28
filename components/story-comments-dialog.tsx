@@ -72,7 +72,7 @@ export default function StoryCommentsDialog({
   const fetchComments = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments?storyId=${storyId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments?storyId=${storyId}`);
       if (!response.ok) throw new Error('Failed to fetch comments');
 
       const data = await response.json();
@@ -108,7 +108,7 @@ export default function StoryCommentsDialog({
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -145,7 +145,7 @@ export default function StoryCommentsDialog({
     }
 
     try {
-      const response = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments/like`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments/like`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -176,7 +176,7 @@ export default function StoryCommentsDialog({
     if (!isAdmin) return;
 
     try {
-      const response = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments/moderate`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments/moderate`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

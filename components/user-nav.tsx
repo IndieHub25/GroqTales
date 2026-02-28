@@ -12,7 +12,7 @@ const generateSeed = (input?: string) => {
   for (let i = 0; i < input.length; i++) {
     const char = input.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
+    hash |= 0;
   }
   return Math.abs(hash).toString(16);
 };
@@ -67,7 +67,7 @@ export function UserNav() {
     const fetchUserData = async () => {
       if (account) {
         try {
-          const res = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/users/profile/${account}`);
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/users/profile/${account}`);
           if (res.ok) {
             const data = await res.json();
             setDbUser(data.user);

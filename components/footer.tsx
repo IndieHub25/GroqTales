@@ -29,7 +29,7 @@ export function Footer({ version }: { version?: string }) {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const res = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/health/db`, { cache: 'no-store' });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/health/db`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           setHealthStatus(data.status === 'ok' ? 'ok' : data.status === 'degraded' ? 'degraded' : 'down');
