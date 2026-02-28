@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Heart, MessageCircle, Share2, ChevronUp, ChevronDown, 
+  Heart, MessageCircle, Share2, ChevronUp, ChevronDown,
   BookOpen, Users, TrendingUp, Filter, Search, Award, Star, Zap, Hexagon
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
@@ -30,12 +30,12 @@ const showcaseNFTs = [
   { id: 3, img: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop', title: 'Ethereal Dragon', author: 'Elena' }
 ];
 
-function PostActions({ post, onVote }: { post: CommunityPost; onVote: (id: string, v: 'up'|'down'|null) => void }) {
+function PostActions({ post, onVote }: { post: CommunityPost; onVote: (id: string, v: 'up' | 'down' | null) => void }) {
   return (
     <div className="flex items-center justify-between text-white/50 pt-4 mt-2 border-t border-white/10">
       <div className="flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/10">
-        <button 
-          onClick={() => onVote(post.id, post.userVote === 'up' ? null : 'up')} 
+        <button
+          onClick={() => onVote(post.id, post.userVote === 'up' ? null : 'up')}
           aria-label={post.userVote === 'up' ? "Remove upvote" : "Upvote"}
           aria-pressed={post.userVote === 'up'}
           className={`p-1.5 rounded-full hover:bg-white/10 hover:text-emerald-400 transition-colors ${post.userVote === 'up' ? 'text-emerald-400 bg-emerald-400/10' : ''}`}
@@ -43,8 +43,8 @@ function PostActions({ post, onVote }: { post: CommunityPost; onVote: (id: strin
           <ChevronUp className="w-4 h-4" />
         </button>
         <span className={`text-sm font-semibold min-w-[2ch] text-center ${post.userVote === 'up' ? 'text-emerald-400' : post.userVote === 'down' ? 'text-rose-400' : 'text-white/70'}`}>{post.likes}</span>
-        <button 
-          onClick={() => onVote(post.id, post.userVote === 'down' ? null : 'down')} 
+        <button
+          onClick={() => onVote(post.id, post.userVote === 'down' ? null : 'down')}
           aria-label={post.userVote === 'down' ? "Remove downvote" : "Downvote"}
           aria-pressed={post.userVote === 'down'}
           className={`p-1.5 rounded-full hover:bg-white/10 hover:text-rose-400 transition-colors ${post.userVote === 'down' ? 'text-rose-400 bg-rose-400/10' : ''}`}
@@ -64,7 +64,7 @@ function PostActions({ post, onVote }: { post: CommunityPost; onVote: (id: strin
   );
 }
 
-function PostCard({ post, onVote }: { post: CommunityPost; onVote: (id: string, v: 'up'|'down'|null) => void }) {
+function PostCard({ post, onVote }: { post: CommunityPost; onVote: (id: string, v: 'up' | 'down' | null) => void }) {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="group relative">
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl blur-xl -z-10" />
@@ -84,7 +84,7 @@ function PostCard({ post, onVote }: { post: CommunityPost; onVote: (id: string, 
                 <span className="font-semibold text-white/90">{post.author.name}</span>
                 {post.author.verified && <Award className="w-3.5 h-3.5 text-blue-400" />}
               </div>
-              <div className="text-xs text-white/40">{Math.floor((Date.now() - post.timestamp.getTime())/3600000)}h ago</div>
+              <div className="text-xs text-white/40">{Math.floor((Date.now() - post.timestamp.getTime()) / 3600000)}h ago</div>
             </div>
           </div>
           <Badge className="bg-white/5 text-white/50 border-white/10 uppercase tracking-wider text-[10px]">{post.type}</Badge>
@@ -111,7 +111,7 @@ function PostCard({ post, onVote }: { post: CommunityPost; onVote: (id: string, 
 export default function CommunityFeed() {
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all'|'stories'|'discussions'>('all');
+  const [filter, setFilter] = useState<'all' | 'stories' | 'discussions'>('all');
   const [profile, setProfile] = useState<any>(null);
   const { toast } = useToast();
   const supabase = React.useMemo(() => createClient(), []);
@@ -158,10 +158,10 @@ export default function CommunityFeed() {
         setLoading(false);
         toast({ title: 'Error loading feed', description: err.message, variant: 'destructive' });
       });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleVote = (id: string, vote: 'up'|'down'|null) => {
+  const handleVote = (id: string, vote: 'up' | 'down' | null) => {
     setPosts(prev => prev.map(p => {
       if (p.id === id) {
         let nL = p.likes;
@@ -177,7 +177,7 @@ export default function CommunityFeed() {
 
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-emerald-500/30">
-      
+
       {/* Background Ambience */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-emerald-500/10 blur-[150px] rounded-full translate-x-1/3 -translate-y-1/3" />
@@ -194,7 +194,7 @@ export default function CommunityFeed() {
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8">
-          
+
           {/* Main Feed */}
           <div className="lg:col-span-8 space-y-6">
             <div className="flex bg-white/5 border border-white/10 rounded-full p-1 backdrop-blur-md w-fit">
@@ -226,7 +226,7 @@ export default function CommunityFeed() {
 
           {/* Sidebar */}
           <div className="lg:col-span-4 space-y-8">
-            
+
             {/* User Profile / XP Card */}
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-md relative overflow-hidden group">
               <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-blue-500 blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
@@ -252,7 +252,7 @@ export default function CommunityFeed() {
                     <span>XP</span> <span>{(profile?.xp || 0).toLocaleString()} / {(profile?.nextLevelXp || 2000).toLocaleString()}</span>
                   </div>
                   <div className="w-full bg-black/50 rounded-full h-3 border border-white/10 overflow-hidden relative">
-                    <motion.div 
+                    <motion.div
                       initial={{ width: 0 }} animate={{ width: `${Math.min(100, ((profile?.xp || 0) / (profile?.nextLevelXp || 2000)) * 100)}%` }} transition={{ duration: 1, delay: 0.5 }}
                       className="h-full bg-gradient-to-r from-emerald-500 to-blue-500 relative"
                     >

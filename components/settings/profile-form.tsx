@@ -32,6 +32,7 @@ export function ProfileForm() {
   const [sessionUser, setSessionUser] = useState<any>(null);
 
   useEffect(() => {
+    if (!supabase) return;
     supabase.auth.getUser().then(({ data }) => setSessionUser(data?.user));
   }, []);
 
