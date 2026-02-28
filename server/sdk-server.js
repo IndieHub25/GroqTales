@@ -33,6 +33,16 @@ app.get('/sdk/health', (req, res) => {
   });
 });
 
+// Root welcome endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to the GroqTales SDK Service',
+    status: 'online',
+    version: process.env.SDK_VERSION || 'v1.0.0',
+    health: '/sdk/health'
+  });
+});
+
 // SDK routes
 app.use('/sdk/v1', require('./routes/sdk'));
 

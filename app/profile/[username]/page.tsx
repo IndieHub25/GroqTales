@@ -2,7 +2,7 @@
  * No profiles to pre-render — data is fetched at runtime by wallet address.
  * Required by Next.js static export (`output: 'export'`).
  */
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return [{ username: 'default' }];

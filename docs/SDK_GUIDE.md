@@ -22,7 +22,7 @@ import { GroqTalesSDK } from '@groqtales/sdk';
 
 const sdk = new GroqTalesSDK({
   apiKey: 'your-api-key',
-  baseUrl: 'https://groqtales-api.onrender.com',
+  baseUrl: 'https://groqtales-backend-api.onrender.com',
 });
 
 // Generate a story
@@ -152,7 +152,7 @@ interface SDKOptions {
 
 ```bash
 GROQTALES_API_KEY=your-api-key
-GROQTALES_BASE_URL=https://groqtales-api.onrender.com
+GROQTALES_BASE_URL=https://groqtales-backend-api.onrender.com
 ```
 
 ## Error Handling

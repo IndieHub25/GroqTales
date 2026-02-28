@@ -7,12 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 1.3.9 (latest), 1.3.8 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+Active full support: 1.3.9 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
 
-## [1.3.9] - 2026-02-28
+## [1.3.9] - 2026-03-01
+
+### Codebase Optimization & Cleanup
+
+#### Deleted — Unnecessary Files & Directories
+
+- **`GroqTales/`**: Removed duplicate nested project scaffold (had its own `package.json`, `next.config.js`, etc.) — never imported by root project.
+- **`path/to/your/`**: Removed accidental placeholder directory containing `file.css` and `file.html`.
+- **`deployment/`**: Removed empty directory (contents were deleted during Cloudflare migration).
+- **`temp.md`**: Removed scratch PR template file.
+- **`app/test-buttons/`**: Removed dev-only test page (`layout.tsx` + `page.tsx`).
+- **`components/nft-purchase.tsx`**: Removed empty 0-byte placeholder file.
+- **`components/ui/tooltip.tsx.backup`**: Removed backup file.
+- **`.zap/`**: Removed ZAP security scan artifact (`rules.tsv`).
+- **`.npm-cache/`**: Removed local npm cache directory.
+- **`.DS_Store`**: Removed macOS filesystem artifact.
+- **Docker files**: Removed `Dockerfile`, `docker-compose.yml`, `.env.docker`, `.dockerignore` — project fully migrated to Cloudflare Pages + Render.
+
+#### Changed — Config Consolidation
+
+- **Merged `tailwind.config.ts` into `tailwind.config.js`**: Moved comic `fontFamily`, `boxShadow`, `borderWidth`, `spin-slow` keyframes, and `shimmer` keyframes/animations into the primary `.js` config. Added `./src/**/*.{js,ts,jsx,tsx,mdx}` to content paths. Deleted the duplicate `tailwind.config.ts`.
+- **Removed `yarn` from `dependencies`**: The project uses npm; `yarn@^1.22.22` was incorrectly listed as a production dependency.
+- **Updated `.gitignore`**: Added `GroqTales/` and `path/` to prevent re-creation of accidental nested dirs. Removed duplicate `.DS_Store` entry.
+
+#### Files Deleted
+`GroqTales/`, `path/`, `deployment/`, `temp.md`, `.zap/`, `.npm-cache/`, `.DS_Store`, `app/test-buttons/`, `components/nft-purchase.tsx`, `components/ui/tooltip.tsx.backup`, `Dockerfile`, `docker-compose.yml`, `.env.docker`, `.dockerignore`, `tailwind.config.ts`
+
+#### Files Modified
+`tailwind.config.js`, `package.json`, `.gitignore`, `CHANGELOG.md`, `VERSION`
+
+### New Feature — MADHAVA Help Bot (Cloudflare Workers AI)
+
+- **AI Help Bot**: Introduced **MADHAVA**, a floating AI-powered help bot available on every page of the GroqTales platform.
+  - Uses the `@cf/fblgit/una-cybertron-7b-v2-bf16` model via **Cloudflare Workers AI**.
+  - Contains a comprehensive knowledge base covering every aspect of GroqTales: features, story creation, NFT minting, wallet setup, troubleshooting, project structure, deployment, contributing, security, and more.
+  - Supports multi-turn conversations (last 10 turns retained for context).
+  - Input validation and rate limiting (max 2000 characters per message).
+- **Backend**: Added `ai` binding to `cf-worker/wrangler.jsonc`. Created `cf-worker/src/routes/helpbot.ts` with Hono route at `/api/helpbot/chat`. Updated `cf-worker/src/index.ts` with `AI` binding and helpbot route.
+- **Frontend**: Created `components/madhava-helpbot.tsx` — premium glassmorphic floating chat widget with pulsing FAB, slide-in panel, typing indicator, auto-scroll, and responsive design. Added ~390 lines of styles to `app/globals.css`. Mounted globally in `app/layout.tsx`.
+
+### Code Quality Sweep
+
+- Fixed escaped template literals (`\${}` → `${}`) in **10 components** (20 fetch calls) so `NEXT_PUBLIC_API_URL` interpolates correctly at runtime: `footer.tsx`, `trending-stories.tsx`, `story-generator.tsx`, `user-nav.tsx`, `web3-provider.tsx`, `notifications-settings.tsx`, `privacy-settings.tsx`, `profile-form.tsx`, `story-comments-dialog.tsx`, `create/page.tsx`.
+- **`app/auth/callback/page.tsx`**: Removed duplicate `mt-4` Tailwind class (only `mt-8` remains).
+- **`components/user-nav.tsx`**: Fixed hash function no-op `hash = hash & hash` → `hash |= 0` for proper 32-bit integer coercion.
+- **`cf-worker/src/routes/stories.ts`**: Story IDs are now generated server-side via `crypto.randomUUID()` instead of trusting client-provided `body.id`.
+- **`components/settings/profile-form.tsx`**: Updated from `/api/settings/profile` to `/api/v1/settings/profile`. Added Bearer token auth from Supabase session.
+- **`docs/PIPELINES.md`**: Updated admin auth references from `x-admin-id` header to `Authorization: Bearer <token>`.
+
+### SEO
+
+- **`public/sitemap.xml`** [NEW]: Comprehensive XML sitemap covering 19 URLs with appropriate change frequencies and priorities.
+- **`public/robots.txt`** [NEW]: Proper robots.txt allowing public page crawling, disallowing API/auth/private routes, referencing the sitemap, and blocking AI scrapers.
+- **`.gitignore`**: Removed `sitemap*.xml`, `robots.txt`, and `temp.md` from ignore list so these files are tracked in version control.
 
 ### Bug Fixes & Infrastructure
 
+- **Exhaustive Security Sweep**: Addressed 10 critical security findings across the repository: secured unprotected Cloudflare KV routes with Admin secrets, overhauled the `cf-worker` Admin middleware to use Bearer tokens instead of trusted headers with row-level affect checks, secured Profile/Story/Marketplace mutation endpoints with JWT authorization, enforced server-side UUID generation for marketplace listings, fixed a dead fallback `baseUrl` injected into the frontend, removed leaked MongoDB credentials from `wrangler.toml`, and alphabetized `.env.example` configurations.
+- **Supabase OAuth Callback Recovery**: Restored the missing `app/auth/callback/page.tsx` required for Supabase OAuth login. Rewrote the OAuth PKCE exchange logic into a pure client component (`'use client'`) using `@supabase/ssr` to ensure full authentication compatibility with Cloudflare Pages edge deployments. Removed the `rm -rf app/auth/callback` destructive command from the `cf-build` script.
+- **Dynamic API Routing Fix**: Mass-injected `process.env.NEXT_PUBLIC_API_URL` prefix into all 16 client-side `fetch('/api/...)` calls across the `app/` and `components/` directories. This prevents 404 errors on Cloudflare Pages static exports by ensuring fetches route to the external Render/Cloudflare Worker backend instead of the static frontend host.
+- **ServiceWorker Registration Fix**: Created a minimal, pass-through `public/sw.js` file to intercept Next.js PWA background registration attempts, silencing persistent 404 Not Found console errors on Cloudflare Pages.
 - **Cloudflare Pages Static Export Fix**: Resolved `output: 'export'` build failure caused by missing `generateStaticParams()` on dynamic routes. Next.js static export requires every `[param]` route to explicitly return at least one path (e.g. `[{ id: 'default' }]`) or the build fails with a generic missing error.
   - **`app/nft-marketplace/comic-stories/[id]/page.tsx`**: Added default static params and `dynamicParams = false`.
   - **`app/nft-marketplace/text-stories/[id]/page.tsx`**: Added default static params and `dynamicParams = false`.
@@ -127,8 +184,8 @@ Go to **GitHub → IndieHub25/GroqTales → Settings → Secrets and variables �
 |---|---|
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API token with Pages edit permission |
 | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID (from Cloudflare dashboard) |
-| `NEXT_PUBLIC_API_URL` | `https://groqtales-api.onrender.com` |
-| `NEXT_PUBLIC_GROQ_API_KEY` | Your Groq API key |
+| `NEXT_PUBLIC_API_URL` | `https://groqtales-backend-api.onrender.com` |
+| `GROQ_API_KEY` | Your Groq API key |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
 | `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | WalletConnect project ID |

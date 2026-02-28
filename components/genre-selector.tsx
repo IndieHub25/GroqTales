@@ -19,7 +19,11 @@ export const genres: Genre[] = [
   {
     name: 'Fantasy',
     slug: 'fantasy',
-    icon: <span className="text-xl">✨</span>,
+    icon: (
+      <span className="text-xl" aria-hidden="true">
+        ✨
+      </span>
+    ),
     color: '#9333ea',
     description: 'Magical worlds, mythical creatures, and epic adventures',
     elements:
@@ -30,7 +34,11 @@ export const genres: Genre[] = [
   {
     name: 'Sci-Fi',
     slug: 'sci-fi',
-    icon: <span className="text-xl">🚀</span>,
+    icon: (
+      <span className="text-xl" aria-hidden="true">
+        🚀
+      </span>
+    ),
     color: '#3b82f6',
     description:
       'Futuristic technology, space exploration, and alternate realities',
@@ -41,7 +49,11 @@ export const genres: Genre[] = [
   {
     name: 'Horror',
     slug: 'horror',
-    icon: <span className="text-xl">💀</span>,
+    icon: (
+      <span className="text-xl" aria-hidden="true">
+        💀
+      </span>
+    ),
     color: '#b91c1c',
     description:
       'Terrifying tales, supernatural entities, and psychological terror',
@@ -52,7 +64,11 @@ export const genres: Genre[] = [
   {
     name: 'Romance',
     slug: 'romance',
-    icon: <span className="text-xl">❤️</span>,
+    icon: (
+      <span className="text-xl" aria-hidden="true">
+        ❤️
+      </span>
+    ),
     color: '#ec4899',
     description: 'Love stories, relationships, and emotional journeys',
     elements:
@@ -62,7 +78,11 @@ export const genres: Genre[] = [
   {
     name: 'Adventure',
     slug: 'adventure',
-    icon: <span className="text-xl">🧭</span>,
+    icon: (
+      <span className="text-xl" aria-hidden="true">
+        🧭
+      </span>
+    ),
     color: '#d97706',
     description: 'Thrilling quests, exploration, and exciting challenges',
     elements:
@@ -72,7 +92,11 @@ export const genres: Genre[] = [
   {
     name: 'Historical',
     slug: 'historical',
-    icon: <span className="text-xl">📜</span>,
+    icon: (
+      <span className="text-xl" aria-hidden="true">
+        📜
+      </span>
+    ),
     color: '#92400e',
     description: 'Stories set in past time periods with historical context',
     elements:
@@ -82,7 +106,11 @@ export const genres: Genre[] = [
   {
     name: 'Educational',
     slug: 'educational',
-    icon: <span className="text-xl">🎓</span>,
+    icon: (
+      <span className="text-xl" aria-hidden="true">
+        🎓
+      </span>
+    ),
     color: '#16a34a',
     description: 'Informative stories that teach valuable lessons and facts',
     elements:
@@ -93,7 +121,11 @@ export const genres: Genre[] = [
   {
     name: 'Magical Realism',
     slug: 'magical-realism',
-    icon: <span className="text-xl">🔮</span>,
+    icon: (
+      <span className="text-xl" aria-hidden="true">
+        🔮
+      </span>
+    ),
     color: '#14b8a6',
     description: 'Ordinary worlds with magical elements woven into reality',
     elements: 'Subtle magic, realistic settings, metaphor, cultural traditions',

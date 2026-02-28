@@ -61,9 +61,7 @@ mgc.md
 *.wav
 *.flac
 
-# Generated files
-/public/sitemap*.xml
-/public/robots.txt
+# Generated files (PWA service workers only)
 /public/sw.js
 /public/workbox-*.js
 /public/worker-*.js
@@ -88,3 +86,7 @@ ehthumbs.db
 Thumbs.db
 TODO.md
 .npm-cache
+
+# Prevent accidental nested dirs
+GroqTales/
+path/

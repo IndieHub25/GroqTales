@@ -32,7 +32,7 @@ export function FeaturedCreators() {
       setIsLoading(true);
       try {
         // Try fetching from the community creators API
-        const res = await fetch('/api/feed?limit=4&type=creators');
+        const res = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/feed?limit=4&type=creators`);
         if (res.ok) {
           const json = await res.json();
           const data = json.data || json.creators || json;

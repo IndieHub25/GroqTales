@@ -56,12 +56,10 @@
   --comic-cyan: #06b6d4;
 
   /* Gradient accents */
-  --gradient-hero: linear-gradient(
-    135deg,
-    #fbbf24 0%,
-    #f97316 50%,
-    #e63946 100%
-  );
+  --gradient-hero: linear-gradient(135deg,
+      #fbbf24 0%,
+      #f97316 50%,
+      #e63946 100%);
   --gradient-card: linear-gradient(135deg, #fef9ef 0%, #f1e8d8 100%);
   --gradient-cta: linear-gradient(135deg, #e63946 0%, #6c3fc5 100%);
 
@@ -113,12 +111,10 @@
   --comic-pink: #f472b6;
   --comic-cyan: #22d3ee;
 
-  --gradient-hero: linear-gradient(
-    135deg,
-    #1e2540 0%,
-    #131829 50%,
-    #0a0e1a 100%
-  );
+  --gradient-hero: linear-gradient(135deg,
+      #1e2540 0%,
+      #131829 50%,
+      #0a0e1a 100%);
   --gradient-card: linear-gradient(135deg, #131829 0%, #1e2540 100%);
   --gradient-cta: linear-gradient(135deg, #ff4d6d 0%, #a78bfa 100%);
 
@@ -286,11 +282,9 @@
 
   /* Halftone dot pattern overlay */
   .halftone-overlay {
-    background-image: radial-gradient(
-      circle,
-      var(--foreground) 1px,
-      transparent 1px
-    );
+    background-image: radial-gradient(circle,
+        var(--foreground) 1px,
+        transparent 1px);
     background-size: 16px 16px;
     opacity: 0.04;
     pointer-events: none;
@@ -305,13 +299,11 @@
 
   /* Speed lines effect */
   .speed-lines {
-    background-image: repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 8px,
-      var(--foreground) 8px,
-      var(--foreground) 9px
-    );
+    background-image: repeating-linear-gradient(90deg,
+        transparent,
+        transparent 8px,
+        var(--foreground) 8px,
+        var(--foreground) 9px);
     opacity: 0.05;
     pointer-events: none;
   }
@@ -350,12 +342,10 @@
   }
 
   .text-fire {
-    background: linear-gradient(
-      45deg,
-      var(--comic-red),
-      var(--comic-orange),
-      var(--comic-yellow)
-    );
+    background: linear-gradient(45deg,
+        var(--comic-red),
+        var(--comic-orange),
+        var(--comic-yellow));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -517,6 +507,7 @@
 
   /* Floating animation */
   @keyframes float {
+
     0%,
     100% {
       transform: translateY(0px);
@@ -533,6 +524,7 @@
 
   /* Wiggle animation */
   @keyframes wiggle {
+
     0%,
     100% {
       transform: rotate(0deg);
@@ -553,6 +545,7 @@
 
   /* Twinkle animation for stars */
   @keyframes twinkle {
+
     0%,
     100% {
       opacity: 0.2;
@@ -724,32 +717,24 @@
 
   /* Hero gradient — instant background while Spline loads */
   .hero-gradient {
-    background: linear-gradient(
-      135deg,
-      #fef9ef 0%,
-      #fff7e6 30%,
-      #fef3cd 60%,
-      #fef9ef 100%
-    );
+    background: linear-gradient(135deg,
+        #fef9ef 0%,
+        #fff7e6 30%,
+        #fef3cd 60%,
+        #fef9ef 100%);
   }
 
   .dark .hero-gradient {
     background:
-      radial-gradient(
-        ellipse 80% 60% at 20% 40%,
+      radial-gradient(ellipse 80% 60% at 20% 40%,
         rgba(99, 102, 241, 0.15) 0%,
-        transparent 70%
-      ),
-      radial-gradient(
-        ellipse 60% 50% at 75% 30%,
+        transparent 70%),
+      radial-gradient(ellipse 60% 50% at 75% 30%,
         rgba(168, 85, 247, 0.12) 0%,
-        transparent 70%
-      ),
-      radial-gradient(
-        ellipse 50% 40% at 50% 80%,
+        transparent 70%),
+      radial-gradient(ellipse 50% 40% at 50% 80%,
         rgba(56, 189, 248, 0.1) 0%,
-        transparent 70%
-      ),
+        transparent 70%),
       #0a0e1a;
   }
 
@@ -759,21 +744,18 @@
     background-image:
       radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
       radial-gradient(at 80% 0%, rgba(168, 85, 247, 0.06) 0px, transparent 50%),
-      radial-gradient(
-        at 0% 100%,
+      radial-gradient(at 0% 100%,
         rgba(56, 189, 248, 0.06) 0px,
-        transparent 50%
-      ),
-      radial-gradient(
-        at 100% 100%,
+        transparent 50%),
+      radial-gradient(at 100% 100%,
         rgba(255, 77, 109, 0.05) 0px,
-        transparent 50%
-      );
+        transparent 50%);
     background-attachment: fixed;
   }
 
   /* Respect reduced motion preferences */
   @media (prefers-reduced-motion: reduce) {
+
     .animate-twinkle,
     .animate-pulse,
     .animate-spin,
@@ -808,20 +790,16 @@
 .genre-marquee-wrapper {
   width: 100%;
   overflow: hidden;
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    black 5%,
-    black 95%,
-    transparent
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent,
-    black 5%,
-    black 95%,
-    transparent
-  );
+  mask-image: linear-gradient(to right,
+      transparent,
+      black 5%,
+      black 95%,
+      transparent);
+  -webkit-mask-image: linear-gradient(to right,
+      transparent,
+      black 5%,
+      black 95%,
+      transparent);
 }
 
 .genre-marquee {
@@ -916,6 +894,7 @@
  * Disable all animations for users who prefer reduced motion
  */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -924,7 +903,7 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  
+
   /* Keep essential feedback animations but make them instant */
   button,
   a,
@@ -942,6 +921,7 @@
     opacity: 0;
     transform: translate3d(0, 10px, 0);
   }
+
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0);
@@ -958,6 +938,7 @@
     transform: translate3d(0, 20px, 0);
     opacity: 0;
   }
+
   to {
     transform: translate3d(0, 0, 0);
     opacity: 1;
@@ -973,6 +954,7 @@
   from {
     transform: rotate3d(0, 0, 1, 0deg);
   }
+
   to {
     transform: rotate3d(0, 0, 1, 360deg);
   }
@@ -981,14 +963,18 @@
 .rotate-optimized {
   animation: rotate-optimized 20s linear infinite;
   will-change: transform;
-  transform: translateZ(0); /* Force GPU layer */
+  transform: translateZ(0);
+  /* Force GPU layer */
 }
 
 @keyframes pulse-optimized {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale3d(1, 1, 1);
     opacity: 0.8;
   }
+
   50% {
     transform: scale3d(1.05, 1.05, 1);
     opacity: 1;
@@ -1038,6 +1024,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .button-hover-optimized:hover,
   .button-hover-optimized:active {
     transform: none;
@@ -1090,7 +1077,7 @@
   opacity: 0;
   transform: translate3d(0, 20px, 0);
   transition: opacity 0.4s cubic-bezier(0.25, 0.1, 0.25, 1),
-              transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+    transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .animate-on-visible.is-visible {
@@ -1138,5 +1125,405 @@
     flex-wrap: wrap;
     justify-content: center;
     width: 100%;
+  }
+}
+
+/* ═══════════════════════════════════════
+   MADHAVA HELP BOT — Floating Chat Widget
+   Premium glassmorphic design
+   ═══════════════════════════════════════ */
+
+/* Floating action button */
+.madhava-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9998;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(135deg, #ff4d6d 0%, #a78bfa 100%);
+  box-shadow:
+    0 4px 20px rgba(255, 77, 109, 0.4),
+    0 0 0 0 rgba(255, 77, 109, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: madhava-pulse 2.5s ease-in-out infinite;
+}
+
+.madhava-fab:hover {
+  transform: scale(1.1);
+  box-shadow:
+    0 6px 28px rgba(255, 77, 109, 0.5),
+    0 0 0 0 rgba(255, 77, 109, 0.3);
+}
+
+@keyframes madhava-pulse {
+
+  0%,
+  100% {
+    box-shadow:
+      0 4px 20px rgba(255, 77, 109, 0.4),
+      0 0 0 0 rgba(255, 77, 109, 0.3);
+  }
+
+  50% {
+    box-shadow:
+      0 4px 20px rgba(255, 77, 109, 0.4),
+      0 0 0 10px rgba(255, 77, 109, 0);
+  }
+}
+
+/* Chat panel */
+.madhava-panel {
+  position: fixed;
+  bottom: 92px;
+  right: 24px;
+  z-index: 9999;
+  width: 380px;
+  max-height: 540px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(19, 24, 41, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(167, 139, 250, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.madhava-panel--open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Header */
+.madhava-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(255, 77, 109, 0.15) 0%, rgba(167, 139, 250, 0.15) 100%);
+  border-bottom: 1px solid rgba(167, 139, 250, 0.15);
+}
+
+.madhava-header__info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.madhava-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff4d6d, #a78bfa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 16px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.madhava-header__title {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #f0f0f5 !important;
+  text-transform: none !important;
+  letter-spacing: 0.5px !important;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.madhava-header__status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.madhava-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.6);
+}
+
+.madhava-header__actions {
+  display: flex;
+  gap: 4px;
+}
+
+.madhava-header__btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.madhava-header__btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f0f0f5;
+}
+
+/* Messages area */
+.madhava-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 280px;
+  max-height: 360px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.3) transparent;
+}
+
+.madhava-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.madhava-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.madhava-messages::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 250, 0.3);
+  border-radius: 4px;
+}
+
+/* Message bubbles */
+.madhava-bubble {
+  max-width: 85%;
+  animation: madhava-fade-in 0.25s ease;
+}
+
+.madhava-bubble--bot {
+  align-self: flex-start;
+}
+
+.madhava-bubble--user {
+  align-self: flex-end;
+}
+
+.madhava-bubble__content {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  font-weight: 500;
+  overflow-wrap: break-word;
+}
+
+.madhava-bubble--bot .madhava-bubble__content {
+  background: rgba(255, 255, 255, 0.07);
+  color: #e2e8f0;
+  border-bottom-left-radius: 4px;
+}
+
+.madhava-bubble--user .madhava-bubble__content {
+  background: linear-gradient(135deg, #ff4d6d, #a78bfa);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.madhava-bubble__time {
+  display: block;
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+.madhava-bubble--user .madhava-bubble__time {
+  text-align: right;
+}
+
+@keyframes madhava-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Typing indicator */
+.madhava-typing {
+  display: flex;
+  gap: 4px;
+  padding: 12px 16px;
+  align-items: center;
+}
+
+.madhava-typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #94a3b8;
+  animation: madhava-bounce 1.4s ease-in-out infinite;
+}
+
+.madhava-typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.madhava-typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes madhava-bounce {
+
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+
+  30% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Input area */
+.madhava-input-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(167, 139, 250, 0.12);
+  background: rgba(10, 14, 26, 0.6);
+}
+
+.madhava-input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f0f0f5;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.madhava-input::placeholder {
+  color: #64748b;
+  font-weight: 400;
+}
+
+.madhava-input:focus {
+  border-color: rgba(167, 139, 250, 0.5);
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.1);
+}
+
+.madhava-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.madhava-send {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #ff4d6d, #a78bfa);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.madhava-send:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 77, 109, 0.4);
+}
+
+.madhava-send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Override GroqTales global strong/b styles inside bot */
+.madhava-bubble__content strong,
+.madhava-bubble__content b {
+  color: inherit !important;
+  text-transform: none !important;
+  font-weight: 700;
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .madhava-panel {
+    width: calc(100vw - 32px);
+    right: 16px;
+    bottom: 84px;
+    max-height: 70vh;
+  }
+
+  .madhava-fab {
+    bottom: 16px;
+    right: 16px;
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .madhava-fab {
+    animation: none !important;
+  }
+
+  .madhava-panel {
+    transition: opacity 0.1s ease;
+    transform: none;
+  }
+
+  .madhava-panel--open {
+    transform: none;
+  }
+
+  .madhava-bubble {
+    animation: none !important;
+  }
+
+  .madhava-typing span {
+    animation: none !important;
   }
 }

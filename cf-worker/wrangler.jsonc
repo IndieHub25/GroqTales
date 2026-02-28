@@ -1,0 +1,25 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "groqtales-backend",
+    "main": "src/index.ts",
+    "compatibility_date": "2024-02-22",
+    "observability": {
+        "enabled": true
+    },
+    "kv_namespaces": [
+        {
+            "binding": "KV",
+            "id": "30df35063bad4bbfbdd33c9c35bfcc0e"
+        }
+    ],
+    "d1_databases": [
+        {
+            "binding": "DB",
+            "database_name": "groqtales-db",
+            "database_id": "fa669053-f525-4996-8cc5-a66ae5c44a19"
+        }
+    ],
+    "ai": {
+        "binding": "AI"
+    }
+}

@@ -27,7 +27,7 @@ export default function NotificationsSettings() {
     useEffect(() => {
         const load = async() => {
             try {
-                const res = await fetch("/api/v1/settings/notifications");
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/notifications`);
                 if(!res.ok) {
                     throw new Error();
                 }
@@ -60,7 +60,7 @@ export default function NotificationsSettings() {
         };
         setNotifications(next);
         try {
-            const res = await fetch("/api/v1/settings/notifications", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/notifications`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

@@ -8,7 +8,7 @@ management, user profiles, and content analysis. Built with Express.js and desig
 ## Base URLs
 
 - **Development**: `http://localhost:3001`
-- **Production**: `https://groqtales-api.onrender.com`
+- **Production**: `https://groqtales-backend-api.onrender.com`
 
 ## Authentication
 

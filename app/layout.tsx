@@ -20,6 +20,7 @@ import { QueryProvider } from '@/components/query-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import BackToTop from '@/components/back-to-top';
+import MadhavaHelpBot from '@/components/madhava-helpbot';
 import { GlobalLoadingWrapper } from '@/components/global-loading-wrapper';
 
 // Optimize font loading
@@ -240,6 +241,7 @@ export default function RootLayout({
           </QueryProvider>
         </Web3Provider>
         <BackToTop />
+        <MadhavaHelpBot />
       </body>
     </html>
   );

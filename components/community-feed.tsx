@@ -124,7 +124,7 @@ export default function CommunityFeed() {
       }
     });
 
-    fetch('/api/feed?limit=20')
+    fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/feed?limit=20`)
       .then(r => {
         if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
         return r.json();

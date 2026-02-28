@@ -26,7 +26,7 @@
   "scripts": {
     "dev": "concurrently \"next dev\" \"nodemon server/backend.js\"",
     "build": "NEXT_PUBLIC_BUILD_MODE=true next build",
-    "cf-build": "rm -rf app/api app/auth/callback && NEXT_PUBLIC_BUILD_MODE=true next build",
+    "cf-build": "rm -rf app/api && NEXT_PUBLIC_BUILD_MODE=true next build",
     "start": "concurrently \"next start\" \"node server/backend.js\"",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
@@ -151,7 +151,6 @@
     "webpack-bundle-analyzer": "^5.2.0",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0",
-    "yarn": "^1.22.22",
     "zod": "^3.22.4",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.23",

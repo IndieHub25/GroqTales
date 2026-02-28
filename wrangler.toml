@@ -31,13 +31,14 @@ compatibility_flags = ["nodejs_compat"]
 # (copy from your .env.local / Vercel project settings):
 #
 #   NEXT_PUBLIC_URL                       = https://groqtales.xyz
-#   NEXT_PUBLIC_VERSION                   = 1.4.0
+#   NEXT_PUBLIC_VERSION                   = 1.3.9
 #   NEXT_PUBLIC_IMAGE_URL                 = https://groqtales.xyz/images
 #   NEXT_PUBLIC_SPLASH_IMAGE_URL          = https://groqtales.xyz/splash.jpg
 #   NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR   = #1a1a2e
-#   NEXT_PUBLIC_GROQ_API_KEY              = <secret>
+#   GROQ_API_KEY              = <secret>
 #   NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID = <secret>
-#   NEXT_PUBLIC_API_URL                   = https://groqtales-api.onrender.com
+#   NEXT_PUBLIC_API_URL                   = https://groqtales-backend-api.onrender.com
+#   NEXT_PUBLIC_SDK_URL                   = https://groqtales-sdk-service.onrender.com
 #   SUPABASE_URL                          = <secret>
 #   SUPABASE_ANON_KEY                     = <secret>
 #   SUPABASE_SERVICE_ROLE_KEY             = <secret>
@@ -72,4 +73,4 @@ name = "groqtales"
 NODE_ENV = "production"
 NEXT_PUBLIC_BUILD_MODE = "false"
 NEXT_PUBLIC_URL = "https://groqtales.xyz"
-NEXT_PUBLIC_VERSION = "1.4.0"
+NEXT_PUBLIC_VERSION = "1.3.9"
