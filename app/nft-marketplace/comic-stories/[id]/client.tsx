@@ -1,30 +1,27 @@
-/**
- * No comic stories to pre-render — IDs are loaded dynamically.
- * Required by Next.js static export (`output: 'export'`).
- */
-export const dynamicParams = false;
+'use client';
 
-export function generateStaticParams() {
-  return [{ id: 'default' }];
-}
+import { ArrowLeft } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import React from 'react';
 
-export default function ComicStoryDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+import { Button } from '@/components/ui/button';
+
+export default function ComicStoryDetailPageClient() {
+  const params = useParams();
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
       <div className="container mx-auto px-4 py-8">
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <a
-            href="/nft-marketplace/comic-stories"
-            className="inline-flex items-center gap-2 px-4 py-2 border rounded-md text-sm hover:bg-gray-100"
-          >
-            ← Back to Marketplace
-          </a>
+          <Button onClick={() => router.back()} variant="outline" size="sm">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Marketplace
+          </Button>
         </div>
 
+        {/* Placeholder Content */}
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="text-center space-y-4">
             <h1 className="text-3xl font-bold text-gray-900">

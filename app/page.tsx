@@ -25,38 +25,75 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 // --- Typewriter Hook ---
-function useTypewriter(texts: string[], typingSpeed = 50, deletingSpeed = 30, pauseTime = 2000) {
-  const [text, setText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [loopNum, setLoopNum] = useState(0);
+// Uses refs for all mutable values so the interval callback never
+// captures stale closure state — the classic bug in the previous version.
+function useTypewriter(
+  texts: string[],
+  typingSpeed = 55,
+  deletingSpeed = 28,
+  pauseAfterType = 1800,
+  pauseAfterDelete = 400,
+) {
+  const [displayText, setDisplayText] = useState('');
+
+  // All mutable state lives in refs so the interval never goes stale
+  const indexRef      = useRef(0);   // which phrase we're on
+  const charRef       = useRef(0);   // current character position
+  const isDeletingRef = useRef(false);
+  const pausingRef    = useRef(false);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    const current = loopNum % texts.length;
-    const fullText = texts[current] || '';
+    if (!texts.length) return;
 
-    if (!fullText) return;
+    const tick = () => {
+      const phrase = texts[indexRef.current % texts.length];
+      if (!phrase) return; // guard: phrase is undefined when texts is empty
 
-    if (isDeleting) {
-      setText((prev) => fullText.substring(0, prev.length - 1));
-      timer = setTimeout(() => {
-        if (text === '') {
-          setIsDeleting(false);
-          setLoopNum(loopNum + 1);
+      if (pausingRef.current) return;
+
+      if (!isDeletingRef.current) {
+        // — Typing forward —
+        charRef.current = Math.min(charRef.current + 1, phrase.length);
+        setDisplayText(phrase.slice(0, charRef.current));
+
+        if (charRef.current === phrase.length) {
+          // Finished typing — pause before deleting
+          pausingRef.current = true;
+          setTimeout(() => { isDeletingRef.current = true; pausingRef.current = false; }, pauseAfterType);
         }
-      }, deletingSpeed);
-    } else {
-      setText((prev) => fullText.substring(0, prev.length + 1));
-      timer = setTimeout(() => {
-        if (text === fullText) {
-          setIsDeleting(true);
-        }
-      }, text === fullText ? pauseTime : typingSpeed);
-    }
-    return () => clearTimeout(timer);
-  }, [text, isDeleting, loopNum, texts, typingSpeed, deletingSpeed, pauseTime]);
+      } else {
+        // — Deleting —
+        charRef.current = Math.max(charRef.current - 1, 0);
+        setDisplayText(phrase.slice(0, charRef.current));
 
-  return text;
+        if (charRef.current === 0) {
+          // Finished deleting — move to next phrase, pause before typing
+          isDeletingRef.current = false;
+          indexRef.current += 1;
+          pausingRef.current = true;
+          setTimeout(() => { pausingRef.current = false; }, pauseAfterDelete);
+        }
+      }
+    };
+
+    // Single interval — speed adapts to typing vs deleting phase via delete ref
+    let timeoutId: NodeJS.Timeout;
+
+    const runTick = () => {
+      tick();
+      timeoutId = setTimeout(runTick, isDeletingRef.current ? deletingSpeed : typingSpeed);
+    };
+
+    timeoutId = setTimeout(runTick, isDeletingRef.current ? deletingSpeed : typingSpeed);
+
+    // Re-create the interval whenever the speed should change
+    // (framer-motion / React will clean up via the return)
+    return () => clearTimeout(timeoutId);
+  // Re-run only when props change — internal state changes use refs
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [texts, typingSpeed, deletingSpeed, pauseAfterType, pauseAfterDelete]);
+
+  return displayText;
 }
 
 // Hero Typewriter texts
