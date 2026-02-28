@@ -108,7 +108,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
 
   const disconnectWallet = useCallback(async()=>{
     try{
-      await fetch(`/api/v1/settings/wallet`,{
+      await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/wallet`,{
         method: "DELETE",
         credentials: "include",
       });
@@ -200,7 +200,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         //setChainId(chainIdNum);
         setBalance(balanceEth.toFixed(4));
         setConnected(true);
-        await fetch(`/api/v1/settings/wallet`,{
+        await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/wallet`,{
           method: "PUT",
           headers: {"Content-Type":"application/json"},
           credentials: "include",

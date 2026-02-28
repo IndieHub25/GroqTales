@@ -12,7 +12,7 @@ export default function WalletSettings(){
     // useEffect(()=>{
     //     async function loadWallet() {
     //         try{
-    //             const res = await fetch("/api/v1/settings/wallet");
+    //             const res = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/wallet`);
     //             if (!res.ok) throw new Error();
     //             const data = await res.json();
     //             setWallet(data);
@@ -38,7 +38,7 @@ export default function WalletSettings(){
     //         //     network: chainId === "0x1"?" Ethereum": "Unknown",
     //         //     provider: "MetaMask"
     //         // };
-    //         const res = await fetch("/api/v1/settings/wallet",{
+    //         const res = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/wallet`,{
     //             method: "PUT",
     //             headers: {"Content-Type":"application/json"},
     //             body: JSON.stringify({address, chainId}),

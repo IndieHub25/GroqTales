@@ -29,7 +29,7 @@ export default function PrivacySettings(){
     useEffect(() => {
         async function fetchPrivacy(){
             try{
-                const res = await fetch("/api/v1/settings/privacy");
+                const res = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/privacy`);
                 if(!res.ok) throw new Error();
                 const json = await res.json();
                 if(!json.success || !json.data){
@@ -59,7 +59,7 @@ export default function PrivacySettings(){
         setSettings(newSettings);
 
         try{
-            const res = await fetch("/api/v1/settings/privacy", {
+            const res = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/privacy`, {
                 method: "PUT",
                 headers: {"Content-Type":"application/json"},
                 body: JSON.stringify(newSettings),

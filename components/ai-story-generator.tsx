@@ -491,7 +491,7 @@ export default function AIStoryGenerator({
 
     // Real API call to Groq backend
     try {
-      const response = await fetch('/api/groq', {
+      const response = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/groq`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

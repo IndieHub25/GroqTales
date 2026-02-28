@@ -38,12 +38,7 @@ export default function ProfilePageClient() {
         setLoading(true);
         setError(false);
 
-        const baseUrl =
-          process.env.NEXT_PUBLIC_API_URL ||
-          (typeof window !== 'undefined'
-            ? (window as any).__NEXT_PUBLIC_API_URL
-            : '') ||
-          '';
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
         const response = await fetch(
           `${baseUrl}/api/v1/users/profile/${walletFromUrl}`,
@@ -122,7 +117,6 @@ export default function ProfilePageClient() {
                   <Link
                     href="/create/ai-story"
                     className="inline-block mt-4 text-violet-400 hover:underline"
-                    role="button"
                   >
                     Create your first story
                   </Link>

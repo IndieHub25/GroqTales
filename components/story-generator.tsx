@@ -46,7 +46,7 @@ export function StoryGenerator() {
     }
     setIsGenerating(true);
     try {
-      const response = await fetch('/api/generate', {
+      const response = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, genre, creator: address }),
@@ -85,7 +85,7 @@ export function StoryGenerator() {
     setIsMinting(true);
     try {
       // Upload to IPFS
-      const ipfsResponse = await fetch('/api/upload', {
+      const ipfsResponse = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/upload`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -101,7 +101,7 @@ export function StoryGenerator() {
       const { metadataUri } = await ipfsResponse.json();
 
       // Mint NFT
-      const mintResponse = await fetch('/api/mint', {
+      const mintResponse = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/mint`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
