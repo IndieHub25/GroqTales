@@ -223,7 +223,7 @@ export function StoryCard({ story }: { story: Story }) {
       </div>
       <div className="px-4 pb-4">
         <Button variant="outline" className="w-full" asChild>
-          <Link href={`/stories/${story.id}`}>
+          <Link href={`/story/${story.id}`}>
             <BookOpen className="mr-2 h-4 w-4" />
             Read Story
           </Link>
