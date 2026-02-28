@@ -1,16 +1,6 @@
 'use client';
 
-import {
-  BookOpen,
-  Sparkles,
-  Skull,
-  Heart,
-  Rocket,
-  Compass,
-  LucideIcon,
-  GraduationCap,
-  Wand2,
-} from 'lucide-react';
+// No imported icons to prevent Next.js static build errors
 import Link from 'next/link';
 import * as React from 'react';
 
@@ -31,7 +21,7 @@ export const genres: Genre[] = [
   {
     name: 'Fantasy',
     slug: 'fantasy',
-    icon: <Sparkles className="text-purple-500" />,
+    icon: <span className="text-xl">✨</span>,
     color: '#9333ea',
     description: 'Magical worlds, mythical creatures, and epic adventures',
     elements:
@@ -42,7 +32,7 @@ export const genres: Genre[] = [
   {
     name: 'Sci-Fi',
     slug: 'sci-fi',
-    icon: <Rocket className="text-blue-500" />,
+    icon: <span className="text-xl">🚀</span>,
     color: '#3b82f6',
     description:
       'Futuristic technology, space exploration, and alternate realities',
@@ -53,7 +43,7 @@ export const genres: Genre[] = [
   {
     name: 'Horror',
     slug: 'horror',
-    icon: <Skull className="text-red-700" />,
+    icon: <span className="text-xl">💀</span>,
     color: '#b91c1c',
     description:
       'Terrifying tales, supernatural entities, and psychological terror',
@@ -64,7 +54,7 @@ export const genres: Genre[] = [
   {
     name: 'Romance',
     slug: 'romance',
-    icon: <Heart className="text-pink-500" />,
+    icon: <span className="text-xl">❤️</span>,
     color: '#ec4899',
     description: 'Love stories, relationships, and emotional journeys',
     elements:
@@ -74,7 +64,7 @@ export const genres: Genre[] = [
   {
     name: 'Adventure',
     slug: 'adventure',
-    icon: <Compass className="text-amber-600" />,
+    icon: <span className="text-xl">🧭</span>,
     color: '#d97706',
     description: 'Thrilling quests, exploration, and exciting challenges',
     elements:
@@ -84,7 +74,7 @@ export const genres: Genre[] = [
   {
     name: 'Historical',
     slug: 'historical',
-    icon: <BookOpen className="text-yellow-800" />,
+    icon: <span className="text-xl">📜</span>,
     color: '#92400e',
     description: 'Stories set in past time periods with historical context',
     elements:
@@ -94,7 +84,7 @@ export const genres: Genre[] = [
   {
     name: 'Educational',
     slug: 'educational',
-    icon: <GraduationCap className="text-green-600" />,
+    icon: <span className="text-xl">🎓</span>,
     color: '#16a34a',
     description: 'Informative stories that teach valuable lessons and facts',
     elements:
@@ -105,7 +95,7 @@ export const genres: Genre[] = [
   {
     name: 'Magical Realism',
     slug: 'magical-realism',
-    icon: <Wand2 className="text-teal-500" />,
+    icon: <span className="text-xl">🔮</span>,
     color: '#14b8a6',
     description: 'Ordinary worlds with magical elements woven into reality',
     elements: 'Subtle magic, realistic settings, metaphor, cultural traditions',

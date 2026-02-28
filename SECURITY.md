@@ -8,14 +8,14 @@ considered End of Security Support (EoSS).
 
 | Version | Status               | Support Level                 | Notes                               |
 | ------- | -------------------- | ----------------------------- | ----------------------------------- |
-| 1.3.9   | ✅ Active (Latest)   | Full (features + security)    | Current production release          |
-| 1.3.8   | ✅ Active (Previous) | Security & critical bug fixes | Upgrade recommended                 |
+| 1.4.0   | ✅ Active (Latest)   | Full (features + security)    | Current production release          |
+| 1.3.9   | ✅ Active (Previous) | Security & critical bug fixes | Upgrade recommended                 |
 | > 1.1.0 | ⚠️ Maintenance       | Critical security only        | Security maintenance — upgrade ASAP |
 | < 1.1.0 | ❌ EoSS              | No updates                    | Please upgrade immediately          |
 
 > [!IMPORTANT]
 > Version 1.3.7 introduces major cinematic UI/UX overhauls, Supabase interactive authentication flows, global emote removal, and on-chain action steppers with off-chain access control rules.
-> Upgrading to **1.3.9** is strongly recommended.
+> Upgrading to **1.4.0** is strongly recommended.
 
 ## Reporting a Vulnerability
 

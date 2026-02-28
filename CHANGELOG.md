@@ -9,9 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Active full support: 1.3.9 (latest), 1.3.8 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
 
-## [1.3.9] - 2026-02-26
+## [1.3.9] - 2026-02-28
 
 ### Bug Fixes & Infrastructure
+
+- **Cloudflare Pages Static Export Fix**: Resolved `output: 'export'` build failure caused by missing `generateStaticParams()` on dynamic routes. Next.js static export requires every `[param]` route to explicitly return at least one path (e.g. `[{ id: 'default' }]`) or the build fails with a generic missing error.
+  - **`app/nft-marketplace/comic-stories/[id]/page.tsx`**: Added default static params and `dynamicParams = false`.
+  - **`app/nft-marketplace/text-stories/[id]/page.tsx`**: Added default static params and `dynamicParams = false`.
+  - **`app/profile/[username]/page.tsx`**: Added default static params and `dynamicParams = false`.
+  - **`app/stories/[id]/page.tsx`**: Added `dynamicParams = false`.
+  - **`app/genres/[slug]/page.tsx`**: Added `dynamicParams = false`.
+- **Static Prerender Fix (Lucide Icons)**: Fixed `TypeError: u is not a function` occurring during static generation for `/genres/[slug]`. This was caused by importing icons from the `lucide-react` barrel file inside a data object (`genres` array) used across Server and Client boundaries. Replaced with simple inline SVGs.
+- **Static Prerender Fix (Cookies API)**: Fixed `NEXT_STATIC_GEN_BAILOUT` occurring in `app/settings/page.tsx`. `output: export` does not support dynamic Server Components that read cookies using the Supabase client because cookies only exist per-request on a live server. Removed the server-side logic and simplified it to just return `<SettingsClient />` to handle auth purely on the client.
 
 - **Database Plan Migration**: Updated the PostgreSQL database plan in `render.yaml` from the legacy `starter` tier to the currently supported `free` tier to resolve dynamic deployment issues on Render.
 - **Cloudflare Pages Build Fix**: Resolved `cross-env: not found` error that caused all Cloudflare Pages deployments to fail with exit code 127. `cross-env` was listed in `devDependencies` but Cloudflare's build environment sets `NODE_ENV=production` before `npm install`, skipping devDep installation. Replaced `cross-env NEXT_PUBLIC_BUILD_MODE=true` with POSIX inline syntax (`NEXT_PUBLIC_BUILD_MODE=true next build`) in both `build` and `cf-build` scripts — `wrangler.toml` already injects this variable for preview/production environments, making `cross-env` redundant.
