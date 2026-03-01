@@ -71,10 +71,22 @@ export function UserNav() {
     const fetchUserData = async () => {
       if (account || session) {
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/users/profile/${account || session?.user?.id}`);
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+          let fetchUrl = `${baseUrl}/api/v1/users/profile/${account}`;
+          const headers: Record<string, string> = {};
+
+          if (session) {
+            const token = session.access_token;
+            if (token) {
+              headers['Authorization'] = `Bearer ${token}`;
+            }
+            fetchUrl = `${baseUrl}/api/v1/users/profile`;
+          }
+
+          const res = await fetch(fetchUrl, { headers });
           if (res.ok) {
             const data = await res.json();
-            setDbUser(data.data?.user || data.user || data);
+            setDbUser(data.data?.user || data.data || data.user || data);
           }
         } catch (err) {
           console.error("Failed to fetch nav user data", err);
