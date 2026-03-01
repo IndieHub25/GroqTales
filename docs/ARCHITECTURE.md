@@ -31,7 +31,7 @@ extensibility.
 - **Database**: MongoDB with Mongoose ODM
 - **Blockchain**: Monad SDK, Solidity Smart Contracts
 - **AI**: Groq API for story generation
-- **Deployment**: Vercel with edge runtime optimization
+- **Deployment**: Cloudflare Pages with edge network optimization
 
 ## System Architecture
 
@@ -445,7 +445,7 @@ graph TB
     end
 
     subgraph "CDN & Edge"
-        Vercel[Vercel Edge Network]
+        CF[Cloudflare Pages + Edge Network]
         CDN[Static Assets CDN]
     end
 
@@ -476,11 +476,11 @@ graph TB
         Web3Provider[Web3 Provider]
     end
 
-    Browser --> Vercel
-    Mobile --> Vercel
+    Browser --> CF
+    Mobile --> CF
     PWA --> CDN
 
-    Vercel --> NextJS
+    CF --> NextJS
     NextJS --> SSR
     NextJS --> API
     API --> Middleware
@@ -722,7 +722,7 @@ graph LR
     end
 
     subgraph "Production"
-        Vercel[Vercel Platform]
+        CF[Cloudflare Pages]
         Edge[Edge Functions]
         CDN[Global CDN]
         Monitor[Monitoring]
@@ -736,10 +736,10 @@ graph LR
     Build --> Test
     Test --> Deploy
 
-    Deploy --> Vercel
-    Vercel --> Edge
-    Vercel --> CDN
-    Vercel --> Monitor
+    Deploy --> CF
+    CF --> Edge
+    CF --> CDN
+    CF --> Monitor
 ```
 
 ### Environment Architecture

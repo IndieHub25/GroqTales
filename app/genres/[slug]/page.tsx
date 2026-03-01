@@ -15,7 +15,31 @@ import {
 } from '@/components/ui/card';
 import { fetchPopularStoriesByGenre } from '@/lib/mock-data';
 
-function GenrePage({ params }: { params: { slug: string } }) {
+/**
+ * Pre-render a page for every known genre slug at build time.
+ * Required by Next.js static export (`output: 'export'`).
+ *
+ * NOTE: Slugs are hardcoded here because the `genres` array lives in a
+ * 'use client' module (it contains JSX icon elements) and cannot be
+ * imported into server-side generateStaticParams().
+ * Keep this list in sync with components/genre-selector.tsx.
+ */
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return [
+    { slug: 'fantasy' },
+    { slug: 'sci-fi' },
+    { slug: 'horror' },
+    { slug: 'romance' },
+    { slug: 'adventure' },
+    { slug: 'historical' },
+    { slug: 'educational' },
+    { slug: 'magical-realism' },
+  ];
+}
+
+export default function GenrePage({ params }: { params: { slug: string } }) {
   const genre = getGenreBySlug(params.slug);
 
   if (!genre) {

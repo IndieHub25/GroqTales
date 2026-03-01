@@ -11,7 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 
-// In production environments like Vercel, env vars are set in the platform
+// In production environments like Cloudflare Pages, env vars are set in the platform dashboard
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Load environment variables from .env.local if it exists

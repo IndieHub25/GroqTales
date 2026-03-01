@@ -48,6 +48,7 @@ yarn-error.log*
 .tmp
 .cache/
 temp.md
+mgc.md
 
 # Large media files
 *.mp4
@@ -67,6 +68,8 @@ another-danger-rohit.zip
 # Generated files
 /public/sitemap*.xml
 /public/robots.txt
+
+# Generated files (PWA service workers only)
 /public/sw.js
 /public/workbox-*.js
 /public/worker-*.js
@@ -90,3 +93,8 @@ logs
 ehthumbs.db
 Thumbs.db
 TODO.md
+.npm-cache
+
+# Prevent accidental nested dirs
+GroqTales/
+path/

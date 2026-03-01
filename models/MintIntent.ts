@@ -13,10 +13,10 @@ export interface IMintIntent extends Document {
 const MintIntentSchema = new Schema<IMintIntent>({
   intentId: { type: String, required: true, unique: true },
   storyId: { type: String, required: true, index: true },
-  status: { 
-    type: String, 
-    enum: ['pending', 'submitted', 'confirmed', 'failed'], 
-    default: 'pending' 
+  status: {
+    type: String,
+    enum: ['pending', 'submitted', 'confirmed', 'failed'],
+    default: 'pending'
   },
   txHash: { type: String },
   tokenId: { type: String },
@@ -24,4 +24,5 @@ const MintIntentSchema = new Schema<IMintIntent>({
   lastError: { type: String },
 }, { timestamps: true });
 
-export default mongoose.models.MintIntent || mongoose.model<IMintIntent>('MintIntent', MintIntentSchema);
+// export default mongoose.models.MintIntent || mongoose.model<IMintIntent>('MintIntent', MintIntentSchema);
+export default null as any;

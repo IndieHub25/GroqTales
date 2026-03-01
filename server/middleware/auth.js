@@ -3,10 +3,13 @@
  * Handles user authentication and permission checks for comics
  */
 
-const { verifyAccessToken,verifyRefreshToken, signAccessToken } =  require('../utils/jwt.js');
+const {
+  verifyAccessToken,
+  verifyRefreshToken,
+  signAccessToken,
+} = require('../utils/jwt.js');
 
-
-const authRequired = async(req, res, next) => {
+const authRequired = async (req, res, next) => {
   try {
     const header = req.headers.authorization || '';
     const token = header.startsWith('Bearer ') ? header.slice(7) : null;
@@ -37,8 +40,7 @@ const authRequired = async(req, res, next) => {
   }
 };
 
-
-const refresh = async(req, res) => {
+const refresh = async (req, res) => {
   const token = req.cookies.refreshToken;
 
   if (!token) {
@@ -55,7 +57,10 @@ const refresh = async(req, res) => {
     }
     const decoded = verifyRefreshToken(token);
 
-    const newAccessToken = signAccessToken({ id: decoded.id , role: decoded.role});
+    const newAccessToken = signAccessToken({
+      id: decoded.id,
+      role: decoded.role,
+    });
 
     return res.json({
       success: true,
@@ -67,10 +72,9 @@ const refresh = async(req, res) => {
       message: 'Invalid or expired refresh token',
     });
   }
-}
-
+};
 
 module.exports = {
   authRequired,
-  refresh
+  refresh,
 };

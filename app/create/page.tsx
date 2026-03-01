@@ -193,20 +193,20 @@ export default function CreateStoryPage() {
   const hasAnyStoryData = useCallback((formData: StoryFormData) => {
     return Boolean(
       formData.title.trim() ||
-        formData.description.trim() ||
-        formData.genre.trim() ||
-        formData.content.trim() ||
-        formData.coverImage
+      formData.description.trim() ||
+      formData.genre.trim() ||
+      formData.content.trim() ||
+      formData.coverImage
     );
   }, []);
 
   const hasSnapshotContent = useCallback((snapshot: StoryDraftSnapshot) => {
     return Boolean(
       snapshot.title.trim() ||
-        snapshot.description.trim() ||
-        snapshot.genre.trim() ||
-        snapshot.content.trim() ||
-        snapshot.coverImageName
+      snapshot.description.trim() ||
+      snapshot.genre.trim() ||
+      snapshot.content.trim() ||
+      snapshot.coverImageName
     );
   }, []);
 
@@ -805,7 +805,7 @@ export default function CreateStoryPage() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // In production, you would make an API call:
-      // await fetch('/api/stories', {
+      // await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/stories`, {
       //   method: 'POST',
       //   body: JSON.stringify({ ...metadata, ...nftData }),
       // });

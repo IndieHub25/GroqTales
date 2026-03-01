@@ -27,11 +27,9 @@ services:
       - key: JWT_SECRET
         sync: false
       - key: CORS_ORIGIN
-        value: https://groq-tales.vercel.app/
+        value: https://groqtales.xyz
       - key: API_VERSION
         value: v1
-    domains:
-      - groqtales-api.onrender.com
 
   # SDK Service (for future SDK implementations)
   - type: web
@@ -52,9 +50,7 @@ services:
       - key: SDK_VERSION
         value: v1.0.0
       - key: CORS_ORIGIN
-        value: https://groq-tales.vercel.app/
-    domains:
-      - groqtales-sdk.onrender.com
+        value: https://groqtales.xyz
 
   # Background Worker Service
   - type: worker
@@ -80,4 +76,4 @@ databases:
     databaseName: groqtales_cache
     user: groqtales_user
     region: oregon
-    plan: starter
+    plan: free

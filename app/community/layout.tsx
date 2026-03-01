@@ -14,7 +14,7 @@ export default function CommunityLayout({
 }) {
   return (
     <div className="container max-w-6xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-16">
         <h1 className="text-3xl font-bold gradient-heading">Community</h1>
         <div className="flex space-x-2">
           <Link href="/community">
@@ -22,8 +22,8 @@ export default function CommunityLayout({
               Main Feed
             </div>
           </Link>
-          <Link href="/community/creators">
-            <div className="px-4 py-2 rounded-md hover:bg-muted transition-colors">
+          <Link href="/community/creators" className="flex-1 sm:flex-none">
+            <div className="px-3 sm:px-4 py-2 rounded-md hover:bg-muted text-center text-xs sm:text-sm font-bold transition-all">
               Creators
             </div>
           </Link>

@@ -11,21 +11,13 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
-import LegalHeader from "@/components/LegalHeader";
+import LegalHeader from '@/components/LegalHeader';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
 // Floating GitHub button component
-const FloatingGithub = () => (
-  <Link
-    href="https://github.com/Drago-03/GroqTales.git"
-    target="_blank"
-    className="fixed bottom-24 right-6 p-3 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-50"
-  >
-    <Github className="w-6 h-6 text-white" />
-  </Link>
-);
+import { FloatingGithub } from '../terms/page';
 
 // Floating doodle elements
 const FloatingDoodles = () => (
@@ -38,7 +30,7 @@ const FloatingDoodles = () => (
 
 const PrivacySection = ({ icon: Icon, title, children }: any) => (
   <Card className="mb-8">
-    <CardHeader className="flex flex-row items-center space-x-4">
+    <CardHeader className="flex flex-row items-center space-x-2">
       <div className="p-2 bg-primary/10 rounded-full">
         <Icon className="w-6 h-6 text-primary" />
       </div>
@@ -57,14 +49,16 @@ export default function PrivacyPage() {
       <div className="container mx-auto px-4 py-12 relative z-10">
         <div className="max-w-4xl mx-auto">
           <LegalHeader />
-          <h1 className="
+          <h1
+            className="
             text-4xl md:text-5xl
             font-black
             text-center
             mb-6
             text-black
             dark:text-white
-          ">
+          "
+          >
             Privacy Policy
           </h1>
           <p className="text-muted-foreground text-center mb-12">
@@ -83,7 +77,7 @@ export default function PrivacyPage() {
               <li>Stories and content you create or interact with</li>
             </ul>
 
-            <h3 className="text-lg font-semibold mt-4">
+            <h3 className="text-lg font-semibold mt-4 pt-4">
               1.2 Automatically Collected Information
             </h3>
             <p>

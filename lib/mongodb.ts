@@ -4,7 +4,8 @@ import { MongoClient } from 'mongodb';
 import { connectWithRetry, setupGracefulShutdown } from './db/connect';
 
 // Only load dotenv in non-production local dev (avoid interfering with hosting platform env injection)
-if (!process.env.VERCEL && process.env.NODE_ENV !== 'production') {
+// CF_PAGES is set automatically by Cloudflare Pages during builds
+if (!process.env.CF_PAGES && !process.env.CI && process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: '.env.local' });
 }
 
@@ -12,7 +13,7 @@ const shouldMockDb =
   process.env.MONGO_MOCK === 'true' ||
   process.env.NEXT_PUBLIC_BUILD_MODE === 'true' ||
   process.env.CI === 'true' ||
-  process.env.VERCEL === '1' ||
+  process.env.CF_PAGES === '1' ||
   (process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI);
 
 const forceMock = process.env.MONGO_MOCK === 'true';
@@ -48,10 +49,10 @@ function createMockClient(): MockClient {
         insertOne: async () => ({ insertedId: 'mock-id' }),
         updateOne: async () => ({ modifiedCount: 1 }),
         deleteOne: async () => ({ deletedCount: 1 }),
-        createIndex: async () => {},
-        drop: async () => {},
+        createIndex: async () => { },
+        drop: async () => { },
       }),
-      createCollection: async () => {},
+      createCollection: async () => { },
     }),
   };
 }

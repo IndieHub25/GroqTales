@@ -411,8 +411,8 @@ export default function NFTMarketplacePage() {
       </motion.div>
 
       <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">Community Stories</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <h2 className="text-2xl font-bold mb-8">Community Stories</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {allNFTs.slice(0, 4).map((nft) => (
             <Card
               key={nft.id}
@@ -519,7 +519,7 @@ export default function NFTMarketplacePage() {
           ))}
         </div>
 
-        <div className="mt-8 flex justify-center">
+        <div className="mt-16 flex justify-center">
           <div className="flex gap-4">
             <Link href="/nft-marketplace/comic-stories">
               <Button variant="outline">Browse All Comics</Button>

@@ -35,7 +35,7 @@ export function NFTGallery() {
 
   const fetchStories = async () => {
     try {
-      const response = await fetch('/api/stories');
+      const response = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/stories`);
       const data = await response.json();
       setStories(data);
     } catch (error) {

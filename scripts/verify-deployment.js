@@ -107,19 +107,14 @@ docFiles.forEach((file) => {
 
 // 6. Deployment Configuration
 console.log('\n🚀 Checking Deployment Configuration...');
-const vercelConfig =
-  fs.existsSync('vercel.json') || fs.existsSync('next.config.js');
+const cloudflareConfig =
+  fs.existsSync('wrangler.toml') || fs.existsSync('next.config.js');
 const renderConfig = fs.existsSync('render.yaml');
-const netlifyConfig = fs.existsSync('netlify.toml');
 
 addCheck(
   'Frontend Deployment',
-  vercelConfig || netlifyConfig,
-  vercelConfig
-    ? 'Vercel configured'
-    : netlifyConfig
-      ? 'Netlify configured'
-      : 'No frontend deployment config'
+  cloudflareConfig,
+  cloudflareConfig ? 'Cloudflare Pages configured (wrangler.toml)' : 'No frontend deployment config'
 );
 addCheck(
   'Backend Deployment',
@@ -199,7 +194,7 @@ console.log(`✅ Passed: ${passed}/${total} checks (${percentage}%)`);
 if (allPassed) {
   console.log('\n🎉 ALL CHECKS PASSED!');
   console.log('✅ GroqTales is ready for production deployment');
-  console.log('🚀 Frontend: Deploy to Vercel');
+  console.log('🚀 Frontend: Deploy to Cloudflare Pages (npm run cf-build)');
   console.log('🔧 Backend: Deploy to Render');
   console.log('📋 Workflows: GitHub Actions configured');
 } else {

@@ -56,21 +56,28 @@ const options = {
 };
 
 const swaggerSpec = swaggerJSDoc(options);
-// Swagger UI setup
-app.use(
-  '/api-docs',
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec, {
-    swaggerOptions: {
-      withCredentials: true,
-    },
-    customCss: `
-      .curl-command { display: none !important; }
-      .request-url { display: none !important; }
-      .response-col_links { display: none !important; }
-    `,
-  })
-);
+
+// Swagger UI setup — available at both /api-docs and /api/docs
+const swaggerSetup = swaggerUi.setup(swaggerSpec, {
+  swaggerOptions: {
+    withCredentials: true,
+  },
+  customCss: `
+    .curl-command { display: none !important; }
+    .request-url { display: none !important; }
+    .response-col_links { display: none !important; }
+  `,
+  customSiteTitle: 'GroqTales API Documentation',
+});
+
+app.use('/api-docs', swaggerUi.serve, swaggerSetup);
+app.use('/api/docs', swaggerUi.serve, swaggerSetup);
+
+// JSON endpoint for the OpenAPI spec
+app.get('/api/docs/json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
 
 // Security middleware
 app.use(
@@ -112,6 +119,7 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Middleware
+app.use(requestIdMiddleware);
 app.use(compression());
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
@@ -170,14 +178,29 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Root welcome endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to the GroqTales Backend API',
+    status: 'online',
+    version: process.env.API_VERSION || 'v1',
+    docs: '/api-docs',
+    health: '/api/health'
+  });
+});
+
 // API Routes
 app.use('/api/v1/auth', require('./routes/auth'));
 app.use('/api/v1/stories', require('./routes/stories'));
 app.use('/api/v1/comics', require('./routes/comics'));
 app.use('/api/v1/nft', require('./routes/nft'));
 app.use('/api/v1/users', require('./routes/users'));
+
 app.use('/api/v1/ai', require('./routes/ai'));
 app.use('/api/v1/drafts', require('./routes/drafts'));
+app.use('/api/v1/settings/notifications', require('./routes/settings/notifications'));
+app.use('/api/v1/settings/privacy', require('./routes/settings/privacy'));
+app.use('/api/v1/settings/wallet', require('./routes/settings/wallet'));
 
 // SDK Routes (for future SDK implementations)
 app.use('/sdk/v1', require('./routes/sdk'));
