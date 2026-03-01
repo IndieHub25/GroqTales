@@ -75,22 +75,28 @@ router.get('/', async (req, res) => {
 
     const query = {};
 
-    // Build query filters
-    if (status) query.status = status;
-    if (visibility) query.visibility = visibility;
-    if (creator) query.creator = creator;
-    if (genre) query.genres = genre;
-    if (tag) query.tags = tag;
+    // Sanitize query filters to prevent NoSQL injection
+    const allowedStatuses = ['draft', 'published', 'archived'];
+    if (status && allowedStatuses.includes(String(status))) query.status = String(status);
+    const allowedVisibility = ['public', 'private', 'unlisted'];
+    if (visibility && allowedVisibility.includes(String(visibility))) query.visibility = String(visibility);
+    if (creator) query.creator = String(creator);
+    if (genre) query.genres = String(genre);
+    if (tag) query.tags = String(tag);
 
     // Text search
     if (search) {
-      query.$text = { $search: search };
+      query.$text = { $search: String(search) };
     }
 
+    // Validate sort to prevent injection
+    const allowedSortFields = ['createdAt', '-createdAt', 'title', '-title', 'views', '-views', 'updatedAt', '-updatedAt'];
+    const safeSort = allowedSortFields.includes(String(sort)) ? String(sort) : '-createdAt';
+
     const comics = await Comic.find(query)
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .sort(sort)
+      .limit(Math.min(parseInt(limit) || 10, 100))
+      .skip(((parseInt(page) || 1) - 1) * (Math.min(parseInt(limit) || 10, 100)))
+      .sort(safeSort)
       .populate('creator', 'firstName lastName email')
       .lean()
       .exec();
@@ -233,7 +239,7 @@ router.get('/:slug', optionalAuth, async (req, res) => {
  * POST /api/v1/comics
  * Create a new comic (draft)
  */
-router.post('/', async (req, res) => {
+router.post('/', authRequired, async (req, res) => {
   try {
     const {
       title,
@@ -324,7 +330,13 @@ router.patch('/:id', authRequired, async (req, res) => {
         error: 'Access denied',
       });
     }
-    Object.assign(comic, updates);
+    // Only allow safe fields to be updated (prevent overwriting creator, slug, etc.)
+    const allowedUpdates = ['title', 'description', 'genres', 'tags', 'language', 'visibility', 'readingDirection', 'ageRating'];
+    for (const key of allowedUpdates) {
+      if (updates[key] !== undefined) {
+        comic[key] = updates[key];
+      }
+    }
     await comic.save();
     res.json({
       success: true,
@@ -772,55 +784,6 @@ router.post('/:id/unpublish', authRequired, async (req, res) => {
   }
 });
 
-// ============================================================================
-// SEARCH (must be before /:slug to avoid capture)
-// ============================================================================
-
-/**
- * GET /api/v1/comics/search
- * Search comics by text
- */
-router.get('/search/text', async (req, res) => {
-  try {
-    const { q, genres, tags, creator, limit = 20 } = req.query;
-
-    if (!q || q.trim().length < 2) {
-      return res.status(400).json({
-        success: false,
-        error: 'Search query must be at least 2 characters',
-      });
-    }
-
-    const query = {
-      $text: { $search: q },
-      status: 'published',
-      visibility: 'public',
-    };
-
-    if (genres)
-      query.genres = { $in: Array.isArray(genres) ? genres : [genres] };
-    if (tags) query.tags = { $in: Array.isArray(tags) ? tags : [tags] };
-    if (creator) query.creator = creator;
-
-    const comics = await Comic.find(query, { score: { $meta: 'textScore' } })
-      .sort({ score: { $meta: 'textScore' } })
-      .limit(parseInt(limit))
-      .populate('creator', 'firstName lastName')
-      .lean();
-
-    res.json({
-      success: true,
-      data: comics,
-      count: comics.length,
-    });
-  } catch (error) {
-    console.error('Error searching comics:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Search failed',
-      message: error.message,
-    });
-  }
-});
+// Duplicate /search/text route removed (already defined at line 128)
 
 module.exports = router;

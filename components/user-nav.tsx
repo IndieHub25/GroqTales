@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Wallet, User, Settings, LogOut, BookOpen } from 'lucide-react';
+import { Wallet, User, Settings, LogOut, BookOpen, Bell, Shield, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
@@ -32,6 +32,8 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { truncateAddress } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
+import { useUserRole } from '@/hooks/use-user-role';
+import { roleBadgeStyles } from '@/lib/rbac';
 
 export function UserNav() {
   const { account, connectWallet, disconnectWallet } = useWeb3();
@@ -39,6 +41,7 @@ export function UserNav() {
   const [dbUser, setDbUser] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
   const supabase = React.useMemo(() => createClient(), []);
+  const { role, isAdmin, isModerator, isModOrAdmin, isOverridden, toggleViewMode } = useUserRole();
 
   useEffect(() => {
     // Check Supabase session
@@ -139,8 +142,13 @@ export function UserNav() {
         className="w-72 p-0 overflow-hidden border border-white/10 shadow-2xl bg-black/95 backdrop-blur-xl rounded-xl"
         align="end"
       >
-        <DropdownMenuLabel className="bg-emerald-500/10 text-emerald-400 border-b border-white/10 py-3 font-semibold uppercase tracking-wider text-xs">
-          User Controls
+        <DropdownMenuLabel className="bg-emerald-500/10 text-emerald-400 border-b border-white/10 py-3 font-semibold uppercase tracking-wider text-xs flex items-center justify-between">
+          <span>User Controls</span>
+          {role !== 'user' && (
+            <span className={`text-[9px] px-1.5 py-0.5 rounded border ${roleBadgeStyles[role].className}`}>
+              {roleBadgeStyles[role].label}
+            </span>
+          )}
         </DropdownMenuLabel>
 
         <div className="bg-transparent p-1">
@@ -150,7 +158,7 @@ export function UserNav() {
               className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all"
             >
               <Link
-                href={`/profile/${account || session?.user?.id}`}
+                href={`/profile/${dbUser?.username || 'me'}`}
                 className="flex items-center w-full uppercase py-2"
               >
                 <User className="mr-2 h-4 w-4" />
@@ -162,7 +170,7 @@ export function UserNav() {
               className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all"
             >
               <Link
-                href={`/profile/${account || session?.user?.id}`}
+                href={`/profile/${dbUser?.username || 'me'}`}
                 className="flex items-center w-full uppercase py-2"
               >
                 <BookOpen className="mr-2 h-4 w-4" />
@@ -195,6 +203,65 @@ export function UserNav() {
           </DropdownMenuGroup>
 
           <DropdownMenuSeparator className="h-px bg-white/10 mx-0 my-1" />
+
+          {/* Role-based items */}
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              asChild
+              className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all uppercase py-2"
+            >
+              <Link href="/settings" className="flex items-center w-full">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              asChild
+              className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all uppercase py-2"
+            >
+              <Link href="/notifications" className="flex items-center w-full">
+                <Bell className="mr-2 h-4 w-4" />
+                <span>Notifications</span>
+              </Link>
+            </DropdownMenuItem>
+
+            {isAdmin && (
+              <DropdownMenuItem
+                asChild
+                className="cursor-pointer focus:bg-red-500/10 focus:text-red-400 rounded-none transition-all uppercase py-2 text-red-400"
+              >
+                <Link href="/admin" className="flex items-center w-full">
+                  <Shield className="mr-2 h-4 w-4" />
+                  <span>Admin Panel</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
+
+            {isModOrAdmin && (
+              <DropdownMenuItem
+                asChild
+                className="cursor-pointer focus:bg-amber-500/10 focus:text-amber-400 rounded-none transition-all uppercase py-2 text-amber-400"
+              >
+                <Link href="/admin/moderation" className="flex items-center w-full">
+                  <Shield className="mr-2 h-4 w-4" />
+                  <span>Moderation</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
+
+            {isModOrAdmin && (
+              <DropdownMenuItem
+                onClick={toggleViewMode}
+                className="cursor-pointer focus:bg-blue-500/10 focus:text-blue-400 rounded-none transition-all uppercase py-2 text-blue-400"
+              >
+                {isOverridden ? (
+                  <><Eye className="mr-2 h-4 w-4" /><span>Switch to Admin View</span></>
+                ) : (
+                  <><EyeOff className="mr-2 h-4 w-4" /><span>Switch to User View</span></>
+                )}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuGroup>
 
           <DropdownMenuItem
             onClick={handleLogout}

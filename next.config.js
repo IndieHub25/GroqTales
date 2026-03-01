@@ -125,10 +125,6 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'escapetoromance.com',
-      },
-      {
-        protocol: 'https',
         hostname: 'www.nyfa.edu',
       },
       {

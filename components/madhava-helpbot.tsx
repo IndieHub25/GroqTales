@@ -17,27 +17,47 @@ const API_URL =
     : undefined) ?? '';
 const HELPBOT_ENDPOINT = `${API_URL}/api/helpbot/chat`;
 
-const WELCOME_MESSAGE: ChatMessage = {
-  id: 'welcome',
-  role: 'assistant',
-  content:
-    "Hey there! 👋 I'm **MADHAVA**, your GroqTales help bot. Ask me anything about creating stories, minting NFTs, wallet setup, troubleshooting, or the platform in general!",
-  timestamp: new Date(),
-};
+const WELCOME_MESSAGE_CONTENT =
+  "Hey there! 👋 I'm **MADHAVA**, your GroqTales help bot. Ask me anything about creating stories, minting NFTs, wallet setup, troubleshooting, or the platform in general!";
 
 // ── Component ───────────────────────────────────────────────────────
 export default function MadhavaHelpBot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [
+    {
+      id: 'welcome',
+      role: 'assistant',
+      content: WELCOME_MESSAGE_CONTENT,
+      timestamp: new Date(),
+    },
+  ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Mark component as mounted (avoids hydration mismatch for time display)
+  // Mark as mounted so timestamps are only rendered client-side
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  // Poll health status
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/health/bot`, { cache: 'no-store' });
+        const data = await res.json();
+        // Allow ok, healthy, or degraded (still online)
+        setIsOnline(data.status !== 'down');
+      } catch {
+        setIsOnline(false);
+      }
+    };
+    checkHealth();
+    const interval = setInterval(checkHealth, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   // Auto-scroll to bottom when messages change
@@ -99,7 +119,7 @@ export default function MadhavaHelpBot() {
           id: `err-${Date.now()}`,
           role: 'assistant',
           content:
-            "Oops — I couldn't reach the server. Please check your connection and try again.",
+            'Oops — I couldn\'t reach the server. Please check your connection and try again.',
           timestamp: new Date(),
         },
       ]);
@@ -116,7 +136,14 @@ export default function MadhavaHelpBot() {
   };
 
   const clearChat = () => {
-    setMessages([WELCOME_MESSAGE]);
+    setMessages([
+      {
+        id: 'welcome',
+        role: 'assistant',
+        content: WELCOME_MESSAGE_CONTENT,
+        timestamp: new Date(),
+      },
+    ]);
   };
 
   // ── Render ──────────────────────────────────────────────────────
@@ -132,31 +159,13 @@ export default function MadhavaHelpBot() {
       >
         {isOpen ? (
           /* X icon */
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         ) : (
           /* Chat icon */
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
         )}
@@ -177,8 +186,8 @@ export default function MadhavaHelpBot() {
             <div>
               <h3 className="madhava-header__title">MADHAVA Help Bot</h3>
               <span className="madhava-header__status">
-                <span className="madhava-status-dot" />
-                Online
+                <span className={`madhava-status-dot ${isOnline ? '' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-none'}`} style={!isOnline ? { background: '#ef4444' } : {}} />
+                {isOnline ? 'Online' : 'Offline'}
               </span>
             </div>
           </div>
@@ -189,16 +198,7 @@ export default function MadhavaHelpBot() {
               title="Clear chat"
               aria-label="Clear chat history"
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="1 4 1 10 7 10" />
                 <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
               </svg>
@@ -209,16 +209,7 @@ export default function MadhavaHelpBot() {
               title="Close"
               aria-label="Close help bot"
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
@@ -241,13 +232,13 @@ export default function MadhavaHelpBot() {
                   </React.Fragment>
                 ))}
               </div>
-              <time className="madhava-bubble__time">
+              <time className="madhava-bubble__time" suppressHydrationWarning>
                 {isMounted
                   ? msg.timestamp.toLocaleTimeString([], {
                       hour: '2-digit',
                       minute: '2-digit',
                     })
-                  : ''}
+                  : '\u00A0'}
               </time>
             </div>
           ))}
@@ -274,28 +265,19 @@ export default function MadhavaHelpBot() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask me anything about GroqTales…"
+            placeholder={isOnline ? "Ask me anything about GroqTales…" : "Service unavailable"}
             className="madhava-input"
-            disabled={isLoading}
+            disabled={isLoading || !isOnline}
             maxLength={2000}
             aria-label="Type your message"
           />
           <button
             onClick={sendMessage}
-            disabled={isLoading || !input.trim()}
+            disabled={isLoading || !isOnline || !input.trim()}
             className="madhava-send"
             aria-label="Send message"
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="22" y1="2" x2="11" y2="13" />
               <polygon points="22 2 15 22 11 13 2 9 22 2" />
             </svg>

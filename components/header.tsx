@@ -107,23 +107,18 @@ export function Header() {
   const navItems: NavItem[] = [
     { type: 'link', href: '/genres', label: 'Genres' },
     { type: 'link', href: '/community', label: 'Community Hub' },
-    {
-      type: 'link',
-      href: '/community/creators',
-      label: 'Top Creators',
-      icon: <Trophy className="h-4 w-4 mr-1.5 text-emerald-400" />,
-    },
+    { type: 'link', href: '/create/ai-story-pro', label: 'Pro Panel' },
     { type: 'link', href: '/nft-gallery', label: 'NFT Gallery' },
     { type: 'link', href: '/nft-marketplace', label: 'NFT Marketplace' },
     ...(account
       ? [
-          {
-            type: 'link' as const,
-            href: '/dashboard/royalties',
-            label: 'Earnings',
-            icon: <DollarSign className="h-4 w-4 mr-1.5 colorful-icon" />,
-          },
-        ]
+        {
+          type: 'link' as const,
+          href: '/dashboard/royalties',
+          label: 'Earnings',
+          icon: <DollarSign className="h-4 w-4 mr-1.5 colorful-icon" />,
+        },
+      ]
       : []),
   ];
 
@@ -149,27 +144,21 @@ export function Header() {
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
               className="w-10 h-10 sm:w-11 sm:h-11 relative flex-shrink-0"
             >
-              <div className="relative w-full h-full">
-                <Image
-                  src="/logo.png"
-                  alt="GroqTales Logo"
-                  fill
-                  sizes="64px"
-                  className="object-contain drop-shadow-lg"
-                  priority
-                />
-              </div>
+              <Image
+                src="/logo.png"
+                alt="GroqTales Logo"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-contain drop-shadow-lg"
+                priority
+              />
             </motion.div>
             <span className="hidden sm:block font-bold text-xl sm:text-2xl text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 tracking-tight">
               GROQTALES
             </span>
           </Link>
 
-          <nav
-            role="navigation"
-            aria-label="Primary navigation"
-            className="hidden lg:flex items-center space-x-2"
-          >
+          <nav role="navigation" aria-label="Primary navigation" className="hidden lg:flex items-center space-x-2">
             {navItems.map((item, index) => (
               <motion.div
                 key={
@@ -213,9 +202,7 @@ export function Header() {
                         <DropdownMenuItem key={subItem.href} asChild>
                           <Link
                             href={subItem.href}
-                            aria-current={
-                              pathname === subItem.href ? 'page' : undefined
-                            }
+                            aria-current={pathname === subItem.href ? 'page' : undefined}
                             className="flex items-center w-full text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
                           >
                             {subItem.icon && subItem.icon}
@@ -278,7 +265,7 @@ export function Header() {
                         src="/logo.png"
                         alt="Logo"
                         fill
-                        sizes="32px"
+                        sizes="(max-width: 768px) 100vw, 33vw"
                         className="object-contain"
                       />
                     </div>
@@ -324,9 +311,7 @@ export function Header() {
                                 : 'text-white/80 hover:text-white'
                             )}
                           >
-                            {item.icon && (
-                              <span className="mr-3">{item.icon}</span>
-                            )}
+                            {item.icon && <span className="mr-3">{item.icon}</span>}
                             {item.label}
                           </Link>
                         )

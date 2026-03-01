@@ -50,3 +50,29 @@ CREATE TABLE marketplace_listings (
   FOREIGN KEY (story_id) REFERENCES stories(id),
   FOREIGN KEY (seller_id) REFERENCES profiles(id)
 );
+
+-- Trending Stories table (updated by cron or on story events)
+DROP TABLE IF EXISTS trending_stories;
+CREATE TABLE trending_stories (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  story_id TEXT NOT NULL,
+  score REAL DEFAULT 0,
+  period TEXT DEFAULT 'daily', -- 'daily', 'weekly', 'alltime'
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (story_id) REFERENCES stories(id)
+);
+CREATE INDEX idx_trending_period_score ON trending_stories(period, score DESC);
+
+-- Notifications table
+DROP TABLE IF EXISTS notifications;
+CREATE TABLE notifications (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  type TEXT NOT NULL, -- 'story_approved', 'story_rejected', 'new_follower', 'new_like', 'system'
+  title TEXT NOT NULL,
+  body TEXT DEFAULT '',
+  read INTEGER DEFAULT 0,
+  metadata TEXT DEFAULT '{}', -- JSON for extra data (storyId, fromUserId, etc.)
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_notifications_user ON notifications(user_id, read, created_at DESC);

@@ -66,6 +66,8 @@ export function TrendingStories() {
         } else {
           setStories([]);
         }
+      } else if (res.status === 404) {
+        setStories([]); // Graceful empty state
       } else {
         setError(`Server error: ${res.status} ${res.statusText}`);
         setStories([]);

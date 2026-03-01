@@ -11,7 +11,115 @@ Active full support: 1.3.9 (latest). Security maintenance (critical fixes only):
 
 ## [1.3.9] - 2026-03-01
 
-### Codebase Optimization & Cleanup
+### Core Infrastructure
+
+- Implement core application structure, API routes, UI components, and Cloudflare Worker for GroqTales.
+
+### Backend Integration & Production Config
+
+#### Backend API Wiring
+- **`lib/api-client.ts`** [NEW]: Centralized `apiFetch()` and `authHeaders()` helpers for consistent API base URL usage across all frontend components.
+- **`.env.example`**: Added `NEXT_PUBLIC_API_URL`, `PROD_URL`, `CORS_ORIGIN` environment variables.
+- **`scripts/check-env.js`**: Added `NEXT_PUBLIC_API_URL` to required environment variables validation.
+
+#### Production Config Fix — Localhost Removal
+- **`server/backend.js`**: Swagger server URL changed from `process.env.URL || 'http://localhost:PORT'` → `process.env.PROD_URL || 'https://groqtales-backend-api.onrender.com/api'` with "Production" description. CORS origin default changed from `localhost:3000` → `https://groqtales.xyz`. Health check startup logs now use `PROD_URL`.
+- **`server/sdk-server.js`**: CORS origin default changed from `localhost:3000` → `https://groqtales.xyz`.
+
+#### Health Endpoints
+- **`server/backend.js`**: Added `GET /api/health/db` (database connectivity) and `GET /api/health/bot` (help bot availability) endpoints.
+- **`hooks/use-system-health.ts`** [NEW]: Frontend hook that polls backend health endpoints, used to show/hide the "System Offline" banner.
+- **`components/footer.tsx`**: Fixed health check parsing — was checking for `'ok'` status but backend returns `'healthy'`.
+
+### RBAC — Role-Based Access Control
+
+- **`lib/rbac.ts`** [NEW]: Role helper functions (`getUserRoles()`, `isAdmin()`, `isModerator()`, `isModOrAdmin()`, `getPrimaryRole()`) reading from Supabase `user_metadata.roles`. Includes `roleBadgeStyles` config for Admin (red), Moderator (amber), User (emerald) badges.
+- **`hooks/use-user-role.ts`** [NEW]: React hook reading Supabase session roles with `localStorage`-based view-switching so admins/mods can preview the UI as a regular user.
+- **`components/user-nav.tsx`**: Added RBAC-aware dropdown items — role badge next to "User Controls", conditional "Admin Panel" (admin only), "Moderation" (admin + mod), "Settings", "Notifications" (all users), and "Switch to User/Admin View" toggle (admin + mod).
+
+### MADHAVA Help Bot — Express Backend
+
+- **`server/routes/helpbot.js`** [NEW]: `POST /api/helpbot/chat` endpoint integrating with Groq LLM API. Includes system prompt with GroqTales knowledge base and fallback message when `GROQ_API_KEY` is not configured.
+- **`server/backend.js`**: Mounted helpbot route at `/api/helpbot`.
+
+### Profile Refactor — Username-Based URLs
+
+- **`server/routes/users.js`**: Added `GET /api/v1/users/profile/username/:username` route for fetching profiles by username.
+- **`app/profile/[slug]/page.tsx`** [NEW]: Server component for username-based profile routing.
+- **`app/profile/[slug]/client.tsx`** [NEW]: Full profile client component — handles `/profile/me` (authenticated) and `/profile/:username` (public), displays moderation status badges, user stats, story list, and "Mint NFT" button for owned approved stories.
+- **`app/profile/page.tsx`**: Now redirects to `/profile/me`.
+- **`app/profile/[id]/`** [DELETED]: Removed old ObjectId-based profile pages.
+
+### Story Moderation System
+
+- **`server/models/Story.js`**: Added `moderationStatus` (`pending`/`approved`/`rejected`), `moderatorId`, and `moderationNotes` fields to the Story schema.
+- **`server/routes/stories.js`**: `GET /` now filters by `moderationStatus` (defaults to `approved`, accepts `?status=` query param). `POST /create` sets new stories to `pending`. Added `PATCH /:id/moderate` for admin approval/rejection.
+- **`app/admin/moderation/page.tsx`** [NEW]: Admin-only moderation queue page with approve/reject UI for pending stories.
+
+### Real Data Integration
+
+- **`scripts/seed.js`**: Rewritten with 10 users (including admin) and 10 diverse stories (8 approved, 2 pending) for development and testing.
+- **`components/story-feed.tsx`**: Replaced hardcoded mock data with live fetch from `/api/v1/stories?limit=6`. Added loading skeleton placeholders and empty state.
+- **`components/community-feed.tsx`**: Fixed broken API URL (was `\${}` escaped template literal + non-existent `/api/feed` endpoint → now properly interpolates `NEXT_PUBLIC_API_URL` and fetches from `/api/v1/stories`).
+
+### Cloudflare Worker — D1 Feeds (Trending & Notifications)
+
+- **`cf-worker/schema.sql`**: Added `trending_stories` table (`story_id`, `score`, `period`, indexed by `period + score DESC`) and `notifications` table (`id`, `user_id`, `type`, `title`, `body`, `read`, `metadata`, indexed by `user_id + read + created_at`).
+- **`cf-worker/src/routes/feeds.ts`** [NEW]: Hono route group — `GET /api/feeds/trending`, `GET /api/feeds/notifications/:userId`, `POST /api/feeds/notifications/:id/read`, `POST /api/feeds/notifications/mark-all-read`.
+- **`cf-worker/src/index.ts`**: Imported and mounted feeds route at `/api/feeds`.
+- **`lib/feeds-client.ts`** [NEW]: Frontend helper — `fetchTrending()`, `fetchNotifications()`, `markNotificationRead()`, `markAllNotificationsRead()`. Tries CF Worker URL first (`NEXT_PUBLIC_CF_WORKER_URL`), falls back to Express backend.
+
+### New Pages
+
+- **`app/notifications/page.tsx`** [NEW]: Notifications list page with type-aware icons, unread count badge, mark-as-read, and mark-all-read functionality. Fetches from CF Worker D1 feeds endpoint.
+
+### Bug Fixes — 2026-03-01
+
+- **Broken Logger Imports**: Fixed `Cannot find module '../lib/logger'` crash in `server/routes/helpbot.js`, `server/routes/feed.js`, and `server/routes/settings/profile.js`. All three files referenced `../lib/logger` (or `../../lib/logger`) but the module lives at `server/utils/logger.js`. Updated import paths accordingly.
+- **Feed Route Error Handling**: Improved `server/routes/feed.js` — added 10s timeout to the CF Worker proxy call, fixed error logging that was printing `undefined` instead of the actual error message, and changed response status from 500 to 502 (Bad Gateway) for upstream failures.
+- **Dead Romance Genre Image**: Replaced `escapetoromance.com` image URL (timing out / unreachable) with a working Unsplash image in `app/page.tsx` and `app/genres/page.tsx`. Removed `escapetoromance.com` from `next.config.js` `remotePatterns`.
+- **Hydration Mismatch Fix**: Fixed React hydration error ("Text content does not match server-rendered HTML") caused by `MadhavaHelpBot` rendering `new Date().toLocaleTimeString()` at module level during SSR. The timestamp was baked into server HTML then differed on the client (e.g. "02:48 PM" vs "02:49 PM"). Fixed by deferring timestamp rendering to client-only with an `isMounted` pattern and `suppressHydrationWarning`. This also resolved the cascading CSS MIME type error that occurred when hydration crashed.
+
+### Swagger API Documentation Overhaul
+
+- **Comprehensive Swagger Coverage**: Added `@swagger` JSDoc annotations to **10 route files** covering **30+ endpoints** that were previously undocumented in the Swagger UI at `/api/docs`.
+  - `server/routes/ai.js` — AI generate and analyze endpoints
+  - `server/routes/feed.js` — Public story feed proxy endpoint
+  - `server/routes/helpbot.js` — MADHAVA AI helpbot chat endpoint
+  - `server/routes/users.js` — 4 user profile endpoints (self, by ID, by wallet, update)
+  - `server/routes/sdk.js` — SDK health and docs endpoints
+  - `server/routes/settings/profile.js` — Profile get/update settings
+  - `server/routes/settings/notifications.js` — Notification preferences get/update
+  - `server/routes/settings/privacy.js` — Privacy settings get/update
+  - `server/routes/settings/wallet.js` — Wallet connection get/update
+- **Expanded Swagger Config** (`server/backend.js`): Added 11 tag groups (Health, Authentication, Stories, AI, Users, Feed, Helpbot, Settings, NFT, Comics, SDK), reusable `Error` and `Pagination` schemas, API contact/license info, and expanded `apis` glob to `['./routes/*.js', './routes/**/*.js', './backend.js']` to include nested `settings/` routes.
+
+### Health Endpoint Improvements
+
+- **Smart No-DB Mode**: Health endpoint (`/api/health`) now reports `healthy` when `MONGODB_URI` is not configured instead of falsely reporting `degraded`. Only shows `degraded` when the DB is configured but the connection failed.
+- **Rich Diagnostics**: Health response now includes uptime, memory usage (RSS, heap), service statuses (API, database, helpbot), and descriptive notes explaining connection state.
+- **Swagger Annotations**: Added `@swagger` JSDoc to `/api/health`, `/api/health/db`, and `/api/health/bot` endpoints.
+
+### Backend & API Routing Fixes
+
+- **Backend Versioning**: Bumped the Render backend API package version to `1.2.0`.
+- **Feed API Endpoint [NEW]**: Added `server/routes/feed.js` to securely proxy requests to the Cloudflare D1 database, resolving persistent `/api/feed` 404 errors on the frontend.
+- **MADHAVA Bot API Proxy [NEW]**: Added `server/routes/helpbot.js` to the Render backend to pass `GROQ_API_KEY` authenticated requests to the Cloudflare Worker, fixing the `/api/helpbot/chat` 405 error. 
+- **DB Health Endpoint Fix**: Fixed `/api/health/db` route resolution resolving a frontend 404.
+- **Bot Health API Endpoint [NEW]**: Implemented `/api/health/bot` on the Render backend to specifically test Groq AI Bot availability.
+- **Cloudflare Story Sync**: Modified `server/routes/stories.js` to automatically proxy new MongoDB story creation payloads to the Cloudflare Worker via `axios.post`, keeping D1 fully synced in real-time.
+
+### Frontend UI & State Enhancements
+
+- **Discover Worlds Fix**: Removed the duplicate mapping block that was causing genres to appear twice in the grid layout.
+- **Trending Stories Error State**: Suppressed the scary "Something Went Wrong: 404" block for empty feed arrays. It now correctly shows a friendly "No Stories Yet" CTA until stories are created. Real 5xx errors still trigger the error block.
+- **Dynamic AI Health Status**: The Footer "Groq AI" label and MADHAVA Help Bot now check real backend health routes before displaying "System Operational" or "System Offline," preventing false marketing claims when services are down.
+- **Create Story CTA Redirect**: Updated the "Start Creating" buttons to navigate directly to `/create/ai-story` (the active creator form) instead of the empty layout wrapper at `/create`.
+- **Profile D1 Sync**: Enhanced `profile-form.tsx` to push essential profile fields (Avatar, Username) to the Cloudflare Worker (`/api/profiles`) immediately after saving to Supabase. This ensures feed items sourced from Cloudflare D1 reflect real-time profile data.
+- **Dual DB Profile Sync**: Upgraded `profile-form.tsx` to explicitly upsert profile changes into the Supabase PostgREST `profiles` table in addition to Auth and Cloudflare, ensuring comprehensive global consistency.
+- **Navigation UX**: Moved the "Top Creators" link from the Main Navigation Header to the Footer section under Explore.
+- **Bot Health UI Polling**: Updated the frontend Helpbot (`components/madhava-helpbot.tsx`) to poll the specific bot health route.
+- **Service Worker Patch**: Created a minimal `public/sw.js` to intercept frontend PWA registration attempts gracefully, preventing browser console 404 logs.
 
 #### Deleted — Unnecessary Files & Directories
 
