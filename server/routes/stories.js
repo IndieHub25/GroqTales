@@ -301,7 +301,9 @@ router.patch('/:id/moderate', authRequired, async (req, res) => {
     }
 
     const { status, notes } = req.body;
-    if (!['approved', 'rejected'].includes(status)) {
+    // Coerce status to string and validate against an allowlist to prevent NoSQL injection
+    const sanitizedStatus = typeof status === 'string' ? status : String(status);
+    if (!['approved', 'rejected'].includes(sanitizedStatus)) {
       return res.status(400).json({ error: 'Status must be approved or rejected' });
     }
 
@@ -316,7 +318,7 @@ router.patch('/:id/moderate', authRequired, async (req, res) => {
     const story = await Story.findByIdAndUpdate(
       req.params.id,
       {
-        moderationStatus: status,
+        moderationStatus: sanitizedStatus,
         moderatorId: req.user.id,
         moderationNotes: sanitizedNotes,
       },
