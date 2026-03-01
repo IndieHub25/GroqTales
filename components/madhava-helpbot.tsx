@@ -31,8 +31,14 @@ export default function MadhavaHelpBot() {
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Mark component as mounted (avoids hydration mismatch for time display)
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -200,10 +206,12 @@ export default function MadhavaHelpBot() {
                 ))}
               </div>
               <time className="madhava-bubble__time">
-                {msg.timestamp.toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+                {isMounted
+                  ? msg.timestamp.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  : ''}
               </time>
             </div>
           ))}

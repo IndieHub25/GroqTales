@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Space+Grotesk:wght@300;400;500;600;700&family=Permanent+Marker&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+@import 'https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Space+Grotesk:wght@300;400;500;600;700&family=Permanent+Marker&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap';
+@import 'https://fonts.googleapis.com/css2?family=Bangers&display=swap';
 
 @tailwind base;
 @tailwind components;
@@ -938,9 +938,10 @@
     transition: border-color 0.2s ease;
   }
 
-  .noir-input:focus {
+  .noir-input:focus-visible {
     border-color: #8a0000;
-    outline: none;
+    outline: 3px solid var(--ring);
+    outline-offset: 3px;
   }
 
   .noir-input::placeholder {
@@ -978,7 +979,7 @@
     font-family: var(--font-marker);
     font-weight: 700;
     transform: skewX(-4deg);
-    -webkit-text-stroke: 0.5px currentColor;
+    -webkit-text-stroke: 0.5px currentcolor;
     paint-order: stroke fill;
   }
 
