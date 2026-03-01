@@ -6,12 +6,15 @@
  */
 
 import React, { useState } from 'react';
-import { useProPanelStore, selectPresets, selectIsModified } from '@/store/proPanelStore';
+import {
+  ArrowLeftRight,
+  FolderOpen,
+  RotateCcw,
+  Save,
+  Trash2,
+} from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Save, FolderOpen, Trash2, ArrowLeftRight, RotateCcw } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -28,9 +31,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import {
+  selectIsModified,
+  selectPresets,
+  useProPanelStore,
+} from '@/store/proPanelStore';
+
 import { ImportExportDialog } from './ImportExportDialog';
 
+/** Preset toolbar — save, load, delete, compare, reset, and import/export. */
 export function PresetManager() {
   const { toast } = useToast();
   const currentPresetName = useProPanelStore((s) => s.currentPresetName);
@@ -98,7 +111,9 @@ export function PresetManager() {
       {/* Current Preset Info */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-gray-400 font-condensed uppercase tracking-wider">Active File:</span>
+          <span className="text-[10px] text-gray-400 font-condensed uppercase tracking-wider">
+            Active File:
+          </span>
           <span className="font-marker text-xs uppercase tracking-widest text-white px-2 py-1 bg-noir-primary border-2 border-black">
             {currentPresetName}
             {isModified && <span className="text-yellow-300 ml-1">*</span>}
@@ -120,14 +135,21 @@ export function PresetManager() {
           </DialogTrigger>
           <DialogContent className="bg-gray-950 border-2 border-white/10 shadow-[0_0_30px_rgba(138,0,0,0.15)]">
             <DialogHeader>
-              <DialogTitle className="font-marker uppercase tracking-widest text-white">Save Dossier</DialogTitle>
+              <DialogTitle className="font-marker uppercase tracking-widest text-white">
+                Save Dossier
+              </DialogTitle>
               <DialogDescription className="font-condensed text-gray-400 uppercase tracking-wider text-xs">
                 Save your current parameter configuration as a new dossier.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="preset-name" className="font-condensed font-bold uppercase text-xs tracking-wider text-gray-300">Dossier Name</Label>
+                <Label
+                  htmlFor="preset-name"
+                  className="font-condensed font-bold uppercase text-xs tracking-wider text-gray-300"
+                >
+                  Dossier Name
+                </Label>
                 <Input
                   id="preset-name"
                   value={newPresetName}
@@ -137,7 +159,12 @@ export function PresetManager() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="preset-description" className="font-condensed font-bold uppercase text-xs tracking-wider text-gray-300">Notes (optional)</Label>
+                <Label
+                  htmlFor="preset-description"
+                  className="font-condensed font-bold uppercase text-xs tracking-wider text-gray-300"
+                >
+                  Notes (optional)
+                </Label>
                 <Textarea
                   id="preset-description"
                   value={newPresetDescription}
@@ -177,9 +204,17 @@ export function PresetManager() {
               <FolderOpen className="w-3 h-3 inline-block mr-1" /> Load
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 bg-black/95 border-2 border-white/20">
+          <DropdownMenuContent
+            align="end"
+            className="w-64 bg-black/95 border-2 border-white/20"
+          >
             {presetList.length === 0 ? (
-              <DropdownMenuItem disabled className="text-gray-500 font-condensed uppercase text-xs">No dossiers saved</DropdownMenuItem>
+              <DropdownMenuItem
+                disabled
+                className="text-gray-500 font-condensed uppercase text-xs"
+              >
+                No dossiers saved
+              </DropdownMenuItem>
             ) : (
               presetList.map(([key, preset]) => (
                 <DropdownMenuItem
@@ -191,7 +226,9 @@ export function PresetManager() {
                     onClick={() => handleLoadPreset(key)}
                     className="flex-1 text-left"
                   >
-                    <div className="font-condensed font-bold uppercase text-xs tracking-wider">{preset.name}</div>
+                    <div className="font-condensed font-bold uppercase text-xs tracking-wider">
+                      {preset.name}
+                    </div>
                     {preset.description && (
                       <div className="text-[10px] text-gray-500 font-condensed line-clamp-1">
                         {preset.description}
@@ -213,8 +250,12 @@ export function PresetManager() {
               ))
             )}
             <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem onClick={handleReset} className="text-noir-primary font-condensed font-bold uppercase text-xs tracking-wider">
-              <RotateCcw className="w-3 h-3 inline-block mr-1" /> Reset to Defaults
+            <DropdownMenuItem
+              onClick={handleReset}
+              className="text-noir-primary font-condensed font-bold uppercase text-xs tracking-wider"
+            >
+              <RotateCcw className="w-3 h-3 inline-block mr-1" /> Reset to
+              Defaults
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -9,9 +9,10 @@
  * - Font-condensed bold uppercase title
  */
 
-import React from 'react';
 import Image from 'next/image';
+import React from 'react';
 
+/** Props for GenreCard — genre metadata, selection state, and click handler. */
 export interface GenreCardProps {
   id: string;
   title: string;
@@ -24,6 +25,7 @@ export interface GenreCardProps {
   onSelect: (id: string) => void;
 }
 
+/** Mugshot-style genre/preset card with grayscale image and case-ID bar. */
 export function GenreCard({
   id,
   title,
@@ -39,10 +41,11 @@ export function GenreCard({
     <button
       type="button"
       onClick={() => onSelect(id)}
-      className={`group relative w-full text-left overflow-hidden transition-all shadow-comic group-hover:-translate-y-1 ${isSelected
+      className={`group relative w-full text-left overflow-hidden transition-all shadow-comic group-hover:-translate-y-1 ${
+        isSelected
           ? 'border-4 border-noir-primary bg-noir-primary/20'
           : 'border-4 border-black bg-white'
-        }`}
+      }`}
     >
       {/* Card inner padding like reference */}
       <div className="p-2">

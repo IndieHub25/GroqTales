@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { useProPanelStore, selectParameters } from '@/store/proPanelStore';
+
+import { selectParameters, useProPanelStore } from '@/store/proPanelStore';
+
 import {
-  SelectControl,
-  TextareaControl,
-  TagsInputControl,
-  ControlGrid,
   CollapsibleGroup,
+  ControlGrid,
+  SelectControl,
+  TagsInputControl,
+  TextareaControl,
 } from '../controls';
 
 const COVER_STYLES = [
@@ -49,15 +51,9 @@ const ILLUSTRATION_FREQUENCIES = [
   'graphic-novel',
 ] as const;
 
-const ASPECT_RATIOS = [
-  '1:1',
-  '4:3',
-  '16:9',
-  '3:4',
-  '9:16',
-  '2:3',
-] as const;
+const ASPECT_RATIOS = ['1:1', '4:3', '16:9', '3:4', '9:16', '2:3'] as const;
 
+/** Parameter controls for cover art style and colour palette. */
 export function VisualSection() {
   const parameters = useProPanelStore(selectParameters);
   const updateParameter = useProPanelStore((s) => s.updateParameter);
@@ -89,7 +85,9 @@ export function VisualSection() {
           description="How often illustrations appear"
           value={visual.illustrationFrequency}
           options={ILLUSTRATION_FREQUENCIES}
-          onChange={(v) => updateParameter('visual', 'illustrationFrequency', v)}
+          onChange={(v) =>
+            updateParameter('visual', 'illustrationFrequency', v)
+          }
         />
         <SelectControl
           label="Aspect Ratio"
@@ -125,4 +123,3 @@ export function VisualSection() {
     </div>
   );
 }
-

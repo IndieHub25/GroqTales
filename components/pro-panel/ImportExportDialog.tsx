@@ -6,9 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { useProPanelStore } from '@/store/proPanelStore';
-import { Textarea } from '@/components/ui/textarea';
-import { Upload, Download, Clipboard, Save, CheckCircle } from 'lucide-react';
+import { CheckCircle, Clipboard, Download, Save, Upload } from 'lucide-react';
+
 import {
   Dialog,
   DialogContent,
@@ -17,17 +16,23 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { useProPanelStore } from '@/store/proPanelStore';
 
 interface ImportExportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function ImportExportDialog({ open, onOpenChange }: ImportExportDialogProps) {
+/** Dialog for exporting/importing presets as JSON. */
+export function ImportExportDialog({
+  open,
+  onOpenChange,
+}: ImportExportDialogProps) {
   const { toast } = useToast();
   const { exportPresets, importPresets } = useProPanelStore();
-  
+
   const [importText, setImportText] = useState('');
   const [activeTab, setActiveTab] = useState<string>('export');
 
@@ -59,7 +64,7 @@ export function ImportExportDialog({ open, onOpenChange }: ImportExportDialogPro
     }
 
     const result = importPresets(importText);
-    
+
     if (result.success) {
       toast({
         title: 'Import Successful',
@@ -88,7 +93,7 @@ export function ImportExportDialog({ open, onOpenChange }: ImportExportDialogPro
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       toast({
         title: 'Downloaded!',
         description: 'Presets file has been downloaded.',
@@ -177,8 +182,9 @@ export function ImportExportDialog({ open, onOpenChange }: ImportExportDialogPro
             </div>
             <div className="p-3 bg-black/40 border-l-4 border-[#8a0000] text-gray-400">
               <p className="font-condensed uppercase tracking-wider text-[10px]">
-                <strong className="text-white">Notice:</strong> Importing will merge with existing dossiers.
-                Files with matching keys will be overwritten.
+                <strong className="text-white">Notice:</strong> Importing will
+                merge with existing dossiers. Files with matching keys will be
+                overwritten.
               </p>
             </div>
             <button

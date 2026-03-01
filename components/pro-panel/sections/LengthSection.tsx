@@ -6,21 +6,18 @@
  */
 
 import React from 'react';
-import { useProPanelStore, selectParameters } from '@/store/proPanelStore';
+
+import { selectParameters, useProPanelStore } from '@/store/proPanelStore';
+
 import {
-  SelectControl,
-  NumberInputControl,
-  SwitchControl,
-  ControlGrid,
   CollapsibleGroup,
+  ControlGrid,
+  NumberInputControl,
+  SelectControl,
+  SwitchControl,
 } from '../controls';
 
-const SCENE_LENGTHS = [
-  'short',
-  'medium',
-  'long',
-  'variable',
-] as const;
+const SCENE_LENGTHS = ['short', 'medium', 'long', 'variable'] as const;
 
 const FORMAT_TYPES = [
   'flash-fiction',
@@ -41,6 +38,7 @@ const WORD_COUNT_PRESETS = [
   { label: 'Epic (100K+)', value: 120000 },
 ];
 
+/** Parameter controls for story length, format, and chapter structure. */
 export function LengthSection() {
   const parameters = useProPanelStore(selectParameters);
   const updateParameter = useProPanelStore((s) => s.updateParameter);
@@ -48,7 +46,14 @@ export function LengthSection() {
   const length = parameters.length;
 
   const applyPreset = (wordCount: number) => {
-    const presets: Record<number, { chapters: number; avgLength: number; format: typeof FORMAT_TYPES[number] }> = {
+    const presets: Record<
+      number,
+      {
+        chapters: number;
+        avgLength: number;
+        format: (typeof FORMAT_TYPES)[number];
+      }
+    > = {
       500: { chapters: 1, avgLength: 500, format: 'flash-fiction' },
       5000: { chapters: 5, avgLength: 1000, format: 'short-story' },
       12000: { chapters: 8, avgLength: 1500, format: 'novelette' },
@@ -56,7 +61,7 @@ export function LengthSection() {
       70000: { chapters: 25, avgLength: 2800, format: 'novel' },
       120000: { chapters: 40, avgLength: 3000, format: 'epic' },
     };
-    
+
     const preset = presets[wordCount];
     if (preset) {
       updateCategory('length', {
@@ -81,9 +86,10 @@ export function LengthSection() {
               onClick={() => applyPreset(preset.value)}
               className={`
                 px-3 py-1.5 text-xs font-medium border-2 transition-all
-                ${length.targetWordCount === preset.value
-                  ? 'bg-primary text-primary-foreground border-foreground shadow-[2px_2px_0px_0px_var(--foreground)]'
-                  : 'bg-card text-foreground border-foreground/50 hover:border-foreground hover:bg-muted'
+                ${
+                  length.targetWordCount === preset.value
+                    ? 'bg-primary text-primary-foreground border-foreground shadow-[2px_2px_0px_0px_var(--foreground)]'
+                    : 'bg-card text-foreground border-foreground/50 hover:border-foreground hover:bg-muted'
                 }
               `}
             >
@@ -130,7 +136,9 @@ export function LengthSection() {
             min={100}
             max={10000}
             step={100}
-            onChange={(v) => updateParameter('length', 'averageChapterLength', v)}
+            onChange={(v) =>
+              updateParameter('length', 'averageChapterLength', v)
+            }
           />
           <SelectControl
             label="Scene Length"
@@ -159,4 +167,3 @@ export function LengthSection() {
     </div>
   );
 }
-

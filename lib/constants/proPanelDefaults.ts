@@ -3,11 +3,16 @@
  * Centralized configuration for all Pro Panel parameters
  */
 
-import type { ProParameters, ProPreset, CategoryKey } from '../schemas/proPanelSchemas';
+import type {
+  ProParameters,
+  ProPreset,
+  CategoryKey,
+} from '../schemas/proPanelSchemas';
 
 // ============================================================
 // DEFAULT PARAMETERS
 // ============================================================
+/** Sensible defaults for all 70+ Pro Panel parameters. */
 export const DEFAULT_PARAMETERS: ProParameters = {
   storyStructure: {
     narrativeStyle: 'linear',
@@ -63,7 +68,7 @@ export const DEFAULT_PARAMETERS: ProParameters = {
     allegoricalLevel: 20,
   },
   modelSettings: {
-    modelSelection: 'llama3-70b-8192',
+    modelSelection: 'llama-3.3-70b-versatile',
     temperature: 0.8,
     maxTokens: 4096,
     topP: 0.9,
@@ -107,6 +112,7 @@ export const DEFAULT_PARAMETERS: ProParameters = {
 // ============================================================
 // CATEGORY CONFIGURATION
 // ============================================================
+/** Metadata shape for each parameter category (title, icon, order). */
 export interface CategoryConfig {
   title: string;
   description: string;
@@ -114,6 +120,7 @@ export interface CategoryConfig {
   order: number;
 }
 
+/** Ordered category metadata used by the Mission Navigator and section headers. */
 export const CATEGORY_CONFIG: Record<CategoryKey, CategoryConfig> = {
   storyStructure: {
     title: 'Story Structure',
@@ -123,7 +130,8 @@ export const CATEGORY_CONFIG: Record<CategoryKey, CategoryConfig> = {
   },
   characters: {
     title: 'Characters',
-    description: 'Define protagonist depth, supporting cast, and dialogue style',
+    description:
+      'Define protagonist depth, supporting cast, and dialogue style',
     icon: 'users',
     order: 2,
   },
@@ -174,10 +182,12 @@ export const CATEGORY_CONFIG: Record<CategoryKey, CategoryConfig> = {
 // ============================================================
 // BUILT-IN PRESETS
 // ============================================================
+/** Curated built-in presets shipped with the Pro Panel (Noir Dossier, etc.). */
 export const BUILT_IN_PRESETS: Record<string, Omit<ProPreset, 'timestamp'>> = {
   'noir-dossier': {
     name: 'Noir Dossier',
-    description: 'Gritty detective fiction with shadowy atmospherics and moral ambiguity',
+    description:
+      'Gritty detective fiction with shadowy atmospherics and moral ambiguity',
     version: 1,
     parameters: {
       ...DEFAULT_PARAMETERS,
@@ -391,7 +401,8 @@ export const BUILT_IN_PRESETS: Record<string, Omit<ProPreset, 'timestamp'>> = {
   },
   'cozy-mystery': {
     name: 'Cozy Mystery',
-    description: 'Charming whodunits with quirky characters and low-stakes violence',
+    description:
+      'Charming whodunits with quirky characters and low-stakes violence',
     version: 1,
     parameters: {
       ...DEFAULT_PARAMETERS,
@@ -442,7 +453,8 @@ export const BUILT_IN_PRESETS: Record<string, Omit<ProPreset, 'timestamp'>> = {
   },
   'literary-fiction': {
     name: 'Literary Fiction',
-    description: 'Character-driven narratives with deep introspection and thematic weight',
+    description:
+      'Character-driven narratives with deep introspection and thematic weight',
     version: 1,
     parameters: {
       ...DEFAULT_PARAMETERS,
@@ -494,7 +506,10 @@ export const BUILT_IN_PRESETS: Record<string, Omit<ProPreset, 'timestamp'>> = {
       advanced: {
         ...DEFAULT_PARAMETERS.advanced,
         pointOfView: 'third-person-omniscient',
-        experimentalTechniques: ['stream-of-consciousness', 'multiple-timelines'],
+        experimentalTechniques: [
+          'stream-of-consciousness',
+          'multiple-timelines',
+        ],
         genreMashup: ['literary', 'drama'],
       },
     },
@@ -567,6 +582,7 @@ export const BUILT_IN_PRESETS: Record<string, Omit<ProPreset, 'timestamp'>> = {
 // ============================================================
 // GENRE PRESET METADATA (for cards with images)
 // ============================================================
+/** Display metadata for a genre preset card (image, badge, archetype). */
 export interface GenrePresetMeta {
   id: string;
   title: string;
@@ -577,6 +593,7 @@ export interface GenrePresetMeta {
   archetype: string;
 }
 
+/** Genre card metadata used by the `GenreGrid` component. */
 export const GENRE_PRESET_META: GenrePresetMeta[] = [
   {
     id: 'fantasy',
@@ -590,7 +607,8 @@ export const GENRE_PRESET_META: GenrePresetMeta[] = [
   {
     id: 'sci-fi',
     title: 'Sci-Fi',
-    description: 'Futuristic technology, space exploration, and alien encounters',
+    description:
+      'Futuristic technology, space exploration, and alien encounters',
     imageUrl: '/images/presets/genre-sci-fi.jpg',
     badge: 'SCI-FI',
     caseId: 'SCFI-02',
@@ -599,7 +617,8 @@ export const GENRE_PRESET_META: GenrePresetMeta[] = [
   {
     id: 'horror',
     title: 'Horror',
-    description: 'Dark terrors, supernatural dread, and spine-chilling suspense',
+    description:
+      'Dark terrors, supernatural dread, and spine-chilling suspense',
     imageUrl: '/images/presets/genre-horror.jpg',
     badge: 'HORROR',
     caseId: 'HORR-03',
@@ -626,7 +645,8 @@ export const GENRE_PRESET_META: GenrePresetMeta[] = [
   {
     id: 'adventure',
     title: 'Adventure',
-    description: 'Daring expeditions, treasure hunts, and thrilling discoveries',
+    description:
+      'Daring expeditions, treasure hunts, and thrilling discoveries',
     imageUrl: '/images/presets/genre-adventure.jpg',
     badge: 'ADVENTURE',
     caseId: 'ADVN-06',
@@ -653,7 +673,8 @@ export const GENRE_PRESET_META: GenrePresetMeta[] = [
   {
     id: 'thriller',
     title: 'Thriller',
-    description: 'High-stakes tension, dangerous conspiracies, and edge-of-seat action',
+    description:
+      'High-stakes tension, dangerous conspiracies, and edge-of-seat action',
     imageUrl: '/images/presets/genre-thriller.jpg',
     badge: 'THRILLER',
     caseId: 'THRL-09',
@@ -662,7 +683,8 @@ export const GENRE_PRESET_META: GenrePresetMeta[] = [
   {
     id: 'drama',
     title: 'Drama',
-    description: 'Deep emotional narratives with complex characters and real conflicts',
+    description:
+      'Deep emotional narratives with complex characters and real conflicts',
     imageUrl: '/images/presets/genre-drama.jpg',
     badge: 'DRAMA',
     caseId: 'DRMA-10',
@@ -673,7 +695,11 @@ export const GENRE_PRESET_META: GenrePresetMeta[] = [
 // ============================================================
 // HELPER: Convert built-in presets to full PresetSchema format
 // ============================================================
-export function initializeBuiltInPresets(): Record<string, Omit<ProPreset, 'timestamp'> & { timestamp: number }> {
+/** Convert built-in presets to full `ProPreset` format by stamping them with `Date.now()`. */
+export function initializeBuiltInPresets(): Record<
+  string,
+  Omit<ProPreset, 'timestamp'> & { timestamp: number }
+> {
   const timestamp = Date.now();
   const result: Record<string, ProPreset> = {};
 

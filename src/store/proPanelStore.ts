@@ -5,25 +5,28 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+
+import {
+  DEFAULT_PARAMETERS,
+  initializeBuiltInPresets,
+} from '../../lib/constants/proPanelDefaults';
 import {
   type ProParameters,
   type ProPreset,
   PresetsCollectionSchema,
   type CategoryKey,
 } from '../../lib/schemas/proPanelSchemas';
-import {
-  DEFAULT_PARAMETERS,
-  initializeBuiltInPresets,
-} from '../../lib/constants/proPanelDefaults';
 
 // ============================================================
 // STORE INTERFACE
 // ============================================================
+/** UI state for the Pro Panel (open categories, selected genre). */
 export interface ProPanelUI {
   openCategories: string[];
   selectedGenre: string | null;
 }
 
+/** User-supplied story metadata (character, title, prompts, tropes). */
 export interface StoryInput {
   characterName: string;
   ageRange: string;
@@ -36,6 +39,7 @@ export interface StoryInput {
   tropesToInclude: string[];
 }
 
+/** Complete Zustand store shape — data, UI state, and all actions. */
 export interface ProPanelState {
   // Core data
   parameters: ProParameters;
@@ -74,7 +78,9 @@ export interface ProPanelState {
 
   // Import/Export
   exportPresets: () => string;
-  importPresets: (json: string) => { success: true; count: number } | { success: false; error: string };
+  importPresets: (
+    json: string
+  ) => { success: true; count: number } | { success: false; error: string };
 
   // UI actions
   setSelectedGenre: (key: string | null) => void;
@@ -82,13 +88,17 @@ export interface ProPanelState {
   setOpenCategories: (categories: string[]) => void;
 
   // Story input actions
-  updateStoryInput: <K extends keyof StoryInput>(key: K, value: StoryInput[K]) => void;
+  updateStoryInput: <K extends keyof StoryInput>(
+    key: K,
+    value: StoryInput[K]
+  ) => void;
   resetStoryInput: () => void;
 }
 
 // ============================================================
 // STORE IMPLEMENTATION
 // ============================================================
+/** Primary Zustand hook — persisted to localStorage under `pro-panel-store`. */
 export const useProPanelStore = create<ProPanelState>()(
   persist(
     (set, get) => ({
@@ -207,11 +217,15 @@ export const useProPanelStore = create<ProPanelState>()(
         const { [name]: deleted, ...remaining } = state.savedPresets;
         // Compare against both the key and the preset's display name
         const deletedName = deleted?.name;
-        const shouldResetName = state.currentPresetName === name || state.currentPresetName === deletedName;
+        const shouldResetName =
+          state.currentPresetName === name ||
+          state.currentPresetName === deletedName;
 
         set({
           savedPresets: remaining,
-          currentPresetName: shouldResetName ? 'Default' : state.currentPresetName,
+          currentPresetName: shouldResetName
+            ? 'Default'
+            : state.currentPresetName,
         });
       },
 
@@ -245,13 +259,18 @@ export const useProPanelStore = create<ProPanelState>()(
           }
           if (error instanceof Error) {
             // Extract Zod error messages
-            const zodError = error as { errors?: Array<{ path: (string | number)[]; message: string }> };
+            const zodError = error as {
+              errors?: Array<{ path: (string | number)[]; message: string }>;
+            };
             if (zodError.errors && Array.isArray(zodError.errors)) {
               const messages = zodError.errors
                 .slice(0, 3)
                 .map((e) => `${e.path.join('.')}: ${e.message}`)
                 .join('; ');
-              return { success: false, error: `Validation failed: ${messages}` };
+              return {
+                success: false,
+                error: `Validation failed: ${messages}`,
+              };
             }
             return { success: false, error: error.message };
           }
@@ -341,10 +360,18 @@ export const useProPanelStore = create<ProPanelState>()(
 // ============================================================
 // SELECTORS (for performance optimization)
 // ============================================================
+/** Selector: returns the full `ProParameters` object. */
 export const selectParameters = (state: ProPanelState) => state.parameters;
-export const selectCategory = <C extends CategoryKey>(category: C) =>
-  (state: ProPanelState) => state.parameters[category];
+/** Selector: returns a single category's parameters. */
+export const selectCategory =
+  <C extends CategoryKey>(category: C) =>
+  (state: ProPanelState) =>
+    state.parameters[category];
+/** Selector: returns saved presets map. */
 export const selectPresets = (state: ProPanelState) => state.savedPresets;
+/** Selector: returns UI state (open categories, selected genre). */
 export const selectUI = (state: ProPanelState) => state.ui;
+/** Selector: true when parameters differ from last saved preset. */
 export const selectIsModified = (state: ProPanelState) => state.isModified;
+/** Selector: returns story input fields. */
 export const selectStoryInput = (state: ProPanelState) => state.storyInput;

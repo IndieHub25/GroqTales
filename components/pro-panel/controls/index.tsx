@@ -7,11 +7,9 @@
  */
 
 import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
+
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -19,7 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 
 // ============================================================
 // NUMERIC SLIDER — Reference: "AI Creativity (Temp)" style
@@ -36,6 +36,7 @@ interface SliderControlProps {
   suffix?: string;
 }
 
+/** Numeric slider control with min/max/step and formatted value display. */
 export function SliderControl({
   label,
   description,
@@ -55,7 +56,8 @@ export function SliderControl({
         </span>
         {showValue && (
           <span className="text-base font-mono font-bold text-white bg-[#8a0000] px-3 py-1 rounded shrink-0 min-w-[3rem] text-center tabular-nums leading-none">
-            {value}{suffix}
+            {value}
+            {suffix}
           </span>
         )}
       </div>
@@ -68,7 +70,19 @@ export function SliderControl({
         className="w-full [&_[role=slider]]:bg-noir-primary [&_[role=slider]]:border-2 [&_[role=slider]]:border-white/40 [&_[role=slider]]:w-4 [&_[role=slider]]:h-4"
       />
       {description && (
-        <span className="block text-[10px] text-gray-500 mt-2 leading-tight" style={{ fontFamily: 'Roboto Condensed, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 400, background: 'none', border: 'none', padding: 0, margin: 0 }}>
+        <span
+          className="block text-[10px] text-gray-500 mt-2 leading-tight"
+          style={{
+            fontFamily: 'Roboto Condensed, sans-serif',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            fontWeight: 400,
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            margin: 0,
+          }}
+        >
           {description}
         </span>
       )}
@@ -88,6 +102,7 @@ interface SelectControlProps<T extends string> {
   placeholder?: string;
 }
 
+/** Dropdown select control with label and options. */
 export function SelectControl<T extends string>({
   label,
   description,
@@ -104,7 +119,9 @@ export function SelectControl<T extends string>({
 
   return (
     <div className="space-y-1.5">
-      <Label className="font-condensed uppercase tracking-wider text-xs text-white">{label}</Label>
+      <Label className="font-condensed uppercase tracking-wider text-xs text-white">
+        {label}
+      </Label>
       {description && (
         <p className="text-[10px] font-condensed uppercase tracking-wider text-gray-500">
           {description}
@@ -112,7 +129,10 @@ export function SelectControl<T extends string>({
       )}
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger className="w-full bg-black border-2 border-noir-primary p-3 font-condensed font-bold uppercase text-sm text-white focus:ring-0 hover:border-white transition-colors overflow-hidden">
-          <SelectValue placeholder={placeholder || 'Select...'} className="truncate" />
+          <SelectValue
+            placeholder={placeholder || 'Select...'}
+            className="truncate"
+          />
         </SelectTrigger>
         <SelectContent className="bg-black border-2 border-noir-primary text-white">
           {normalizedOptions.map((opt) => (
@@ -144,6 +164,7 @@ interface InputControlProps {
   max?: number;
 }
 
+/** Text input control with label. */
 export function InputControl({
   label,
   description,
@@ -156,7 +177,9 @@ export function InputControl({
 }: InputControlProps) {
   return (
     <div className="space-y-1.5">
-      <Label className="font-condensed uppercase tracking-wider text-xs text-white">{label}</Label>
+      <Label className="font-condensed uppercase tracking-wider text-xs text-white">
+        {label}
+      </Label>
       {description && (
         <p className="text-[10px] font-condensed uppercase tracking-wider text-gray-500">
           {description}
@@ -188,6 +211,7 @@ interface NumberInputControlProps {
   step?: number;
 }
 
+/** Numeric input control with min/max validation. */
 export function NumberInputControl({
   label,
   description,
@@ -199,7 +223,9 @@ export function NumberInputControl({
 }: NumberInputControlProps) {
   return (
     <div className="space-y-1.5">
-      <Label className="font-condensed uppercase tracking-wider text-xs text-white">{label}</Label>
+      <Label className="font-condensed uppercase tracking-wider text-xs text-white">
+        {label}
+      </Label>
       {description && (
         <p className="text-[10px] font-condensed uppercase tracking-wider text-gray-500">
           {description}
@@ -231,6 +257,7 @@ interface TextareaControlProps {
   maxLength?: number;
 }
 
+/** Multi-line textarea control with character count. */
 export function TextareaControl({
   label,
   description,
@@ -243,7 +270,9 @@ export function TextareaControl({
   return (
     <div className="space-y-1.5">
       <div className="flex items-start justify-between gap-3">
-        <Label className="font-condensed uppercase tracking-wider text-xs text-white leading-tight">{label}</Label>
+        <Label className="font-condensed uppercase tracking-wider text-xs text-white leading-tight">
+          {label}
+        </Label>
         {maxLength && (
           <span className="text-xs font-condensed text-gray-300 bg-white/10 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
             {value.length}/{maxLength}
@@ -277,6 +306,7 @@ interface SwitchControlProps {
   onChange: (checked: boolean) => void;
 }
 
+/** On/off toggle switch with label and description. */
 export function SwitchControl({
   label,
   description,
@@ -286,12 +316,20 @@ export function SwitchControl({
   return (
     <div className="flex items-center justify-between py-2 border-b border-white/10">
       <div className="space-y-0.5">
-        <Label className="font-condensed font-bold uppercase tracking-widest text-sm text-white">{label}</Label>
+        <Label className="font-condensed font-bold uppercase tracking-widest text-sm text-white">
+          {label}
+        </Label>
         {description && (
-          <p className="text-xs text-gray-400 font-condensed uppercase tracking-wider">{description}</p>
+          <p className="text-xs text-gray-400 font-condensed uppercase tracking-wider">
+            {description}
+          </p>
         )}
       </div>
-      <Switch checked={checked} onCheckedChange={onChange} className="data-[state=checked]:bg-noir-primary" />
+      <Switch
+        checked={checked}
+        onCheckedChange={onChange}
+        className="data-[state=checked]:bg-noir-primary"
+      />
     </div>
   );
 }
@@ -308,6 +346,7 @@ interface MultiSelectControlProps<T extends string> {
   maxSelections?: number;
 }
 
+/** Multi-select checkbox group for choosing multiple options. */
 export function MultiSelectControl<T extends string>({
   label,
   description,
@@ -327,7 +366,9 @@ export function MultiSelectControl<T extends string>({
   return (
     <div className="space-y-2">
       <div className="flex items-start justify-between gap-3">
-        <Label className="font-condensed uppercase tracking-wider text-xs text-white leading-tight">{label}</Label>
+        <Label className="font-condensed uppercase tracking-wider text-xs text-white leading-tight">
+          {label}
+        </Label>
         {maxSelections && (
           <span className="text-xs font-condensed text-gray-300 bg-white/10 px-1.5 py-0.5 rounded uppercase shrink-0">
             {values.length}/{maxSelections}
@@ -342,7 +383,8 @@ export function MultiSelectControl<T extends string>({
       <div className="flex flex-wrap gap-2">
         {options.map((option) => {
           const isSelected = values.includes(option);
-          const isDisabled = !isSelected && maxSelections && values.length >= maxSelections;
+          const isDisabled =
+            !isSelected && maxSelections && values.length >= maxSelections;
 
           return (
             <button
@@ -352,9 +394,10 @@ export function MultiSelectControl<T extends string>({
               disabled={isDisabled as boolean}
               className={`
                 px-3 py-1 font-condensed text-sm uppercase tracking-wider border transition-colors
-                ${isSelected
-                  ? 'bg-noir-primary text-white border-white'
-                  : 'bg-black text-white border-gray-600 hover:bg-noir-primary'
+                ${
+                  isSelected
+                    ? 'bg-noir-primary text-white border-white'
+                    : 'bg-black text-white border-gray-600 hover:bg-noir-primary'
                 }
                 ${isDisabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}
               `}
@@ -381,6 +424,7 @@ interface TagsInputControlProps {
   maxLength?: number;
 }
 
+/** Free-form tags input with add/remove chip UI. */
 export function TagsInputControl({
   label,
   description,
@@ -409,7 +453,9 @@ export function TagsInputControl({
   return (
     <div className="space-y-2">
       <div className="flex items-start justify-between gap-3">
-        <Label className="font-condensed uppercase tracking-wider text-xs text-white leading-tight">{label}</Label>
+        <Label className="font-condensed uppercase tracking-wider text-xs text-white leading-tight">
+          {label}
+        </Label>
         <span className="text-xs font-condensed text-gray-300 bg-white/10 px-1.5 py-0.5 rounded uppercase shrink-0">
           {values.length}/{maxTags}
         </span>
@@ -458,6 +504,7 @@ interface CollapsibleGroupProps {
   children: React.ReactNode;
 }
 
+/** Collapsible section wrapper with animated expand/collapse. */
 export function CollapsibleGroup({
   title,
   defaultOpen = false,
@@ -488,9 +535,7 @@ export function CollapsibleGroup({
           isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="px-4 pb-4 pt-2 space-y-4">
-          {children}
-        </div>
+        <div className="px-4 pb-4 pt-2 space-y-4">{children}</div>
       </div>
     </div>
   );
@@ -499,14 +544,14 @@ export function CollapsibleGroup({
 // ============================================================
 // GRID LAYOUTS — tighter gaps for compact layout
 // ============================================================
+/** Responsive 2-column grid layout for controls. */
 export function ControlGrid({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {children}
-    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{children}</div>
   );
 }
 
+/** Single-row flex layout for inline controls. */
 export function ControlRow({ children }: { children: React.ReactNode }) {
   return <div className="space-y-4">{children}</div>;
 }

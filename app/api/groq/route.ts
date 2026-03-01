@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       focus,
       apiKey,
       proConfig, // Pro Panel configuration
-      title,     // Story title for Pro Panel generation
+      title, // Story title for Pro Panel generation
     } = body;
     // Create updated options with API key if provided
     const updatedOptions = apiKey ? { ...options, apiKey } : options;
@@ -39,22 +39,29 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
-        
+
         // If proConfig is provided, use Pro Panel generation
         if (proConfig) {
           // Validate the proConfig
           const validationResult = ParametersSchema.safeParse(proConfig);
           if (!validationResult.success) {
             return NextResponse.json(
-              { error: 'Invalid Pro Panel configuration', details: validationResult.error.errors },
+              {
+                error: 'Invalid Pro Panel configuration',
+                details: validationResult.error.errors,
+              },
               { status: 400 }
             );
           }
-          
-          result = await generateStoryWithProConfig(prompt, validationResult.data, {
-            title,
-            apiKey: updatedOptions?.apiKey,
-          });
+
+          result = await generateStoryWithProConfig(
+            prompt,
+            validationResult.data,
+            {
+              title,
+              apiKey: updatedOptions?.apiKey,
+            }
+          );
         } else {
           // Use standard generation
           result = await generateStoryContent({
@@ -98,16 +105,16 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
     return NextResponse.json({ result });
-  } catch (error: any) {
-    console.error('Groq API error:', error);
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error('Groq API error:', err);
 
     // Return 400 for input validation errors, 500 for everything else
     const isValidationError =
-      error.message && error.message.startsWith('Invalid input');
+      err.message && err.message.startsWith('Invalid input');
     return NextResponse.json(
       {
-        error:
-          error.message || 'An error occurred while processing your request',
+        error: err.message || 'An error occurred while processing your request',
       },
       { status: isValidationError ? 400 : 500 }
     );
@@ -134,17 +141,21 @@ export async function GET(request: NextRequest) {
       default: GROQ_MODELS.STORY_GENERATION,
       // Provide human-readable names for the models
       modelNames: {
-        [GROQ_MODELS.STORY_GENERATION]: 'Llama 3 (70B) - Story Generation',
-        [GROQ_MODELS.STORY_ANALYSIS]: 'Llama 3 (8B) - Story Analysis',
+        [GROQ_MODELS.STORY_GENERATION]:
+          'Llama 3.3 (70B) - Story Generation',
+        [GROQ_MODELS.STORY_ANALYSIS]:
+          'Llama 3.1 (8B) - Story Analysis',
         [GROQ_MODELS.CONTENT_IMPROVEMENT]:
           'Mixtral (8x7B) - Content Improvement',
-        [GROQ_MODELS.RECOMMENDATIONS]: 'Llama 3 (8B) - Recommendations',
+        [GROQ_MODELS.RECOMMENDATIONS]:
+          'Llama 3.1 (8B) - Recommendations',
       },
     });
-  } catch (error: any) {
-    console.error('Error fetching Groq models:', error);
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error('Error fetching Groq models:', err);
     return NextResponse.json(
-      { error: error.message || 'An error occurred while fetching models' },
+      { error: err.message || 'An error occurred while fetching models' },
       { status: 500 }
     );
   }

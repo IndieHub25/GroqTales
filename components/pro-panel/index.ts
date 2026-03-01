@@ -12,8 +12,8 @@ export { ImportExportDialog } from './ImportExportDialog';
 export { GenerateStoryButton } from './GenerateStoryButton';
 export { StoryInputSection } from './StoryInputSection';
 export {
-    LocationDocksPanel,
-    StyleDossierPanel,
-    ContentControlsPanel,
-    InspirationPanel,
+  LocationDocksPanel,
+  StyleDossierPanel,
+  ContentControlsPanel,
+  InspirationPanel,
 } from './SidebarPanels';

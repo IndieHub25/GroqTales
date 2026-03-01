@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { useProPanelStore, selectParameters } from '@/store/proPanelStore';
+
+import { selectParameters, useProPanelStore } from '@/store/proPanelStore';
+
 import {
-  SliderControl,
-  SelectControl,
-  ControlGrid,
   CollapsibleGroup,
+  ControlGrid,
+  SelectControl,
+  SliderControl,
 } from '../controls';
 
 const NARRATIVE_STYLES = [
@@ -50,6 +52,7 @@ const RESOLUTION_STYLES = [
   'bittersweet',
 ] as const;
 
+/** Parameter controls for narrative style, pacing, and plot complexity. */
 export function StoryStructureSection() {
   const parameters = useProPanelStore(selectParameters);
   const updateParameter = useProPanelStore((s) => s.updateParameter);
@@ -64,7 +67,9 @@ export function StoryStructureSection() {
           description="The overall storytelling approach"
           value={structure.narrativeStyle}
           options={NARRATIVE_STYLES}
-          onChange={(v) => updateParameter('storyStructure', 'narrativeStyle', v)}
+          onChange={(v) =>
+            updateParameter('storyStructure', 'narrativeStyle', v)
+          }
         />
         <SelectControl
           label="Pacing"
@@ -88,7 +93,9 @@ export function StoryStructureSection() {
           description="How the story concludes"
           value={structure.resolutionStyle}
           options={RESOLUTION_STYLES}
-          onChange={(v) => updateParameter('storyStructure', 'resolutionStyle', v)}
+          onChange={(v) =>
+            updateParameter('storyStructure', 'resolutionStyle', v)
+          }
         />
       </ControlGrid>
 
@@ -99,29 +106,36 @@ export function StoryStructureSection() {
             label="Plot Complexity"
             description="Number and intricacy of plot threads"
             value={structure.plotComplexity}
-            onChange={(v) => updateParameter('storyStructure', 'plotComplexity', v)}
+            onChange={(v) =>
+              updateParameter('storyStructure', 'plotComplexity', v)
+            }
           />
           <SliderControl
             label="Conflict Intensity"
             description="Level of drama and stakes"
             value={structure.conflictIntensity}
-            onChange={(v) => updateParameter('storyStructure', 'conflictIntensity', v)}
+            onChange={(v) =>
+              updateParameter('storyStructure', 'conflictIntensity', v)
+            }
           />
           <SliderControl
             label="Flashback Frequency"
             description="Use of past events and memories"
             value={structure.flashbackFrequency}
-            onChange={(v) => updateParameter('storyStructure', 'flashbackFrequency', v)}
+            onChange={(v) =>
+              updateParameter('storyStructure', 'flashbackFrequency', v)
+            }
           />
           <SliderControl
             label="Foreshadowing Level"
             description="Hints and setup for future events"
             value={structure.foreshadowingLevel}
-            onChange={(v) => updateParameter('storyStructure', 'foreshadowingLevel', v)}
+            onChange={(v) =>
+              updateParameter('storyStructure', 'foreshadowingLevel', v)
+            }
           />
         </ControlGrid>
       </CollapsibleGroup>
     </div>
   );
 }
-

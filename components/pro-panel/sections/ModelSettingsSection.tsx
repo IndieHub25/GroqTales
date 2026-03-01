@@ -6,28 +6,27 @@
  */
 
 import React from 'react';
-import { useProPanelStore, selectParameters } from '@/store/proPanelStore';
+
+import { selectParameters, useProPanelStore } from '@/store/proPanelStore';
+
 import {
-  SliderControl,
-  SelectControl,
-  NumberInputControl,
-  TagsInputControl,
-  ControlGrid,
   CollapsibleGroup,
+  ControlGrid,
+  NumberInputControl,
+  SelectControl,
+  SliderControl,
+  TagsInputControl,
 } from '../controls';
 
 const MODEL_OPTIONS = [
-  { value: 'llama3-70b-8192', label: 'LLaMA 3 70B (Recommended)' },
-  { value: 'llama3-8b-8192', label: 'LLaMA 3 8B (Fast)' },
-  { value: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B (Long Context)' },
-  { value: 'gemma-7b-it', label: 'Gemma 7B' },
-  { value: 'gemma2-9b-it', label: 'Gemma 2 9B' },
-  { value: 'llama-3.1-70b-versatile', label: 'LLaMA 3.1 70B Versatile' },
-  { value: 'llama-3.1-8b-instant', label: 'LLaMA 3.1 8B Instant' },
+  { value: 'llama-3.3-70b-versatile', label: 'LLaMA 3.3 70B Versatile (Recommended)' },
+  { value: 'llama-3.1-8b-instant', label: 'LLaMA 3.1 8B Instant (Fast)' },
   { value: 'llama-3.2-90b-vision-preview', label: 'LLaMA 3.2 90B Vision' },
-  { value: 'llama-3.3-70b-versatile', label: 'LLaMA 3.3 70B Versatile' },
+  { value: 'gemma2-9b-it', label: 'Gemma 2 9B' },
+  { value: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B (Long Context)' },
 ] as const;
 
+/** Parameter controls for Groq AI model, temperature, and token limits. */
 export function ModelSettingsSection() {
   const parameters = useProPanelStore(selectParameters);
   const updateParameter = useProPanelStore((s) => s.updateParameter);
@@ -37,8 +36,9 @@ export function ModelSettingsSection() {
     <div className="space-y-6">
       {/* Warning Banner */}
       <div className="p-3 bg-primary/10 border-2 border-primary text-sm">
-        <strong className="text-primary">⚠️ Advanced Settings:</strong>{' '}
-        These parameters directly affect AI generation. Changes can significantly impact output quality and behavior.
+        <strong className="text-primary">⚠️ Advanced Settings:</strong> These
+        parameters directly affect AI generation. Changes can significantly
+        impact output quality and behavior.
       </div>
 
       <SelectControl
@@ -99,7 +99,9 @@ export function ModelSettingsSection() {
             min={-2}
             max={2}
             step={0.1}
-            onChange={(v) => updateParameter('modelSettings', 'frequencyPenalty', v)}
+            onChange={(v) =>
+              updateParameter('modelSettings', 'frequencyPenalty', v)
+            }
           />
           <SliderControl
             label="Presence Penalty"
@@ -108,7 +110,9 @@ export function ModelSettingsSection() {
             min={-2}
             max={2}
             step={0.1}
-            onChange={(v) => updateParameter('modelSettings', 'presencePenalty', v)}
+            onChange={(v) =>
+              updateParameter('modelSettings', 'presencePenalty', v)
+            }
           />
           <SliderControl
             label="Repetition Penalty"
@@ -117,7 +121,9 @@ export function ModelSettingsSection() {
             min={0}
             max={2}
             step={0.1}
-            onChange={(v) => updateParameter('modelSettings', 'repetitionPenalty', v)}
+            onChange={(v) =>
+              updateParameter('modelSettings', 'repetitionPenalty', v)
+            }
           />
         </ControlGrid>
 
@@ -134,4 +140,3 @@ export function ModelSettingsSection() {
     </div>
   );
 }
-

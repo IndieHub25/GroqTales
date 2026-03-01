@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { useProPanelStore, selectParameters } from '@/store/proPanelStore';
+
+import { selectParameters, useProPanelStore } from '@/store/proPanelStore';
+
 import {
-  SliderControl,
-  SelectControl,
-  ControlGrid,
   CollapsibleGroup,
+  ControlGrid,
+  SelectControl,
+  SliderControl,
 } from '../controls';
 
 const PRIMARY_TONES = [
@@ -61,6 +63,7 @@ const ROMANCE_LEVELS = [
   'central',
 ] as const;
 
+/** Parameter controls for emotional tone, writing style, and tension. */
 export function ToneStyleSection() {
   const parameters = useProPanelStore(selectParameters);
   const updateParameter = useProPanelStore((s) => s.updateParameter);
@@ -135,17 +138,20 @@ export function ToneStyleSection() {
             label="Descriptive Balance"
             description="Action vs. description ratio"
             value={tone.descriptiveBalance}
-            onChange={(v) => updateParameter('toneStyle', 'descriptiveBalance', v)}
+            onChange={(v) =>
+              updateParameter('toneStyle', 'descriptiveBalance', v)
+            }
           />
           <SliderControl
             label="Emotional Intensity"
             description="Dramatic weight of scenes"
             value={tone.emotionalIntensity}
-            onChange={(v) => updateParameter('toneStyle', 'emotionalIntensity', v)}
+            onChange={(v) =>
+              updateParameter('toneStyle', 'emotionalIntensity', v)
+            }
           />
         </ControlGrid>
       </CollapsibleGroup>
     </div>
   );
 }
-

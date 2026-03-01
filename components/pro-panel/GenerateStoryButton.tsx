@@ -12,10 +12,16 @@
  */
 
 import React, { useState } from 'react';
-import { useProPanelStore, selectStoryInput, selectParameters } from '@/store/proPanelStore';
 import { Flame, Loader2 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
 
+import { useToast } from '@/components/ui/use-toast';
+import {
+  selectParameters,
+  selectStoryInput,
+  useProPanelStore,
+} from '@/store/proPanelStore';
+
+/** Noir-styled red "Generate Story" button with fire animation and loading state. */
 export function GenerateStoryButton() {
   const { toast } = useToast();
   const storyInput = useProPanelStore(selectStoryInput);
@@ -28,7 +34,8 @@ export function GenerateStoryButton() {
     if (!storyInput.storyPrompt.trim()) {
       toast({
         title: 'Required',
-        description: 'Please enter a story prompt in the "What\'s the Story, Hero?" field above.',
+        description:
+          'Please enter a story prompt in the "What\'s the Story, Hero?" field above.',
         variant: 'destructive',
       });
       return;
@@ -43,7 +50,10 @@ export function GenerateStoryButton() {
         body: JSON.stringify({
           action: 'generate',
           prompt: storyInput.storyPrompt,
-          title: storyInput.storyTitle || storyInput.characterName || 'Untitled Story',
+          title:
+            storyInput.storyTitle ||
+            storyInput.characterName ||
+            'Untitled Story',
           characterName: storyInput.characterName,
           characterBackground: storyInput.characterBackground,
           ageRange: storyInput.ageRange,
@@ -67,7 +77,8 @@ export function GenerateStoryButton() {
     } catch (error) {
       toast({
         title: 'Generation Failed',
-        description: error instanceof Error ? error.message : 'An error occurred',
+        description:
+          error instanceof Error ? error.message : 'An error occurred',
         variant: 'destructive',
       });
     } finally {
@@ -105,7 +116,8 @@ export function GenerateStoryButton() {
       {/* No prompt hint */}
       {!storyInput.storyPrompt.trim() && (
         <p className="text-sm font-condensed uppercase tracking-wider text-gray-500 text-center">
-          ↑ Enter a story prompt in the &quot;What&apos;s the Story, Hero?&quot; section above to enable generation
+          ↑ Enter a story prompt in the &quot;What&apos;s the Story, Hero?&quot;
+          section above to enable generation
         </p>
       )}
     </div>

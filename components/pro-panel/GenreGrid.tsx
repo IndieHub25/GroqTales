@@ -7,34 +7,100 @@
  */
 
 import React from 'react';
-import { useProPanelStore, selectUI } from '@/store/proPanelStore';
-import { GenreCard } from './GenreCard';
+
 import type { GenrePresetMeta } from '@/lib/constants/proPanelDefaults';
+import { selectUI, useProPanelStore } from '@/store/proPanelStore';
+
+import { GenreCard } from './GenreCard';
 
 // Genre-specific default parameters applied on selection
-const GENRE_DEFAULTS: Record<string, {
-  settingType: string;
-  technologyLevel: string;
-  primaryTone: string;
-  proseStyle: string;
-  primaryTheme: string;
-}> = {
-  fantasy: { settingType: 'high-fantasy', technologyLevel: 'medieval', primaryTone: 'hopeful', proseStyle: 'literary', primaryTheme: 'good-vs-evil' },
-  'sci-fi': { settingType: 'science-fiction', technologyLevel: 'far-future', primaryTone: 'suspenseful', proseStyle: 'cinematic', primaryTheme: 'identity' },
-  horror: { settingType: 'real-world-contemporary', technologyLevel: 'modern', primaryTone: 'dark', proseStyle: 'literary', primaryTheme: 'survival' },
-  mystery: { settingType: 'real-world-contemporary', technologyLevel: 'modern', primaryTone: 'suspenseful', proseStyle: 'conversational', primaryTheme: 'justice' },
-  romance: { settingType: 'real-world-contemporary', technologyLevel: 'modern', primaryTone: 'romantic', proseStyle: 'lyrical', primaryTheme: 'love' },
-  adventure: { settingType: 'real-world-historical', technologyLevel: 'industrial', primaryTone: 'hopeful', proseStyle: 'cinematic', primaryTheme: 'survival' },
-  comedy: { settingType: 'real-world-contemporary', technologyLevel: 'modern', primaryTone: 'humorous', proseStyle: 'conversational', primaryTheme: 'identity' },
-  cyberpunk: { settingType: 'cyberpunk', technologyLevel: 'near-future', primaryTone: 'gritty', proseStyle: 'cinematic', primaryTheme: 'corruption' },
-  thriller: { settingType: 'real-world-contemporary', technologyLevel: 'modern', primaryTone: 'suspenseful', proseStyle: 'cinematic', primaryTheme: 'survival' },
-  drama: { settingType: 'real-world-contemporary', technologyLevel: 'modern', primaryTone: 'melancholic', proseStyle: 'literary', primaryTheme: 'identity' },
+const GENRE_DEFAULTS: Record<
+  string,
+  {
+    settingType: string;
+    technologyLevel: string;
+    primaryTone: string;
+    proseStyle: string;
+    primaryTheme: string;
+  }
+> = {
+  fantasy: {
+    settingType: 'high-fantasy',
+    technologyLevel: 'medieval',
+    primaryTone: 'hopeful',
+    proseStyle: 'literary',
+    primaryTheme: 'good-vs-evil',
+  },
+  'sci-fi': {
+    settingType: 'science-fiction',
+    technologyLevel: 'far-future',
+    primaryTone: 'suspenseful',
+    proseStyle: 'cinematic',
+    primaryTheme: 'identity',
+  },
+  horror: {
+    settingType: 'real-world-contemporary',
+    technologyLevel: 'modern',
+    primaryTone: 'dark',
+    proseStyle: 'literary',
+    primaryTheme: 'survival',
+  },
+  mystery: {
+    settingType: 'real-world-contemporary',
+    technologyLevel: 'modern',
+    primaryTone: 'suspenseful',
+    proseStyle: 'conversational',
+    primaryTheme: 'justice',
+  },
+  romance: {
+    settingType: 'real-world-contemporary',
+    technologyLevel: 'modern',
+    primaryTone: 'romantic',
+    proseStyle: 'lyrical',
+    primaryTheme: 'love',
+  },
+  adventure: {
+    settingType: 'real-world-historical',
+    technologyLevel: 'industrial',
+    primaryTone: 'hopeful',
+    proseStyle: 'cinematic',
+    primaryTheme: 'survival',
+  },
+  comedy: {
+    settingType: 'real-world-contemporary',
+    technologyLevel: 'modern',
+    primaryTone: 'humorous',
+    proseStyle: 'conversational',
+    primaryTheme: 'identity',
+  },
+  cyberpunk: {
+    settingType: 'cyberpunk',
+    technologyLevel: 'near-future',
+    primaryTone: 'gritty',
+    proseStyle: 'cinematic',
+    primaryTheme: 'corruption',
+  },
+  thriller: {
+    settingType: 'real-world-contemporary',
+    technologyLevel: 'modern',
+    primaryTone: 'suspenseful',
+    proseStyle: 'cinematic',
+    primaryTheme: 'survival',
+  },
+  drama: {
+    settingType: 'real-world-contemporary',
+    technologyLevel: 'modern',
+    primaryTone: 'melancholic',
+    proseStyle: 'literary',
+    primaryTheme: 'identity',
+  },
 };
 
 interface GenreGridProps {
   presets: GenrePresetMeta[];
 }
 
+/** Responsive grid of mugshot-style genre preset cards. */
 export function GenreGrid({ presets }: GenreGridProps) {
   const ui = useProPanelStore(selectUI);
   const setSelectedGenre = useProPanelStore((s) => s.setSelectedGenre);

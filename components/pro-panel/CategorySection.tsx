@@ -7,13 +7,15 @@
  */
 
 import React from 'react';
-import { useProPanelStore } from '@/store/proPanelStore';
-import type { CategoryKey } from '@/lib/schemas/proPanelSchemas';
+
 import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import type { CategoryKey } from '@/lib/schemas/proPanelSchemas';
+import { useProPanelStore } from '@/store/proPanelStore';
+
 import { ICON_MAP } from './iconMap';
 
 interface CategorySectionProps {
@@ -24,6 +26,7 @@ interface CategorySectionProps {
   children: React.ReactNode;
 }
 
+/** Accordion item for a single parameter category with icon header. */
 export function CategorySection({
   id,
   title,
@@ -50,7 +53,11 @@ export function CategorySection({
           <div className="flex items-center gap-3">
             {(() => {
               const IconComp = ICON_MAP[icon];
-              return IconComp ? <IconComp className="w-5 h-5 text-white" /> : <span className="text-xl">{icon}</span>;
+              return IconComp ? (
+                <IconComp className="w-5 h-5 text-white" />
+              ) : (
+                <span className="text-xl">{icon}</span>
+              );
             })()}
             <div className="text-left">
               <h3 className="font-marker text-white text-base sm:text-lg tracking-wider leading-tight">
@@ -83,9 +90,7 @@ export function CategorySection({
 
       {/* Dark content area — compact padding */}
       <AccordionContent className="bg-black/60 border-t border-white/10 px-5 pb-4">
-        <div className="pt-4">
-          {children}
-        </div>
+        <div className="pt-4">{children}</div>
       </AccordionContent>
     </AccordionItem>
   );

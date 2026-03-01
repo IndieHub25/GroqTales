@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { useProPanelStore, selectParameters } from '@/store/proPanelStore';
+
+import { selectParameters, useProPanelStore } from '@/store/proPanelStore';
+
 import {
-  SliderControl,
-  SelectControl,
-  MultiSelectControl,
-  ControlGrid,
   CollapsibleGroup,
+  ControlGrid,
+  MultiSelectControl,
+  SelectControl,
+  SliderControl,
 } from '../controls';
 
 const PRIMARY_THEMES = [
@@ -56,6 +58,7 @@ const SECONDARY_THEMES = [
   'faith',
 ] as const;
 
+/** Parameter controls for primary/secondary themes and symbolism. */
 export function ThemeSection() {
   const parameters = useProPanelStore(selectParameters);
   const updateParameter = useProPanelStore((s) => s.updateParameter);
@@ -118,4 +121,3 @@ export function ThemeSection() {
     </div>
   );
 }
-

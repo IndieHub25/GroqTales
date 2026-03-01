@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { useProPanelStore, selectParameters } from '@/store/proPanelStore';
+
+import { selectParameters, useProPanelStore } from '@/store/proPanelStore';
+
 import {
-  SliderControl,
-  SelectControl,
-  ControlGrid,
   CollapsibleGroup,
+  ControlGrid,
+  SelectControl,
+  SliderControl,
 } from '../controls';
 
 const SUPPORTING_CAST_SIZES = [
@@ -40,6 +42,7 @@ const DIALOGUE_STYLES = [
   'poetic',
 ] as const;
 
+/** Parameter controls for character depth, growth arc, and dialogue. */
 export function CharacterSection() {
   const parameters = useProPanelStore(selectParameters);
   const updateParameter = useProPanelStore((s) => s.updateParameter);
@@ -54,14 +57,18 @@ export function CharacterSection() {
           description="Number of secondary characters"
           value={chars.supportingCastSize}
           options={SUPPORTING_CAST_SIZES}
-          onChange={(v) => updateParameter('characters', 'supportingCastSize', v)}
+          onChange={(v) =>
+            updateParameter('characters', 'supportingCastSize', v)
+          }
         />
         <SelectControl
           label="Character Growth Arc"
           description="Type of character development"
           value={chars.characterGrowthArc}
           options={CHARACTER_GROWTH_ARCS}
-          onChange={(v) => updateParameter('characters', 'characterGrowthArc', v)}
+          onChange={(v) =>
+            updateParameter('characters', 'characterGrowthArc', v)
+          }
         />
       </ControlGrid>
 
@@ -80,41 +87,52 @@ export function CharacterSection() {
             label="Protagonist Depth"
             description="Complexity of the main character"
             value={chars.protagonistDepth}
-            onChange={(v) => updateParameter('characters', 'protagonistDepth', v)}
+            onChange={(v) =>
+              updateParameter('characters', 'protagonistDepth', v)
+            }
           />
           <SliderControl
             label="Antagonist Complexity"
             description="Moral complexity of the villain/obstacle"
             value={chars.antagonistComplexity}
-            onChange={(v) => updateParameter('characters', 'antagonistComplexity', v)}
+            onChange={(v) =>
+              updateParameter('characters', 'antagonistComplexity', v)
+            }
           />
           <SliderControl
             label="Voice Distinctness"
             description="How unique each character sounds"
             value={chars.characterVoiceDistinctness}
-            onChange={(v) => updateParameter('characters', 'characterVoiceDistinctness', v)}
+            onChange={(v) =>
+              updateParameter('characters', 'characterVoiceDistinctness', v)
+            }
           />
           <SliderControl
             label="Relationship Complexity"
             description="Intricacy of character interactions"
             value={chars.relationshipComplexity}
-            onChange={(v) => updateParameter('characters', 'relationshipComplexity', v)}
+            onChange={(v) =>
+              updateParameter('characters', 'relationshipComplexity', v)
+            }
           />
           <SliderControl
             label="Backstory Integration"
             description="How much past is woven into the story"
             value={chars.backstoryIntegration}
-            onChange={(v) => updateParameter('characters', 'backstoryIntegration', v)}
+            onChange={(v) =>
+              updateParameter('characters', 'backstoryIntegration', v)
+            }
           />
           <SliderControl
             label="Internal Monologue"
             description="Frequency of character thoughts shown"
             value={chars.internalMonologueFrequency}
-            onChange={(v) => updateParameter('characters', 'internalMonologueFrequency', v)}
+            onChange={(v) =>
+              updateParameter('characters', 'internalMonologueFrequency', v)
+            }
           />
         </ControlGrid>
       </CollapsibleGroup>
     </div>
   );
 }
-

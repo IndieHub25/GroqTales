@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { useProPanelStore, selectParameters } from '@/store/proPanelStore';
+
+import { selectParameters, useProPanelStore } from '@/store/proPanelStore';
+
 import {
-  SliderControl,
-  SelectControl,
-  ControlGrid,
   CollapsibleGroup,
+  ControlGrid,
+  SelectControl,
+  SliderControl,
 } from '../controls';
 
 const SETTING_TYPES = [
@@ -49,6 +51,7 @@ const TECHNOLOGY_LEVELS = [
   'mixed',
 ] as const;
 
+/** Parameter controls for world-building, setting, and environment. */
 export function WorldSection() {
   const parameters = useProPanelStore(selectParameters);
   const updateParameter = useProPanelStore((s) => s.updateParameter);
@@ -101,7 +104,9 @@ export function WorldSection() {
             label="Magic/Supernatural Systems"
             description="Complexity of magical elements (0 = none)"
             value={world.magicSystemComplexity}
-            onChange={(v) => updateParameter('world', 'magicSystemComplexity', v)}
+            onChange={(v) =>
+              updateParameter('world', 'magicSystemComplexity', v)
+            }
           />
           <SliderControl
             label="Environmental Detail"
@@ -126,4 +131,3 @@ export function WorldSection() {
     </div>
   );
 }
-

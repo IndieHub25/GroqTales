@@ -6,17 +6,19 @@
  */
 
 import React from 'react';
-import { useProPanelStore, selectParameters } from '@/store/proPanelStore';
+
+import { selectParameters, useProPanelStore } from '@/store/proPanelStore';
+
 import {
-  SliderControl,
-  SelectControl,
-  SwitchControl,
-  MultiSelectControl,
-  TextareaControl,
-  TagsInputControl,
-  InputControl,
-  ControlGrid,
   CollapsibleGroup,
+  ControlGrid,
+  InputControl,
+  MultiSelectControl,
+  SelectControl,
+  SliderControl,
+  SwitchControl,
+  TagsInputControl,
+  TextareaControl,
 } from '../controls';
 
 const POINT_OF_VIEW_OPTIONS = [
@@ -27,12 +29,7 @@ const POINT_OF_VIEW_OPTIONS = [
   'multiple-pov',
 ] as const;
 
-const TENSE_OPTIONS = [
-  'past',
-  'present',
-  'future',
-  'mixed',
-] as const;
+const TENSE_OPTIONS = ['past', 'present', 'future', 'mixed'] as const;
 
 const EXPERIMENTAL_TECHNIQUES = [
   'stream-of-consciousness',
@@ -70,6 +67,7 @@ const GENRE_OPTIONS = [
   'noir',
 ] as const;
 
+/** Parameter controls for POV, experimental techniques, and custom instructions. */
 export function AdvancedSection() {
   const parameters = useProPanelStore(selectParameters);
   const updateParameter = useProPanelStore((s) => s.updateParameter);
@@ -124,7 +122,9 @@ export function AdvancedSection() {
           label="Metafictional Elements"
           description="Self-referential and fourth-wall-breaking content"
           value={advanced.metafictionalElements}
-          onChange={(v) => updateParameter('advanced', 'metafictionalElements', v)}
+          onChange={(v) =>
+            updateParameter('advanced', 'metafictionalElements', v)
+          }
         />
         <div className="mt-4">
           <MultiSelectControl
@@ -133,7 +133,9 @@ export function AdvancedSection() {
             values={advanced.experimentalTechniques}
             options={EXPERIMENTAL_TECHNIQUES}
             maxSelections={5}
-            onChange={(v) => updateParameter('advanced', 'experimentalTechniques', v)}
+            onChange={(v) =>
+              updateParameter('advanced', 'experimentalTechniques', v)
+            }
           />
         </div>
       </CollapsibleGroup>
@@ -166,11 +168,12 @@ export function AdvancedSection() {
             maxLength={2000}
             rows={4}
             placeholder="Add any specific instructions, style notes, or requirements..."
-            onChange={(v) => updateParameter('advanced', 'customInstructions', v)}
+            onChange={(v) =>
+              updateParameter('advanced', 'customInstructions', v)
+            }
           />
         </div>
       </CollapsibleGroup>
     </div>
   );
 }
-

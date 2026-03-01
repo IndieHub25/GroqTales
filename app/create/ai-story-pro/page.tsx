@@ -9,7 +9,8 @@ import { ProPanel } from '@/components/pro-panel/ProPanel';
 
 export const metadata: Metadata = {
   title: 'Pro Panel | GroqTales',
-  description: 'Advanced AI story generation with 70+ customizable parameters across 9 categories',
+  description:
+    'Advanced AI story generation with 70+ customizable parameters across 9 categories',
   openGraph: {
     title: 'Pro Panel | GroqTales',
     description: 'Fine-tune every aspect of your AI-generated stories',
