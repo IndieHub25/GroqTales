@@ -5,9 +5,11 @@ import {
   Share2,
   Wallet,
   ShoppingCart,
+  Sparkles,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import * as React from 'react';
 
 import { useWeb3 } from '@/components/providers/web3-provider';
@@ -48,6 +50,24 @@ export default function StoryDetailsDialog({
   const [commentCount, setCommentCount] = React.useState(
     story.comments?.length || 0
   );
+  const router = useRouter();
+
+  const handleRemix = () => {
+    onClose();
+
+    // Convert current story content into a context prompt
+    const contentToRemix = story.content || story.description || '';
+    const remixPrompt = `Remix this story: ${contentToRemix.substring(0, 1500)}`; // Trim to avoid URL length issues
+
+    const query = new URLSearchParams({
+      remix: 'true',
+      source: 'story',
+      genre: story.genre || 'Fantasy',
+      prompt: remixPrompt,
+    });
+
+    router.push(`/create/ai-story?${query.toString()}`);
+  };
 
   const handlePurchase = () => {
     if (!account) {
@@ -165,6 +185,15 @@ export default function StoryDetailsDialog({
                 <Button variant="ghost" size="sm">
                   <Share2 className="w-4 h-4 mr-1" />
                   Share
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRemix}
+                  className="text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"
+                >
+                  <Sparkles className="w-4 h-4 mr-1" />
+                  Remix
                 </Button>
               </div>
               <div className="flex items-center space-x-2">

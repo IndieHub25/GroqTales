@@ -49,6 +49,8 @@ import { truncateAddress } from '@/lib/utils';
 
 interface AIStoryGeneratorProps {
   className?: string;
+  initialPrompt?: string;
+  initialGenre?: string;
 }
 
 const DRAFT_KEY = "groqtales_story_draft_v1";
@@ -108,12 +110,14 @@ interface StoryDraft {
 
 export default function AIStoryGenerator({
   className = '',
+  initialPrompt = '',
+  initialGenre = '',
 }: AIStoryGeneratorProps) {
   // Core required fields
-  const [prompt, setPrompt] = useState('');
+  const [prompt, setPrompt] = useState(initialPrompt);
 
   // Core optional fields
-  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [selectedGenres, setSelectedGenres] = useState<string[]>(initialGenre ? [initialGenre] : []);
   const [storyLength, setStoryLength] = useState('medium');
   const [storyTitle, setStoryTitle] = useState('');
 
@@ -949,8 +953,8 @@ export default function AIStoryGenerator({
                                 key={trait}
                                 onClick={() => toggleTrait(trait)}
                                 className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${characterTraits.includes(trait)
-                                    ? 'bg-blue-400 text-white'
-                                    : 'bg-white/5 text-white hover:bg-white/5'
+                                  ? 'bg-blue-400 text-white'
+                                  : 'bg-white/5 text-white hover:bg-white/5'
                                   }`}
                               >
                                 {trait}
@@ -1568,8 +1572,8 @@ export default function AIStoryGenerator({
                                 key={theme}
                                 onClick={() => toggleTheme(theme.toLowerCase())}
                                 className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${secondaryThemes.includes(theme.toLowerCase())
-                                    ? 'bg-pink-400 text-white'
-                                    : 'bg-white/5 text-white hover:bg-white/5'
+                                  ? 'bg-pink-400 text-white'
+                                  : 'bg-white/5 text-white hover:bg-white/5'
                                   }`}
                               >
                                 {theme}
@@ -1925,8 +1929,8 @@ export default function AIStoryGenerator({
                                   }
                                 }}
                                 className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${avoidCliches.includes(trope.toLowerCase())
-                                    ? 'bg-rose-500/20 text-rose-300 text-white'
-                                    : 'bg-white/5 text-white hover:bg-white/5'
+                                  ? 'bg-rose-500/20 text-rose-300 text-white'
+                                  : 'bg-white/5 text-white hover:bg-white/5'
                                   }`}
                               >
                                 {trope}
@@ -1966,8 +1970,8 @@ export default function AIStoryGenerator({
                                   }
                                 }}
                                 className={`px-3 py-1 rounded-md border-2 border-black text-sm font-bold transition-all ${includeTropes.includes(trope.toLowerCase())
-                                    ? 'bg-green-400 text-white'
-                                    : 'bg-white/5 text-white hover:bg-white/5'
+                                  ? 'bg-green-400 text-white'
+                                  : 'bg-white/5 text-white hover:bg-white/5'
                                   }`}
                               >
                                 {trope}
