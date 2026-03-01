@@ -22,7 +22,9 @@ export default function CommunityPage() {
   }, []);
 
   if (isLoading) {
-    return <LoadingScreen message="Loading community hub..." fullScreen size="lg" />;
+    return (
+      <LoadingScreen message="Loading community hub..." fullScreen size="lg" />
+    );
   }
   return (
     <motion.div

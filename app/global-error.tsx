@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from "react";
-import "./globals.css";
+import { useEffect } from 'react';
+import './globals.css';
 
 export default function GlobalError({
   error,
@@ -10,10 +10,9 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-
   // Log critical application-level errors
   useEffect(() => {
-    console.error("Global application error:", error);
+    console.error('Global application error:', error);
   }, [error]);
 
   return (

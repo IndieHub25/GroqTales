@@ -10,7 +10,7 @@ import {
   BookOpen,
   Zap,
   Star,
-  Activity
+  Activity,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -25,7 +25,10 @@ export default function AIStoryGeneratorPage() {
     <Suspense
       fallback={
         <div className="flex h-screen w-full items-center justify-center bg-black">
-          <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+          <motion.div
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+          >
             <Sparkles className="w-12 h-12 text-emerald-500" />
           </motion.div>
         </div>
@@ -48,7 +51,13 @@ function AIStoryContent() {
 
   useEffect(() => {
     try {
-      const storyData = { type: 'ai', format, genre, redirectToCreate: !!source, timestamp: Date.now() };
+      const storyData = {
+        type: 'ai',
+        format,
+        genre,
+        redirectToCreate: !!source,
+        timestamp: Date.now(),
+      };
       localStorage.setItem('storyCreationData', JSON.stringify(storyData));
     } catch (error) {
       console.error('Error setting up story creation data:', error);
@@ -62,14 +71,16 @@ function AIStoryContent() {
         toast({
           title: 'Spark Ignited',
           description: 'Ready to forge a new path?',
-          className: 'bg-black/80 border border-white/10 text-white backdrop-blur-md',
+          className:
+            'bg-black/80 border border-white/10 text-white backdrop-blur-md',
         });
       } else {
         setNavigatedFrom('homepage');
         toast({
           title: 'Welcome, Creator',
-          description: "Initialize your narrative sequence.",
-          className: 'bg-black/80 border border-white/10 text-white backdrop-blur-md',
+          description: 'Initialize your narrative sequence.',
+          className:
+            'bg-black/80 border border-white/10 text-white backdrop-blur-md',
         });
       }
     } else {
@@ -89,7 +100,7 @@ function AIStoryContent() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
         className="container mx-auto px-4 py-8 relative z-10"
       >
         <div className="max-w-7xl mx-auto">
@@ -112,7 +123,9 @@ function AIStoryContent() {
 
             <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-1.5 rounded-full">
               <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
-              <span className="text-xs font-semibold text-emerald-400 tracking-widest uppercase">Engine Online</span>
+              <span className="text-xs font-semibold text-emerald-400 tracking-widest uppercase">
+                Engine Online
+              </span>
             </div>
           </header>
 
@@ -126,28 +139,61 @@ function AIStoryContent() {
                 className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 backdrop-blur-md"
               >
                 <Sparkles className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-medium tracking-wider uppercase text-white/80">Groq AI Studio</span>
+                <span className="text-xs font-medium tracking-wider uppercase text-white/80">
+                  Groq AI Studio
+                </span>
               </motion.div>
-              
+
               <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-white/90 to-white/50">
-                Architect Your <br className="hidden md:block"/> Universe
+                Architect Your <br className="hidden md:block" /> Universe
               </h1>
               <p className="text-lg text-white/50 max-w-xl leading-relaxed">
-                Configure your narrative parameters below. Our neural engine will synthesize your specifications into a cohesive, mintable legacy.
+                Configure your narrative parameters below. Our neural engine
+                will synthesize your specifications into a cohesive, mintable
+                legacy.
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               {[
-                { icon: Zap, title: 'Speed', val: '< 2.5s', color: 'text-blue-400' },
-                { icon: BookText, title: 'Tokens', val: '8K Context', color: 'text-purple-400' },
-                { icon: Wallet, title: 'Network', val: 'Monad Testnet', color: 'text-emerald-400' },
-                { icon: Star, title: 'Quality', val: 'Ultra-HD', color: 'text-amber-400' },
+                {
+                  icon: Zap,
+                  title: 'Speed',
+                  val: '< 2.5s',
+                  color: 'text-blue-400',
+                },
+                {
+                  icon: BookText,
+                  title: 'Tokens',
+                  val: '8K Context',
+                  color: 'text-purple-400',
+                },
+                {
+                  icon: Wallet,
+                  title: 'Network',
+                  val: 'Monad Testnet',
+                  color: 'text-emerald-400',
+                },
+                {
+                  icon: Star,
+                  title: 'Quality',
+                  val: 'Ultra-HD',
+                  color: 'text-amber-400',
+                },
               ].map((stat, i) => (
-                <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm hover:bg-white/10 transition-colors">
-                  <stat.icon className={`w-6 h-6 mb-3 ${stat.color} opacity-80`} />
-                  <p className="text-xs text-white/40 uppercase tracking-widest mb-1">{stat.title}</p>
-                  <p className="text-lg font-semibold text-white/90">{stat.val}</p>
+                <div
+                  key={i}
+                  className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm hover:bg-white/10 transition-colors"
+                >
+                  <stat.icon
+                    className={`w-6 h-6 mb-3 ${stat.color} opacity-80`}
+                  />
+                  <p className="text-xs text-white/40 uppercase tracking-widest mb-1">
+                    {stat.title}
+                  </p>
+                  <p className="text-lg font-semibold text-white/90">
+                    {stat.val}
+                  </p>
                 </div>
               ))}
             </div>
@@ -159,7 +205,6 @@ function AIStoryContent() {
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-purple-500/5 blur-3xl -z-10 rounded-[3rem]" />
             <AIStoryGenerator className="relative z-10" />
           </div>
-
         </div>
       </motion.div>
     </div>

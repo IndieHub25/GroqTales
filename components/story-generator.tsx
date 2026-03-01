@@ -46,11 +46,14 @@ export function StoryGenerator() {
     }
     setIsGenerating(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, genre, creator: address }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/generate`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, genre, creator: address }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Failed to generate story');
@@ -85,15 +88,18 @@ export function StoryGenerator() {
     setIsMinting(true);
     try {
       // Upload to IPFS
-      const ipfsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/upload`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          story: generatedStory,
-          genre,
-          creator: address,
-        }),
-      });
+      const ipfsResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/upload`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            story: generatedStory,
+            genre,
+            creator: address,
+          }),
+        }
+      );
 
       if (!ipfsResponse.ok) {
         throw new Error('Failed to upload to IPFS');
@@ -101,14 +107,17 @@ export function StoryGenerator() {
       const { metadataUri } = await ipfsResponse.json();
 
       // Mint NFT
-      const mintResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/mint`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          metadataUri,
-          creator: address,
-        }),
-      });
+      const mintResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/mint`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            metadataUri,
+            creator: address,
+          }),
+        }
+      );
 
       if (!mintResponse.ok) {
         throw new Error('Failed to mint NFT');
@@ -131,8 +140,12 @@ export function StoryGenerator() {
 
   const copyToClipboard = (text: string) => {
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text)
-        .then(() => { setIsCopied(true); setTimeout(() => setIsCopied(false), 2000); })
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          setIsCopied(true);
+          setTimeout(() => setIsCopied(false), 2000);
+        })
         .catch(() => fallbackCopy(text));
     } else {
       fallbackCopy(text);
@@ -159,7 +172,8 @@ export function StoryGenerator() {
     } catch {
       toast({
         title: 'Copy Failed',
-        description: 'Could not copy automatically. Please select the text and copy manually.',
+        description:
+          'Could not copy automatically. Please select the text and copy manually.',
         variant: 'destructive',
       });
     }
@@ -225,9 +239,15 @@ export function StoryGenerator() {
                 onClick={() => copyToClipboard(generatedStory)}
               >
                 {isCopied ? (
-                  <><Check className="mr-1 h-4 w-4" />Copied!</>
+                  <>
+                    <Check className="mr-1 h-4 w-4" />
+                    Copied!
+                  </>
                 ) : (
-                  <><Copy className="mr-1 h-4 w-4" />Copy Story</>
+                  <>
+                    <Copy className="mr-1 h-4 w-4" />
+                    Copy Story
+                  </>
                 )}
               </Button>
             </div>

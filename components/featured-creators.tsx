@@ -32,7 +32,9 @@ export function FeaturedCreators() {
       setIsLoading(true);
       try {
         // Try fetching from the community creators API
-        const res = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/feed?limit=4&type=creators`);
+        const res = await fetch(
+          `\${process.env.NEXT_PUBLIC_API_URL || ''}/api/feed?limit=4&type=creators`
+        );
         if (res.ok) {
           const json = await res.json();
           const data = json.data || json.creators || json;
@@ -40,16 +42,20 @@ export function FeaturedCreators() {
           if (Array.isArray(data) && data.length > 0) {
             // Only map items that are actually creator-shaped objects
             const mapped: Creator[] = data
-              .filter((c: any) =>
-                // Require at least one creator-identifying field
-                c.username || c.followersCount !== undefined || c.profileImage
+              .filter(
+                (c: any) =>
+                  // Require at least one creator-identifying field
+                  c.username || c.followersCount !== undefined || c.profileImage
               )
               .slice(0, 4)
               .map((c: any) => ({
                 id: c._id || c.id || '',
                 name: c.name || c.authorName || 'Unknown Creator',
                 username: c.username || '',
-                avatar: c.avatar || c.profileImage || `https://api.dicebear.com/7.x/personas/svg?seed=${c._id || c.id || 'default'}`,
+                avatar:
+                  c.avatar ||
+                  c.profileImage ||
+                  `https://api.dicebear.com/7.x/personas/svg?seed=${c._id || c.id || 'default'}`,
                 bio: c.bio || c.description || '',
                 followers: c.followers ?? c.followersCount ?? 0,
                 stories: c.stories ?? c.storiesCount ?? 0,
@@ -88,7 +94,10 @@ export function FeaturedCreators() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold flex items-center text-foreground">
-              <Users className="mr-2 h-6 w-6" style={{ color: 'var(--comic-purple)' }} />
+              <Users
+                className="mr-2 h-6 w-6"
+                style={{ color: 'var(--comic-purple)' }}
+              />
               Featured Creators
             </h2>
             <p className="text-muted-foreground mt-2 font-bold">
@@ -96,20 +105,21 @@ export function FeaturedCreators() {
             </p>
           </div>
           <Button
-              asChild
-              variant="outline"
-              className="border-4 border-foreground font-black uppercase rounded-none shadow-[4px_4px_0px_0px_var(--shadow-color)]"
-            >
-              <Link href="/community/creators">
-                View All
-              </Link>
-            </Button>
+            asChild
+            variant="outline"
+            className="border-4 border-foreground font-black uppercase rounded-none shadow-[4px_4px_0px_0px_var(--shadow-color)]"
+          >
+            <Link href="/community/creators">View All</Link>
+          </Button>
         </div>
 
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i} className="animate-pulse border-4 border-foreground/20">
+              <Card
+                key={i}
+                className="animate-pulse border-4 border-foreground/20"
+              >
                 <CardContent className="p-6">
                   <div className="flex flex-col items-center">
                     <div className="w-20 h-20 rounded-full bg-muted mb-4" />
@@ -138,7 +148,8 @@ export function FeaturedCreators() {
                     transition: { duration: 0.2 },
                   }}
                 >
-                  <Card className="overflow-hidden h-full border-4 border-foreground transition-all duration-300 hover:shadow-[8px_8px_0px_0px_var(--shadow-color)]"
+                  <Card
+                    className="overflow-hidden h-full border-4 border-foreground transition-all duration-300 hover:shadow-[8px_8px_0px_0px_var(--shadow-color)]"
                     style={{ boxShadow: '6px 6px 0px 0px var(--shadow-color)' }}
                   >
                     <CardContent className="p-6">
@@ -149,7 +160,9 @@ export function FeaturedCreators() {
                             {creator.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
-                        <h3 className="font-black text-foreground uppercase">{creator.name}</h3>
+                        <h3 className="font-black text-foreground uppercase">
+                          {creator.name}
+                        </h3>
                         <p className="text-sm text-muted-foreground mb-2 font-bold">
                           {creator.username}
                         </p>

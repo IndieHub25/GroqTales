@@ -19,7 +19,10 @@ import {
 } from '../controls';
 
 const MODEL_OPTIONS = [
-  { value: 'llama-3.3-70b-versatile', label: 'LLaMA 3.3 70B Versatile (Recommended)' },
+  {
+    value: 'llama-3.3-70b-versatile',
+    label: 'LLaMA 3.3 70B Versatile (Recommended)',
+  },
   { value: 'llama-3.1-8b-instant', label: 'LLaMA 3.1 8B Instant (Fast)' },
   { value: 'llama-3.2-90b-vision-preview', label: 'LLaMA 3.2 90B Vision' },
   { value: 'gemma2-9b-it', label: 'Gemma 2 9B' },

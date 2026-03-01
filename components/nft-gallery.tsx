@@ -35,7 +35,9 @@ export function NFTGallery() {
 
   const fetchStories = async () => {
     try {
-      const response = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/stories`);
+      const response = await fetch(
+        `\${process.env.NEXT_PUBLIC_API_URL || ''}/api/stories`
+      );
       const data = await response.json();
       setStories(data);
     } catch (error) {
@@ -68,11 +70,15 @@ export function NFTGallery() {
               <CardHeader>
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle className="truncate">{story.title}</CardTitle>
-                  {story.royaltyPercentage != null && story.royaltyPercentage > 0 && (
-                    <Badge variant="secondary" className="shrink-0 text-[10px]">
-                      {story.royaltyPercentage}% Royalty
-                    </Badge>
-                  )}
+                  {story.royaltyPercentage != null &&
+                    story.royaltyPercentage > 0 && (
+                      <Badge
+                        variant="secondary"
+                        className="shrink-0 text-[10px]"
+                      >
+                        {story.royaltyPercentage}% Royalty
+                      </Badge>
+                    )}
                 </div>
               </CardHeader>
               <CardContent>

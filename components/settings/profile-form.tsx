@@ -1,22 +1,28 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/client";
+} from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/client';
 
 type ProfileData = {
   username: string;
@@ -41,44 +47,46 @@ export function ProfileForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
-  
+
   const { register, handleSubmit, setValue, watch } = useForm<ProfileData>({
     defaultValues: {
-      username: "",
-      displayName: "",
-      bio: "",
-      website: "",
-      location: "",
-      primaryGenre: "other",
+      username: '',
+      displayName: '',
+      bio: '',
+      website: '',
+      location: '',
+      primaryGenre: 'other',
     },
   });
 
-  const selectedGenre = watch("primaryGenre");
+  const selectedGenre = watch('primaryGenre');
 
   useEffect(() => {
     async function loadProfile() {
       try {
         const { data: sessionData } = await supabase.auth.getSession();
         const token = sessionData?.session?.access_token;
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/profile`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/profile`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        );
         if (!res.ok) throw new Error();
 
-          const data = await res.json();
-          setValue("username", data.username?? "");
-          setValue("displayName", data.displayName?? "");
-          setValue("bio", data.bio ?? "");
-          setValue("website", data.website ?? "");
-          setValue("location", data.location ?? "");
-          setValue("primaryGenre", data.primaryGenre ?? "other");
+        const data = await res.json();
+        setValue('username', data.username ?? '');
+        setValue('displayName', data.displayName ?? '');
+        setValue('bio', data.bio ?? '');
+        setValue('website', data.website ?? '');
+        setValue('location', data.location ?? '');
+        setValue('primaryGenre', data.primaryGenre ?? 'other');
 
-          setAvatarUrl(data.avatarUrl?? null);
-          setDisplayName(data.displayName?? null);
-        
+        setAvatarUrl(data.avatarUrl ?? null);
+        setDisplayName(data.displayName ?? null);
       } catch (error) {
-        console.error("Failed to load profile", error);
-        toast.error("Failed to load profile");
+        console.error('Failed to load profile', error);
+        toast.error('Failed to load profile');
       }
     }
     if (sessionUser) {
@@ -91,20 +99,23 @@ export function ProfileForm() {
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/profile`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(data),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/profile`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(data),
+        }
+      );
 
-      if (!res.ok) throw new Error("Failed to update profile");
+      if (!res.ok) throw new Error('Failed to update profile');
 
-      toast.success("Profile updated successfully!");
+      toast.success('Profile updated successfully!');
     } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -120,19 +131,32 @@ export function ProfileForm() {
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          
           <div className="flex flex-col md:flex-row gap-4 items-start">
             <div>
               <Avatar className="w-24 h-24">
-                <AvatarImage src={avatarUrl || sessionUser?.user_metadata?.avatar_url || "/placeholder-avatar.jpg"} />
+                <AvatarImage
+                  src={
+                    avatarUrl ||
+                    sessionUser?.user_metadata?.avatar_url ||
+                    '/placeholder-avatar.jpg'
+                  }
+                />
                 <AvatarFallback>
-                  {displayName?.slice(0, 2).toUpperCase() || 
-                  sessionUser?.user_metadata?.name?.slice(0, 2).toUpperCase() || 
-
-                "GT"}
+                  {displayName?.slice(0, 2).toUpperCase() ||
+                    sessionUser?.user_metadata?.name
+                      ?.slice(0, 2)
+                      .toUpperCase() ||
+                    'GT'}
                 </AvatarFallback>
               </Avatar>
-              <Button variant="outline" size="sm" type="button" className="mt-2 w-full" disabled title="Coming soon">
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                className="mt-2 w-full"
+                disabled
+                title="Coming soon"
+              >
                 Change
               </Button>
             </div>
@@ -141,11 +165,19 @@ export function ProfileForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="displayName">Display Name</Label>
-                  <Input id="displayName" {...register("displayName")} placeholder="Your Name" />
+                  <Input
+                    id="displayName"
+                    {...register('displayName')}
+                    placeholder="Your Name"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="username">Username</Label>
-                  <Input id="username" {...register("username")} placeholder="username" />
+                  <Input
+                    id="username"
+                    {...register('username')}
+                    placeholder="username"
+                  />
                 </div>
               </div>
 
@@ -153,7 +185,7 @@ export function ProfileForm() {
                 <Label htmlFor="bio">Bio</Label>
                 <Textarea
                   id="bio"
-                  {...register("bio")}
+                  {...register('bio')}
                   placeholder="Tell us about yourself"
                   className="resize-none h-24"
                 />
@@ -162,11 +194,19 @@ export function ProfileForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="website">Website</Label>
-                  <Input id="website" {...register("website")} placeholder="https://..." />
+                  <Input
+                    id="website"
+                    {...register('website')}
+                    placeholder="https://..."
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="location">Location</Label>
-                  <Input id="location" {...register("location")} placeholder="City, Country" />
+                  <Input
+                    id="location"
+                    {...register('location')}
+                    placeholder="City, Country"
+                  />
                 </div>
               </div>
             </div>
@@ -174,9 +214,9 @@ export function ProfileForm() {
 
           <div className="space-y-2">
             <Label>Preferred Genre</Label>
-            <Select 
-              value={selectedGenre} 
-              onValueChange={(val) => setValue("primaryGenre", val)}
+            <Select
+              value={selectedGenre}
+              onValueChange={(val) => setValue('primaryGenre', val)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a genre" />
@@ -193,7 +233,7 @@ export function ProfileForm() {
           </div>
 
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : "Save Changes"}
+            {isLoading ? 'Saving...' : 'Save Changes'}
           </Button>
         </form>
       </CardContent>

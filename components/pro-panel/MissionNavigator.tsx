@@ -61,7 +61,10 @@ export function MissionNavigator({
   sortedCategories,
 }: MissionNavigatorProps) {
   return (
-    <div className="h-full bg-[#050505] border-4 border-white/10 relative overflow-hidden">
+    <nav
+      aria-label="Category navigation"
+      className="h-full bg-[#050505] border-4 border-white/10 relative overflow-hidden"
+    >
       {/* Halftone texture overlay */}
       <div className="absolute inset-0 halftone-bg opacity-20 pointer-events-none" />
 
@@ -87,6 +90,7 @@ export function MissionNavigator({
               <button
                 key={categoryKey}
                 type="button"
+                aria-current={isActive ? 'true' : undefined}
                 onClick={() => onSelectCategory(categoryKey)}
                 className={`
                   w-full text-left px-4 py-3 flex items-center gap-3 transition-all duration-200 relative group
@@ -157,6 +161,6 @@ export function MissionNavigator({
           </div>
         </div>
       </div>
-    </div>
+    </nav>
   );
 }

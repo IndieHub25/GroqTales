@@ -169,9 +169,12 @@ export default function ProfilePageClient({ userId }: { userId: string }) {
         setError(false);
 
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
-        const res = await fetch(`${baseUrl}/api/v1/users/profile/id/${userId}`, {
-          signal: controller.signal,
-        });
+        const res = await fetch(
+          `${baseUrl}/api/v1/users/profile/id/${userId}`,
+          {
+            signal: controller.signal,
+          }
+        );
         if (!res.ok) throw new Error('Failed to load profile');
         const json = await res.json();
         if (!json.success) throw new Error(json.error || 'Failed');
@@ -184,9 +187,10 @@ export default function ProfilePageClient({ userId }: { userId: string }) {
 
         // Check ownership — try fetching our own profile
         try {
-          const token = typeof window !== 'undefined'
-            ? localStorage.getItem('accessToken')
-            : null;
+          const token =
+            typeof window !== 'undefined'
+              ? localStorage.getItem('accessToken')
+              : null;
           if (token) {
             const meRes = await fetch(`${baseUrl}/api/v1/users/profile`, {
               headers: { Authorization: `Bearer ${token}` },
@@ -194,10 +198,7 @@ export default function ProfilePageClient({ userId }: { userId: string }) {
             });
             if (meRes.ok) {
               const meJson = await meRes.json();
-              if (
-                meJson.success &&
-                meJson.data?._id === json.data.user._id
-              ) {
+              if (meJson.success && meJson.data?._id === json.data.user._id) {
                 setIsOwner(true);
               }
             }
@@ -415,7 +416,9 @@ export default function ProfilePageClient({ userId }: { userId: string }) {
                 variant="ghost"
                 size="icon"
                 className="text-slate-400 hover:text-white"
-                onClick={() => navigator.clipboard?.writeText(window.location.href)}
+                onClick={() =>
+                  navigator.clipboard?.writeText(window.location.href)
+                }
               >
                 <Share2 className="w-5 h-5" />
               </Button>
@@ -540,7 +543,7 @@ export default function ProfilePageClient({ userId }: { userId: string }) {
                   <p className="text-sm mt-1">
                     {isOwner
                       ? 'Start creating your first story!'
-                      : 'This creator hasn\'t published any stories yet.'}
+                      : "This creator hasn't published any stories yet."}
                   </p>
                   {isOwner && (
                     <Button asChild className="mt-6">

@@ -195,11 +195,15 @@ export function ProPanel() {
                   {/* Character Name + Age Range — matching reference */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
                     <div className="space-y-2">
-                      <label className="flex items-center gap-2 font-condensed text-black font-bold uppercase tracking-tighter">
+                      <label
+                        htmlFor="char-name"
+                        className="flex items-center gap-2 font-condensed text-black font-bold uppercase tracking-tighter"
+                      >
                         <User className="w-4 h-4 text-[#8a0000]" /> Main
                         Character Name
                       </label>
                       <input
+                        id="char-name"
                         type="text"
                         value={storyInput.characterName}
                         onChange={(e) =>
@@ -210,10 +214,14 @@ export function ProPanel() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="flex items-center gap-2 font-condensed text-black font-bold uppercase tracking-tighter">
+                      <label
+                        htmlFor="age-range"
+                        className="flex items-center gap-2 font-condensed text-black font-bold uppercase tracking-tighter"
+                      >
                         <Cake className="w-4 h-4 text-[#8a0000]" /> Age Range
                       </label>
                       <select
+                        id="age-range"
                         value={storyInput.ageRange}
                         onChange={(e) =>
                           updateStoryInput('ageRange', e.target.value)
@@ -237,11 +245,15 @@ export function ProPanel() {
 
                   {/* Character Background inside FILE 01 */}
                   <div className="bg-white/50 border-4 border-black p-6 relative">
-                    <label className="font-condensed text-black font-bold uppercase mb-2 flex items-center gap-2">
+                    <label
+                      htmlFor="char-bg"
+                      className="font-condensed text-black font-bold uppercase mb-2 flex items-center gap-2"
+                    >
                       <ClipboardList className="w-4 h-4 text-[#8a0000]" />{' '}
                       Character Background
                     </label>
                     <textarea
+                      id="char-bg"
                       value={storyInput.characterBackground}
                       onChange={(e) =>
                         updateStoryInput('characterBackground', e.target.value)
@@ -288,9 +300,14 @@ export function ProPanel() {
                 </div>
 
                 {/* View Mode Toggle */}
-                <div className="flex items-center gap-1 border-2 border-white/10 bg-black/60 p-0.5">
+                <div
+                  className="flex items-center gap-1 border-2 border-white/10 bg-black/60 p-0.5"
+                  role="group"
+                  aria-label="View mode"
+                >
                   <button
                     type="button"
+                    aria-pressed={viewMode === 'split'}
                     onClick={() => setViewMode('split')}
                     title="Split Panel View"
                     className={`px-3 py-1.5 font-condensed text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all ${
@@ -303,6 +320,7 @@ export function ProPanel() {
                   </button>
                   <button
                     type="button"
+                    aria-pressed={viewMode === 'accordion'}
                     onClick={() => setViewMode('accordion')}
                     title="Accordion View"
                     className={`px-3 py-1.5 font-condensed text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all ${
@@ -326,7 +344,11 @@ export function ProPanel() {
                 <>
                   {/* Mobile: Horizontal scrollable tabs */}
                   <div className="lg:hidden mb-4 overflow-x-auto">
-                    <div className="flex gap-1 pb-2 min-w-max">
+                    <div
+                      className="flex gap-1 pb-2 min-w-max"
+                      role="tablist"
+                      aria-label="Category tabs"
+                    >
                       {sortedCategories.map((categoryKey) => {
                         const config = CATEGORY_CONFIG[categoryKey];
                         const isActive = selectedCategory === categoryKey;
@@ -334,6 +356,8 @@ export function ProPanel() {
                           <button
                             key={categoryKey}
                             type="button"
+                            role="tab"
+                            aria-selected={isActive}
                             onClick={() => handleCategoryChange(categoryKey)}
                             className={`
                               px-3 py-2 font-condensed text-[10px] font-bold uppercase tracking-wider whitespace-nowrap border-2 transition-all

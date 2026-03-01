@@ -10,7 +10,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
 
-
 import ClientLayout from '@/components/client-layout';
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
@@ -65,7 +64,9 @@ if (
   // CF_PAGES_URL is automatically set by Cloudflare Pages during builds
   const cfPagesUrl = process.env.CF_PAGES_URL;
   const defaultEnvVars: Record<string, string> = {
-    NEXT_PUBLIC_URL: cfPagesUrl ? `https://${cfPagesUrl}` : 'http://localhost:3000',
+    NEXT_PUBLIC_URL: cfPagesUrl
+      ? `https://${cfPagesUrl}`
+      : 'http://localhost:3000',
     // 'NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME': 'GroqTales', // Commented out OnChain references
     // NEXT_PUBLIC_VERSION is injected by next.config.js from the VERSION file at build time.
     // It does not need a default here — if it is missing the build itself is misconfigured.
@@ -227,9 +228,7 @@ export default function RootLayout({
                       className="container mx-auto px-4 py-6 flex-grow focus:outline-2 focus:outline-primary"
                     >
                       <React.Suspense fallback={null}>
-                        <GlobalLoadingWrapper>
-                          {children}
-                        </GlobalLoadingWrapper>
+                        <GlobalLoadingWrapper>{children}</GlobalLoadingWrapper>
                       </React.Suspense>
                     </main>
                     <Footer version={appVersion} />

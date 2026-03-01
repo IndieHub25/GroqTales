@@ -357,7 +357,9 @@ export default function CreatorsPage() {
             <div className="flex-1 w-full">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="font-semibold text-lg leading-tight">{creator.name}</h3>
+                  <h3 className="font-semibold text-lg leading-tight">
+                    {creator.name}
+                  </h3>
                   <p className="text-sm text-muted-foreground">
                     {creator.username}
                   </p>
@@ -436,7 +438,12 @@ export default function CreatorsPage() {
           </div>
 
           <div className="flex flex-col min-[400px]:flex-row gap-2 min-[400px]:justify-between mt-6">
-            <Button variant="outline" size="sm" asChild className="w-full min-[400px]:w-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="w-full min-[400px]:w-auto"
+            >
               <Link href={`/profile/${creator.username.replace('@', '')}`}>
                 View Profile
                 <ChevronRight className="ml-1 h-4 w-4" />

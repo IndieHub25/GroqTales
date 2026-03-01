@@ -10,10 +10,6 @@ export function generateStaticParams() {
 
 import ProfilePageClient from './client';
 
-export default function ProfilePage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function ProfilePage({ params }: { params: { id: string } }) {
   return <ProfilePageClient userId={params.id} />;
 }

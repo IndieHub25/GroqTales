@@ -92,14 +92,23 @@ export function StoryInputSection() {
   const updateStoryInput = useProPanelStore((s) => s.updateStoryInput);
   const updateParameter = useProPanelStore((s) => s.updateParameter);
 
+  const promptId = 'story-prompt';
+  const plotId = 'plot-type';
+  const conflictId = 'conflict-type';
+  const arcId = 'story-arc';
+
   return (
     <div className="space-y-8">
       {/* Main Story Prompt */}
       <div className="mb-8">
-        <label className="font-marker text-3xl text-black mb-4 block">
+        <label
+          htmlFor={promptId}
+          className="font-marker text-3xl text-black mb-4 block"
+        >
           WHAT&apos;S THE STORY, HERO?*
         </label>
         <textarea
+          id={promptId}
           value={storyInput.storyPrompt}
           onChange={(e) => updateStoryInput('storyPrompt', e.target.value)}
           placeholder="Enter your prompt here... (e.g., A cyberpunk detective hunting a ghost in the machine)"
@@ -115,10 +124,14 @@ export function StoryInputSection() {
       {/* Quick Config Grid — 2 columns */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-4">
-          <label className="flex items-center gap-2 font-condensed text-black font-bold uppercase">
+          <label
+            htmlFor={plotId}
+            className="flex items-center gap-2 font-condensed text-black font-bold uppercase"
+          >
             <Search className="w-4 h-4 text-[#8a0000]" /> Plot Type
           </label>
           <select
+            id={plotId}
             value={parameters.storyStructure.narrativeStyle}
             onChange={(e) =>
               updateParameter(
@@ -136,10 +149,14 @@ export function StoryInputSection() {
             ))}
           </select>
 
-          <label className="flex items-center gap-2 font-condensed text-black font-bold uppercase mt-6">
+          <label
+            htmlFor={conflictId}
+            className="flex items-center gap-2 font-condensed text-black font-bold uppercase mt-6"
+          >
             <Brain className="w-4 h-4 text-[#8a0000]" /> Conflict Type
           </label>
           <select
+            id={conflictId}
             value={parameters.storyStructure.actStructure}
             onChange={(e) =>
               updateParameter(
@@ -159,10 +176,14 @@ export function StoryInputSection() {
         </div>
 
         <div className="space-y-4">
-          <label className="flex items-center gap-2 font-condensed text-black font-bold uppercase">
+          <label
+            htmlFor={arcId}
+            className="flex items-center gap-2 font-condensed text-black font-bold uppercase"
+          >
             <TrendingUp className="w-4 h-4 text-[#8a0000]" /> Story Arc
           </label>
           <select
+            id={arcId}
             value={parameters.storyStructure.resolutionStyle}
             onChange={(e) =>
               updateParameter(
@@ -183,11 +204,16 @@ export function StoryInputSection() {
           <label className="flex items-center gap-2 font-condensed text-black font-bold uppercase mt-6">
             <Zap className="w-4 h-4 text-[#8a0000]" /> Pacing
           </label>
-          <div className="flex flex-wrap gap-2">
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label="Pacing options"
+          >
             {PACING_OPTIONS.map((p) => (
               <button
                 key={p}
                 type="button"
+                aria-pressed={parameters.storyStructure.pacing === p}
                 onClick={() => updateParameter('storyStructure', 'pacing', p)}
                 className={`border-2 border-black px-3 py-2 font-condensed font-bold uppercase text-[10px] leading-tight text-center transition-colors whitespace-nowrap ${
                   parameters.storyStructure.pacing === p

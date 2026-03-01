@@ -141,14 +141,11 @@ export async function GET(request: NextRequest) {
       default: GROQ_MODELS.STORY_GENERATION,
       // Provide human-readable names for the models
       modelNames: {
-        [GROQ_MODELS.STORY_GENERATION]:
-          'Llama 3.3 (70B) - Story Generation',
-        [GROQ_MODELS.STORY_ANALYSIS]:
-          'Llama 3.1 (8B) - Story Analysis',
+        [GROQ_MODELS.STORY_GENERATION]: 'Llama 3.3 (70B) - Story Generation',
+        [GROQ_MODELS.STORY_ANALYSIS]: 'Llama 3.1 (8B) - Story Analysis',
         [GROQ_MODELS.CONTENT_IMPROVEMENT]:
           'Mixtral (8x7B) - Content Improvement',
-        [GROQ_MODELS.RECOMMENDATIONS]:
-          'Llama 3.1 (8B) - Recommendations',
+        [GROQ_MODELS.RECOMMENDATIONS]: 'Llama 3.1 (8B) - Recommendations',
       },
     });
   } catch (error: unknown) {

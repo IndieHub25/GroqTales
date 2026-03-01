@@ -72,7 +72,9 @@ export default function StoryCommentsDialog({
   const fetchComments = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments?storyId=${storyId}`);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments?storyId=${storyId}`
+      );
       if (!response.ok) throw new Error('Failed to fetch comments');
 
       const data = await response.json();
@@ -108,21 +110,24 @@ export default function StoryCommentsDialog({
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          storyId,
-          content: newComment.trim(),
-          author: {
-            name: account || 'Anonymous User',
-            username: account ? account.slice(0, 8) : 'anon',
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${account || 'anon'}`,
-            walletAddress: account,
-            isVerified: false,
-          },
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            storyId,
+            content: newComment.trim(),
+            author: {
+              name: account || 'Anonymous User',
+              username: account ? account.slice(0, 8) : 'anon',
+              avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${account || 'anon'}`,
+              walletAddress: account,
+              isVerified: false,
+            },
+          }),
+        }
+      );
 
       if (!response.ok) throw new Error('Failed to post comment');
 
@@ -145,14 +150,17 @@ export default function StoryCommentsDialog({
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments/like`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          commentId,
-          userId: account,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments/like`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            commentId,
+            userId: account,
+          }),
+        }
+      );
 
       if (!response.ok) throw new Error('Failed to like comment');
 
@@ -176,14 +184,17 @@ export default function StoryCommentsDialog({
     if (!isAdmin) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments/moderate`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          commentId,
-          action,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/comments/moderate`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            commentId,
+            action,
+          }),
+        }
+      );
 
       if (!response.ok) throw new Error('Failed to moderate comment');
 

@@ -50,7 +50,6 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
         <div className={`relative ${currentSize.container}`}>
           {/* Central loading icon */}
           <div className="absolute inset-0 flex items-center justify-center">
-            
             {/* Outer spinning aura */}
             <motion.div
               animate={{ rotate: 360 }}
@@ -70,7 +69,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
                   'drop-shadow(0 0 15px rgba(16,185,129,0.4))',
                   'drop-shadow(0 0 40px rgba(16,185,129,0.9))',
                   'drop-shadow(0 0 15px rgba(16,185,129,0.4))',
-                ]
+                ],
               }}
               transition={{
                 duration: 2,
@@ -80,12 +79,12 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
               className="relative rounded-full p-6 flex items-center justify-center bg-black/60 backdrop-blur-xl border border-white/20 shadow-[0_0_30px_rgba(0,0,0,0.8)]"
             >
               <div className="relative w-20 h-20 md:w-32 md:h-32">
-                <Image 
-                  src="/logo.png" 
-                  alt="Loading" 
-                  fill 
-                  className="object-contain drop-shadow-[0_0_12px_rgba(255,255,255,1)]" 
-                  priority 
+                <Image
+                  src="/logo.png"
+                  alt="Loading"
+                  fill
+                  className="object-contain drop-shadow-[0_0_12px_rgba(255,255,255,1)]"
+                  priority
                 />
               </div>
             </motion.div>

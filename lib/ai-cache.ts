@@ -139,7 +139,9 @@ export async function setCachedResponse<T = string>(
 
   try {
     await redis.set(key, JSON.stringify(response), { ex: ttl });
-    console.log(`[AI-Cache] SET  — ${category} — TTL ${ttl}s — ${key.slice(-12)}`);
+    console.log(
+      `[AI-Cache] SET  — ${category} — TTL ${ttl}s — ${key.slice(-12)}`
+    );
   } catch (error) {
     // Cache write failures should never break the main flow.
     console.error('[AI-Cache] Error writing cache:', error);
@@ -165,7 +167,9 @@ export async function invalidateCacheEntry(
 
   try {
     const deleted = await redis.del(key);
-    console.log(`[AI-Cache] DEL  — ${category} — ${key.slice(-12)} — removed: ${deleted}`);
+    console.log(
+      `[AI-Cache] DEL  — ${category} — ${key.slice(-12)} — removed: ${deleted}`
+    );
     return deleted > 0;
   } catch (error) {
     console.error('[AI-Cache] Error invalidating cache:', error);
@@ -208,7 +212,9 @@ export async function invalidateCacheCategory(
       }
     } while (cursor !== 0 && cursor !== '0');
 
-    console.log(`[AI-Cache] PURGE — ${category} — ${totalDeleted} keys removed`);
+    console.log(
+      `[AI-Cache] PURGE — ${category} — ${totalDeleted} keys removed`
+    );
     return totalDeleted;
   } catch (error) {
     console.error('[AI-Cache] Error purging category:', error);

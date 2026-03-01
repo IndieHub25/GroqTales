@@ -38,7 +38,7 @@ export async function configureRoyalty(params: ConfigureRoyaltyParams) {
         story_id: storyId,
         creator_percentage: royaltyPercentage,
         platform_percentage: 2.5, // default
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       },
       { onConflict: 'story_id' }
     )
@@ -62,7 +62,9 @@ interface RecordTransactionParams {
   txHash?: string;
 }
 
-export async function recordRoyaltyTransaction(params: RecordTransactionParams) {
+export async function recordRoyaltyTransaction(
+  params: RecordTransactionParams
+) {
   const { nftId, salePrice, txHash } = params;
 
   if (salePrice <= 0) {
@@ -93,7 +95,7 @@ export async function recordRoyaltyTransaction(params: RecordTransactionParams) 
       currency: 'MON',
       type: 'secondary_sale',
       tx_hash: txHash,
-      status: 'completed'
+      status: 'completed',
     })
     .select()
     .single();
@@ -114,9 +116,11 @@ export async function recordRoyaltyTransaction(params: RecordTransactionParams) 
     await supabase
       .from('creator_earnings')
       .update({
-        total_earned: Number(existingEarnings.total_earned || 0) + royaltyAmount,
-        available_to_claim: Number(existingEarnings.available_to_claim || 0) + royaltyAmount,
-        updated_at: new Date().toISOString()
+        total_earned:
+          Number(existingEarnings.total_earned || 0) + royaltyAmount,
+        available_to_claim:
+          Number(existingEarnings.available_to_claim || 0) + royaltyAmount,
+        updated_at: new Date().toISOString(),
       })
       .eq('id', existingEarnings.id);
   } else {
@@ -124,7 +128,7 @@ export async function recordRoyaltyTransaction(params: RecordTransactionParams) 
     await supabase.from('creator_earnings').insert({
       wallet_address: params.sellerWallet,
       total_earned: royaltyAmount,
-      available_to_claim: royaltyAmount
+      available_to_claim: royaltyAmount,
     });
   }
 
@@ -163,7 +167,7 @@ export async function getCreatorEarnings(walletAddress: string) {
     paidOut: (data.total_earned || 0) - (data.available_to_claim || 0),
     totalSales: 0, // Not explicitly tracked in simple schema
     lastUpdated: data.updated_at,
-    creatorWallet: data.wallet_address
+    creatorWallet: data.wallet_address,
   };
 }
 
@@ -198,7 +202,11 @@ export async function getCreatorTransactions(
     query = query.eq('status', options.status);
   }
 
-  const { data: transactions, count, error } = await query
+  const {
+    data: transactions,
+    count,
+    error,
+  } = await query
     .order('created_at', { ascending: false })
     .range(skip, skip + limit - 1);
 

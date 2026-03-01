@@ -48,20 +48,32 @@ export function SliderControl({
   showValue = true,
   suffix = '',
 }: SliderControlProps) {
+  const id = React.useId();
+  const labelId = `${id}-label`;
+  const descId = `${id}-desc`;
+
   return (
     <div className="pb-4">
       <div className="flex items-center justify-between gap-2 mb-3">
-        <span className="font-condensed uppercase tracking-wider text-xs text-white leading-tight max-w-[55%] block">
+        <span
+          id={labelId}
+          className="font-condensed uppercase tracking-wider text-xs text-white leading-tight max-w-[55%] block"
+        >
           {label}
         </span>
         {showValue && (
-          <span className="text-base font-mono font-bold text-white bg-[#8a0000] px-3 py-1 rounded shrink-0 min-w-[3rem] text-center tabular-nums leading-none">
+          <span
+            aria-live="polite"
+            className="text-base font-mono font-bold text-white bg-[#8a0000] px-3 py-1 rounded shrink-0 min-w-[3rem] text-center tabular-nums leading-none"
+          >
             {value}
             {suffix}
           </span>
         )}
       </div>
       <Slider
+        aria-labelledby={labelId}
+        aria-describedby={description ? descId : undefined}
         value={[value]}
         min={min}
         max={max}
@@ -71,6 +83,7 @@ export function SliderControl({
       />
       {description && (
         <span
+          id={descId}
           className="block text-[10px] text-gray-500 mt-2 leading-tight"
           style={{
             fontFamily: 'Roboto Condensed, sans-serif',
@@ -111,6 +124,10 @@ export function SelectControl<T extends string>({
   onChange,
   placeholder,
 }: SelectControlProps<T>) {
+  const id = React.useId();
+  const controlId = `${id}-select`;
+  const descId = `${id}-desc`;
+
   const normalizedOptions = options.map((opt) =>
     typeof opt === 'string'
       ? { value: opt as T, label: formatOptionLabel(opt) }
@@ -119,16 +136,26 @@ export function SelectControl<T extends string>({
 
   return (
     <div className="space-y-1.5">
-      <Label className="font-condensed uppercase tracking-wider text-xs text-white">
+      <Label
+        htmlFor={controlId}
+        className="font-condensed uppercase tracking-wider text-xs text-white"
+      >
         {label}
       </Label>
       {description && (
-        <p className="text-[10px] font-condensed uppercase tracking-wider text-gray-500">
+        <p
+          id={descId}
+          className="text-[10px] font-condensed uppercase tracking-wider text-gray-500"
+        >
           {description}
         </p>
       )}
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="w-full bg-black border-2 border-noir-primary p-3 font-condensed font-bold uppercase text-sm text-white focus:ring-0 hover:border-white transition-colors overflow-hidden">
+        <SelectTrigger
+          id={controlId}
+          aria-describedby={description ? descId : undefined}
+          className="w-full bg-black border-2 border-noir-primary p-3 font-condensed font-bold uppercase text-sm text-white focus:ring-0 hover:border-white transition-colors overflow-hidden"
+        >
           <SelectValue
             placeholder={placeholder || 'Select...'}
             className="truncate"
@@ -175,17 +202,29 @@ export function InputControl({
   min,
   max,
 }: InputControlProps) {
+  const id = React.useId();
+  const controlId = `${id}-input`;
+  const descId = `${id}-desc`;
+
   return (
     <div className="space-y-1.5">
-      <Label className="font-condensed uppercase tracking-wider text-xs text-white">
+      <Label
+        htmlFor={controlId}
+        className="font-condensed uppercase tracking-wider text-xs text-white"
+      >
         {label}
       </Label>
       {description && (
-        <p className="text-[10px] font-condensed uppercase tracking-wider text-gray-500">
+        <p
+          id={descId}
+          className="text-[10px] font-condensed uppercase tracking-wider text-gray-500"
+        >
           {description}
         </p>
       )}
       <Input
+        id={controlId}
+        aria-describedby={description ? descId : undefined}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -221,17 +260,29 @@ export function NumberInputControl({
   max,
   step = 1,
 }: NumberInputControlProps) {
+  const id = React.useId();
+  const controlId = `${id}-num`;
+  const descId = `${id}-desc`;
+
   return (
     <div className="space-y-1.5">
-      <Label className="font-condensed uppercase tracking-wider text-xs text-white">
+      <Label
+        htmlFor={controlId}
+        className="font-condensed uppercase tracking-wider text-xs text-white"
+      >
         {label}
       </Label>
       {description && (
-        <p className="text-[10px] font-condensed uppercase tracking-wider text-gray-500">
+        <p
+          id={descId}
+          className="text-[10px] font-condensed uppercase tracking-wider text-gray-500"
+        >
           {description}
         </p>
       )}
       <Input
+        id={controlId}
+        aria-describedby={description ? descId : undefined}
         type="number"
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
@@ -267,24 +318,39 @@ export function TextareaControl({
   rows = 3,
   maxLength,
 }: TextareaControlProps) {
+  const id = React.useId();
+  const controlId = `${id}-textarea`;
+  const descId = `${id}-desc`;
+
   return (
     <div className="space-y-1.5">
       <div className="flex items-start justify-between gap-3">
-        <Label className="font-condensed uppercase tracking-wider text-xs text-white leading-tight">
+        <Label
+          htmlFor={controlId}
+          className="font-condensed uppercase tracking-wider text-xs text-white leading-tight"
+        >
           {label}
         </Label>
         {maxLength && (
-          <span className="text-xs font-condensed text-gray-300 bg-white/10 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
+          <span
+            aria-live="polite"
+            className="text-xs font-condensed text-gray-300 bg-white/10 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0"
+          >
             {value.length}/{maxLength}
           </span>
         )}
       </div>
       {description && (
-        <p className="text-[10px] font-condensed uppercase tracking-wider text-gray-500">
+        <p
+          id={descId}
+          className="text-[10px] font-condensed uppercase tracking-wider text-gray-500"
+        >
           {description}
         </p>
       )}
       <Textarea
+        id={controlId}
+        aria-describedby={description ? descId : undefined}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -313,19 +379,31 @@ export function SwitchControl({
   checked,
   onChange,
 }: SwitchControlProps) {
+  const id = React.useId();
+  const controlId = `${id}-switch`;
+  const descId = `${id}-desc`;
+
   return (
     <div className="flex items-center justify-between py-2 border-b border-white/10">
       <div className="space-y-0.5">
-        <Label className="font-condensed font-bold uppercase tracking-widest text-sm text-white">
+        <Label
+          htmlFor={controlId}
+          className="font-condensed font-bold uppercase tracking-widest text-sm text-white"
+        >
           {label}
         </Label>
         {description && (
-          <p className="text-xs text-gray-400 font-condensed uppercase tracking-wider">
+          <p
+            id={descId}
+            className="text-xs text-gray-400 font-condensed uppercase tracking-wider"
+          >
             {description}
           </p>
         )}
       </div>
       <Switch
+        id={controlId}
+        aria-describedby={description ? descId : undefined}
         checked={checked}
         onCheckedChange={onChange}
         className="data-[state=checked]:bg-noir-primary"
@@ -355,6 +433,10 @@ export function MultiSelectControl<T extends string>({
   onChange,
   maxSelections,
 }: MultiSelectControlProps<T>) {
+  const id = React.useId();
+  const groupId = `${id}-group`;
+  const descId = `${id}-desc`;
+
   const toggleOption = (option: T) => {
     if (values.includes(option)) {
       onChange(values.filter((v) => v !== option));
@@ -366,21 +448,35 @@ export function MultiSelectControl<T extends string>({
   return (
     <div className="space-y-2">
       <div className="flex items-start justify-between gap-3">
-        <Label className="font-condensed uppercase tracking-wider text-xs text-white leading-tight">
+        <Label
+          id={groupId}
+          className="font-condensed uppercase tracking-wider text-xs text-white leading-tight"
+        >
           {label}
         </Label>
         {maxSelections && (
-          <span className="text-xs font-condensed text-gray-300 bg-white/10 px-1.5 py-0.5 rounded uppercase shrink-0">
+          <span
+            aria-live="polite"
+            className="text-xs font-condensed text-gray-300 bg-white/10 px-1.5 py-0.5 rounded uppercase shrink-0"
+          >
             {values.length}/{maxSelections}
           </span>
         )}
       </div>
       {description && (
-        <p className="text-[10px] font-condensed uppercase tracking-wider text-gray-500">
+        <p
+          id={descId}
+          className="text-[10px] font-condensed uppercase tracking-wider text-gray-500"
+        >
           {description}
         </p>
       )}
-      <div className="flex flex-wrap gap-2">
+      <div
+        role="group"
+        aria-labelledby={groupId}
+        aria-describedby={description ? descId : undefined}
+        className="flex flex-wrap gap-2"
+      >
         {options.map((option) => {
           const isSelected = values.includes(option);
           const isDisabled =
@@ -390,6 +486,7 @@ export function MultiSelectControl<T extends string>({
             <button
               key={option}
               type="button"
+              aria-pressed={isSelected}
               onClick={() => toggleOption(option)}
               disabled={isDisabled as boolean}
               className={`
@@ -434,6 +531,10 @@ export function TagsInputControl({
   maxTags = 10,
   maxLength = 50,
 }: TagsInputControlProps) {
+  const id = React.useId();
+  const inputId = `${id}-tag-input`;
+  const labelId = `${id}-label`;
+  const descId = `${id}-desc`;
   const [inputValue, setInputValue] = React.useState('');
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -453,27 +554,43 @@ export function TagsInputControl({
   return (
     <div className="space-y-2">
       <div className="flex items-start justify-between gap-3">
-        <Label className="font-condensed uppercase tracking-wider text-xs text-white leading-tight">
+        <Label
+          id={labelId}
+          htmlFor={inputId}
+          className="font-condensed uppercase tracking-wider text-xs text-white leading-tight"
+        >
           {label}
         </Label>
-        <span className="text-xs font-condensed text-gray-300 bg-white/10 px-1.5 py-0.5 rounded uppercase shrink-0">
+        <span
+          aria-live="polite"
+          className="text-xs font-condensed text-gray-300 bg-white/10 px-1.5 py-0.5 rounded uppercase shrink-0"
+        >
           {values.length}/{maxTags}
         </span>
       </div>
       {description && (
-        <p className="text-[10px] font-condensed uppercase tracking-wider text-gray-500">
+        <p
+          id={descId}
+          className="text-[10px] font-condensed uppercase tracking-wider text-gray-500"
+        >
           {description}
         </p>
       )}
-      <div className="flex flex-wrap gap-2 mb-2">
+      <div
+        className="flex flex-wrap gap-2 mb-2"
+        role="list"
+        aria-label={`${label} tags`}
+      >
         {values.map((tag, index) => (
           <span
             key={index}
+            role="listitem"
             className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-condensed font-bold uppercase tracking-wider bg-noir-primary text-white border border-white"
           >
             {tag}
             <button
               type="button"
+              aria-label={`Remove ${tag}`}
               onClick={() => removeTag(index)}
               className="hover:text-gray-300 ml-0.5"
             >
@@ -484,6 +601,8 @@ export function TagsInputControl({
       </div>
       {values.length < maxTags && (
         <Input
+          id={inputId}
+          aria-describedby={description ? descId : undefined}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value.slice(0, maxLength))}
           onKeyDown={handleKeyDown}
@@ -510,12 +629,16 @@ export function CollapsibleGroup({
   defaultOpen = false,
   children,
 }: CollapsibleGroupProps) {
+  const id = React.useId();
+  const contentId = `${id}-content`;
   const [isOpen, setIsOpen] = React.useState(defaultOpen);
 
   return (
     <div className="border border-white/10 bg-white/[0.02]">
       <button
         type="button"
+        aria-expanded={isOpen}
+        aria-controls={contentId}
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/[0.03] transition-colors group"
       >
@@ -523,6 +646,7 @@ export function CollapsibleGroup({
           {title}
         </h4>
         <span
+          aria-hidden="true"
           className={`text-gray-500 text-xs font-condensed uppercase tracking-wider transition-transform duration-200 ${
             isOpen ? 'rotate-0' : '-rotate-90'
           }`}
@@ -531,6 +655,10 @@ export function CollapsibleGroup({
         </span>
       </button>
       <div
+        id={contentId}
+        role="region"
+        aria-hidden={!isOpen}
+        {...(!isOpen ? { inert: true } : {})}
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
           isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
         }`}

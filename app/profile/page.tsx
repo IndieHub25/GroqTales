@@ -79,7 +79,6 @@ import { useState, useEffect } from 'react';
 //   // ... more stories
 // ];
 
-
 // Floating GitHub button component
 const FloatingGithub = () => (
   <Link
@@ -144,17 +143,19 @@ export default function ProfilePage() {
         setLoading(true);
 
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
-        const token = typeof window !== 'undefined'
-          ? localStorage.getItem('accessToken')
-          : null;
+        const token =
+          typeof window !== 'undefined'
+            ? localStorage.getItem('accessToken')
+            : null;
 
         const headers: Record<string, string> = {};
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const res = await fetch(
-          `${baseUrl}/api/v1/users/profile`,
-          { headers, credentials: 'include', signal: controller.signal }
-        );
+        const res = await fetch(`${baseUrl}/api/v1/users/profile`, {
+          headers,
+          credentials: 'include',
+          signal: controller.signal,
+        });
         if (!res.ok) throw new Error();
         const json = await res.json();
         if (!json.success) throw new Error();

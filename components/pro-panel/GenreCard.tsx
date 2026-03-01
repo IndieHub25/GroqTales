@@ -40,6 +40,7 @@ export function GenreCard({
   return (
     <button
       type="button"
+      aria-pressed={isSelected}
       onClick={() => onSelect(id)}
       className={`group relative w-full text-left overflow-hidden transition-all shadow-comic group-hover:-translate-y-1 ${
         isSelected

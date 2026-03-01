@@ -5,7 +5,11 @@ import { connectWithRetry, setupGracefulShutdown } from './db/connect';
 
 // Only load dotenv in non-production local dev (avoid interfering with hosting platform env injection)
 // CF_PAGES is set automatically by Cloudflare Pages during builds
-if (!process.env.CF_PAGES && !process.env.CI && process.env.NODE_ENV !== 'production') {
+if (
+  !process.env.CF_PAGES &&
+  !process.env.CI &&
+  process.env.NODE_ENV !== 'production'
+) {
   dotenv.config({ path: '.env.local' });
 }
 
@@ -49,10 +53,10 @@ function createMockClient(): MockClient {
         insertOne: async () => ({ insertedId: 'mock-id' }),
         updateOne: async () => ({ modifiedCount: 1 }),
         deleteOne: async () => ({ deletedCount: 1 }),
-        createIndex: async () => { },
-        drop: async () => { },
+        createIndex: async () => {},
+        drop: async () => {},
       }),
-      createCollection: async () => { },
+      createCollection: async () => {},
     }),
   };
 }

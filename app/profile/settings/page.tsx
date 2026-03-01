@@ -101,7 +101,9 @@ export default function SettingsPage() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | string | null>(null);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveStatus, setSaveStatus] = useState<
+    'idle' | 'saving' | 'saved' | 'error'
+  >('idle');
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -110,9 +112,8 @@ export default function SettingsPage() {
 
   const getToken = () =>
     typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-  const baseUrl = typeof window !== 'undefined'
-    ? (process.env.NEXT_PUBLIC_API_URL || '')
-    : '';
+  const baseUrl =
+    typeof window !== 'undefined' ? process.env.NEXT_PUBLIC_API_URL || '' : '';
 
   // const onSubmit = (data: ProfileFormValues) => {
   //   // In a real app, this would save the data to the server
@@ -127,14 +128,11 @@ export default function SettingsPage() {
         const headers: Record<string, string> = {};
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const res = await fetch(
-          `${baseUrl}/api/v1/users/profile`,
-          {
-            headers,
-            credentials: 'include',
-            signal: controller.signal,
-          }
-        );
+        const res = await fetch(`${baseUrl}/api/v1/users/profile`, {
+          headers,
+          credentials: 'include',
+          signal: controller.signal,
+        });
 
         if (!res.ok) throw new Error('Failed to fetch profile');
 
@@ -223,16 +221,14 @@ export default function SettingsPage() {
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
       // Save notification preferences
-      const notifRes = await fetch(
-        `${baseUrl}/api/v1/settings/notifications`,
-        {
-          method: 'PUT',
-          headers,
-          credentials: 'include',
-          body: JSON.stringify(notifications),
-        }
-      );
-      if (!notifRes.ok) throw new Error('Failed to save notification preferences');
+      const notifRes = await fetch(`${baseUrl}/api/v1/settings/notifications`, {
+        method: 'PUT',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify(notifications),
+      });
+      if (!notifRes.ok)
+        throw new Error('Failed to save notification preferences');
 
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 3000);
@@ -265,9 +261,7 @@ export default function SettingsPage() {
         <p className="text-muted-foreground mb-8">
           We encountered an error while loading your preferences.
         </p>
-        <Button onClick={() => window.location.reload()}>
-          Retry Settings
-        </Button>
+        <Button onClick={() => window.location.reload()}>Retry Settings</Button>
       </div>
     );
   }
@@ -449,10 +443,11 @@ export default function SettingsPage() {
                             </FormControl>
                             <FormDescription>
                               <span
-                                className={`${(field.value?.length || 0) > 200
-                                  ? 'text-warning'
-                                  : ''
-                                  }`}
+                                className={`${
+                                  (field.value?.length || 0) > 200
+                                    ? 'text-warning'
+                                    : ''
+                                }`}
                               >
                                 {field.value?.length || 0}
                               </span>
@@ -507,10 +502,14 @@ export default function SettingsPage() {
 
                     <div className="flex justify-end gap-3">
                       {saveStatus === 'saved' && (
-                        <span className="text-sm text-emerald-400 self-center">✓ Changes saved!</span>
+                        <span className="text-sm text-emerald-400 self-center">
+                          ✓ Changes saved!
+                        </span>
                       )}
                       {saveStatus === 'error' && (
-                        <span className="text-sm text-red-400 self-center">Failed to save</span>
+                        <span className="text-sm text-red-400 self-center">
+                          Failed to save
+                        </span>
                       )}
                       <Button type="submit" disabled={saveStatus === 'saving'}>
                         {saveStatus === 'saving' ? 'Saving...' : 'Save Changes'}
@@ -790,14 +789,17 @@ export default function SettingsPage() {
                 >
                   Reset to Defaults
                 </Button>
-                <Button onClick={savePreferences} disabled={saveStatus === 'saving'}>
+                <Button
+                  onClick={savePreferences}
+                  disabled={saveStatus === 'saving'}
+                >
                   {saveStatus === 'saving'
                     ? 'Saving...'
                     : saveStatus === 'saved'
-                    ? '✓ Saved!'
-                    : saveStatus === 'error'
-                    ? 'Error — Retry'
-                    : 'Save Preferences'}
+                      ? '✓ Saved!'
+                      : saveStatus === 'error'
+                        ? 'Error — Retry'
+                        : 'Save Preferences'}
                 </Button>
               </CardFooter>
             </Card>

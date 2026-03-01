@@ -130,7 +130,13 @@ export function useCreatorTransactions(
     fetchTransactions();
   }, [fetchTransactions]);
 
-  return { transactions, pagination, isLoading, error, refetch: fetchTransactions };
+  return {
+    transactions,
+    pagination,
+    isLoading,
+    error,
+    refetch: fetchTransactions,
+  };
 }
 
 // ── useRoyaltyConfig ───────────────────────────────────────────────
@@ -140,7 +146,9 @@ export function useRoyaltyConfig(params: {
   storyId?: string;
   creatorWallet?: string;
 }) {
-  const [config, setConfig] = useState<RoyaltyConfig | RoyaltyConfig[] | null>(null);
+  const [config, setConfig] = useState<RoyaltyConfig | RoyaltyConfig[] | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -156,7 +164,8 @@ export function useRoyaltyConfig(params: {
       const searchParams = new URLSearchParams();
       if (params.nftId) searchParams.set('nftId', params.nftId);
       if (params.storyId) searchParams.set('storyId', params.storyId);
-      if (params.creatorWallet) searchParams.set('creatorWallet', params.creatorWallet);
+      if (params.creatorWallet)
+        searchParams.set('creatorWallet', params.creatorWallet);
 
       const res = await fetch(`/api/royalties/configure?${searchParams}`);
       const data = await res.json();

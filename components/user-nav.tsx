@@ -7,11 +7,11 @@ import React from 'react';
 
 // Simple deterministic hash to avoid sending raw PII or identifiers to third parties
 const generateSeed = (input?: string) => {
-  if (!input) return "default";
+  if (!input) return 'default';
   let hash = 0;
   for (let i = 0; i < input.length; i++) {
     const char = input.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash |= 0;
   }
   return Math.abs(hash).toString(16);
@@ -45,7 +45,13 @@ export function UserNav() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
-        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url, id: session.user.id });
+        setDbUser({
+          username:
+            session.user.user_metadata?.username ||
+            session.user.email?.split('@')[0],
+          avatar: session.user.user_metadata?.avatar_url,
+          id: session.user.id,
+        });
       }
     });
 
@@ -54,7 +60,13 @@ export function UserNav() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session?.user) {
-        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url, id: session.user.id });
+        setDbUser({
+          username:
+            session.user.user_metadata?.username ||
+            session.user.email?.split('@')[0],
+          avatar: session.user.user_metadata?.avatar_url,
+          id: session.user.id,
+        });
       } else if (!account) {
         setDbUser(null);
       }
@@ -67,13 +79,15 @@ export function UserNav() {
     const fetchUserData = async () => {
       if (account) {
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/users/profile/${account}`);
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/users/profile/${account}`
+          );
           if (res.ok) {
             const data = await res.json();
             setDbUser(data.user);
           }
         } catch (err) {
-          console.error("Failed to fetch nav user data", err);
+          console.error('Failed to fetch nav user data', err);
         }
       }
     };
@@ -102,10 +116,22 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" aria-label="User menu" className="relative h-8 w-8 rounded-full">
+        <Button
+          variant="ghost"
+          aria-label="User menu"
+          className="relative h-8 w-8 rounded-full"
+        >
           <Avatar className="h-8 w-8">
-            <AvatarImage src={dbUser?.avatar || `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(generateSeed(dbUser?.id || account || session?.user?.id))}`} alt="User Avatar" />
-            <AvatarFallback>{dbUser?.username?.slice(0, 2).toUpperCase() || "U"}</AvatarFallback>
+            <AvatarImage
+              src={
+                dbUser?.avatar ||
+                `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(generateSeed(dbUser?.id || account || session?.user?.id))}`
+              }
+              alt="User Avatar"
+            />
+            <AvatarFallback>
+              {dbUser?.username?.slice(0, 2).toUpperCase() || 'U'}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -195,7 +221,11 @@ export function UserNav() {
                 Security Info
               </p>
               <div className="text-[10px] text-white/40 leading-snug">
-                Last Login: {session?.user?.last_sign_in_at ? new Date(session.user.last_sign_in_at).toLocaleString() : 'Active Wallet Session'} <br />
+                Last Login:{' '}
+                {session?.user?.last_sign_in_at
+                  ? new Date(session.user.last_sign_in_at).toLocaleString()
+                  : 'Active Wallet Session'}{' '}
+                <br />
                 Access: {account ? 'On-Chain Web3' : 'Off-Chain Auth'}
               </div>
             </div>

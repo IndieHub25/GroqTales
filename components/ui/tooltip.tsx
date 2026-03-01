@@ -26,8 +26,7 @@ const Tooltip = ({
   return <>{children}</>;
 };
 
-interface TooltipTriggerProps
-  extends React.HTMLAttributes<HTMLSpanElement> {
+interface TooltipTriggerProps extends React.HTMLAttributes<HTMLSpanElement> {
   asChild?: boolean;
 }
 const TooltipTrigger = React.forwardRef<HTMLSpanElement, TooltipTriggerProps>(
@@ -36,14 +35,20 @@ const TooltipTrigger = React.forwardRef<HTMLSpanElement, TooltipTriggerProps>(
     if (asChild && React.isValidElement(children)) {
       return React.cloneElement(children as React.ReactElement, {
         ref,
-        className: cn((children as React.ReactElement).props?.className, className),
+        className: cn(
+          (children as React.ReactElement).props?.className,
+          className
+        ),
         ...props,
       });
     }
     return (
       <span
         ref={ref}
-        className={cn('inline-flex items-center justify-center cursor-pointer', className)}
+        className={cn(
+          'inline-flex items-center justify-center cursor-pointer',
+          className
+        )}
         {...props}
       >
         {children}
