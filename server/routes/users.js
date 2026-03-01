@@ -71,16 +71,17 @@ router.get('/profile', authRequired, async (req, res) => {
     const profile = await User.findById(req.user.id)
       .select('-password -refreshToken')
       .lean();
-    if (!profile) return res.status(404).json({ success: false, error: 'Profile not found' });
+    if (!profile)
+      return res
+        .status(404)
+        .json({ success: false, error: 'Profile not found' });
 
     const storyQuery = { author: profile._id };
     if (!req.user || req.user.id !== profile._id.toString()) {
       storyQuery.moderationStatus = 'approved';
     }
 
-    const stories = await Story.find(storyQuery)
-      .sort({ createdAt: -1 })
-      .lean();
+    const stories = await Story.find(storyQuery).sort({ createdAt: -1 }).lean();
 
     return res.json({
       success: true,
@@ -117,7 +118,6 @@ router.get('/profile', authRequired, async (req, res) => {
     return res.status(500).json({ success: false, error: error.message });
   }
 });
-
 
 /**
  * @swagger
@@ -169,18 +169,25 @@ router.get('/profile/id/:id', async (req, res) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ success: false, error: 'Invalid user ID format' });
+      return res
+        .status(400)
+        .json({ success: false, error: 'Invalid user ID format' });
     }
 
     const user = await User.findById(id)
-      .select('username bio avatar badges firstName lastName wallet walletAddress email socialLinks createdAt')
+      .select(
+        'username bio avatar badges firstName lastName wallet walletAddress email socialLinks createdAt'
+      )
       .lean();
 
     if (!user) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
 
-    const stories = await Story.find({ author: user._id, moderationStatus: 'approved' })
+    const stories = await Story.find({
+      author: user._id,
+      moderationStatus: 'approved',
+    })
       .sort({ createdAt: -1 })
       .lean();
 
@@ -191,14 +198,22 @@ router.get('/profile/id/:id', async (req, res) => {
         stories,
         stats: {
           storyCount: stories.length,
-          totalLikes: stories.reduce((sum, s) => sum + (s.stats?.likes || 0), 0),
-          totalViews: stories.reduce((sum, s) => sum + (s.stats?.views || 0), 0),
+          totalLikes: stories.reduce(
+            (sum, s) => sum + (s.stats?.likes || 0),
+            0
+          ),
+          totalViews: stories.reduce(
+            (sum, s) => sum + (s.stats?.views || 0),
+            0
+          ),
         },
       },
     });
   } catch (error) {
     console.error('Profile by ID Route Error:', error);
-    return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    return res
+      .status(500)
+      .json({ success: false, error: 'Internal Server Error' });
   }
 });
 
@@ -209,14 +224,19 @@ router.get('/profile/username/:username', async (req, res) => {
 
     // Intentionally exclude email, wallet, walletAddress for public responses
     const user = await User.findOne({ username })
-      .select('username bio avatar badges firstName lastName socialLinks createdAt')
+      .select(
+        'username bio avatar badges firstName lastName socialLinks createdAt'
+      )
       .lean();
 
     if (!user) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
 
-    const stories = await Story.find({ author: user._id, moderationStatus: 'approved' })
+    const stories = await Story.find({
+      author: user._id,
+      moderationStatus: 'approved',
+    })
       .sort({ createdAt: -1 })
       .lean();
 
@@ -227,14 +247,22 @@ router.get('/profile/username/:username', async (req, res) => {
         stories,
         stats: {
           storyCount: stories.length,
-          totalLikes: stories.reduce((sum, s) => sum + (s.stats?.likes || 0), 0),
-          totalViews: stories.reduce((sum, s) => sum + (s.stats?.views || 0), 0),
+          totalLikes: stories.reduce(
+            (sum, s) => sum + (s.stats?.likes || 0),
+            0
+          ),
+          totalViews: stories.reduce(
+            (sum, s) => sum + (s.stats?.views || 0),
+            0
+          ),
         },
       },
     });
   } catch (error) {
     console.error('Profile by Username Route Error:', error);
-    return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    return res
+      .status(500)
+      .json({ success: false, error: 'Internal Server Error' });
   }
 });
 
@@ -287,16 +315,18 @@ router.get('/profile/:walletAddress', async (req, res) => {
     const { walletAddress } = req.params;
 
     if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
-      return res.status(400).json({ success: false, error: 'Invalid wallet address' });
+      return res
+        .status(400)
+        .json({ success: false, error: 'Invalid wallet address' });
     }
     const addr = walletAddress.toLowerCase();
     const user = await User.findOneAndUpdate(
-      { "wallet.address": addr },
+      { 'wallet.address': addr },
       {
         $setOnInsert: {
           wallet: { address: addr },
-          username: `user_${addr.slice(-6)}`
-        }
+          username: `user_${addr.slice(-6)}`,
+        },
       },
       {
         upsert: true,
@@ -306,7 +336,10 @@ router.get('/profile/:walletAddress', async (req, res) => {
       .select('username bio avatar badges firstName lastName wallet createdAt')
       .lean();
 
-    const stories = await Story.find({ author: user._id, moderationStatus: 'approved' })
+    const stories = await Story.find({
+      author: user._id,
+      moderationStatus: 'approved',
+    })
       .sort({ createdAt: -1 })
       .lean();
     return res.json({
@@ -316,17 +349,24 @@ router.get('/profile/:walletAddress', async (req, res) => {
         stories,
         stats: {
           storyCount: stories.length,
-          totalLikes: stories.reduce((sum, s) => sum + (s.stats?.likes || 0), 0),
-          totalViews: stories.reduce((sum, s) => sum + (s.stats?.views || 0), 0),
+          totalLikes: stories.reduce(
+            (sum, s) => sum + (s.stats?.likes || 0),
+            0
+          ),
+          totalViews: stories.reduce(
+            (sum, s) => sum + (s.stats?.views || 0),
+            0
+          ),
         },
       },
     });
   } catch (error) {
     console.error('Profile Route Error:', error);
-    return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    return res
+      .status(500)
+      .json({ success: false, error: 'Internal Server Error' });
   }
 });
-
 
 /**
  * @swagger

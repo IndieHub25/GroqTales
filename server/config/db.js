@@ -10,7 +10,9 @@ const connectDB = async (maxRetries = 5, retryDelayMs = 2000) => {
   const safeRetryDelayMs = Math.max(100, retryDelayMs);
 
   if (!process.env.MONGODB_URI) {
-    console.warn('[Mongoose] MONGODB_URI not set - running without database connection');
+    console.warn(
+      '[Mongoose] MONGODB_URI not set - running without database connection'
+    );
     return;
   }
   const uri = process.env.MONGODB_URI;

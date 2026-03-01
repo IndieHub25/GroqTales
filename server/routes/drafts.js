@@ -51,10 +51,10 @@ function normalizeSnapshot(rawSnapshot, existingVersion) {
 function hasMeaningfulContent(snapshot) {
   return Boolean(
     snapshot.title ||
-      snapshot.description ||
-      snapshot.genre ||
-      snapshot.content ||
-      snapshot.coverImageName
+    snapshot.description ||
+    snapshot.genre ||
+    snapshot.content ||
+    snapshot.coverImageName
   );
 }
 

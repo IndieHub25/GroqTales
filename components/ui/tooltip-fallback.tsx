@@ -26,8 +26,7 @@ const Tooltip = ({
   return <>{children}</>;
 };
 
-interface TooltipTriggerProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface TooltipTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
 }
 const TooltipTrigger = React.forwardRef<HTMLButtonElement, TooltipTriggerProps>(

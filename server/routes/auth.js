@@ -194,14 +194,13 @@ router.post('/signup', async (req, res) => {
       component: 'auth/signup',
       code: error.code,
     });
-    console.log(error)
+    console.log(error);
     if (error.code === 11000) {
       return res.status(409).json({ error: 'Email already registered' });
     }
     return res.status(500).json({ message: 'Internal Server error' });
   }
 });
-
 
 /**
  * @swagger

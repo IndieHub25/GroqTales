@@ -1,7 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Wallet, User, Settings, LogOut, BookOpen, Bell, Shield, Eye, EyeOff } from 'lucide-react';
+import {
+  Wallet,
+  User,
+  Settings,
+  LogOut,
+  BookOpen,
+  Bell,
+  Shield,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
@@ -41,7 +51,14 @@ export function UserNav() {
   const [dbUser, setDbUser] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
   const supabase = React.useMemo(() => createClient(), []);
-  const { role, isAdmin, isModerator, isModOrAdmin, isOverridden, toggleViewMode } = useUserRole();
+  const {
+    role,
+    isAdmin,
+    isModerator,
+    isModOrAdmin,
+    isOverridden,
+    toggleViewMode,
+  } = useUserRole();
 
   useEffect(() => {
     // Check Supabase session
@@ -145,7 +162,9 @@ export function UserNav() {
         <DropdownMenuLabel className="bg-emerald-500/10 text-emerald-400 border-b border-white/10 py-3 font-semibold uppercase tracking-wider text-xs flex items-center justify-between">
           <span>User Controls</span>
           {role !== 'user' && (
-            <span className={`text-[9px] px-1.5 py-0.5 rounded border ${roleBadgeStyles[role].className}`}>
+            <span
+              className={`text-[9px] px-1.5 py-0.5 rounded border ${roleBadgeStyles[role].className}`}
+            >
               {roleBadgeStyles[role].label}
             </span>
           )}
@@ -242,7 +261,10 @@ export function UserNav() {
                 asChild
                 className="cursor-pointer focus:bg-amber-500/10 focus:text-amber-400 rounded-none transition-all uppercase py-2 text-amber-400"
               >
-                <Link href="/admin/moderation" className="flex items-center w-full">
+                <Link
+                  href="/admin/moderation"
+                  className="flex items-center w-full"
+                >
                   <Shield className="mr-2 h-4 w-4" />
                   <span>Moderation</span>
                 </Link>
@@ -255,9 +277,15 @@ export function UserNav() {
                 className="cursor-pointer focus:bg-blue-500/10 focus:text-blue-400 rounded-none transition-all uppercase py-2 text-blue-400"
               >
                 {isOverridden ? (
-                  <><Eye className="mr-2 h-4 w-4" /><span>Switch to Admin View</span></>
+                  <>
+                    <Eye className="mr-2 h-4 w-4" />
+                    <span>Switch to Admin View</span>
+                  </>
                 ) : (
-                  <><EyeOff className="mr-2 h-4 w-4" /><span>Switch to User View</span></>
+                  <>
+                    <EyeOff className="mr-2 h-4 w-4" />
+                    <span>Switch to User View</span>
+                  </>
                 )}
               </DropdownMenuItem>
             )}

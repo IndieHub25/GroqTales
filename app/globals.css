@@ -59,10 +59,12 @@
   --comic-cyan: #06b6d4;
 
   /* Gradient accents */
-  --gradient-hero: linear-gradient(135deg,
-      #fbbf24 0%,
-      #f97316 50%,
-      #e63946 100%);
+  --gradient-hero: linear-gradient(
+    135deg,
+    #fbbf24 0%,
+    #f97316 50%,
+    #e63946 100%
+  );
   --gradient-card: linear-gradient(135deg, #fef9ef 0%, #f1e8d8 100%);
   --gradient-cta: linear-gradient(135deg, #e63946 0%, #6c3fc5 100%);
 
@@ -114,10 +116,12 @@
   --comic-pink: #f472b6;
   --comic-cyan: #22d3ee;
 
-  --gradient-hero: linear-gradient(135deg,
-      #1e2540 0%,
-      #131829 50%,
-      #0a0e1a 100%);
+  --gradient-hero: linear-gradient(
+    135deg,
+    #1e2540 0%,
+    #131829 50%,
+    #0a0e1a 100%
+  );
   --gradient-card: linear-gradient(135deg, #131829 0%, #1e2540 100%);
   --gradient-cta: linear-gradient(135deg, #ff4d6d 0%, #a78bfa 100%);
 
@@ -316,9 +320,11 @@
 
   /* Halftone dot pattern overlay */
   .halftone-overlay {
-    background-image: radial-gradient(circle,
-        var(--foreground) 1px,
-        transparent 1px);
+    background-image: radial-gradient(
+      circle,
+      var(--foreground) 1px,
+      transparent 1px
+    );
     background-size: 16px 16px;
     opacity: 0.04;
     pointer-events: none;
@@ -333,11 +339,13 @@
 
   /* Speed lines effect */
   .speed-lines {
-    background-image: repeating-linear-gradient(90deg,
-        transparent,
-        transparent 8px,
-        var(--foreground) 8px,
-        var(--foreground) 9px);
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 8px,
+      var(--foreground) 8px,
+      var(--foreground) 9px
+    );
     opacity: 0.05;
     pointer-events: none;
   }
@@ -376,10 +384,12 @@
   }
 
   .text-fire {
-    background: linear-gradient(45deg,
-        var(--comic-red),
-        var(--comic-orange),
-        var(--comic-yellow));
+    background: linear-gradient(
+      45deg,
+      var(--comic-red),
+      var(--comic-orange),
+      var(--comic-yellow)
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -541,7 +551,6 @@
 
   /* Floating animation */
   @keyframes float {
-
     0%,
     100% {
       transform: translateY(0px);
@@ -558,7 +567,6 @@
 
   /* Wiggle animation */
   @keyframes wiggle {
-
     0%,
     100% {
       transform: rotate(0deg);
@@ -579,7 +587,6 @@
 
   /* Twinkle animation for stars */
   @keyframes twinkle {
-
     0%,
     100% {
       opacity: 0.2;
@@ -751,24 +758,32 @@
 
   /* Hero gradient — instant background while Spline loads */
   .hero-gradient {
-    background: linear-gradient(135deg,
-        #fef9ef 0%,
-        #fff7e6 30%,
-        #fef3cd 60%,
-        #fef9ef 100%);
+    background: linear-gradient(
+      135deg,
+      #fef9ef 0%,
+      #fff7e6 30%,
+      #fef3cd 60%,
+      #fef9ef 100%
+    );
   }
 
   .dark .hero-gradient {
     background:
-      radial-gradient(ellipse 80% 60% at 20% 40%,
+      radial-gradient(
+        ellipse 80% 60% at 20% 40%,
         rgba(99, 102, 241, 0.15) 0%,
-        transparent 70%),
-      radial-gradient(ellipse 60% 50% at 75% 30%,
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 60% 50% at 75% 30%,
         rgba(168, 85, 247, 0.12) 0%,
-        transparent 70%),
-      radial-gradient(ellipse 50% 40% at 50% 80%,
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 50% 40% at 50% 80%,
         rgba(56, 189, 248, 0.1) 0%,
-        transparent 70%),
+        transparent 70%
+      ),
       #0a0e1a;
   }
 
@@ -778,18 +793,21 @@
     background-image:
       radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
       radial-gradient(at 80% 0%, rgba(168, 85, 247, 0.06) 0px, transparent 50%),
-      radial-gradient(at 0% 100%,
+      radial-gradient(
+        at 0% 100%,
         rgba(56, 189, 248, 0.06) 0px,
-        transparent 50%),
-      radial-gradient(at 100% 100%,
+        transparent 50%
+      ),
+      radial-gradient(
+        at 100% 100%,
         rgba(255, 77, 109, 0.05) 0px,
-        transparent 50%);
+        transparent 50%
+      );
     background-attachment: fixed;
   }
 
   /* Respect reduced motion preferences */
   @media (prefers-reduced-motion: reduce) {
-
     .animate-twinkle,
     .animate-pulse,
     .animate-spin,
@@ -867,31 +885,35 @@
         rgba(0, 0, 0, 0.1) 1px,
         transparent 1px
       );
-    background-size: 100% 20px, 40px 100%;
+    background-size:
+      100% 20px,
+      40px 100%;
   }
 
   /* Noir dossier paper texture */
   .noir-paper-texture {
-    background-color: #E5E5E5;
+    background-color: #e5e5e5;
     background-image:
-      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px),
-      linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+      linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+      linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
     background-size: 20px 20px;
   }
 
   /* Pro Panel genre card styles */
   .pro-panel-genre-card {
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
   }
 
   .pro-panel-genre-card:hover {
     transform: translateY(-2px);
-    box-shadow: 6px 6px 0px 0px rgba(0,0,0,1);
+    box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
   }
 
   .pro-panel-genre-card:active {
     transform: translateY(0);
-    box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
+    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
   }
 
   /* Noir fingerprint decorative corner */
@@ -954,24 +976,24 @@
   }
 
   /* Compact range slider for sidebar */
-  input[type="range"].accent-noir-primary {
+  input[type='range'].accent-noir-primary {
     accent-color: #8a0000;
   }
 
-  input[type="range"]::-webkit-slider-thumb {
+  input[type='range']::-webkit-slider-thumb {
     cursor: pointer;
   }
 
-  input[type="range"]::-moz-range-thumb {
+  input[type='range']::-moz-range-thumb {
     cursor: pointer;
   }
 
   /* Pro Panel accordion refinements */
-  .pro-panel-accordion [data-state="open"] > [role="region"] {
+  .pro-panel-accordion [data-state='open'] > [role='region'] {
     @apply animate-accordion-down;
   }
 
-  .pro-panel-accordion [data-state="closed"] > [role="region"] {
+  .pro-panel-accordion [data-state='closed'] > [role='region'] {
     @apply animate-accordion-up;
   }
 
@@ -999,7 +1021,6 @@
   .emoji-dark {
     filter: grayscale(1) brightness(0);
   }
-
 }
 
 /* ═══════════════════════════════════════
@@ -1018,16 +1039,20 @@
 .genre-marquee-wrapper {
   width: 100%;
   overflow: hidden;
-  mask-image: linear-gradient(to right,
-      transparent,
-      black 5%,
-      black 95%,
-      transparent);
-  -webkit-mask-image: linear-gradient(to right,
-      transparent,
-      black 5%,
-      black 95%,
-      transparent);
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 5%,
+    black 95%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 5%,
+    black 95%,
+    transparent
+  );
 }
 
 .genre-marquee {
@@ -1122,7 +1147,6 @@
  * Disable all animations for users who prefer reduced motion
  */
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {
@@ -1135,7 +1159,7 @@
   /* Keep essential feedback animations but make them instant */
   button,
   a,
-  [role="button"] {
+  [role='button'] {
     transition-duration: 0.05ms !important;
   }
 }
@@ -1196,7 +1220,6 @@
 }
 
 @keyframes pulse-optimized {
-
   0%,
   100% {
     transform: scale3d(1, 1, 1);
@@ -1252,7 +1275,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .button-hover-optimized:hover,
   .button-hover-optimized:active {
     transform: none;
@@ -1304,7 +1326,8 @@
 .animate-on-visible {
   opacity: 0;
   transform: translate3d(0, 20px, 0);
-  transition: opacity 0.4s cubic-bezier(0.25, 0.1, 0.25, 1),
+  transition:
+    opacity 0.4s cubic-bezier(0.25, 0.1, 0.25, 1),
     transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
@@ -1392,7 +1415,6 @@
 }
 
 @keyframes madhava-pulse {
-
   0%,
   100% {
     box-shadow:
@@ -1445,7 +1467,11 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  background: linear-gradient(135deg, rgba(255, 77, 109, 0.15) 0%, rgba(167, 139, 250, 0.15) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 77, 109, 0.15) 0%,
+    rgba(167, 139, 250, 0.15) 100%
+  );
   border-bottom: 1px solid rgba(167, 139, 250, 0.15);
 }
 
@@ -1631,7 +1657,6 @@
 }
 
 @keyframes madhava-bounce {
-
   0%,
   60%,
   100% {

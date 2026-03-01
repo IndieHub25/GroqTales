@@ -48,26 +48,26 @@ const axios = require('axios');
  *       200:
  *         description: Stories retrieved successfully.
  *         content:
-*           application/json:
-*             schema:
-*               type: object
-*               properties:
-*                 data:
-*                   type: array
-*                   description: List of stories
-*                   items:
-*                     type: object
-*                 pagination:
-*                   type: object
-*                   properties:
-*                     page:
-*                       type: integer
-*                     limit:
-*                       type: integer
-*                     total:
-*                       type: integer
-*                     pages:
-*                       type: integer
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   description: List of stories
+ *                   items:
+ *                     type: object
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     pages:
+ *                       type: integer
  *       500:
  *         description: Internal server error.
  */
@@ -95,10 +95,14 @@ router.get('/', async (req, res) => {
         if (decoded && decoded.role === 'admin') {
           isAdmin = true;
         }
-      } catch (err) { }
+      } catch (err) {}
     }
 
-    if (isAdmin && status && ['pending', 'approved', 'rejected'].includes(String(status))) {
+    if (
+      isAdmin &&
+      status &&
+      ['pending', 'approved', 'rejected'].includes(String(status))
+    ) {
       query.moderationStatus = String(status);
     } else {
       query.moderationStatus = 'approved';
@@ -189,28 +193,34 @@ router.post('/create', authRequired, async (req, res) => {
 
     // Synchronize to Cloudflare D1 database
     try {
-      const workerUrl = process.env.CF_WORKER_URL || 'https://groqtales-backend.groqtales.workers.dev';
+      const workerUrl =
+        process.env.CF_WORKER_URL ||
+        'https://groqtales-backend.groqtales.workers.dev';
       // req.user.id or req.user.sub depending on JWT issuer
       const authorId = req.user.sub || req.user.id;
 
-      await axios.post(`${workerUrl}/api/stories`, {
-        title,
-        content,
-        genre: [genre], // assuming D1 expects tags/genres as array maybe
-      }, {
-        headers: {
-          'Authorization': `Bearer ${authorId}`
+      await axios.post(
+        `${workerUrl}/api/stories`,
+        {
+          title,
+          content,
+          genre: [genre], // assuming D1 expects tags/genres as array maybe
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authorId}`,
+          },
         }
-      });
+      );
     } catch (cfError) {
       console.error('Failed to sync story to Cloudflare DB:', cfError.message);
-      // We don't throw here to ensure Mongo save isn't rolled back since it succeeded, 
+      // We don't throw here to ensure Mongo save isn't rolled back since it succeeded,
       // but in a robust system this could be handled with a message queue.
     }
 
     return res.status(201).json(story);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).json({ error: error.message });
   }
 });
@@ -314,9 +324,12 @@ router.patch('/:id/moderate', authRequired, async (req, res) => {
 
     const { status, notes } = req.body;
     // Coerce status to string and validate against an allowlist to prevent NoSQL injection
-    const sanitizedStatus = typeof status === 'string' ? status : String(status);
+    const sanitizedStatus =
+      typeof status === 'string' ? status : String(status);
     if (!['approved', 'rejected'].includes(sanitizedStatus)) {
-      return res.status(400).json({ error: 'Status must be approved or rejected' });
+      return res
+        .status(400)
+        .json({ error: 'Status must be approved or rejected' });
     }
 
     const mongoose = require('mongoose');
@@ -325,7 +338,8 @@ router.patch('/:id/moderate', authRequired, async (req, res) => {
     }
 
     // Coerce notes to string to prevent NoSQL injection via object payloads
-    const sanitizedNotes = typeof notes === 'string' ? notes.slice(0, 2000) : '';
+    const sanitizedNotes =
+      typeof notes === 'string' ? notes.slice(0, 2000) : '';
 
     const story = await Story.findByIdAndUpdate(
       req.params.id,

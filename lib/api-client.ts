@@ -5,8 +5,7 @@
  * the base URL is set once via NEXT_PUBLIC_API_URL.
  */
 
-export const API_BASE_URL: string =
-    process.env.NEXT_PUBLIC_API_URL ?? '';
+export const API_BASE_URL: string = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 /**
  * Thin wrapper around `fetch` that automatically prefixes the backend
@@ -16,33 +15,33 @@ export const API_BASE_URL: string =
  * @param init  — standard RequestInit options
  */
 export async function apiFetch<T = unknown>(
-    path: string,
-    init?: RequestInit,
+  path: string,
+  init?: RequestInit
 ): Promise<{ ok: boolean; status: number; data: T }> {
-    const url = `${API_BASE_URL}${path}`;
+  const url = `${API_BASE_URL}${path}`;
 
-    const headers = new Headers(init?.headers);
-    if (!headers.has('Content-Type') && !(init?.body instanceof FormData)) {
-        headers.set('Content-Type', 'application/json');
-    }
+  const headers = new Headers(init?.headers);
+  if (!headers.has('Content-Type') && !(init?.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
+  }
 
-    const res = await fetch(url, { ...init, headers });
+  const res = await fetch(url, { ...init, headers });
 
-    let data: T;
-    try {
-        data = await res.json();
-    } catch {
-        data = {} as T;
-    }
+  let data: T;
+  try {
+    data = await res.json();
+  } catch {
+    data = {} as T;
+  }
 
-    return { ok: res.ok, status: res.status, data };
+  return { ok: res.ok, status: res.status, data };
 }
 
 /**
  * Convenience: attach a Bearer token from localStorage.
  */
 export function authHeaders(): HeadersInit {
-    if (typeof window === 'undefined') return {};
-    const token = localStorage.getItem('accessToken');
-    return token ? { Authorization: `Bearer ${token}` } : {};
+  if (typeof window === 'undefined') return {};
+  const token = localStorage.getItem('accessToken');
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }

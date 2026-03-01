@@ -88,10 +88,10 @@ function writeStore(store: StoryDraftStore): void {
 function hasMeaningfulContent(snapshot: StoryDraftSnapshot): boolean {
   return Boolean(
     snapshot.title.trim() ||
-      snapshot.description.trim() ||
-      snapshot.genre.trim() ||
-      snapshot.content.trim() ||
-      snapshot.coverImageName
+    snapshot.description.trim() ||
+    snapshot.genre.trim() ||
+    snapshot.content.trim() ||
+    snapshot.coverImageName
   );
 }
 

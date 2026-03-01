@@ -6,15 +6,11 @@
 export const dynamicParams = process.env.NEXT_PUBLIC_BUILD_MODE !== 'true';
 
 export function generateStaticParams() {
-    return [{ slug: 'me' }];
+  return [{ slug: 'me' }];
 }
 
 import ProfilePageClient from './client';
 
-export default function ProfilePage({
-    params,
-}: {
-    params: { slug: string };
-}) {
-    return <ProfilePageClient slug={params.slug} />;
+export default function ProfilePage({ params }: { params: { slug: string } }) {
+  return <ProfilePageClient slug={params.slug} />;
 }

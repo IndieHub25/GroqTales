@@ -60,25 +60,30 @@ const logger = require('../utils/logger');
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/', async (req, res) => {
-    try {
-        const workerUrl = process.env.CF_WORKER_URL || 'https://groqtales-backend-workers.mantejsingh.workers.dev';
+  try {
+    const workerUrl =
+      process.env.CF_WORKER_URL ||
+      'https://groqtales-backend-workers.mantejsingh.workers.dev';
 
-        // Parse query params to pass along
-        const limit = req.query.limit || 6;
-        const page = req.query.page || 1;
+    // Parse query params to pass along
+    const limit = req.query.limit || 6;
+    const page = req.query.page || 1;
 
-        // Make request to CF Worker
-        const response = await axios.get(`${workerUrl}/api/feed?limit=${limit}&page=${page}`, {
-            validateStatus: false, // Allow any status code
-            timeout: 10000 // 10 second timeout
-        });
+    // Make request to CF Worker
+    const response = await axios.get(
+      `${workerUrl}/api/feed?limit=${limit}&page=${page}`,
+      {
+        validateStatus: false, // Allow any status code
+        timeout: 10000, // 10 second timeout
+      }
+    );
 
-        res.status(response.status).json(response.data);
-    } catch (error) {
-        const errMsg = error.message || error.code || 'Unknown error';
-        logger.error(`Error fetching feed from Worker: ${errMsg}`);
-        res.status(502).json({ error: 'Failed to fetch feed', message: errMsg });
-    }
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    const errMsg = error.message || error.code || 'Unknown error';
+    logger.error(`Error fetching feed from Worker: ${errMsg}`);
+    res.status(502).json({ error: 'Failed to fetch feed', message: errMsg });
+  }
 });
 
 module.exports = router;

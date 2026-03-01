@@ -51,20 +51,37 @@ const options = {
     },
     servers: [
       {
-        url: process.env.PROD_URL || 'https://groqtales-backend-api.onrender.com/api',
+        url:
+          process.env.PROD_URL ||
+          'https://groqtales-backend-api.onrender.com/api',
         description: 'Production',
       },
     ],
     tags: [
       { name: 'Health', description: 'Server & service health checks' },
-      { name: 'Authentication', description: 'User signup, login, token refresh, and logout' },
+      {
+        name: 'Authentication',
+        description: 'User signup, login, token refresh, and logout',
+      },
       { name: 'Stories', description: 'Story CRUD, search, and AI generation' },
       { name: 'AI', description: 'AI-powered content generation and analysis' },
       { name: 'Users', description: 'User profiles and account management' },
-      { name: 'Feed', description: 'Public story feed (proxied from Cloudflare D1)' },
-      { name: 'Helpbot', description: 'MADHAVA AI help bot chat (proxied to CF Worker)' },
-      { name: 'Settings', description: 'User settings: profile, notifications, privacy, wallet' },
-      { name: 'NFT', description: 'NFT minting, marketplace, and royalty operations' },
+      {
+        name: 'Feed',
+        description: 'Public story feed (proxied from Cloudflare D1)',
+      },
+      {
+        name: 'Helpbot',
+        description: 'MADHAVA AI help bot chat (proxied to CF Worker)',
+      },
+      {
+        name: 'Settings',
+        description: 'User settings: profile, notifications, privacy, wallet',
+      },
+      {
+        name: 'NFT',
+        description: 'NFT minting, marketplace, and royalty operations',
+      },
       { name: 'Comics', description: 'Comic creation and management' },
       { name: 'SDK', description: 'External SDK integration endpoints' },
     ],
@@ -74,7 +91,8 @@ const options = {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'Enter your JWT access token obtained from /api/v1/auth/login',
+          description:
+            'Enter your JWT access token obtained from /api/v1/auth/login',
         },
       },
       schemas: {
@@ -286,9 +304,17 @@ app.get(['/api/health', '/api/health/db'], (req, res) => {
       configured: dbConfigured,
       connected: dbConnected,
       readyState: mongoose.connection.readyState,
-      ...(dbConnected && mongoose.connection.host ? { host: mongoose.connection.host } : {}),
-      ...(!dbConfigured ? { note: 'MONGODB_URI not set — running in no-db mode' } : {}),
-      ...(dbConfigured && !dbConnected ? { note: 'Database configured but connection failed. Check credentials and IP whitelist.' } : {}),
+      ...(dbConnected && mongoose.connection.host
+        ? { host: mongoose.connection.host }
+        : {}),
+      ...(!dbConfigured
+        ? { note: 'MONGODB_URI not set — running in no-db mode' }
+        : {}),
+      ...(dbConfigured && !dbConnected
+        ? {
+            note: 'Database configured but connection failed. Check credentials and IP whitelist.',
+          }
+        : {}),
     },
     memory: {
       rss: formatBytes(mem.rss),
@@ -297,7 +323,11 @@ app.get(['/api/health', '/api/health/db'], (req, res) => {
     },
     services: {
       api: 'online',
-      database: dbConnected ? 'online' : (dbConfigured ? 'offline' : 'not configured'),
+      database: dbConnected
+        ? 'online'
+        : dbConfigured
+          ? 'offline'
+          : 'not configured',
       helpbot: process.env.GROQ_API_KEY ? 'online' : 'offline',
     },
   });
@@ -349,7 +379,7 @@ app.get('/', (req, res) => {
     status: 'online',
     version: process.env.API_VERSION || 'v1',
     docs: '/api-docs',
-    health: '/api/health'
+    health: '/api/health',
   });
 });
 
@@ -368,14 +398,15 @@ app.use('/api/feed', require('./routes/feed'));
 app.use('/api/helpbot', require('./routes/helpbot'));
 app.use('/api/v1/helpbot', require('./routes/helpbot'));
 
-
 app.use('/api/v1/ai', require('./routes/ai'));
 app.use('/api/v1/drafts', require('./routes/drafts'));
-app.use('/api/v1/settings/notifications', require('./routes/settings/notifications'));
+app.use(
+  '/api/v1/settings/notifications',
+  require('./routes/settings/notifications')
+);
 app.use('/api/v1/settings/privacy', require('./routes/settings/privacy'));
 app.use('/api/v1/settings/wallet', require('./routes/settings/wallet'));
 app.use('/api/v1/settings/profile', require('./routes/settings/profile'));
-
 
 // SDK Routes (for future SDK implementations)
 app.use('/sdk/v1', require('./routes/sdk'));
@@ -438,7 +469,9 @@ connectDB(DB_MAX_RETRIES, DB_RETRY_DELAY_MS)
     server = app.listen(PORT, () => {
       logger.info(`GroqTales Backend API server running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      logger.info(`Health check: ${process.env.PROD_URL || 'http://localhost:' + PORT}/api/health`);
+      logger.info(
+        `Health check: ${process.env.PROD_URL || 'http://localhost:' + PORT}/api/health`
+      );
     });
   })
   .catch((err) => {
@@ -452,7 +485,9 @@ connectDB(DB_MAX_RETRIES, DB_RETRY_DELAY_MS)
           `GroqTales Backend API server running on port ${PORT} (NO DATABASE)`
         );
         console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-        console.log(`Health check: ${process.env.PROD_URL || 'http://localhost:' + PORT}/api/health`);
+        console.log(
+          `Health check: ${process.env.PROD_URL || 'http://localhost:' + PORT}/api/health`
+        );
       });
     } else {
       process.exit(1);

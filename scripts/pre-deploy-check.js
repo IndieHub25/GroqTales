@@ -66,7 +66,9 @@ function runChecks() {
   );
   console.log('To deploy, run:');
   console.log('  git push origin main');
-  console.log('Or push to your connected branch to trigger an automatic Cloudflare Pages deploy.');
+  console.log(
+    'Or push to your connected branch to trigger an automatic Cloudflare Pages deploy.'
+  );
 }
 
 runChecks();

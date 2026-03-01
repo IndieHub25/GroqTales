@@ -227,12 +227,21 @@ router.get('/', async (req, res) => {
 // POST /api/v1/nft/mint
 router.post('/mint', authRequired, async (req, res) => {
   try {
-    const { storyId, metadataURI, metadata, price = 0, royaltyPercentage: rawRoyalty = 5, creatorWallet } = req.body;
+    const {
+      storyId,
+      metadataURI,
+      metadata,
+      price = 0,
+      royaltyPercentage: rawRoyalty = 5,
+      creatorWallet,
+    } = req.body;
 
     // Validate royaltyPercentage is a valid number
     const royaltyPercentage = Number(rawRoyalty);
     if (!Number.isFinite(royaltyPercentage)) {
-      return res.status(400).json({ error: 'royaltyPercentage must be a valid number' });
+      return res
+        .status(400)
+        .json({ error: 'royaltyPercentage must be a valid number' });
     }
 
     // Basic validation
@@ -326,7 +335,6 @@ router.post('/mint', authRequired, async (req, res) => {
 
     return res.status(500).json({ error: 'Internal server error' });
   }
-  
 });
 
 /**
@@ -597,7 +605,7 @@ router.patch('/remove/:tokenId', authRequired, async (req, res) => {
  *                 example: "0xabcdef1234567890abcdef1234567890abcdef12"
  *               txHash:
  *                 type: string
- *                 description: Transaction hash 
+ *                 description: Transaction hash
  *     responses:
  *       200:
  *         description: NFT bought successfully
@@ -657,7 +665,8 @@ router.patch('/buy/:tokenId', authRequired, async (req, res) => {
         });
 
         if (royaltyConfig) {
-          const royaltyAmount = salePrice * (royaltyConfig.royaltyPercentage / 100);
+          const royaltyAmount =
+            salePrice * (royaltyConfig.royaltyPercentage / 100);
 
           // Step 1: Create transaction as pending
           const royaltyTx = await RoyaltyTransaction.create({
@@ -677,7 +686,11 @@ router.patch('/buy/:tokenId', authRequired, async (req, res) => {
             await CreatorEarnings.findOneAndUpdate(
               { creatorWallet: royaltyConfig.creatorWallet },
               {
-                $inc: { totalEarned: royaltyAmount, pendingPayout: royaltyAmount, totalSales: 1 },
+                $inc: {
+                  totalEarned: royaltyAmount,
+                  pendingPayout: royaltyAmount,
+                  totalSales: 1,
+                },
                 $set: { lastUpdated: new Date() },
               },
               { upsert: true }
