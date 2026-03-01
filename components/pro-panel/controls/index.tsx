@@ -48,22 +48,17 @@ export function SliderControl({
   suffix = '',
 }: SliderControlProps) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-start justify-between gap-3">
-        <Label className="font-condensed uppercase tracking-wider text-xs text-white leading-tight">
+    <div className="pb-4">
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <span className="font-condensed uppercase tracking-wider text-xs text-white leading-tight max-w-[55%] block">
           {label}
-        </Label>
+        </span>
         {showValue && (
-          <span className="text-sm font-condensed font-bold text-noir-primary shrink-0 min-w-[2.5rem] text-right tabular-nums">
+          <span className="text-base font-mono font-bold text-white bg-[#8a0000] px-3 py-1 rounded shrink-0 min-w-[3rem] text-center tabular-nums leading-none">
             {value}{suffix}
           </span>
         )}
       </div>
-      {description && (
-        <p className="text-[10px] font-condensed uppercase tracking-wider text-gray-500 -mt-1">
-          {description}
-        </p>
-      )}
       <Slider
         value={[value]}
         min={min}
@@ -72,6 +67,11 @@ export function SliderControl({
         onValueChange={(values) => onChange(values[0] ?? value)}
         className="w-full [&_[role=slider]]:bg-noir-primary [&_[role=slider]]:border-2 [&_[role=slider]]:border-white/40 [&_[role=slider]]:w-4 [&_[role=slider]]:h-4"
       />
+      {description && (
+        <span className="block text-[10px] text-gray-500 mt-2 leading-tight" style={{ fontFamily: 'Roboto Condensed, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 400, background: 'none', border: 'none', padding: 0, margin: 0 }}>
+          {description}
+        </span>
+      )}
     </div>
   );
 }
@@ -245,7 +245,7 @@ export function TextareaControl({
       <div className="flex items-start justify-between gap-3">
         <Label className="font-condensed uppercase tracking-wider text-xs text-white leading-tight">{label}</Label>
         {maxLength && (
-          <span className="text-xs font-condensed text-gray-500 uppercase tracking-wider shrink-0">
+          <span className="text-xs font-condensed text-gray-300 bg-white/10 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
             {value.length}/{maxLength}
           </span>
         )}
@@ -329,7 +329,7 @@ export function MultiSelectControl<T extends string>({
       <div className="flex items-start justify-between gap-3">
         <Label className="font-condensed uppercase tracking-wider text-xs text-white leading-tight">{label}</Label>
         {maxSelections && (
-          <span className="text-xs font-condensed text-gray-500 uppercase shrink-0">
+          <span className="text-xs font-condensed text-gray-300 bg-white/10 px-1.5 py-0.5 rounded uppercase shrink-0">
             {values.length}/{maxSelections}
           </span>
         )}
@@ -410,7 +410,7 @@ export function TagsInputControl({
     <div className="space-y-2">
       <div className="flex items-start justify-between gap-3">
         <Label className="font-condensed uppercase tracking-wider text-xs text-white leading-tight">{label}</Label>
-        <span className="text-xs font-condensed text-gray-500 uppercase shrink-0">
+        <span className="text-xs font-condensed text-gray-300 bg-white/10 px-1.5 py-0.5 rounded uppercase shrink-0">
           {values.length}/{maxTags}
         </span>
       </div>

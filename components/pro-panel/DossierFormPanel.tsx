@@ -71,7 +71,7 @@ export function DossierFormPanel({ selectedCategory }: DossierFormPanelProps) {
     };
 
     return (
-        <div className="bg-[#E5E5E5] border-[6px] border-black shadow-[6px_6px_0px_rgba(138,0,0,0.5)] relative overflow-hidden min-h-[600px]">
+        <div className="bg-[#E5E5E5] border-[6px] border-black shadow-[6px_6px_0px_rgba(138,0,0,0.5)] relative overflow-x-visible overflow-y-hidden min-h-[600px]">
 
             {/* ── Watermark — faded category icon ── */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 opacity-[0.04] rotate-[-15deg] pointer-events-none select-none">

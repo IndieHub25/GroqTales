@@ -28,22 +28,23 @@ export function LocationDocksPanel() {
     const world = parameters.world;
 
     // Genre-specific location data
-    const GENRE_LOCATIONS: Record<string, { name: string; icon: React.ReactNode }> = {
-        'fantasy': { name: 'ENCHANTED REALM', icon: <Castle className="w-8 h-8 text-white" /> },
-        'sci-fi': { name: 'SPACE STATION', icon: <Rocket className="w-8 h-8 text-white" /> },
-        'horror': { name: 'HAUNTED MANOR', icon: <Ghost className="w-8 h-8 text-white" /> },
-        'mystery': { name: 'CRIME SCENE', icon: <Search className="w-8 h-8 text-white" /> },
-        'romance': { name: 'SUNSET TERRACE', icon: <Heart className="w-8 h-8 text-white" /> },
-        'adventure': { name: 'LOST TEMPLE', icon: <Map className="w-8 h-8 text-white" /> },
-        'comedy': { name: 'DOWNTOWN STAGE', icon: <Theater className="w-8 h-8 text-white" /> },
-        'cyberpunk': { name: 'NEON DISTRICT', icon: <Building2 className="w-8 h-8 text-white" /> },
-        'thriller': { name: 'SAFE HOUSE', icon: <Crosshair className="w-8 h-8 text-white" /> },
-        'drama': { name: 'CITY STREETS', icon: <Drama className="w-8 h-8 text-white" /> },
+    const GENRE_LOCATIONS: Record<string, { name: string; icon: React.ReactNode; locationImage: string }> = {
+        'fantasy': { name: 'ENCHANTED REALM', icon: <Castle className="w-8 h-8 text-white" />, locationImage: '/images/presets/fantasylocation.jpg' },
+        'sci-fi': { name: 'SPACE STATION', icon: <Rocket className="w-8 h-8 text-white" />, locationImage: '/images/presets/scifilocation.jpg' },
+        'horror': { name: 'HAUNTED MANOR', icon: <Ghost className="w-8 h-8 text-white" />, locationImage: '/images/presets/horrorlocation.jpg' },
+        'mystery': { name: 'CRIME SCENE', icon: <Search className="w-8 h-8 text-white" />, locationImage: '/images/presets/mysterylocation.jpg' },
+        'romance': { name: 'SUNSET TERRACE', icon: <Heart className="w-8 h-8 text-white" />, locationImage: '/images/presets/romanticlocation.jpg' },
+        'adventure': { name: 'LOST TEMPLE', icon: <Map className="w-8 h-8 text-white" />, locationImage: '/images/presets/adventurelocation.jpg' },
+        'comedy': { name: 'DOWNTOWN STAGE', icon: <Theater className="w-8 h-8 text-white" />, locationImage: '/images/presets/comedylocation.jpg' },
+        'cyberpunk': { name: 'NEON DISTRICT', icon: <Building2 className="w-8 h-8 text-white" />, locationImage: '/images/presets/cyberpunklocation.jpg' },
+        'thriller': { name: 'SAFE HOUSE', icon: <Crosshair className="w-8 h-8 text-white" />, locationImage: '/images/presets/thrillerlocation.jpg' },
+        'drama': { name: 'CITY STREETS', icon: <Drama className="w-8 h-8 text-white" />, locationImage: '/images/presets/dramalocation.jpg' },
     };
 
     const genreLoc = ui.selectedGenre ? GENRE_LOCATIONS[ui.selectedGenre] : null;
     const locationName = genreLoc?.name || 'LOCATION: DOCKS';
     const locationIcon = genreLoc?.icon || <Building2 className="w-8 h-8 text-white" />;
+    const locationImage = genreLoc?.locationImage || null;
 
     const SETTING_TYPES = [
         'real-world-contemporary', 'real-world-historical', 'alternate-history',
@@ -63,9 +64,9 @@ export function LocationDocksPanel() {
             </div>
             <div className="border-4 border-black bg-black p-1">
                 <div className="relative h-56 w-full overflow-hidden grayscale contrast-125">
-                    {ui.selectedGenre ? (
+                    {locationImage ? (
                         <img
-                            src={`/images/presets/genre-${ui.selectedGenre}.jpg`}
+                            src={locationImage}
                             alt={locationName}
                             className="w-full h-full object-cover"
                         />
@@ -306,11 +307,10 @@ export function InspirationPanel() {
                                 key={trope}
                                 type="button"
                                 onClick={() => toggleTrope('tropesToAvoid', trope)}
-                                className={`border-2 px-2 py-0.5 font-condensed text-[10px] font-bold transition-colors ${
-                                    selected
-                                        ? 'bg-white text-[#8a0000] border-white'
-                                        : 'bg-transparent text-white/80 border-white/40 hover:border-white hover:text-white'
-                                }`}
+                                className={`border-2 px-2 py-0.5 font-condensed text-[10px] font-bold transition-colors ${selected
+                                    ? 'bg-white text-[#8a0000] border-white'
+                                    : 'bg-transparent text-white/80 border-white/40 hover:border-white hover:text-white'
+                                    }`}
                             >
                                 {trope}
                             </button>
@@ -332,11 +332,10 @@ export function InspirationPanel() {
                                 key={trope}
                                 type="button"
                                 onClick={() => toggleTrope('tropesToInclude', trope)}
-                                className={`border-2 px-2 py-0.5 font-condensed text-[10px] font-bold transition-colors ${
-                                    selected
-                                        ? 'bg-white text-[#8a0000] border-white'
-                                        : 'bg-transparent text-white/80 border-white/40 hover:border-white hover:text-white'
-                                }`}
+                                className={`border-2 px-2 py-0.5 font-condensed text-[10px] font-bold transition-colors ${selected
+                                    ? 'bg-white text-[#8a0000] border-white'
+                                    : 'bg-transparent text-white/80 border-white/40 hover:border-white hover:text-white'
+                                    }`}
                             >
                                 {trope}
                             </button>
