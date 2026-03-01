@@ -794,8 +794,12 @@
     .animate-pulse,
     .animate-spin,
     .animate-float,
-    .animate-wiggle {
+    .animate-wiggle,
+    .dossier-page-enter,
+    .dossier-page-exit {
       animation: none !important;
+      transform: none;
+      opacity: 1;
     }
 
     *,
@@ -907,6 +911,7 @@
   /* Sidebar panel styling */
   .noir-sidebar-panel {
     background: rgba(255, 255, 255, 0.02);
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.05);
   }
@@ -957,13 +962,17 @@
     cursor: pointer;
   }
 
+  input[type="range"]::-moz-range-thumb {
+    cursor: pointer;
+  }
+
   /* Pro Panel accordion refinements */
   .pro-panel-accordion [data-state="open"] > [role="region"] {
-    animation: accordion-down 0.2s ease-out;
+    @apply animate-accordion-down;
   }
 
   .pro-panel-accordion [data-state="closed"] > [role="region"] {
-    animation: accordion-up 0.2s ease-out;
+    @apply animate-accordion-up;
   }
 
   /* Noir sticky sidebar */
@@ -985,7 +994,7 @@
 
   /* Emoji color utilities — forces native emojis to white or black */
   .emoji-white {
-    filter: grayscale(1) brightness(100);
+    filter: grayscale(1) brightness(0) invert(1);
   }
   .emoji-dark {
     filter: grayscale(1) brightness(0);

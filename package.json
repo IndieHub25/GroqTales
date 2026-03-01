@@ -19,6 +19,7 @@
     "react",
     "groq"
   ],
+  "packageManager": "npm@10",
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
@@ -56,7 +57,6 @@
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.1",
-    "@cloudflare/next-on-pages": "^1.13.12",
     "@coinbase/agentkit": "^0.7.0",
     "@coinbase/coinbase-sdk": "^0.23.0",
     "@coinbase/onchainkit": "^0.38.9",
@@ -101,7 +101,6 @@
     "@upstash/redis": "^1.36.2",
     "@web3modal/wagmi": "^4.0.0-alpha.0",
     "alchemy-sdk": "^3.5.7",
-    "autoprefixer": "^10.4.14",
     "axios": "^1.9.0",
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.2.2",
@@ -115,7 +114,6 @@
     "date-fns": "^3.3.1",
     "dotenv": "^16.5.0",
     "embla-carousel-react": "^8.6.0",
-    "eslint-config-next": "14.1.0",
     "ethers": "^6.11.1",
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
@@ -134,7 +132,6 @@
     "next": "14.1.0",
     "next-auth": "^4.24.13",
     "next-themes": "^0.2.1",
-    "postcss": "^8.4.23",
     "react": "^18.2.0",
     "react-day-picker": "^9.6.7",
     "react-dom": "^18.2.0",
@@ -147,9 +144,7 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "tailwind-merge": "^2.6.0",
-    "tailwindcss": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "^5.8.3",
     "uploadthing": "^7.4.4",
     "vaul": "^1.1.2",
     "viem": "^2.7.9",
@@ -157,7 +152,6 @@
     "webpack-bundle-analyzer": "^5.2.0",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0",
-    "yarn": "^1.22.22",
     "zod": "^3.25.76",
     "zustand": "^5.0.11"
   },
@@ -193,8 +187,14 @@
     "nodemon": "^3.0.2",
     "prettier": "^3.2.5",
     "style-loader": "^4.0.0",
+    "tailwindcss": "^3.3.0",
     "ts-jest": "^29.4.6",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
+    "autoprefixer": "^10.4.14",
+    "eslint-config-next": "14.1.0",
+    "postcss": "^8.4.23",
+    "@cloudflare/next-on-pages": "^1.13.12"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
