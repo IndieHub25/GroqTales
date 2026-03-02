@@ -20,7 +20,6 @@ import type {
   CorePromptData,
   StoryMode,
 } from '@/hooks/use-creation-wizard';
-import { cn } from '@/lib/utils';
 
 interface StepPreviewProps {
   mode: StoryMode | null;
@@ -136,7 +135,7 @@ export function StepPreview({
         <Button
           onClick={handleGenerate}
           disabled={isGenerating || !corePrompt.prompt.trim()}
-          className="theme-gradient-bg text-white text-lg"
+          className="theme-gradient-bg text-lg"
           size="lg"
         >
           {isGenerating ? (

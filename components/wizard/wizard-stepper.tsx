@@ -73,10 +73,10 @@ export function WizardStepper({
                 className={cn(
                   'relative flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold transition-all',
                   isActive
-                    ? 'bg-primary text-white border-primary shadow-md'
+                    ? 'bg-primary border-primary shadow-md'
                     : isCompleted
                       ? 'bg-green-500 text-white border-green-700'
-                      : 'bg-card text-foreground border-muted-foreground/30',
+                      : 'bg-card text-primary border-muted-foreground',
                   isAccessible &&
                     !isActive &&
                     'group-hover:bg-primary/10 group-hover:border-primary'

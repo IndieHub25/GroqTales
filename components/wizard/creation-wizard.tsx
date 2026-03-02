@@ -308,7 +308,7 @@ export function CreationWizard({
                 type="button"
                 onClick={wizard.goNext}
                 disabled={!wizard.canGoNext()}
-                className={`comic-button flex items-center text-sm ${!wizard.canGoNext() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`comic-button-secondary flex items-center text-sm" ${!wizard.canGoNext() ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 Next
                 <ArrowRight className="ml-2 h-4 w-4" />
