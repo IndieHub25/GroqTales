@@ -9,12 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Active full support: 1.3.9 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
 
-## [1.3.10] - 2026-03-03
+## [1.3.9] - 2026-03-03
 
 ### Bug Fixes
 - **Cloudflare Pages Deployment Fix**: Fixed GitHub Action workflow `deployment.yml` to trigger on branches other than `main` and dynamically deploy to the current branch instead of hardcoding `main`. Also removed the restrictive repository name check.
-
-## [1.3.9] - 2026-03-02
 
 ### Story Creation Reversion & Enhancements
 
