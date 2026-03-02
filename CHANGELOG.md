@@ -11,6 +11,68 @@ Active full support: 1.3.9 (latest). Security maintenance (critical fixes only):
 
 ## [1.3.9] - 2026-03-01
 
+### Core Infrastructure
+
+- Implement core application structure, API routes, UI components, and Cloudflare Worker for GroqTales.
+
+### Backend Integration & Production Config
+
+#### Backend API Wiring
+- **`lib/api-client.ts`** [NEW]: Centralized `apiFetch()` and `authHeaders()` helpers for consistent API base URL usage across all frontend components.
+- **`.env.example`**: Added `NEXT_PUBLIC_API_URL`, `PROD_URL`, `CORS_ORIGIN` environment variables.
+- **`scripts/check-env.js`**: Added `NEXT_PUBLIC_API_URL` to required environment variables validation.
+
+#### Production Config Fix — Localhost Removal
+- **`server/backend.js`**: Swagger server URL changed from `process.env.URL || 'http://localhost:PORT'` → `process.env.PROD_URL || 'https://groqtales-backend-api.onrender.com/api'` with "Production" description. CORS origin default changed from `localhost:3000` → `https://groqtales.xyz`. Health check startup logs now use `PROD_URL`.
+- **`server/sdk-server.js`**: CORS origin default changed from `localhost:3000` → `https://groqtales.xyz`.
+
+#### Health Endpoints
+- **`server/backend.js`**: Added `GET /api/health/db` (database connectivity) and `GET /api/health/bot` (help bot availability) endpoints.
+- **`hooks/use-system-health.ts`** [NEW]: Frontend hook that polls backend health endpoints, used to show/hide the "System Offline" banner.
+- **`components/footer.tsx`**: Fixed health check parsing — was checking for `'ok'` status but backend returns `'healthy'`.
+
+### RBAC — Role-Based Access Control
+
+- **`lib/rbac.ts`** [NEW]: Role helper functions (`getUserRoles()`, `isAdmin()`, `isModerator()`, `isModOrAdmin()`, `getPrimaryRole()`) reading from Supabase `user_metadata.roles`. Includes `roleBadgeStyles` config for Admin (red), Moderator (amber), User (emerald) badges.
+- **`hooks/use-user-role.ts`** [NEW]: React hook reading Supabase session roles with `localStorage`-based view-switching so admins/mods can preview the UI as a regular user.
+- **`components/user-nav.tsx`**: Added RBAC-aware dropdown items — role badge next to "User Controls", conditional "Admin Panel" (admin only), "Moderation" (admin + mod), "Settings", "Notifications" (all users), and "Switch to User/Admin View" toggle (admin + mod).
+
+### MADHAVA Help Bot — Express Backend
+
+- **`server/routes/helpbot.js`** [NEW]: `POST /api/helpbot/chat` endpoint integrating with Groq LLM API. Includes system prompt with GroqTales knowledge base and fallback message when `GROQ_API_KEY` is not configured.
+- **`server/backend.js`**: Mounted helpbot route at `/api/helpbot`.
+
+### Profile Refactor — Username-Based URLs
+
+- **`server/routes/users.js`**: Added `GET /api/v1/users/profile/username/:username` route for fetching profiles by username.
+- **`app/profile/[slug]/page.tsx`** [NEW]: Server component for username-based profile routing.
+- **`app/profile/[slug]/client.tsx`** [NEW]: Full profile client component — handles `/profile/me` (authenticated) and `/profile/:username` (public), displays moderation status badges, user stats, story list, and "Mint NFT" button for owned approved stories.
+- **`app/profile/page.tsx`**: Now redirects to `/profile/me`.
+- **`app/profile/[id]/`** [DELETED]: Removed old ObjectId-based profile pages.
+
+### Story Moderation System
+
+- **`server/models/Story.js`**: Added `moderationStatus` (`pending`/`approved`/`rejected`), `moderatorId`, and `moderationNotes` fields to the Story schema.
+- **`server/routes/stories.js`**: `GET /` now filters by `moderationStatus` (defaults to `approved`, accepts `?status=` query param). `POST /create` sets new stories to `pending`. Added `PATCH /:id/moderate` for admin approval/rejection.
+- **`app/admin/moderation/page.tsx`** [NEW]: Admin-only moderation queue page with approve/reject UI for pending stories.
+
+### Real Data Integration
+
+- **`scripts/seed.js`**: Rewritten with 10 users (including admin) and 10 diverse stories (8 approved, 2 pending) for development and testing.
+- **`components/story-feed.tsx`**: Replaced hardcoded mock data with live fetch from `/api/v1/stories?limit=6`. Added loading skeleton placeholders and empty state.
+- **`components/community-feed.tsx`**: Fixed broken API URL (was `\${}` escaped template literal + non-existent `/api/feed` endpoint → now properly interpolates `NEXT_PUBLIC_API_URL` and fetches from `/api/v1/stories`).
+
+### Cloudflare Worker — D1 Feeds (Trending & Notifications)
+
+- **`cf-worker/schema.sql`**: Added `trending_stories` table (`story_id`, `score`, `period`, indexed by `period + score DESC`) and `notifications` table (`id`, `user_id`, `type`, `title`, `body`, `read`, `metadata`, indexed by `user_id + read + created_at`).
+- **`cf-worker/src/routes/feeds.ts`** [NEW]: Hono route group — `GET /api/feeds/trending`, `GET /api/feeds/notifications/:userId`, `POST /api/feeds/notifications/:id/read`, `POST /api/feeds/notifications/mark-all-read`.
+- **`cf-worker/src/index.ts`**: Imported and mounted feeds route at `/api/feeds`.
+- **`lib/feeds-client.ts`** [NEW]: Frontend helper — `fetchTrending()`, `fetchNotifications()`, `markNotificationRead()`, `markAllNotificationsRead()`. Tries CF Worker URL first (`NEXT_PUBLIC_CF_WORKER_URL`), falls back to Express backend.
+
+### New Pages
+
+- **`app/notifications/page.tsx`** [NEW]: Notifications list page with type-aware icons, unread count badge, mark-as-read, and mark-all-read functionality. Fetches from CF Worker D1 feeds endpoint.
+
 ### Bug Fixes — 2026-03-01
 
 - **Broken Logger Imports**: Fixed `Cannot find module '../lib/logger'` crash in `server/routes/helpbot.js`, `server/routes/feed.js`, and `server/routes/settings/profile.js`. All three files referenced `../lib/logger` (or `../../lib/logger`) but the module lives at `server/utils/logger.js`. Updated import paths accordingly.

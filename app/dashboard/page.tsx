@@ -82,7 +82,7 @@ export default function DashboardPage() {
     async function fetchDashboard() {
       try {
         setDashLoading(true);
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
         const token = typeof window !== 'undefined'
           ? localStorage.getItem('accessToken')
           : null;

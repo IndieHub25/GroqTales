@@ -37,6 +37,7 @@ import { cn } from '@/lib/utils';
 
 import { CreateStoryDialog } from './create-story-dialog';
 import { ModeToggle } from './mode-toggle';
+import { UploadStoryTrigger } from './upload-story-trigger';
 
 // Type definitions for nav items
 type NavSubItem = {
@@ -227,16 +228,19 @@ export function Header() {
         </div>
 
         <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="hidden lg:flex items-center gap-2 px-5 py-2 rounded-full border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-semibold shadow-[0_0_15px_rgba(16,185,129,0.2)] hover:bg-emerald-500 hover:text-black hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all duration-300"
-            onClick={handleCreateClick}
-            aria-label="Create a new story"
-          >
-            <PenSquare className="h-4 w-4 mr-2" />
-            Create
-          </Button>
+          <div className="flex items-center gap-2 mr-2">
+            <UploadStoryTrigger variant="outline" className="hidden lg:flex" buttonText="Upload" />
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden lg:flex items-center gap-2 px-5 py-2 rounded-full border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-semibold shadow-[0_0_15px_rgba(16,185,129,0.2)] hover:bg-emerald-500 hover:text-black hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all duration-300"
+              onClick={handleCreateClick}
+              aria-label="Create a new story"
+            >
+              <PenSquare className="h-4 w-4 mr-2" />
+              Create
+            </Button>
+          </div>
           {/* <ModeToggle /> Temporarily disabled */}
           <UserNav />
 
@@ -317,7 +321,12 @@ export function Header() {
                       )}
                     </div>
                   ))}
-                  <div className="pt-4 mt-4 border-t-2 border-white/10">
+                  <div className="pt-4 mt-4 border-t-2 border-white/10 space-y-3">
+                    <UploadStoryTrigger
+                      variant="outline"
+                      className="w-full justify-start text-lg text-white border-white/50 hover:bg-white/10"
+                      buttonText="Upload Story"
+                    />
                     <Button
                       variant="outline"
                       className="w-full justify-start text-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full font-semibold"

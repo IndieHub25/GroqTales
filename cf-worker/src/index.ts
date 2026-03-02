@@ -7,6 +7,7 @@ import marketplace from './routes/marketplace';
 import rag from './routes/rag';
 import admin from './routes/admin';
 import helpbot from './routes/helpbot';
+import feeds from './routes/feeds';
 
 type Bindings = {
     DB: D1Database;
@@ -28,6 +29,7 @@ app.route('/api/marketplace', marketplace);
 app.route('/api/rag', rag);
 app.route('/api/admin', admin);
 app.route('/api/helpbot', helpbot);
+app.route('/api/feeds', feeds);
 
 app.get('/', (c) => {
     return c.json({

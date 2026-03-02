@@ -14,7 +14,7 @@ export function useStoryAnalytics(storyId: string) {
     if (navigator.sendBeacon) {
       navigator.sendBeacon('/api/analytics/record', blob);
     } else {
-      fetch('/api/analytics/record', {
+      fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/analytics/record', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -29,7 +29,7 @@ export function useStoryAnalytics(storyId: string) {
     startTime.current = Date.now();
 
     if (!hasRecordedView.current) {
-      fetch('/api/analytics/record', {
+      fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/analytics/record', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ storyId, type: 'VIEW', value: 1 }),
@@ -48,7 +48,7 @@ export function useStoryAnalytics(storyId: string) {
   }, [storyId]);
 
   const trackInteraction = useCallback((type: InteractionType) => {
-    fetch('/api/analytics/record', {
+    fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/analytics/record', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ storyId, type, value: 1 }),

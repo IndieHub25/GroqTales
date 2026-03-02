@@ -66,9 +66,11 @@ router.get('/', async (req, res) => {
         // Parse query params to pass along
         const limit = req.query.limit || 6;
         const page = req.query.page || 1;
+        const sort = req.query.sort || 'newest'; // Default sort order
 
         // Make request to CF Worker
-        const response = await axios.get(`${workerUrl}/api/feed?limit=${limit}&page=${page}`, {
+        const response = await axios.get(`${workerUrl}/api/stories/feed`, {
+            params: { page, limit, sort },
             validateStatus: false, // Allow any status code
             timeout: 10000 // 10 second timeout
         });

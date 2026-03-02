@@ -111,7 +111,7 @@ export default function SettingsPage() {
   const getToken = () =>
     typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
   const baseUrl = typeof window !== 'undefined'
-    ? (process.env.NEXT_PUBLIC_API_URL || '')
+    ? (process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com')
     : '';
 
   // const onSubmit = (data: ProfileFormValues) => {
@@ -201,9 +201,15 @@ export default function SettingsPage() {
           firstName: data.displayName?.split(' ')[0] || data.displayName,
           lastName: data.displayName?.split(' ').slice(1).join(' ') || '',
           email: data.email,
+          username: data.username,
+          bio: data.bio,
+          primaryGenre: data.primaryGenre
         }),
       });
       if (!res.ok) throw new Error('Failed to save profile');
+
+      // Dispatch a global event so the user-nav re-fetches profile data instantly
+      window.dispatchEvent(new Event('profileUpdated'));
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (err) {
@@ -794,10 +800,10 @@ export default function SettingsPage() {
                   {saveStatus === 'saving'
                     ? 'Saving...'
                     : saveStatus === 'saved'
-                    ? '✓ Saved!'
-                    : saveStatus === 'error'
-                    ? 'Error — Retry'
-                    : 'Save Preferences'}
+                      ? '✓ Saved!'
+                      : saveStatus === 'error'
+                        ? 'Error — Retry'
+                        : 'Save Preferences'}
                 </Button>
               </CardFooter>
             </Card>

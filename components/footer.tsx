@@ -20,6 +20,7 @@ import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 
 import { AdminLoginModal } from './admin-login-modal';
+import { UploadStoryTrigger } from './upload-story-trigger';
 
 export function Footer({ version }: { version?: string }) {
   const currentYear = new Date().getFullYear();
@@ -29,7 +30,7 @@ export function Footer({ version }: { version?: string }) {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/health/db`, { cache: 'no-store' });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/health`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           setHealthStatus((data.status === 'ok' || data.status === 'healthy') ? 'ok' : data.status === 'degraded' ? 'degraded' : 'down');
@@ -118,17 +119,22 @@ export function Footer({ version }: { version?: string }) {
                   { href: '/community', label: 'Community' },
                   { href: '/community/creators', label: 'Top Creators' },
                   { href: '/create', label: 'Create Story' },
+                  { href: '#', label: 'Upload Story', isUpload: true },
                   { href: '/nft-gallery', label: 'NFT Gallery' },
                   { href: '/nft-marketplace', label: 'Marketplace' },
                 ].map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="group relative inline-flex items-center text-sm font-medium text-white/60 hover:text-white transition-colors duration-300"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity absolute -left-3" />
-                      {link.label}
-                    </Link>
+                  <li key={link.label}>
+                    {link.isUpload ? (
+                      <UploadStoryTrigger variant="ghost" className="p-0 h-auto font-medium text-white/60 hover:text-white" buttonText="Upload Story" icon={false} />
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="group relative inline-flex items-center text-sm font-medium text-white/60 hover:text-white transition-colors duration-300"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity absolute -left-3" />
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -222,12 +228,12 @@ export function Footer({ version }: { version?: string }) {
             <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 border border-white/10 rounded-full">
               <span
                 className={`w-1.5 h-1.5 rounded-full ${healthStatus === 'ok'
-                    ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse'
-                    : healthStatus === 'degraded'
-                      ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)] animate-pulse'
-                      : healthStatus === 'down'
-                        ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]'
-                        : 'bg-white/30'
+                  ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse'
+                  : healthStatus === 'degraded'
+                    ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)] animate-pulse'
+                    : healthStatus === 'down'
+                      ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]'
+                      : 'bg-white/30'
                   }`}
               />
               <span className="text-xs font-medium text-white/50 tracking-wider uppercase">

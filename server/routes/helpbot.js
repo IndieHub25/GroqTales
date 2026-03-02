@@ -1,3 +1,8 @@
+/**
+ * Helpbot API Route
+ * POST /api/helpbot/chat — MADHAVA help-bot (proxies to CF Worker)
+ */
+
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');

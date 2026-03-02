@@ -188,10 +188,16 @@ export default function RootLayout({
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js').catch(function(err) {
-                  console.log('ServiceWorker registration failed: ', err);
-                });
+              try {
+                if ('serviceWorker' in navigator) {
+                  window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                      console.log('ServiceWorker registration gracefully failed or blocked: ', err.message);
+                    });
+                  });
+                }
+              } catch (e) {
+                // Ignore SW errors, likely blocked by client
               }
             `,
           }}

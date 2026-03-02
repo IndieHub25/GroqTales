@@ -60,7 +60,7 @@ export function ProfileForm() {
       try {
         const { data: sessionData } = await supabase.auth.getSession();
         const token = sessionData?.session?.access_token;
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/profile`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/v1/settings/profile`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         if (!res.ok) throw new Error();
@@ -118,7 +118,7 @@ export function ProfileForm() {
       }
 
       // 2. Sync to Render backend (which proxies to Mongo and CF D1)
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/settings/profile`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/v1/settings/profile`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

@@ -74,13 +74,38 @@ const axios = require('axios');
 // GET /api/v1/stories - Get all stories
 router.get('/', async (req, res) => {
   try {
-    const { page = 1, limit = 10, genre, author } = req.query;
+    const { genre, author, status } = req.query;
+    let page = parseInt(req.query.page, 10);
+    if (isNaN(page) || page < 1) page = 1;
+    let limit = parseInt(req.query.limit, 10);
+    if (isNaN(limit) || limit < 1) limit = 10;
+    limit = Math.min(limit, 100);
     const query = {};
 
-    if (genre) query.genre = genre;
-    if (author) query.author = author;
+    if (genre) query.genre = String(genre);
+    if (author) query.author = String(author);
+    // Check if user is authenticated admin to allow status override
+    let isAdmin = false;
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (token) {
+      try {
+        const { verifyAccessToken } = require('../utils/jwt.js');
+        const decoded = verifyAccessToken(token);
+        if (decoded && decoded.role === 'admin') {
+          isAdmin = true;
+        }
+      } catch (err) { }
+    }
+
+    if (isAdmin && status && ['pending', 'approved', 'rejected'].includes(String(status))) {
+      query.moderationStatus = String(status);
+    } else {
+      query.moderationStatus = 'approved';
+    }
 
     const stories = await Story.find(query)
+      .populate('author', 'username avatar firstName lastName')
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .sort({ createdAt: -1 })
@@ -142,13 +167,22 @@ router.get('/', async (req, res) => {
 // POST /api/v1/stories/create - Create new story
 router.post('/create', authRequired, async (req, res) => {
   try {
-    const { title, content, genre } = req.body;
+    const { title, content, genre, tags } = req.body;
+    let validTags = [];
+    if (tags !== undefined) {
+      if (!Array.isArray(tags)) {
+        return res.status(400).json({ error: 'tags must be an array' });
+      }
+      validTags = tags;
+    }
 
     const story = new Story({
       title,
       content,
       genre,
       author: req.user.id,
+      tags: validTags,
+      moderationStatus: 'pending',
     });
 
     await story.save();
@@ -177,6 +211,86 @@ router.post('/create', authRequired, async (req, res) => {
     return res.status(201).json(story);
   } catch (error) {
     console.log(error)
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/stories/upload:
+ *   post:
+ *     tags:
+ *       - Stories
+ *     summary: Upload a manual user story
+ *     description: Creates a new user-uploaded story with rich metadata.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               genre:
+ *                 type: string
+ *               twists:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               coverImageUrl:
+ *                 type: string
+ *               imageUrls:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       201:
+ *         description: Story uploaded successfully.
+ */
+// POST /api/v1/stories/upload - Upload user story
+router.post('/upload', authRequired, async (req, res) => {
+  try {
+    const { title, description, content, genre, twists, tags, coverImageUrl, imageUrls } = req.body;
+
+    // Validate minimum requirements
+    if (!title || !content || !genre) {
+      return res.status(400).json({ error: 'Title, content, and genre are required.' });
+    }
+
+    const validTags = Array.isArray(tags) ? tags : [];
+    const validTwists = Array.isArray(twists) ? twists : [];
+    const validImageUrls = Array.isArray(imageUrls) ? imageUrls : [];
+
+    const story = new Story({
+      title: title.slice(0, 100),
+      description: description ? description.slice(0, 500) : '',
+      content,
+      genre,
+      twists: validTwists,
+      tags: validTags,
+      source: 'uploaded',
+      coverImageUrl: coverImageUrl || null,
+      imageUrls: validImageUrls,
+      author: req.user.id,
+      moderationStatus: 'pending',
+    });
+
+    await story.save();
+
+    return res.status(201).json({ success: true, data: story });
+  } catch (error) {
+    console.error('Story upload error:', error);
     return res.status(500).json({ error: error.message });
   }
 });
@@ -264,6 +378,50 @@ router.post('/:id/analyze', authRequired, async (req, res) => {
     };
 
     return res.json(analysis);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// PATCH /api/v1/stories/:id/moderate - Moderate a story (admin only)
+router.patch('/:id/moderate', authRequired, async (req, res) => {
+  try {
+    // Check if user is admin
+    const user = await require('../models/User').findById(req.user.id).lean();
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const { status, notes } = req.body;
+    // Coerce status to string and validate against an allowlist to prevent NoSQL injection
+    const sanitizedStatus = typeof status === 'string' ? status : String(status);
+    if (!['approved', 'rejected'].includes(sanitizedStatus)) {
+      return res.status(400).json({ error: 'Status must be approved or rejected' });
+    }
+
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid id' });
+    }
+
+    // Coerce notes to string to prevent NoSQL injection via object payloads
+    const sanitizedNotes = typeof notes === 'string' ? notes.slice(0, 2000) : '';
+
+    const story = await Story.findByIdAndUpdate(
+      req.params.id,
+      {
+        moderationStatus: sanitizedStatus,
+        moderatorId: req.user.id,
+        moderationNotes: sanitizedNotes,
+      },
+      { new: true }
+    ).lean();
+
+    if (!story) {
+      return res.status(404).json({ error: 'Story not found' });
+    }
+
+    return res.json({ success: true, data: story });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

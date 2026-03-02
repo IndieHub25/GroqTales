@@ -51,8 +51,8 @@ const options = {
     },
     servers: [
       {
-        url: process.env.URL || 'http://localhost:' + PORT + '/',
-        description: process.env.NODE_ENV === 'production' ? 'Production Server' : 'Development Server',
+        url: process.env.PROD_URL || 'https://groqtales-backend-api.onrender.com/api',
+        description: 'Production',
       },
     ],
     tags: [
@@ -146,9 +146,20 @@ app.use(
 );
 
 // CORS configuration
+const allowedOrigins = (process.env.CORS_ORIGIN || 'https://groqtales.xyz')
+  .split(',')
+  .map(o => o.trim())
+  .concat(['https://www.groqtales.xyz', 'https://groqtales.xyz']);
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
@@ -160,10 +171,14 @@ app.use(
   })
 );
 
+// Trust proxy for rate limiting behind Render/Cloudflare load balancers
+app.set('trust proxy', 1);
+
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  skip: (req) => req.originalUrl.startsWith('/api/health'),
   message: {
     error: 'Too many requests from this IP, please try again later.',
   },
@@ -330,13 +345,20 @@ app.get(['/api/health', '/api/health/db'], (req, res) => {
  *                   example: helpbot
  */
 app.get('/api/health/bot', (req, res) => {
-  const botOnline = !!process.env.GROQ_API_KEY;
+  // If we have a proxy target (CF_WORKER_URL) or native GROQ key, the bot is healthy
+  const botOnline = !!process.env.CF_WORKER_URL || !!process.env.GROQ_API_KEY;
   res.json({
     status: botOnline ? 'healthy' : 'down',
     timestamp: new Date().toISOString(),
     service: 'helpbot',
+    version: process.env.API_VERSION || 'v1',
+    uptime: formatUptime(process.uptime()),
   });
 });
+
+// Database health endpoint handled by ['/api/health', '/api/health/db'] above
+
+// Bot health endpoint handled by /api/health/bot above
 
 // Root welcome endpoint
 app.get('/', (req, res) => {
@@ -355,10 +377,12 @@ app.use('/api/v1/stories', require('./routes/stories'));
 app.use('/api/v1/comics', require('./routes/comics'));
 app.use('/api/v1/nft', require('./routes/nft'));
 app.use('/api/v1/users', require('./routes/users'));
-
-app.use('/api/feed', require('./routes/feed'));
+app.use('/api/v1/admin', require('./routes/admin'));
 app.use('/api/helpbot', require('./routes/helpbot'));
 app.use('/api/v1/helpbot', require('./routes/helpbot'));
+
+app.use('/api/feed', require('./routes/feed'));
+app.use('/api/feeds', require('./routes/notification-feed'));
 
 
 app.use('/api/v1/ai', require('./routes/ai'));
@@ -421,32 +445,28 @@ const gracefulShutdown = async (signal) => {
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-// Start server after database connection succeeds
+// Start server immediately so health checks pass
+server = app.listen(PORT, () => {
+  logger.info(`GroqTales Backend API server running on port ${PORT}`);
+  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`Health check: ${process.env.PROD_URL || 'http://localhost:' + PORT}/api/health`);
+});
+
 const DB_MAX_RETRIES = parseInt(process.env.DB_MAX_RETRIES || '5', 10);
 const DB_RETRY_DELAY_MS = parseInt(process.env.DB_RETRY_DELAY_MS || '2000', 10);
 
+// Connect to database asynchronously
 connectDB(DB_MAX_RETRIES, DB_RETRY_DELAY_MS)
   .then(() => {
-    server = app.listen(PORT, () => {
-      logger.info(`GroqTales Backend API server running on port ${PORT}`);
-      logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      logger.info(`Health check: http://localhost:${PORT}/api/health`);
-    });
+    logger.info('Database connection established successfully after server start.');
   })
   .catch((err) => {
-    console.error('Database connection failed:', err.message);
-
-    // In development, start server anyway without database
+    logger.error('Database connection failed:', err.message);
     if (process.env.NODE_ENV === 'development') {
-      logger.warn('Starting server in development mode without database...');
-      server = app.listen(PORT, () => {
-        console.log(
-          `GroqTales Backend API server running on port ${PORT} (NO DATABASE)`
-        );
-        console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-        console.log(`Health check: http://localhost:${PORT}/api/health`);
-      });
+      logger.warn('Running in development mode without database...');
     } else {
-      process.exit(1);
+      logger.error('CRITICAL: Database connection failed in production! Application will run in degraded mode.');
+      // Do not process.exit(1) here unless you want to force Render to kill and restart
+      // Instead, we let the health check return 200 with 'degraded' status, or we can choose to exit based on specific requirements.
     }
   });

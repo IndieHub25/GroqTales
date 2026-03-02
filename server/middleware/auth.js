@@ -74,7 +74,43 @@ const refresh = async (req, res) => {
   }
 };
 
+const isSuperAdmin = async (req, res, next) => {
+  try {
+    const header = req.headers.authorization || '';
+    const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'Missing token' });
+    }
+
+    try {
+      const decoded = verifyAccessToken(token);
+      req.user = decoded; // { id, role }
+
+      // Specifically check for the hardcoded superadmin email
+      const User = require('../models/User'); // Delay require to avoid circular dependency
+      const user = await User.findById(req.user.id).select('email isAdmin role');
+
+      if (!user || user.email !== 'indiehubexe@gmail.com') {
+        return res.status(403).json({ success: false, error: 'Forbidden. Superadmin access strictly required.' });
+      }
+
+      return next();
+    } catch (err) {
+      return res.status(401).json({ success: false, error: 'Invalid token' });
+    }
+  } catch (error) {
+    console.error('Superadmin Authentication error:', error);
+    return res.status(401).json({
+      success: false,
+      error: 'Authentication failed',
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   authRequired,
   refresh,
+  isSuperAdmin,
 };
