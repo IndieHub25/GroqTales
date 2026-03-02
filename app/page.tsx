@@ -37,10 +37,10 @@ function useTypewriter(
   const [displayText, setDisplayText] = useState('');
 
   // All mutable state lives in refs so the interval never goes stale
-  const indexRef      = useRef(0);   // which phrase we're on
-  const charRef       = useRef(0);   // current character position
+  const indexRef = useRef(0);   // which phrase we're on
+  const charRef = useRef(0);   // current character position
   const isDeletingRef = useRef(false);
-  const pausingRef    = useRef(false);
+  const pausingRef = useRef(false);
 
   useEffect(() => {
     if (!texts.length) return;
@@ -89,8 +89,8 @@ function useTypewriter(
     // Re-create the interval whenever the speed should change
     // (framer-motion / React will clean up via the return)
     return () => clearTimeout(timeoutId);
-  // Re-run only when props change — internal state changes use refs
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Re-run only when props change — internal state changes use refs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [texts, typingSpeed, deletingSpeed, pauseAfterType, pauseAfterDelete]);
 
   return displayText;
@@ -108,7 +108,7 @@ export default function Home() {
   const { account, connectWallet, connecting } = useWeb3();
   const { scrollYProgress } = useScroll();
   const heroRef = useRef<HTMLElement>(null);
-  
+
   // Parallax values
   const yBg = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
   const opacityHero = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
@@ -173,7 +173,8 @@ export default function Home() {
 
   return (
     <main className="flex min-h-[calc(100vh-80px)] w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] -mt-6 -mb-6 flex-col overflow-hidden bg-black text-white">
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes scrollMarquee {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
@@ -193,12 +194,12 @@ export default function Home() {
         <motion.div style={{ y: yBg, opacity: opacityHero }} className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1920')] bg-cover bg-center opacity-40 mix-blend-screen" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black z-10" />
-          <motion.div 
+          <motion.div
             animate={{ scale: [1, 1.1, 1], rotate: [0, 5, 0] }}
             transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
             className="absolute top-[-20%] right-[-10%] w-[70vw] h-[70vw] rounded-full bg-[radial-gradient(circle,_rgba(59,130,246,0.15)_0%,_transparent_60%)] filter blur-[120px]"
           />
-          <motion.div 
+          <motion.div
             animate={{ scale: [1, 1.2, 1], rotate: [0, -5, 0] }}
             transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
             className="absolute bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-[radial-gradient(circle,_rgba(168,85,247,0.1)_0%,_transparent_60%)] filter blur-[100px]"
@@ -206,7 +207,7 @@ export default function Home() {
         </motion.div>
 
         <div className="container mx-auto px-6 relative z-10 flex flex-col items-center max-w-5xl">
-          
+
           {/* Centered Text & CTA */}
           <motion.div variants={stagger} initial="hidden" animate="visible" className="text-center mt-20 md:mt-0 flex flex-col items-center">
             <motion.div variants={fadeUp} className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-8 backdrop-blur-md">
@@ -216,7 +217,7 @@ export default function Home() {
               </span>
               <span className="text-xs font-bold tracking-widest uppercase text-emerald-400">AI × Stories × NFTs</span>
             </motion.div>
-            
+
             <motion.h1 variants={fadeUp} className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[1.2] pb-4 mb-6">
               Write your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 py-2 inline-block">legacy.</span><br />
               Own your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 py-2 inline-block">universe.</span>
@@ -227,9 +228,9 @@ export default function Home() {
               <p className="text-xl md:text-2xl text-white/60 font-medium font-mono leading-relaxed">
                 <span className="text-emerald-400 opacity-60 mr-2">{'>'}</span>
                 {typedString}
-                <motion.span 
-                  animate={{ opacity: [1, 0] }} 
-                  transition={{ repeat: Infinity, duration: 0.8 }} 
+                <motion.span
+                  animate={{ opacity: [1, 0] }}
+                  transition={{ repeat: Infinity, duration: 0.8 }}
                   className="inline-block w-2 bg-white/80 ml-1 h-5 align-middle"
                 />
               </p>
@@ -240,7 +241,7 @@ export default function Home() {
                 <Link href="/create/ai-story">
                   <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-black/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
                   <span className="relative z-10 flex items-center">
-                    Start Creating <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    Start Creating <ArrowRight className="ml-2 w-5 h-5 text-white group-hover:text-white group-hover:translate-x-1 transition-all" />
                   </span>
                 </Link>
               </Button>
@@ -290,7 +291,7 @@ export default function Home() {
                 <div className="flex-shrink-0 flex items-center justify-center w-16 h-16 rounded-xl bg-black border border-white/10 group-hover:border-emerald-500/50 transition-colors shadow-2xl">
                   <span className="font-mono text-xl text-white/40 group-hover:text-emerald-400 transition-colors">{item.step}</span>
                 </div>
-                
+
                 <div className="flex-grow">
                   <h3 className="text-2xl font-bold text-white/90 tracking-tight mb-2 group-hover:text-white transition-colors">{item.title}</h3>
                   <p className="text-white/50 text-base leading-relaxed max-w-2xl">{item.desc}</p>
@@ -329,7 +330,7 @@ export default function Home() {
               </Button>
             </motion.div>
           </motion.div>
-          
+
           <TrendingStories />
         </div>
       </section>
@@ -360,7 +361,7 @@ export default function Home() {
                   <Image src={genre.image} alt={genre.name} fill sizes="(max-width: 768px) 280px, 320px" className="object-cover transform group-hover:scale-110 transition-transform duration-700" />
                   <div className={`absolute inset-0 bg-gradient-to-t ${genre.color} mix-blend-multiply opacity-60 group-hover:opacity-80 transition-opacity`} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80" />
-                  
+
                   <div className="absolute inset-0 p-6 flex flex-col justify-end">
                     <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-md group-hover:translate-x-1 transition-transform">{genre.name}</h3>
                     <div className="h-0.5 w-12 bg-white/50 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
