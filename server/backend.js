@@ -293,71 +293,6 @@ app.use(
   })
 );
 
-// Trust proxy for rate limiting behind Render/Cloudflare load balancers
-app.set('trust proxy', 1);
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  skip: (req) => req.originalUrl.startsWith('/api/health'),
-  message: {
-    error: 'Too many requests from this IP, please try again later.',
-  },
-});
-app.use('/api/', limiter);
-
-// Middleware
-app.use(requestIdMiddleware);
-app.use(compression());
-app.use(morgan('combined'));
-app.use(express.json({ limit: '10mb' }));
-app.use(cookieParser());
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Logging middleware (after request parsing)
-app.use(loggingMiddleware);
-
-/**
- * @swagger
- * /api/health:
- *   get:
- *     tags:
- *       - Health
- *     summary: Full server health check
- *     description: |
- *       Returns comprehensive real-time diagnostics including API status,
- *       database connectivity, runtime info (PID, Node version, CPU, memory),
- *       and service availability. Use this endpoint for monitoring dashboards
- *       and uptime checks.
- *     responses:
- *       200:
- *         description: Health diagnostics retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/HealthResponse'
- */
-
-/**
- * @swagger
- * /api/health/db:
- *   get:
- *     tags:
- *       - Health
- *     summary: Database health check
- *     description: |
- *       Returns the same comprehensive diagnostics as /api/health.
- *       Alias provided for semantic clarity when checking DB status specifically.
- *     responses:
- *       200:
- *         description: Database health status
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/HealthResponse'
- */
-
 // Helper: format bytes to human-readable
 const formatBytes = (bytes) => {
   if (bytes < 1024) return bytes + ' B';
@@ -524,6 +459,72 @@ app.get('/', (req, res) => {
     },
   });
 });
+
+
+// Trust proxy for rate limiting behind Render/Cloudflare load balancers
+app.set('trust proxy', 1);
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  skip: (req) => req.originalUrl.startsWith('/api/health'),
+  message: {
+    error: 'Too many requests from this IP, please try again later.',
+  },
+});
+app.use('/api/', limiter);
+
+// Middleware
+app.use(requestIdMiddleware);
+app.use(compression());
+app.use(morgan('combined'));
+app.use(express.json({ limit: '10mb' }));
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Logging middleware (after request parsing)
+app.use(loggingMiddleware);
+
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     tags:
+ *       - Health
+ *     summary: Full server health check
+ *     description: |
+ *       Returns comprehensive real-time diagnostics including API status,
+ *       database connectivity, runtime info (PID, Node version, CPU, memory),
+ *       and service availability. Use this endpoint for monitoring dashboards
+ *       and uptime checks.
+ *     responses:
+ *       200:
+ *         description: Health diagnostics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HealthResponse'
+ */
+
+/**
+ * @swagger
+ * /api/health/db:
+ *   get:
+ *     tags:
+ *       - Health
+ *     summary: Database health check
+ *     description: |
+ *       Returns the same comprehensive diagnostics as /api/health.
+ *       Alias provided for semantic clarity when checking DB status specifically.
+ *     responses:
+ *       200:
+ *         description: Database health status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HealthResponse'
+ */
 
 // API Routes
 app.use('/api/v1/auth', require('./routes/auth'));
