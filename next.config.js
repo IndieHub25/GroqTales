@@ -238,9 +238,9 @@ const nextConfig = {
   }),
 
   // Output configuration
-  // 'export' = static HTML/JS/CSS (no dynamic routes allowed)
+  // For Cloudflare Pages: use undefined to allow @cloudflare/next-on-pages to handle dynamic routes
   // 'standalone' = self-contained Node.js server for Render
-  // undefined = let @cloudflare/next-on-pages handle dynamic routes via functions
+  // undefined = default Next.js behavior with dynamic routes and SSR
   output: isCfBuild ? undefined : (process.env.BUILD_STANDALONE === 'true' ? 'standalone' : undefined),
 
   // Experimental features

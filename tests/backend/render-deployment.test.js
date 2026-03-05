@@ -110,7 +110,7 @@ describe('Render Deployment Readiness', () => {
         test('exports MODELS with valid Groq identifiers', () => {
             expect(serviceSource).toContain('llama-3.3-70b-versatile');
             expect(serviceSource).toContain('llama-3.1-8b-instant');
-            expect(serviceSource).toContain('mixtral-8x7b-32768');
+            expect(serviceSource).toContain('mistral-saba-24b');
         });
 
         test('does NOT reference invalid model names', () => {

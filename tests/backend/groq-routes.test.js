@@ -171,7 +171,7 @@ describe('/api/groq routes', () => {
                 .send({ action: 'generate', prompt: 'test' })
                 .expect(500);
 
-            expect(res.body.error).toBe('Groq API timeout');
+            expect(res.body.error).toBe('AI operation failed');
         });
     });
 });

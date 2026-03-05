@@ -8,6 +8,7 @@ const router = express.Router();
 const { supabaseAdmin } = require('../config/supabase');
 const { authRequired } = require('../middleware/auth');
 const groqService = require('../services/groqService');
+const { normalizeParam } = require('../utils/paramNormalizer');
 
 /**
  * @swagger
@@ -380,26 +381,36 @@ router.post('/generate', authRequired, async (req, res) => {
       return res.status(400).json({ error: 'prompt or theme is required' });
     }
 
+    // Normalize all string parameters to prevent type confusion
+    const normalizedPrompt = normalizeParam(prompt, 'prompt');
+    const normalizedGenre = normalizeParam(genre, 'genre');
+    const normalizedLength = normalizeParam(length, 'length');
+    const normalizedStyle = normalizeParam(style, 'style');
+    const normalizedTheme = normalizeParam(theme, 'theme');
+    const normalizedCharacters = normalizeParam(characters, 'characters');
+    const normalizedSetting = normalizeParam(setting, 'setting');
+    const normalizedFormatType = normalizeParam(formatType, 'formatType');
+
     const result = await groqService.generate({
-      prompt,
-      genre,
-      theme,
-      length: length || 'medium',
-      tone: style,
-      characters,
-      setting,
-      formatType: formatType || 'story',
+      prompt: normalizedPrompt,
+      genre: normalizedGenre,
+      theme: normalizedTheme,
+      length: normalizedLength || 'medium',
+      tone: normalizedStyle,
+      characters: normalizedCharacters,
+      setting: normalizedSetting,
+      formatType: normalizedFormatType || 'story',
     });
 
     const generatedStory = {
       id: require('crypto').randomUUID(),
-      title: `AI Generated ${(formatType || 'Story').charAt(0).toUpperCase() + (formatType || 'story').slice(1)}`,
+      title: `AI Generated ${((normalizedFormatType || 'Story').charAt(0).toUpperCase() + (normalizedFormatType || 'story').slice(1))}`,
       content: result.content,
-      genre,
+      genre: normalizedGenre,
       metadata: {
-        prompt,
-        length,
-        style,
+        prompt: normalizedPrompt,
+        length: normalizedLength,
+        style: normalizedStyle,
         model: result.model,
         tokensUsed: result.tokensUsed,
         generatedAt: new Date().toISOString(),

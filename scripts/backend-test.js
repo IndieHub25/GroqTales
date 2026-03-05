@@ -112,7 +112,8 @@ try {
         'missing exports'
     ));
     test('GroqService: retry logic implemented', () => assert(s.includes('MAX_RETRIES'), 'no retry loops'));
-    test('GroqService: uses API endpoint', () => assert(s.includes('https://api.groq.com/openai/v1/chat/completions'), 'wrong endpoint'));
+    test('GroqService: uses Groq API domain', () => assert(s.includes('api.groq.com'), 'wrong API domain'));
+    test('GroqService: uses OpenAI-compatible endpoint', () => assert(s.includes('/openai/v1/chat/completions'), 'wrong endpoint path'));
     test('GroqService: logger fallback for winston', () => assert(s.includes('catch') && s.includes('logger'), 'missing fallback'));
 } catch (e) {
     test('GroqService exists', () => { throw new Error('Could not read groqService.js'); });

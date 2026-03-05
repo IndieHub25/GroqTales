@@ -9,6 +9,7 @@
 const express = require('express');
 const router = express.Router();
 const groqService = require('../services/groqService');
+const { normalizeParam } = require('../utils/paramNormalizer');
 
 /**
  * @swagger
@@ -33,8 +34,16 @@ router.get('/models', async (req, res) => {
     try {
         // Connection test mode
         if (req.query.action === 'test') {
+            // Reject query parameter API keys (security vulnerability)
+            if (req.query.apiKey) {
+                return res.status(400).json({ 
+                    error: 'API key must be provided via Authorization header (Bearer token). Query parameter authentication is not supported for security reasons.' 
+                });
+            }
+            
             const authHeader = req.headers.authorization || '';
-            const apiKey = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : req.query.apiKey;
+            const apiKey = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+            
             const result = await groqService.testConnection(apiKey);
             return res.json(result);
         }
@@ -122,18 +131,33 @@ router.post('/', async (req, res) => {
                 if (!prompt && !theme) {
                     return res.status(400).json({ error: 'Either prompt or theme is required for generation' });
                 }
+                
+                // Normalize all string parameters to prevent type confusion
+                const normalizedPrompt = normalizeParam(prompt, 'prompt');
+                const normalizedGenre = normalizeParam(genre, 'genre');
+                const normalizedTheme = normalizeParam(theme, 'theme');
+                const normalizedLength = normalizeParam(length, 'length');
+                const normalizedTone = normalizeParam(tone, 'tone');
+                const normalizedCharacters = normalizeParam(characters, 'characters');
+                const normalizedSetting = normalizeParam(setting, 'setting');
+                const normalizedFormatType = normalizeParam(formatType, 'formatType');
+                const normalizedModel = normalizeParam(model, 'model');
+                
+                // Validate options is an object, not an array
+                const normalizedOptions = (options && typeof options === 'object' && !Array.isArray(options)) ? options : {};
+                
                 result = await groqService.generate({
-                    prompt,
-                    genre,
-                    theme,
-                    length: length || options?.length,
-                    tone,
-                    characters,
-                    setting,
-                    formatType,
-                    model: model || options?.model,
-                    temperature: options?.temperature,
-                    maxTokens: options?.max_tokens,
+                    prompt: normalizedPrompt,
+                    genre: normalizedGenre,
+                    theme: normalizedTheme,
+                    length: normalizedLength || normalizedOptions?.length,
+                    tone: normalizedTone,
+                    characters: normalizedCharacters,
+                    setting: normalizedSetting,
+                    formatType: normalizedFormatType,
+                    model: normalizedModel || normalizedOptions?.model,
+                    temperature: normalizedOptions?.temperature,
+                    maxTokens: normalizedOptions?.max_tokens,
                     apiKey,
                 });
                 return res.json({ result: result.content, model: result.model, tokensUsed: result.tokensUsed });
@@ -144,15 +168,24 @@ router.post('/', async (req, res) => {
                 if (!content) {
                     return res.status(400).json({ error: 'content is required for analysis' });
                 }
-                result = await groqService.analyze({ content, apiKey });
+                
+                // Normalize content parameter
+                const normalizedContent = normalizeParam(content, 'content');
+                
+                result = await groqService.analyze({ content: normalizedContent, apiKey });
                 return res.json({ result: result.content, tokensUsed: result.tokensUsed });
             }
 
             case 'ideas': {
                 const { genre, theme, count } = req.body;
+                
+                // Normalize string parameters
+                const normalizedGenre = normalizeParam(genre, 'genre');
+                const normalizedTheme = normalizeParam(theme, 'theme');
+                
                 const rawCount = parseInt(count, 10);
                 const safeCount = Number.isFinite(rawCount) ? Math.min(Math.max(rawCount, 1), 20) : 5;
-                result = await groqService.generateIdeas({ genre, theme, count: safeCount, apiKey });
+                result = await groqService.generateIdeas({ genre: normalizedGenre, theme: normalizedTheme, count: safeCount, apiKey });
                 return res.json({ result: result.content, tokensUsed: result.tokensUsed });
             }
 
@@ -161,7 +194,12 @@ router.post('/', async (req, res) => {
                 if (!content) {
                     return res.status(400).json({ error: 'content is required for improvement' });
                 }
-                result = await groqService.improve({ content, focusArea: focus, apiKey });
+                
+                // Normalize string parameters
+                const normalizedContent = normalizeParam(content, 'content');
+                const normalizedFocus = normalizeParam(focus, 'focus');
+                
+                result = await groqService.improve({ content: normalizedContent, focusArea: normalizedFocus, apiKey });
                 return res.json({ result: result.content, tokensUsed: result.tokensUsed });
             }
 
