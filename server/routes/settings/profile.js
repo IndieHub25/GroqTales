@@ -1,9 +1,12 @@
+/**
+ * Profile Settings Route — Supabase
+ */
+
 const express = require('express');
 const router = express.Router();
-const User = require('../../models/User'); // Mongoose user
-const axios = require('axios');
+const { supabaseAdmin } = require('../../config/supabase');
 const logger = require('../../utils/logger');
-const { authRequired } = require('../../middleware/auth'); // assuming it works with supabase token
+const { authRequired } = require('../../middleware/auth');
 
 /**
  * @swagger
@@ -12,7 +15,7 @@ const { authRequired } = require('../../middleware/auth'); // assuming it works 
  *     tags:
  *       - Settings
  *     summary: Get profile settings
- *     description: Returns the authenticated user's profile settings (username, display name, bio, avatar, etc.).
+ *     description: Returns the authenticated user's profile settings.
  *     security:
  *       - BearerAuth: []
  *     responses:
@@ -46,7 +49,7 @@ const { authRequired } = require('../../middleware/auth'); // assuming it works 
  *     tags:
  *       - Settings
  *     summary: Update profile settings
- *     description: Updates profile settings and syncs to both MongoDB and Cloudflare D1.
+ *     description: Updates profile settings in Supabase.
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -65,6 +68,12 @@ const { authRequired } = require('../../middleware/auth'); // assuming it works 
  *               bio:
  *                 type: string
  *                 example: "Writer and dreamer."
+ *               website:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               primaryGenre:
+ *                 type: string
  *               avatarUrl:
  *                 type: string
  *                 format: uri
@@ -72,36 +81,41 @@ const { authRequired } = require('../../middleware/auth'); // assuming it works 
  *     responses:
  *       200:
  *         description: Profile updated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
  *       401:
  *         description: Unauthorized.
  *       500:
  *         description: Internal server error.
  */
 
-// GET /api/v1/settings/profile
 router.get('/', authRequired, async (req, res) => {
     try {
-        const userId = req.user?.id || req.user?.sub;
-        const profile = await User.findOne({ "wallet.address": req.user?.walletAddress || userId }).lean();
-        if (!profile) return res.json({}); // Default empty
+        const { data: profile, error } = await supabaseAdmin
+            .from('profiles')
+            .select('*')
+            .eq('id', req.user.id)
+            .single();
+
+        if (error || !profile) {
+            // Return defaults if no profile exists yet
+            return res.json({
+                username: '',
+                displayName: '',
+                bio: '',
+                website: '',
+                location: '',
+                primaryGenre: 'other',
+                avatarUrl: null,
+            });
+        }
 
         return res.json({
             username: profile.username || '',
-            displayName: profile.firstName ? `${profile.firstName} ${profile.lastName || ''}`.trim() : '',
+            displayName: profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
             bio: profile.bio || '',
-            website: '',
-            location: '',
-            primaryGenre: 'other',
-            avatarUrl: profile.avatar || null
+            website: profile.website || profile.social_website || '',
+            location: profile.location || '',
+            primaryGenre: profile.primary_genre || 'other',
+            avatarUrl: profile.avatar_url || null,
         });
     } catch (error) {
         logger.error('Error in profile GET:', error);
@@ -109,51 +123,33 @@ router.get('/', authRequired, async (req, res) => {
     }
 });
 
-// PATCH /api/v1/settings/profile
 router.patch('/', authRequired, async (req, res) => {
     try {
         const updates = req.body;
 
-        // 1. Update MongoDB (if needed / still used as fallback)
-        const userId = req.user?.id || req.user?.sub;
-        const mongoUpdate = {
-            username: updates.username,
-            bio: updates.bio,
-            'wallet.address': req.user?.walletAddress || userId
-        };
+        const dbUpdates = {};
+        if (updates.username !== undefined) dbUpdates.username = updates.username;
+        if (updates.bio !== undefined) dbUpdates.bio = updates.bio;
+        if (updates.website !== undefined) dbUpdates.website = updates.website;
+        if (updates.location !== undefined) dbUpdates.location = updates.location;
+        if (updates.primaryGenre !== undefined) dbUpdates.primary_genre = updates.primaryGenre;
+        if (updates.avatarUrl !== undefined) dbUpdates.avatar_url = updates.avatarUrl;
+
         if (updates.displayName) {
+            dbUpdates.display_name = updates.displayName;
             const parts = updates.displayName.split(' ');
-            mongoUpdate.firstName = parts[0];
-            mongoUpdate.lastName = parts.slice(1).join(' ');
+            dbUpdates.first_name = parts[0];
+            dbUpdates.last_name = parts.slice(1).join(' ');
         }
 
-        await User.findOneAndUpdate(
-            { "wallet.address": mongoUpdate['wallet.address'] },
-            { $set: mongoUpdate },
-            { upsert: true }
-        );
+        const { error } = await supabaseAdmin
+            .from('profiles')
+            .upsert({ id: req.user.id, ...dbUpdates })
+            .eq('id', req.user.id);
 
-        // 2. Sync to Cloudflare D1
-        const workerUrl = process.env.CF_WORKER_URL || 'https://groqtales-backend-workers.mantejsingh.workers.dev';
-        const CF_SYNC_ENDPOINT = `${workerUrl}/api/profiles/${userId}`;
-
-        const token = req.headers.authorization?.split(' ')[1];
-
-        try {
-            await axios.put(CF_SYNC_ENDPOINT, {
-                username: updates.username || updates.displayName,
-                bio: updates.bio,
-                avatar_url: req.body.avatarUrl || null
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${token}`, // Pass the supabase token directly
-                    'Content-Type': 'application/json'
-                }
-            });
-            logger.info('Successfully synced profile to Cloudflare D1');
-        } catch (cfError) {
-            logger.error('Failed to sync profile to Cloudflare worker:', cfError.message);
-            // We don't fail the whole request just because CF sync failed
+        if (error) {
+            logger.error('Profile update error:', error);
+            return res.status(500).json({ error: 'Internal server error' });
         }
 
         res.json({ success: true, message: 'Profile updated' });

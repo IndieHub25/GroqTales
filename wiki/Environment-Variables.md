@@ -21,7 +21,7 @@ locally or in production, ensuring secure and flexible setup for developers and 
   - [WalletConnect Configuration](#walletconnect-configuration)
   - [IPFS Configuration](#ipfs-configuration)
   - [Web3 Configuration](#web3-configuration)
-  - [MongoDB Configuration](#mongodb-configuration)
+  - [Supabase Configuration](#supabase-configuration)
   - [AI API Configurations](#ai-api-configurations)
   - [Blockchain Configuration](#blockchain-configuration)
   - [Development and Build Settings](#development-and-build-settings)
@@ -125,20 +125,23 @@ variable includes its purpose, whether it's required, and default or example val
   - **Example**: `your_alchemy_api_key_here`
   - **Source**: Sign up at [Alchemy](https://www.alchemy.com/).
 
-### MongoDB Configuration
+### Supabase Configuration
 
-- **MONGODB_URI**
-  - **Purpose**: Connection string for MongoDB, used to store user data, stories, or other
-    non-blockchain data.
-  - **Required**: Yes, for database operations in production or full local setup.
-  - **Example**: `your_mongodb_uri_here`
-  - **Source**: Create a database at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) or use a
-    local MongoDB instance.
-- **MONGODB_DB_NAME**
-  - **Purpose**: Specific database name within MongoDB for GroqTales data.
-  - **Required**: Yes, for database operations.
-  - **Example**: `your_mongodb_db_name_here`
-  - **Source**: Define during MongoDB setup, often `groqtales` or similar.
+- **NEXT_PUBLIC_SUPABASE_URL**
+  - **Purpose**: The URL of your Supabase project, used for database queries, authentication, and
+    real-time subscriptions. All data (profiles, stories, drafts, settings) is stored in Supabase
+    PostgreSQL with Row Level Security.
+  - **Required**: Yes, for all database and authentication operations.
+  - **Example**: `https://your-project-id.supabase.co`
+  - **Source**: Create a project at [Supabase](https://supabase.com/) and find the URL in
+    Settings → API.
+- **NEXT_PUBLIC_SUPABASE_ANON_KEY**
+  - **Purpose**: The anonymous/public API key for your Supabase project, used for client-side
+    access. This key is safe to expose in the browser as Row Level Security policies restrict
+    data access.
+  - **Required**: Yes, for all database and authentication operations.
+  - **Example**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+  - **Source**: Available in your Supabase project under Settings → API → Project API Keys.
 
 ### AI API Configurations
 
@@ -210,8 +213,8 @@ get them:
   for image fetching.
 - **Alchemy API Key**: Sign up at [Alchemy](https://www.alchemy.com/), create an app, and copy the
   API key for blockchain interactions.
-- **MongoDB URI**: Set up a database with [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) or
-  locally, and get the connection string.
+- **Supabase Credentials**: Create a project at [Supabase](https://supabase.com/) and copy the
+  project URL and anon key from Settings → API.
 - **Monad Testnet Tokens**: For testing NFT minting, request test tokens from a Monad Testnet faucet
   (URL to be provided when available).
 
@@ -240,8 +243,9 @@ Handling environment variables securely is critical to protect sensitive data:
   logs for exact variable names.
 - **Invalid API Key**: If API calls fail with authentication errors, verify the key in `.env.local`
   is correct, not expired, and has the necessary permissions. Test with a new key if needed.
-- **Database Connection Fails**: For MongoDB errors, ensure `MONGODB_URI` and `MONGODB_DB_NAME` are
-  correct. Test the connection string in a MongoDB client to isolate issues.
+- **Database Connection Fails**: For Supabase errors, ensure `NEXT_PUBLIC_SUPABASE_URL` and
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY` are correct. Test the connection in the Supabase dashboard to
+  isolate issues.
 - **Blockchain RPC Errors**: If NFT minting or wallet interactions fail, confirm `MONAD_RPC_URL` is
   accessible and your wallet is on the correct network (Monad Testnet, Chain ID: 10143).
 - **Environment Not Loading**: If variables aren't recognized, ensure `.env.local` is in the project

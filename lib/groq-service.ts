@@ -53,9 +53,9 @@ export interface StoryRecommendation {
  */
 export const GROQ_MODELS = {
   STORY_GENERATION: 'llama-3.3-70b-versatile',
-  STORY_ANALYSIS: 'llama-3.1-8b-instant',      
-  CONTENT_IMPROVEMENT: 'mixtral-8x7b-32768',   
-  RECOMMENDATIONS: 'llama-3.1-8b-instant',     
+  STORY_ANALYSIS: 'llama-3.1-8b-instant',
+  CONTENT_IMPROVEMENT: 'mistral-saba-24b',
+  RECOMMENDATIONS: 'llama-3.1-8b-instant',
 } as const;
 
 /**
@@ -469,7 +469,7 @@ export async function improveStoryContent(
         type: 'output_flagged',
         details: { flags: outputCheck.flags },
       });
-       throw new Error('Improved content was blocked due to security policy violations.');
+      throw new Error('Improved content was blocked due to security policy violations.');
     }
 
     // --- Cache: store the improvement ---

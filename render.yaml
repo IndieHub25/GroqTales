@@ -10,7 +10,7 @@ services:
     plan: starter
     buildCommand: npm install && npm run build:backend
     startCommand: npm run start:backend
-    healthCheckPath: /api/health
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
         value: production
@@ -20,7 +20,11 @@ services:
         sync: false
       - key: OPENAI_API_KEY
         sync: false
-      - key: MONGODB_URI
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
       - key: REDIS_URL
         sync: false
@@ -39,7 +43,7 @@ services:
     plan: starter
     buildCommand: npm install && npm run build:sdk
     startCommand: npm run start:sdk
-    healthCheckPath: /sdk/health
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
         value: production
@@ -65,7 +69,11 @@ services:
         value: production
       - key: GROQ_API_KEY
         sync: false
-      - key: MONGODB_URI
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
       - key: REDIS_URL
         sync: false

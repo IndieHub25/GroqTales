@@ -15,6 +15,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { useWeb3 } from '@/components/providers/web3-provider';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,7 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { UserNav } from '@/components/user-nav';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
 
 import { CreateStoryDialog } from './create-story-dialog';
 import { ModeToggle } from './mode-toggle';
@@ -61,6 +63,21 @@ export function Header() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const router = useRouter();
+  const [session, setSession] = useState<any>(null);
+  const supabase = React.useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
 
   // Track scroll position for adding box shadow to header
   useEffect(() => {
@@ -87,19 +104,8 @@ export function Header() {
   };
 
   const handleCreateClick = () => {
-    // Check if user is authenticated
-    const isAdmin =
-      typeof window !== 'undefined' && window.localStorage
-        ? localStorage.getItem('adminSession')
-        : null;
-
-    if (!account && !isAdmin) {
-      toast({
-        title: 'Authentication Required',
-        description:
-          'Please connect your wallet or login as admin to create stories',
-        variant: 'destructive',
-      });
+    if (!account && !session) {
+      router.push('/sign-in');
       return;
     }
     setShowCreateDialog(true);
@@ -108,8 +114,9 @@ export function Header() {
   const navItems: NavItem[] = [
     { type: 'link', href: '/genres', label: 'Genres' },
     { type: 'link', href: '/community', label: 'Community Hub' },
-    { type: 'link', href: '/nft-gallery', label: 'NFT Gallery' },
-    { type: 'link', href: '/nft-marketplace', label: 'NFT Marketplace' },
+    { type: 'link', href: '/gallery', label: 'Gallery' },
+    { type: 'link', href: '/marketplace', label: 'Marketplace' },
+    { type: 'link', href: '/blog', label: 'Blogs' },
     ...(account
       ? [
         {

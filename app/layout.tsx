@@ -1,8 +1,6 @@
 import React from 'react';
 
 import './globals.css';
-import fs from 'fs';
-import path from 'path';
 
 import type { Metadata } from 'next';
 import { Inter, Comic_Neue } from 'next/font/google';
@@ -85,19 +83,10 @@ if (
   }
 }
 
-// Get quick boot script content
-function getQuickBootScript(): string {
-  try {
-    const filePath = path.join(process.cwd(), 'public', 'quick-boot.js');
-    return fs.readFileSync(filePath, 'utf8');
-  } catch (e) {
-    console.warn('Could not read quick-boot.js:', e);
-    return ''; // Return empty string if file reading fails
-  }
-}
-
-// Quick boot script to prevent flashing and improve initial load
-const quickBootScript = getQuickBootScript();
+// Quick boot script is not loaded in Edge Runtime
+// Edge Runtime doesn't support fs/path modules needed to read the file
+// The script is optional and gracefully degrades when not available
+const quickBootScript = '';
 
 /**
  * App version is injected by next.config.js at build time from the root VERSION file.

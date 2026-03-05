@@ -1,5 +1,10 @@
-const router = require("express").Router();
-const { authRequired: requireAuth } = require("../../middleware/auth");
+/**
+ * Privacy Settings Route — Supabase
+ */
+
+const router = require('express').Router();
+const { authRequired: requireAuth } = require('../../middleware/auth');
+const { supabaseAdmin } = require('../../config/supabase');
 
 /**
  * @swagger
@@ -8,7 +13,7 @@ const { authRequired: requireAuth } = require("../../middleware/auth");
  *     tags:
  *       - Settings
  *     summary: Get privacy settings
- *     description: Returns the authenticated user's privacy preferences (profile visibility, comments, activity, reading history, data collection, personalization).
+ *     description: Returns the authenticated user's privacy preferences.
  *     security:
  *       - BearerAuth: []
  *     responses:
@@ -69,88 +74,88 @@ const { authRequired: requireAuth } = require("../../middleware/auth");
  *     responses:
  *       200:
  *         description: Privacy settings updated.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: object
  *       401:
  *         description: Unauthorized.
  *       500:
  *         description: Internal server error.
  */
 
-router.get("/", requireAuth, async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
     try {
-        const p = req.user.privacySettings || {};
+        const { data: settings, error } = await supabaseAdmin
+            .from('user_settings')
+            .select('*')
+            .eq('user_id', req.user.id)
+            .single();
+
+        if (error || !settings) {
+            return res.json({
+                success: true,
+                data: {
+                    profileVisible: true, allowComments: true,
+                    showActivity: true, showReadingHistory: false,
+                    dataCollection: true, personalization: true,
+                },
+            });
+        }
 
         res.json({
             success: true,
             data: {
-                profileVisible: p.profilePublic ?? true,
-                allowComments: p.allowComments ?? true,
-                showActivity: p.showActivity ?? true,
-                showReadingHistory: p.showReadingHistory ?? true,
-                dataCollection: p.dataCollection ?? true,
-                personalization: p.personalization ?? true,
+                profileVisible: settings.privacy_profile_public ?? true,
+                allowComments: settings.privacy_allow_comments ?? true,
+                showActivity: settings.privacy_show_activity ?? true,
+                showReadingHistory: settings.privacy_show_reading_history ?? false,
+                dataCollection: settings.privacy_data_collection ?? true,
+                personalization: settings.privacy_personalization ?? true,
             },
         });
     } catch (err) {
-        console.error("Fetch privacy settings failed:", err);
-        res.status(500).json({
-            success: false,
-            error: { message: "Failed to fetch privacy settings" },
-        });
+        console.error('Fetch privacy settings failed:', err);
+        res.status(500).json({ success: false, error: { message: 'Failed to fetch privacy settings' } });
     }
 });
 
-router.put("/", requireAuth, async (req, res) => {
+router.put('/', requireAuth, async (req, res) => {
     try {
         const {
-            profileVisible,
-            allowComments,
-            showActivity,
-            showReadingHistory,
-            dataCollection,
-            personalization,
+            profileVisible, allowComments, showActivity,
+            showReadingHistory, dataCollection, personalization,
         } = req.body;
 
-        if (typeof profileVisible == "boolean")
-            req.user.privacySettings.profilePublic = profileVisible;
-        if (typeof allowComments == "boolean")
-            req.user.privacySettings.allowComments = allowComments;
-        if (typeof showActivity == "boolean")
-            req.user.privacySettings.showActivity = showActivity;
-        if (typeof showReadingHistory == "boolean")
-            req.user.privacySettings.showReadingHistory = showReadingHistory;
-        if (typeof dataCollection == "boolean")
-            req.user.privacySettings.dataCollection = dataCollection;
-        if (typeof personalization == "boolean")
-            req.user.privacySettings.personalization = personalization;
+        const updates = {};
+        if (typeof profileVisible === 'boolean') updates.privacy_profile_public = profileVisible;
+        if (typeof allowComments === 'boolean') updates.privacy_allow_comments = allowComments;
+        if (typeof showActivity === 'boolean') updates.privacy_show_activity = showActivity;
+        if (typeof showReadingHistory === 'boolean') updates.privacy_show_reading_history = showReadingHistory;
+        if (typeof dataCollection === 'boolean') updates.privacy_data_collection = dataCollection;
+        if (typeof personalization === 'boolean') updates.privacy_personalization = personalization;
 
-        await req.user.save();
+        const { data, error } = await supabaseAdmin
+            .from('user_settings')
+            .upsert({ user_id: req.user.id, ...updates })
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Privacy settings update error:', error);
+            return res.status(500).json({ success: false, error: { message: 'Failed to update privacy settings' } });
+        }
 
         res.json({
             success: true,
             data: {
-                profileVisible: req.user.privacySettings.profilePublic ?? true,
-                allowComments: req.user.privacySettings.allowComments ?? true,
-                showActivity: req.user.privacySettings.showActivity ?? true,
-                showReadingHistory: req.user.privacySettings.showReadingHistory ?? true,
-                dataCollection: req.user.privacySettings.dataCollection ?? true,
-                personalization: req.user.privacySettings.personalization ?? true,
+                profileVisible: data.privacy_profile_public ?? true,
+                allowComments: data.privacy_allow_comments ?? true,
+                showActivity: data.privacy_show_activity ?? true,
+                showReadingHistory: data.privacy_show_reading_history ?? false,
+                dataCollection: data.privacy_data_collection ?? true,
+                personalization: data.privacy_personalization ?? true,
             },
         });
     } catch (err) {
-        console.error("Privacy settings update failed:", err);
-        res.status(500).json({
-            success: false,
-            error: { message: "Failed to update privacy settings" },
-        });
+        console.error('Privacy settings update failed:', err);
+        res.status(500).json({ success: false, error: { message: 'Failed to update privacy settings' } });
     }
 });
 

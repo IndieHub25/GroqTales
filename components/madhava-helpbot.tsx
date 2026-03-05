@@ -43,16 +43,30 @@ export default function MadhavaHelpBot() {
     setIsMounted(true);
   }, []);
 
-  // Poll health status
+    // Poll health status
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/health/bot`, { cache: 'no-store' });
+        // Try backend first
+        let res = await fetch(`${API_URL}/api/health/bot`, { cache: 'no-store' });
+        
+        // Fallback to local API route if backend fails
+        if (!res.ok) {
+          res = await fetch('/api/health/bot', { cache: 'no-store' });
+        }
+        
         const data = await res.json();
         // Allow ok, healthy, or degraded (still online)
         setIsOnline(data.status !== 'down');
       } catch {
-        setIsOnline(false);
+        // Try local API route as final fallback
+        try {
+          const res = await fetch('/api/health/bot', { cache: 'no-store' });
+          const data = await res.json();
+          setIsOnline(data.status !== 'down');
+        } catch {
+          setIsOnline(false);
+        }
       }
     };
     checkHealth();

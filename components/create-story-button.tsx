@@ -13,14 +13,30 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 
 export function CreateStoryButton() {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const supabase = React.useMemo(() => createClient(), []);
+
+  const handleOpen = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+          router.push('/sign-in');
+          return;
+      }
+      
+      const isServerAdmin = session?.user?.user_metadata?.role === 'admin';
+      setOpen(true);
+  };
 
   return (
     <>
       <Button
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
         size="lg"
         className="theme-gradient-bg text-white border-0 hover:opacity-90"
       >
