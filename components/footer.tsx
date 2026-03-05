@@ -120,12 +120,16 @@ export function Footer({ version }: { version?: string }) {
                   { href: '/community/creators', label: 'Top Creators' },
                   { href: '/create', label: 'Create Story' },
                   { href: '#', label: 'Upload Story', isUpload: true },
-                  { href: '/nft-gallery', label: 'NFT Gallery' },
-                  { href: '/nft-marketplace', label: 'Marketplace' },
+                  { href: '/gallery', label: 'Gallery' },
+                  { href: '/marketplace', label: 'Marketplace' },
+                  { href: '/blog', label: 'Blogs' },
                 ].map((link) => (
                   <li key={link.label}>
                     {link.isUpload ? (
-                      <UploadStoryTrigger variant="ghost" className="p-0 h-auto font-medium text-white/60 hover:text-white" buttonText="Upload Story" icon={false} />
+                      <span className="relative group inline-block">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity absolute -left-3 top-[50%] -translate-y-[50%] pointer-events-none" />
+                        <UploadStoryTrigger variant="ghost" className="p-0 h-auto font-medium text-white/60 group-hover:text-white transition-colors duration-300" buttonText="Upload Story" icon={false} />
+                      </span>
                     ) : (
                       <Link
                         href={link.href}

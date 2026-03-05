@@ -4,7 +4,6 @@
  */
 
 const express = require('express');
-const express = require('express');
 const axios = require('axios');
 const logger = require('../utils/logger');
 const router = express.Router();
@@ -255,6 +254,76 @@ router.get('/profile/username/:username', async (req, res) => {
   } catch (error) {
     console.error('Profile by Username Route Error:', error);
     return res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/users/top-creators:
+ *   get:
+ *     tags:
+ *       - Users
+ *     summary: Get top creators aggregate
+ *     description: Returns top creators based on stories count, followers, etc.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved top creators.
+ */
+router.get('/top-creators', async (req, res) => {
+  try {
+    // We fetch profiles
+    const { data: profiles, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, username, first_name, last_name, display_name, bio, avatar_url, verified, badges, created_at')
+      .limit(50);
+
+    if (profileError) throw profileError;
+
+    // We fetch stories for agg stats
+    const { data: stories, error: storiesError } = await supabaseAdmin
+      .from('stories')
+      .select('author_id, likes, views');
+
+    if (storiesError) throw storiesError;
+
+    // Calculate aggregated stats per user
+    const statsMap = {};
+    if (stories) {
+      stories.forEach(story => {
+        if (!statsMap[story.author_id]) {
+          statsMap[story.author_id] = { stories: 0, likes: 0, views: 0 };
+        }
+        statsMap[story.author_id].stories += 1;
+        statsMap[story.author_id].likes += (story.likes || 0);
+        statsMap[story.author_id].views += (story.views || 0);
+      });
+    }
+
+    const formattedCreators = profiles.map(profile => {
+      const stats = statsMap[profile.id] || { stories: 0, likes: 0, views: 0 };
+      return {
+        id: profile.id,
+        name: profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.username || 'Anonymous',
+        username: `@${profile.username}`,
+        avatar: profile.avatar_url || `https://api.dicebear.com/7.x/personas/svg?seed=${profile.username}`,
+        bio: profile.bio || 'Storyteller at GroqTales',
+        followers: Math.floor(Math.random() * 5000) + stats.likes, // Mocking followers partially as schema lacks it for now
+        stories: stats.stories,
+        featured: (stats.likes > 100), // simplistic condition
+        rating: Math.min(5.0, (4.0 + (stats.likes / 200))).toFixed(1),
+        tags: ['Fiction', 'Adventure'], // mocked for now until genres array on profile
+        badge: profile.badges && profile.badges.length > 0 ? profile.badges[0] : (stats.stories > 5 ? 'Pro' : 'Creator'),
+        nfts: Math.floor(stats.stories / 2),
+        joined: profile.created_at,
+        achievements: stats.stories > 10 ? ['Rising Star', 'Volume Writer'] : (stats.stories > 0 ? ['New Voice'] : []),
+        totalLikes: stats.likes,
+        verified: profile.verified || false,
+      };
+    });
+
+    return res.json({ success: true, data: formattedCreators });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
   }
 });
 

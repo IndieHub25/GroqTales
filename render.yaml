@@ -10,7 +10,7 @@ services:
     plan: starter
     buildCommand: npm install && npm run build:backend
     startCommand: npm run start:backend
-    healthCheckPath: /api/health
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
         value: production
@@ -43,7 +43,7 @@ services:
     plan: starter
     buildCommand: npm install && npm run build:sdk
     startCommand: npm run start:sdk
-    healthCheckPath: /sdk/health
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
         value: production

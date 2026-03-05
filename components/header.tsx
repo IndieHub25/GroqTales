@@ -114,8 +114,9 @@ export function Header() {
   const navItems: NavItem[] = [
     { type: 'link', href: '/genres', label: 'Genres' },
     { type: 'link', href: '/community', label: 'Community Hub' },
-    { type: 'link', href: '/nft-gallery', label: 'NFT Gallery' },
-    { type: 'link', href: '/nft-marketplace', label: 'NFT Marketplace' },
+    { type: 'link', href: '/gallery', label: 'Gallery' },
+    { type: 'link', href: '/marketplace', label: 'Marketplace' },
+    { type: 'link', href: '/blog', label: 'Blogs' },
     ...(account
       ? [
         {

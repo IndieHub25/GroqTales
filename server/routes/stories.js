@@ -7,6 +7,8 @@ const express = require('express');
 const router = express.Router();
 const { supabaseAdmin } = require('../config/supabase');
 const { authRequired } = require('../middleware/auth');
+const groqService = require('../services/groqService');
+const { normalizeParam } = require('../utils/paramNormalizer');
 
 /**
  * @swagger
@@ -215,35 +217,75 @@ router.post('/create', authRequired, async (req, res) => {
  *       201:
  *         description: Story uploaded successfully.
  */
-// POST /api/v1/stories/upload - Upload user story
-router.post('/upload', authRequired, async (req, res) => {
+// POST /api/v1/stories/upload - Upload user story (Live Writer)
+router.post('/upload', authRequired, fileUploadOptions.fields([{ name: 'coverImage', maxCount: 1 }]), async (req, res) => {
   try {
-    const { title, description, content, genre, twists, tags, coverImageUrl, imageUrls } = req.body;
+    const { title, description, content, genre, twists, tags, imageUrls, formatType, characterSetting } = req.body;
+    const coverImage = req.files?.coverImage?.[0];
 
     // Validate minimum requirements
-    if (!title || !content || !genre) {
-      return res.status(400).json({ error: 'Title, content, and genre are required.' });
+    if (!title || !content || !genre || !coverImage) {
+      return res.status(400).json({ error: 'Title, content, genre, and Cover Image are required.' });
     }
 
-    const validTags = Array.isArray(tags) ? tags : [];
+    let validTags = [];
+    try {
+      validTags = tags ? JSON.parse(tags) : [];
+    } catch (e) {
+      validTags = typeof tags === 'string' ? tags.split(',').map(t => t.trim()) : [];
+    }
+
     const validTwists = Array.isArray(twists) ? twists : [];
     const validImageUrls = Array.isArray(imageUrls) ? imageUrls : [];
 
-    const story = new Story({
-      title: title.slice(0, 100),
-      description: description ? description.slice(0, 500) : '',
-      content,
-      genre,
-      twists: validTwists,
-      tags: validTags,
-      source: 'uploaded',
-      coverImageUrl: coverImageUrl || null,
-      imageUrls: validImageUrls,
-      author: req.user.id,
-      moderationStatus: 'pending',
-    });
+    // Upload Cover Image to Supabase Storage
+    const coverExt = coverImage.originalname.split('.').pop() || 'png';
+    const coverName = `${req.user.id}/cover_${Date.now()}_${Math.random().toString(36).substring(7)}.${coverExt}`;
 
-    await story.save();
+    // Upload to 'covers' bucket
+    const { error: coverUploadError } = await supabaseAdmin
+      .storage
+      .from('covers')
+      .upload(coverName, coverImage.buffer, {
+        contentType: coverImage.mimetype,
+        upsert: false
+      });
+
+    if (coverUploadError) {
+      console.warn("Cover image upload warning:", coverUploadError);
+    }
+
+    const { data: publicCoverUrlData } = supabaseAdmin.storage.from('covers').getPublicUrl(coverName);
+    const coverUrl = coverUploadError ? null : publicCoverUrlData.publicUrl;
+
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('username, display_name')
+      .eq('id', req.user.id)
+      .single();
+
+    const { data: story, error: dbError } = await supabaseAdmin
+      .from('stories')
+      .insert({
+        title: title.slice(0, 100),
+        description: characterSetting ? `${description ? description.slice(0, 500) : ''}\n\nCharacter Focus: ${characterSetting}` : description ? description.slice(0, 500) : '',
+        content,
+        genre: genre.toLowerCase(),
+        tags: validTags,
+        format_type: formatType || 'Storybook',
+        cover_image: coverUrl,
+        source: 'uploaded',
+        author_id: req.user.id,
+        author_name: profile?.display_name || profile?.username || 'Anonymous',
+        is_verified: true,
+        is_minted: false
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      return res.status(500).json({ error: dbError.message });
+    }
 
     return res.status(201).json({ success: true, data: story });
   } catch (error) {
@@ -333,19 +375,51 @@ router.get('/search/:id', async (req, res) => {
  */
 router.post('/generate', authRequired, async (req, res) => {
   try {
-    const { prompt, genre, length, style } = req.body;
+    const { prompt, genre, length, style, theme, characters, setting, formatType } = req.body;
 
-    // Placeholder implementation
+    if (!prompt && !theme) {
+      return res.status(400).json({ error: 'prompt or theme is required' });
+    }
+
+    // Normalize all string parameters to prevent type confusion
+    const normalizedPrompt = normalizeParam(prompt, 'prompt');
+    const normalizedGenre = normalizeParam(genre, 'genre');
+    const normalizedLength = normalizeParam(length, 'length');
+    const normalizedStyle = normalizeParam(style, 'style');
+    const normalizedTheme = normalizeParam(theme, 'theme');
+    const normalizedCharacters = normalizeParam(characters, 'characters');
+    const normalizedSetting = normalizeParam(setting, 'setting');
+    const normalizedFormatType = normalizeParam(formatType, 'formatType');
+
+    const result = await groqService.generate({
+      prompt: normalizedPrompt,
+      genre: normalizedGenre,
+      theme: normalizedTheme,
+      length: normalizedLength || 'medium',
+      tone: normalizedStyle,
+      characters: normalizedCharacters,
+      setting: normalizedSetting,
+      formatType: normalizedFormatType || 'story',
+    });
+
     const generatedStory = {
       id: require('crypto').randomUUID(),
-      title: 'AI Generated Story',
-      content: 'Generated story content based on prompt...',
-      genre,
-      metadata: { prompt, length, style, generatedAt: new Date().toISOString() },
+      title: `AI Generated ${((normalizedFormatType || 'Story').charAt(0).toUpperCase() + (normalizedFormatType || 'story').slice(1))}`,
+      content: result.content,
+      genre: normalizedGenre,
+      metadata: {
+        prompt: normalizedPrompt,
+        length: normalizedLength,
+        style: normalizedStyle,
+        model: result.model,
+        tokensUsed: result.tokensUsed,
+        generatedAt: new Date().toISOString(),
+      },
     };
 
     return res.json(generatedStory);
   } catch (error) {
+    console.error('Story generation error:', error);
     return res.status(500).json({ error: error.message });
   }
 });
@@ -377,17 +451,27 @@ router.post('/:id/analyze', authRequired, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const analysis = {
-      storyId: id,
-      sentiment: 'positive',
-      themes: ['adventure', 'friendship'],
-      readabilityScore: 8.5,
-      wordCount: 1500,
-      analyzedAt: new Date().toISOString(),
-    };
+    // Fetch story content from database
+    const { data: story, error: fetchError } = await supabaseAdmin
+      .from('stories')
+      .select('content, title, genre')
+      .eq('id', id)
+      .single();
 
-    return res.json(analysis);
+    if (fetchError || !story) {
+      return res.status(404).json({ error: 'Story not found' });
+    }
+
+    const result = await groqService.analyze({ content: story.content });
+
+    return res.json({
+      storyId: id,
+      ...result.content,
+      tokensUsed: result.tokensUsed,
+      analyzedAt: new Date().toISOString(),
+    });
   } catch (error) {
+    console.error('Story analysis error:', error);
     return res.status(500).json({ error: error.message });
   }
 });
@@ -432,6 +516,181 @@ router.patch('/:id/moderate', authRequired, async (req, res) => {
 
     return res.json({ success: true, data: story });
   } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+const multer = require('multer');
+let pdfParse;
+let mammoth;
+try {
+  pdfParse = require('pdf-parse');
+  mammoth = require('mammoth');
+} catch (e) {
+  console.warn("pdf-parse or mammoth not installed locally.");
+}
+
+const fileUploadOptions = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+});
+
+/**
+ * @swagger
+ * /api/v1/stories/upload-file:
+ *   post:
+ *     tags:
+ *       - Stories
+ *     summary: Upload a large file (PDF/DOCX/TXT/MD) to story pipeline
+ *     description: Parses the file, extracts text, calls Groq AI for synopsis, and stores in database.
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post('/upload-file', authRequired, fileUploadOptions.fields([{ name: 'file', maxCount: 1 }, { name: 'coverImage', maxCount: 1 }]), async (req, res) => {
+  try {
+    const { title, genre, formatType, tags, description, characterSetting } = req.body;
+    const file = req.files?.file?.[0];
+    const coverImage = req.files?.coverImage?.[0];
+
+    if (!file) {
+      return res.status(400).json({ error: 'File is required (up to 50MB).' });
+    }
+    if (!coverImage) {
+      return res.status(400).json({ error: 'Cover Image is required.' });
+    }
+    if (!title || !genre || !formatType) {
+      return res.status(400).json({ error: 'Title, genre, and formatType are required.' });
+    }
+
+    let validTags = [];
+    try {
+      validTags = tags ? JSON.parse(tags) : [];
+    } catch (e) {
+      validTags = typeof tags === 'string' ? tags.split(',').map(t => t.trim()) : [];
+    }
+
+    // 1. Upload Document File to Supabase Storage
+    const fileExt = file.originalname.split('.').pop() || 'tmp';
+    const fileName = `${req.user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+    // Ensure 'documents' bucket exists or just upload. 
+    const { data: uploadData, error: uploadError } = await supabaseAdmin
+      .storage
+      .from('documents')
+      .upload(fileName, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.warn("Storage upload warning:", uploadError);
+    }
+
+    const { data: publicUrlData } = supabaseAdmin.storage.from('documents').getPublicUrl(fileName);
+    const fileUrl = uploadError ? null : publicUrlData.publicUrl;
+
+    // 1b. Upload Cover Image to Supabase Storage
+    const coverExt = coverImage.originalname.split('.').pop() || 'png';
+    const coverName = `${req.user.id}/cover_${Date.now()}_${Math.random().toString(36).substring(7)}.${coverExt}`;
+
+    // Upload to 'covers' bucket (we'll ensure it exists or use 'stories' / 'documents')
+    const { error: coverUploadError } = await supabaseAdmin
+      .storage
+      .from('covers')  // Using covers bucket
+      .upload(coverName, coverImage.buffer, {
+        contentType: coverImage.mimetype,
+        upsert: false
+      });
+
+    if (coverUploadError) {
+      console.warn("Cover image upload warning:", coverUploadError);
+    }
+
+    const { data: publicCoverUrlData } = supabaseAdmin.storage.from('covers').getPublicUrl(coverName);
+    const coverUrl = coverUploadError ? null : publicCoverUrlData.publicUrl;
+
+    // 2. Extract Text
+    let extractedText = '';
+    try {
+      if (file.mimetype === 'application/pdf' || fileExt.toLowerCase() === 'pdf') {
+        if (pdfParse) {
+          const pdfData = await pdfParse(file.buffer);
+          extractedText = pdfData.text;
+        } else {
+          extractedText = 'PDF parsing lib missing.';
+        }
+      } else if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || fileExt.toLowerCase() === 'docx') {
+        if (mammoth) {
+          const docxData = await mammoth.extractRawText({ buffer: file.buffer });
+          extractedText = docxData.value;
+        } else {
+          extractedText = 'DOCX parsing lib missing.';
+        }
+      } else if (file.mimetype === 'text/plain' || file.mimetype === 'text/markdown' || fileExt.toLowerCase() === 'txt' || fileExt.toLowerCase() === 'md') {
+        extractedText = file.buffer.toString('utf8');
+      } else {
+        return res.status(400).json({ error: 'Unsupported file type. Please upload PDF, DOCX, TXT, or MD.' });
+      }
+    } catch (extractErr) {
+      console.error('Extraction error:', extractErr);
+      extractedText = 'Could not extract text from the file.';
+    }
+
+    const previewText = extractedText.substring(0, 1500);
+
+    // 3. Generate Synopsis via Groq AI
+    let synopsis = `An intriguing ${formatType} exploring themes of ${genre}. Based on the provided file, this story unravels unique concepts and interesting character dynamics.`;
+    if (previewText.length > 50) {
+      if (process.env.GROQ_API_KEY) {
+        try {
+          const synopsisResult = await groqService.generateSynopsis({
+            content: previewText,
+            genre,
+            formatType,
+          });
+          synopsis = synopsisResult.content;
+        } catch (groqErr) {
+          console.error('Groq AI Synopsis Error:', groqErr);
+          synopsis = `An engaging ${formatType} set in the ${genre} genre. The opening reveals a captivating narrative starting with: "${previewText.substring(0, 100).replace(/\n/g, ' ')}...".`;
+        }
+      } else {
+        synopsis = `An engaging ${formatType} set in the ${genre} genre. The opening reveals a captivating narrative starting with: "${previewText.substring(0, 100).replace(/\n/g, ' ')}...".`;
+      }
+    }
+
+    // 4. Save to Database
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('username, display_name')
+      .eq('id', req.user.id)
+      .single();
+
+    const { data: story, error: dbError } = await supabaseAdmin
+      .from('stories')
+      .insert({
+        title: title.slice(0, 100),
+        description: characterSetting ? `${synopsis}\n\nCharacter Focus: ${characterSetting}` : synopsis,
+        content: title + ' - ' + synopsis + (characterSetting ? `\n\nCharacter Focus: ${characterSetting}` : ''),
+        genre: genre.toLowerCase(),
+        format_type: formatType,
+        tags: validTags,
+        file_url: fileUrl,
+        cover_image: coverUrl,
+        is_verified: true,
+        author_id: req.user.id,
+        author_name: profile?.display_name || profile?.username || 'Anonymous',
+        is_minted: false
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      return res.status(500).json({ error: dbError.message });
+    }
+
+    return res.status(201).json({ success: true, data: story });
+  } catch (error) {
+    console.error('Upload Error:', error);
     return res.status(500).json({ error: error.message });
   }
 });

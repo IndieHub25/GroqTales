@@ -31,6 +31,15 @@ const { checkSupabaseHealth, SUPABASE_URL } = require('./config/supabase');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust proxy for rate limiting behind Render/Cloudflare load balancers
+app.set('trust proxy', 1);
+
+// Super-fast, dependency-free health endpoint for Render liveness probes
+app.get('/healthz', (req, res) => {
+  console.log(`[${new Date().toISOString()}] GET /healthz - 200 OK`);
+  res.status(200).send('OK');
+});
+
 // Store server reference for graceful shutdown
 let server;
 
@@ -462,14 +471,15 @@ app.get('/', (req, res) => {
 });
 
 
-// Trust proxy for rate limiting behind Render/Cloudflare load balancers
-app.set('trust proxy', 1);
-
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  skip: (req) => req.originalUrl.startsWith('/api/health'),
+  skip: (req) => {
+    const path = req.originalUrl;
+    // Never rate limit liveness/readiness probes or the root welcome page
+    return path === '/healthz' || path === '/' || path.startsWith('/api/health');
+  },
   message: {
     error: 'Too many requests from this IP, please try again later.',
   },
@@ -546,6 +556,7 @@ app.use('/api/feed', require('./routes/feed'));
 app.use('/api/feeds', require('./routes/notification-feed'));
 
 
+app.use('/api/groq', require('./routes/groq'));
 app.use('/api/v1/ai', require('./routes/ai'));
 app.use('/api/v1/drafts', require('./routes/drafts'));
 app.use('/api/v1/settings/notifications', require('./routes/settings/notifications'));

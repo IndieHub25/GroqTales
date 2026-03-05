@@ -276,7 +276,7 @@ export default function Home() {
             <motion.div variants={fadeUp} className="flex flex-wrap gap-6 items-center justify-center pt-4">
               <Button asChild className="group relative overflow-hidden bg-white text-black hover:text-black h-16 px-10 rounded-full font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.2)]">
                 <Link href="/create">
-                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-black/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                  <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-black/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
                   <span className="relative z-10 flex items-center">
                     Start Creating <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </span>
@@ -409,7 +409,7 @@ export default function Home() {
                 </Button>
               </div>
 
-              <div className="w-full md:w-1/2 h-full min-h-[200px] rounded-2xl border border-white/10 bg-[url('https://images.unsplash.com/photo-1455390582262-044cdead27d8?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center brightness-75 mix-blend-luminosity filter transition-all duration-700 hover:mix-blend-normal hover:brightness-100" />
+              <div className="w-full md:w-1/2 h-full min-h-[200px] rounded-2xl border border-white/10 bg-[url('https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center brightness-75 mix-blend-luminosity filter transition-all duration-700 hover:mix-blend-normal hover:brightness-100" />
             </motion.div>
 
           </div>
@@ -436,7 +436,7 @@ export default function Home() {
             </div>
             <motion.div variants={fadeUp}>
               <Button asChild variant="outline" className="rounded-full border-white/10 hover:bg-white/10 text-white">
-                <Link href="/nft-gallery">View Gallery <ArrowRight className="ml-2 w-4 h-4" /></Link>
+                <Link href="/gallery">View Gallery <ArrowRight className="ml-2 w-4 h-4" /></Link>
               </Button>
             </motion.div>
           </motion.div>

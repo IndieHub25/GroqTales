@@ -12,6 +12,12 @@ const compression = require('compression');
 const app = express();
 const PORT = process.env.PORT || 3002;
 
+// Super-fast, dependency-free health endpoint for Render liveness probes
+app.get('/healthz', (req, res) => {
+  console.log(`[${new Date().toISOString()}] GET /healthz - 200 OK`);
+  res.status(200).send('OK');
+});
+
 // Security and middleware
 app.use(helmet());
 app.use(

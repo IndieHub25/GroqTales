@@ -63,6 +63,9 @@ CREATE TABLE IF NOT EXISTS stories (
   likes INTEGER DEFAULT 0,
   is_minted BOOLEAN DEFAULT false,
   nft_token_id TEXT,
+  file_url TEXT,
+  is_verified BOOLEAN DEFAULT false,
+  format_type TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

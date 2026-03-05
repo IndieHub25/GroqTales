@@ -73,7 +73,7 @@ Create a new story.
 
 #### POST `/api/v1/stories/generate`
 
-Generate a story using AI.
+Generate a story using AI with extensive parameters (70+ options across 9 categories).
 
 **Request Body:**
 
@@ -82,7 +82,91 @@ Generate a story using AI.
   "prompt": "Write a story about...",
   "genre": "fantasy",
   "length": "medium",
-  "style": "narrative"
+  "style": "narrative",
+  "theme": "hero's journey",
+  "formatType": "story",
+  "characters": "A brave knight and a clever rogue",
+  "setting": "A medieval fantasy world",
+  "parameters": {
+    "characters": {
+      "count": 2,
+      "traits": ["brave", "clever"],
+      "age": ["adult", "young adult"],
+      "background": "orphans",
+      "protagonistType": "anti-hero"
+    },
+    "plotStructure": {
+      "type": "quest",
+      "conflict": "man vs society",
+      "arc": "growth",
+      "pacing": "fast",
+      "ending": "bittersweet",
+      "plotTwists": true
+    },
+    "settingWorld": {
+      "timePeriod": "medieval",
+      "location": "mystic forest",
+      "worldBuildingDepth": "deep",
+      "atmosphere": "dark"
+    },
+    "writingStyleTone": {
+      "voice": "third-person limited",
+      "tone": "gritty",
+      "readingLevel": "adult",
+      "mood": "suspenseful",
+      "dialoguePercentage": 40,
+      "descriptionDetail": "high"
+    },
+    "themesMessages": {
+      "primaryThemes": ["betrayal", "redemption"],
+      "moralComplexity": "ambiguous",
+      "socialCommentary": false
+    },
+    "contentControls": {
+      "violence": "moderate",
+      "romance": "none",
+      "language": "mild",
+      "matureContent": false
+    },
+    "advancedOptions": {
+      "chapters": 3,
+      "foreshadowing": true,
+      "symbolism": "heavy",
+      "multiplePOVs": false
+    },
+    "inspirationReferences": {
+      "similarWorks": ["Lord of the Rings", "The Witcher"],
+      "tropesToAvoid": ["chosen one"],
+      "tropesToInclude": ["found family"]
+    },
+    "technical": {
+      "creativity": 0.8,
+      "model": "llama-3.3-70b-versatile"
+    }
+  }
+}
+```
+
+**Response (JSON Output Schema):**
+
+```json
+{
+  "id": "story123",
+  "title": "AI Generated Story",
+  "content": "Story content string containing the generated narrative...",
+  "genre": "fantasy",
+  "metadata": {
+    "prompt": "Write a story about...",
+    "length": "medium",
+    "style": "narrative",
+    "model": "llama-3.3-70b-versatile",
+    "tokensUsed": {
+      "prompt": 120,
+      "completion": 850,
+      "total": 970
+    },
+    "generatedAt": "2024-01-01T00:00:00Z"
+  }
 }
 ```
 
@@ -220,7 +304,8 @@ NODE_ENV=production
 PORT=3001
 GROQ_API_KEY=your-groq-api-key
 OPENAI_API_KEY=your-openai-key
-MONGODB_URI=your-mongodb-connection
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 REDIS_URL=your-redis-connection
 JWT_SECRET=your-jwt-secret
 CORS_ORIGIN=https://groqtales.xyz

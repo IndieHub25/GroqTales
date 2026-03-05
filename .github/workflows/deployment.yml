@@ -2,6 +2,7 @@ name: Deploy to Cloudflare Pages (Production)
 
 on:
   push:
+    branches: ['**']
   workflow_dispatch:
 
 permissions:
@@ -39,7 +40,7 @@ jobs:
           NEXT_PUBLIC_BUILD_MODE: 'false'
           NEXT_PUBLIC_URL: 'https://groqtales.xyz'
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-          NEXT_PUBLIC_GROQ_API_KEY: ${{ secrets.NEXT_PUBLIC_GROQ_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID }}
@@ -59,7 +60,7 @@ jobs:
     name: Build & Deploy to Cloudflare Pages (Preview)
     runs-on: ubuntu-latest
     environment:
-      name: preview-${{ github.ref_name }}
+      name: preview
       url: https://groqtales-preview.pages.dev
 
     steps:
@@ -84,7 +85,7 @@ jobs:
           NEXT_PUBLIC_BUILD_MODE: 'true'
           NEXT_PUBLIC_URL: 'https://groqtales-preview.pages.dev'
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-          NEXT_PUBLIC_GROQ_API_KEY: ${{ secrets.NEXT_PUBLIC_GROQ_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID }}

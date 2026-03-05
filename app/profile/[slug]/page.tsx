@@ -3,11 +3,8 @@
  * /profile/me → own profile (fetches auth'd endpoint)
  * /profile/<username> → public profile
  */
+export const runtime = 'edge';
 export const dynamicParams = true;
-
-export function generateStaticParams() {
-    return [{ slug: 'me' }];
-}
 
 import ProfilePageClient from './client';
 
