@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+
 import {
   Card,
   CardContent,
@@ -9,9 +10,9 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 
 type PrivacySettingsData = {
   profileVisible: boolean;

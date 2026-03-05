@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
+import { Mail, Lock, LogIn, CheckCircle2, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/components/ui/use-toast';
+import React, { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mail, Lock, LogIn, CheckCircle2, AlertCircle } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 import WalletConnect from '@/components/wallet-connect';
+import { createClient } from '@/lib/supabase/client';
 
 export default function SignInPage() {
   const [identifier, setIdentifier] = useState('');

@@ -1,14 +1,6 @@
 'use client';
 
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useToast } from '@/components/ui/use-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Mail,
   Lock,
@@ -20,8 +12,17 @@ import {
   Library,
   Sparkles,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/ui/use-toast';
 import WalletConnect from '@/components/wallet-connect';
+import { createClient } from '@/lib/supabase/client';
 
 type Step = 'role' | 'details';
 type Role = 'creator' | 'collector' | 'both' | null;

@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+
+import { useWeb3 } from '@/components/providers/web3-provider';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -9,7 +11,6 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { useWeb3 } from '@/components/providers/web3-provider';
 
 export default function WalletSettings() {
   const { account, connected, connectWallet, disconnectWallet } = useWeb3();

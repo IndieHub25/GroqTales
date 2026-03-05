@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2, BookOpen, Sparkles } from 'lucide-react';
+import { Loader2, BookOpen, Sparkles, Check, Copy } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,9 @@ export function StoryGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isMinting, setIsMinting] = useState(false);
   const [generatedStory, setGeneratedStory] = useState('');
-  const [mintStatus, setMintStatus] = useState<'idle' | 'checking' | 'minted' | 'pending' | 'failed'>('idle');
+  const [mintStatus, setMintStatus] = useState<
+    'idle' | 'checking' | 'minted' | 'pending' | 'failed'
+  >('idle');
   const [currentStoryHash, setCurrentStoryHash] = useState('');
   const { toast } = useToast();
   const { address } = useWallet();
@@ -46,20 +48,20 @@ export function StoryGenerator() {
 
   const checkMintStatus = async () => {
     if (!generatedStory || !address) return;
-    
+
     const contentHash = generateContentHash(generatedStory);
     setCurrentStoryHash(contentHash);
-    
+
     try {
       const checkResponse = await fetch('/api/mint/check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           storyHash: contentHash,
-          authorAddress: address
+          authorAddress: address,
         }),
       });
-      
+
       if (checkResponse.ok) {
         const checkData = await checkResponse.json();
         if (checkData.status === 'MINTED') {
@@ -88,11 +90,14 @@ export function StoryGenerator() {
     setIsGenerating(true);
     setMintStatus('idle');
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, genre, creator: address }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/generate`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, genre, creator: address }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Failed to generate story');
@@ -149,7 +154,7 @@ export function StoryGenerator() {
     try {
       // Generate content hash for idempotent minting
       const storyHash = currentStoryHash || generateContentHash(generatedStory);
-      
+
       // Upload to IPFS first
       const ipfsResponse = await fetch('/api/upload', {
         method: 'POST',
@@ -173,7 +178,7 @@ export function StoryGenerator() {
         body: JSON.stringify({
           metadataUri,
           creator: address,
-          storyHash: storyHash, // Include story hash for idempotency
+          storyHash, // Include story hash for idempotency
         }),
       });
 
@@ -185,14 +190,16 @@ export function StoryGenerator() {
             setMintStatus('minted');
             toast({
               title: 'Already Minted',
-              description: mintData.message || 'This story has already been minted.',
+              description:
+                mintData.message || 'This story has already been minted.',
             });
             return;
           } else if (mintData.status === 'PENDING') {
             setMintStatus('pending');
             toast({
               title: 'Minting In Progress',
-              description: mintData.message || 'A minting request is already in progress.',
+              description:
+                mintData.message || 'A minting request is already in progress.',
             });
             return;
           }
@@ -281,35 +288,47 @@ export function StoryGenerator() {
                 onClick={() => copyToClipboard(generatedStory)}
               >
                 {isCopied ? (
-                  <><Check className="mr-1 h-4 w-4" />Copied!</>
+                  <>
+                    <Check className="mr-1 h-4 w-4" />
+                    Copied!
+                  </>
                 ) : (
-                  <><Copy className="mr-1 h-4 w-4" />Copy Story</>
+                  <>
+                    <Copy className="mr-1 h-4 w-4" />
+                    Copy Story
+                  </>
                 )}
               </Button>
             </div>
             <div className="prose max-w-none bg-secondary/50 p-4 rounded-lg">
               <p>{generatedStory}</p>
             </div>
-            
+
             {/* Show mint status message */}
             {isMinted && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                <p className="text-green-700 font-medium">✓ This story has been minted as NFT</p>
+                <p className="text-green-700 font-medium">
+                  ✓ This story has been minted as NFT
+                </p>
               </div>
             )}
-            
+
             {isPending && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
-                <p className="text-yellow-700 font-medium">⏳ Minting in progress...</p>
+                <p className="text-yellow-700 font-medium">
+                  ⏳ Minting in progress...
+                </p>
               </div>
             )}
-            
+
             {mintStatus === 'failed' && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
-                <p className="text-red-700 font-medium">✗ Previous minting attempt failed</p>
+                <p className="text-red-700 font-medium">
+                  ✗ Previous minting attempt failed
+                </p>
               </div>
             )}
-            
+
             <Button
               variant="outline"
               onClick={handleMint}

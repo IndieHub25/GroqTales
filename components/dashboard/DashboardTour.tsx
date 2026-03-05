@@ -1,8 +1,8 @@
 'use client';
 
+import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
 import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
-import { useTheme } from 'next-themes';
 
 export function DashboardTour({
   shouldRun,

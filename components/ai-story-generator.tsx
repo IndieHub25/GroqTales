@@ -19,8 +19,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { generateContentHash } from '@/lib/story-hash';
 import { useToast } from '@/components/ui/use-toast';
+import { generateContentHash } from '@/lib/story-hash';
 
 interface AIStoryGeneratorProps {
   className?: string;
@@ -100,7 +100,9 @@ export default function AIStoryGenerator({
   const [isMinting, setIsMinting] = useState(false);
   const [mintedNftUrl, setMintedNftUrl] = useState('');
   const [activeTab, setActiveTab] = useState('input');
-  const [mintStatus, setMintStatus] = useState<'idle' | 'checking' | 'minted' | 'pending' | 'failed'>('idle');
+  const [mintStatus, setMintStatus] = useState<
+    'idle' | 'checking' | 'minted' | 'pending' | 'failed'
+  >('idle');
   const [currentStoryHash, setCurrentStoryHash] = useState('');
 
   // Session lock to prevent double-clicks during mint
@@ -128,7 +130,8 @@ export default function AIStoryGenerator({
     setIsGenerating(true);
     setMintStatus('idle');
     setCurrentStoryHash('');
-    try {      // Simulate AI story generation
+    try {
+      // Simulate AI story generation
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       const mockStory = `# ${title || 'Generated Story'}
@@ -164,18 +167,18 @@ This generated story demonstrates the power of AI-assisted creative writing, com
       // Generate content hash for idempotent minting
       const contentHash = generateContentHash(mockStory);
       setCurrentStoryHash(contentHash);
-      
+
       // Check if this content has already been minted
       try {
         const checkResponse = await fetch('/api/mint/check', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             storyHash: contentHash,
-            authorAddress: account // Include wallet address for ownership check
+            authorAddress: account, // Include wallet address for ownership check
           }),
         });
-        
+
         if (checkResponse.ok) {
           const checkData = await checkResponse.json();
           if (checkData.status === 'MINTED') {
@@ -188,7 +191,7 @@ This generated story demonstrates the power of AI-assisted creative writing, com
         // If check fails, allow minting attempt
         console.error('Failed to check mint status:', error);
       }
-      
+
       setGeneratedContent(mockStory);
       setActiveTab('preview');
 
@@ -210,14 +213,14 @@ This generated story demonstrates the power of AI-assisted creative writing, com
   const handleMintNFT = async () => {
     // Step 1: Guard to prevent double-click spam using session lock
     if (mintSessionLock.current) {
-      console.log("Mint blocked: Session lock is active");
+      console.log('Mint blocked: Session lock is active');
       return;
     }
 
     // Acquire session lock immediately
     mintSessionLock.current = true;
 
-    console.log("MINT FUNCTION TRIGGERED");
+    console.log('MINT FUNCTION TRIGGERED');
 
     try {
       if (!connected) {
@@ -242,7 +245,8 @@ This generated story demonstrates the power of AI-assisted creative writing, com
       setMintStatus('checking');
 
       // Generate content hash for idempotent minting
-      const storyHash = currentStoryHash || generateContentHash(generatedContent);
+      const storyHash =
+        currentStoryHash || generateContentHash(generatedContent);
 
       // Call the mint API with story hash for idempotency
       const mintResponse = await fetch('/api/mint', {
@@ -258,7 +262,9 @@ This generated story demonstrates the power of AI-assisted creative writing, com
       try {
         mintData = await mintResponse.json();
       } catch {
-        throw new Error(`Mint request failed with status ${mintResponse.status}`);
+        throw new Error(
+          `Mint request failed with status ${mintResponse.status}`
+        );
       }
 
       // Handle all response statuses including idempotency
@@ -268,19 +274,21 @@ This generated story demonstrates the power of AI-assisted creative writing, com
           setMintStatus('minted');
           toast({
             title: 'Already Minted',
-            description: mintData.message || 'This story has already been minted.',
+            description:
+              mintData.message || 'This story has already been minted.',
           });
           return;
         } else if (mintData.status === 'PENDING') {
           setMintStatus('pending');
           toast({
             title: 'Minting In Progress',
-            description: mintData.message || 'A minting request is already in progress.',
+            description:
+              mintData.message || 'A minting request is already in progress.',
           });
           return;
         } else if (mintData.status === 'FAILED') {
           // Allow retry for failed mints
-          console.log("Previous mint failed, allowing retry...");
+          console.log('Previous mint failed, allowing retry...');
         }
       }
 
@@ -296,7 +304,9 @@ This generated story demonstrates the power of AI-assisted creative writing, com
       // Otherwise leave it empty and hide the OpenSea link
       const { tokenId, contractAddress } = mintData.record ?? {};
       if (tokenId && contractAddress) {
-        setMintedNftUrl(`https://opensea.io/assets/${contractAddress}/${tokenId}`);
+        setMintedNftUrl(
+          `https://opensea.io/assets/${contractAddress}/${tokenId}`
+        );
       } else {
         setMintedNftUrl('');
       }
@@ -545,7 +555,8 @@ This generated story demonstrates the power of AI-assisted creative writing, com
                   </div>
 
                   {(() => {
-                    const isMinted = Boolean(mintedNftUrl) || String(mintStatus) === 'minted';
+                    const isMinted =
+                      Boolean(mintedNftUrl) || String(mintStatus) === 'minted';
                     const isPending = String(mintStatus) === 'pending';
 
                     if (isMinted && mintedNftUrl) {
@@ -553,10 +564,16 @@ This generated story demonstrates the power of AI-assisted creative writing, com
                         <div className="text-center space-y-4">
                           <div className="text-green-600">
                             <Sparkles className="h-12 w-12 mx-auto mb-2" />
-                            <h3 className="text-lg font-medium">NFT Minted Successfully!</h3>
+                            <h3 className="text-lg font-medium">
+                              NFT Minted Successfully!
+                            </h3>
                           </div>
                           <Button asChild>
-                            <a href={mintedNftUrl} target="_blank" rel="noopener noreferrer">
+                            <a
+                              href={mintedNftUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
                               View on OpenSea
                             </a>
                           </Button>
@@ -570,9 +587,12 @@ This generated story demonstrates the power of AI-assisted creative writing, com
                         <div className="text-center space-y-4">
                           <div className="text-green-600">
                             <Sparkles className="h-12 w-12 mx-auto mb-2" />
-                            <h3 className="text-lg font-medium">NFT Minted Successfully!</h3>
+                            <h3 className="text-lg font-medium">
+                              NFT Minted Successfully!
+                            </h3>
                             <p className="text-sm text-muted-foreground">
-                              Your story has been minted. Transaction details will be available shortly.
+                              Your story has been minted. Transaction details
+                              will be available shortly.
                             </p>
                           </div>
                         </div>
@@ -584,9 +604,12 @@ This generated story demonstrates the power of AI-assisted creative writing, com
                         <div className="text-center space-y-4">
                           <div className="text-yellow-600">
                             <Loader2 className="h-12 w-12 mx-auto mb-2 animate-spin" />
-                            <h3 className="text-lg font-medium">Minting In Progress</h3>
+                            <h3 className="text-lg font-medium">
+                              Minting In Progress
+                            </h3>
                             <p className="text-sm text-muted-foreground">
-                              A minting request is already in progress for this story.
+                              A minting request is already in progress for this
+                              story.
                             </p>
                           </div>
                         </div>
@@ -594,7 +617,12 @@ This generated story demonstrates the power of AI-assisted creative writing, com
                     }
 
                     return (
-                      <Button onClick={handleMintNFT} disabled={isMinting} className="w-full" size="lg">
+                      <Button
+                        onClick={handleMintNFT}
+                        disabled={isMinting}
+                        className="w-full"
+                        size="lg"
+                      >
                         {isMinting ? (
                           <>
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />

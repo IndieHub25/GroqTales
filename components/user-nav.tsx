@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
   Wallet,
   User,
@@ -13,7 +12,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 // Simple deterministic hash to avoid sending raw PII or identifiers to third parties
 const generateSeed = (input?: string) => {
@@ -40,10 +39,10 @@ import {
   DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/components/ui/use-toast';
-import { truncateAddress } from '@/lib/utils';
-import { createClient } from '@/lib/supabase/client';
 import { useUserRole } from '@/hooks/use-user-role';
 import { roleBadgeStyles } from '@/lib/rbac';
+import { createClient } from '@/lib/supabase/client';
+import { truncateAddress } from '@/lib/utils';
 
 export function UserNav() {
   const { account, connectWallet, disconnectWallet } = useWeb3();

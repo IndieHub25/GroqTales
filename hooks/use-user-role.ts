@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { createClient } from '@/lib/supabase/client';
+
 import {
   type UserRole,
   getPrimaryRole,
@@ -10,6 +10,7 @@ import {
   isModOrAdmin as checkModOrAdmin,
   type RBACSession,
 } from '@/lib/rbac';
+import { createClient } from '@/lib/supabase/client';
 
 const ROLE_OVERRIDE_KEY = 'groqtales_role_override';
 

@@ -1,9 +1,10 @@
 'use client';
-import React from 'react';
-import { StatCard } from '@/components/Analytics/StatCard';
-import { GenreChart } from '@/components/Analytics/GenreChart';
-import { useChronicleAnalytics } from '@/hooks/useChronicleAnalytics';
 import { BarChart3, BookOpen, Cpu, Zap } from 'lucide-react';
+import React from 'react';
+
+import { GenreChart } from '@/components/Analytics/GenreChart';
+import { StatCard } from '@/components/Analytics/StatCard';
+import { useChronicleAnalytics } from '@/hooks/useChronicleAnalytics';
 
 export default function AnalyticsPage() {
   const { insights, loading } = useChronicleAnalytics([]); // Connect to real data source here

@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { useEffect, useMemo } from 'react';
+
 import { GlobalLoadingWrapper } from '@/components/global-loading-wrapper';
+import { createClient } from '@/lib/supabase/client';
 
 export default function RoleSyncPage() {
   const router = useRouter();

@@ -10,17 +10,17 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
 
+import BackToTop from '@/components/back-to-top';
 import ClientLayout from '@/components/client-layout';
 import { Footer } from '@/components/footer';
+import { GlobalLoadingWrapper } from '@/components/global-loading-wrapper';
 import { Header } from '@/components/header';
 import { AnimatedLayout } from '@/components/layout/animated-layout';
+import MadhavaHelpBot from '@/components/madhava-helpbot';
 import { Web3Provider } from '@/components/providers/web3-provider'; // DISABLED VERSION FOR PRODUCTION
 import { QueryProvider } from '@/components/query-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
-import BackToTop from '@/components/back-to-top';
-import MadhavaHelpBot from '@/components/madhava-helpbot';
-import { GlobalLoadingWrapper } from '@/components/global-loading-wrapper';
 
 // Optimize font loading
 const inter = Inter({

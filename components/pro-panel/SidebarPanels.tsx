@@ -10,7 +10,6 @@
  * All data dynamic from zustand store
  */
 
-import React from 'react';
 import {
   Building2,
   Castle,
@@ -28,6 +27,7 @@ import {
   Search,
   Theater,
 } from 'lucide-react';
+import React from 'react';
 
 import {
   selectParameters,

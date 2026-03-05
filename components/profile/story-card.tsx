@@ -1,7 +1,8 @@
-import { Card, CardFooter, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
+
+import { Badge } from '@/components/ui/badge';
+import { Card, CardFooter, CardHeader } from '@/components/ui/card';
 
 interface StoryProps {
   title: string;

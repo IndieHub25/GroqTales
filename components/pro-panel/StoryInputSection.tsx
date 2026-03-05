@@ -7,8 +7,8 @@
  * Matches reference HTML exactly
  */
 
-import React from 'react';
 import { Brain, Search, TrendingUp, Zap } from 'lucide-react';
+import React from 'react';
 
 import {
   selectParameters,

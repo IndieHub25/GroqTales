@@ -5,6 +5,7 @@
  */
 
 import { Metadata } from 'next';
+
 import { ProPanel } from '@/components/pro-panel/ProPanel';
 
 export const metadata: Metadata = {

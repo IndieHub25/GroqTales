@@ -52,21 +52,26 @@ export function useStoryRecommendations(): UseStoryRecommendationsResult {
     setError(null);
 
     try {
-      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/story-recommendations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          storyId,
-          content,
-          keywords,
-          genre,
-          limit,
-          model,
-          apiKey,
-        }),
-      });
+      const response = await fetch(
+        (process.env.NEXT_PUBLIC_API_URL ||
+          'https://groqtales-backend-api.onrender.com') +
+          '/api/story-recommendations',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            storyId,
+            content,
+            keywords,
+            genre,
+            limit,
+            model,
+            apiKey,
+          }),
+        }
+      );
 
       const data = await response.json();
 

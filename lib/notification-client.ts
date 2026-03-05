@@ -2,6 +2,7 @@ import {
   type SendNotificationRequest,
   sendNotificationResponseSchema,
 } from '@farcaster/frame-sdk';
+
 import {
   getUserNotificationDetails,
   type FrameNotificationDetails,

@@ -19,12 +19,7 @@ import * as z from 'zod';
 
 // import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 // import { Badge } from '@/components/ui/badge';
-import {
-  ApiResponse,
-  User,
-  NotificationSettings,
-  PrivacySettings,
-} from '@/types/api';
+import { useWeb3 } from '@/components/providers/web3-provider';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -55,7 +50,12 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { useWeb3 } from '@/components/providers/web3-provider';
+import {
+  ApiResponse,
+  User,
+  NotificationSettings,
+  PrivacySettings,
+} from '@/types/api';
 
 const profileFormSchema = z.object({
   username: z

@@ -1,11 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { OnboardingChecklist } from '@/components/dashboard/OnboardingChecklist';
-import { DashboardTour } from '@/components/dashboard/DashboardTour';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import {
   BarChart3,
   Wallet,
@@ -18,9 +12,16 @@ import {
   Shield,
   PenTool,
 } from 'lucide-react';
-import { useWallet } from '@/hooks/use-wallet';
-import { useCreatorEarnings } from '@/hooks/use-royalties';
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
+
+import { DashboardTour } from '@/components/dashboard/DashboardTour';
+import { OnboardingChecklist } from '@/components/dashboard/OnboardingChecklist';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCreatorEarnings } from '@/hooks/use-royalties';
+import { useWallet } from '@/hooks/use-wallet';
 
 interface ChecklistStep {
   id: string;

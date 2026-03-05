@@ -7,8 +7,9 @@
  * Uses Upstash Redis (serverless, edge-compatible).
  */
 
-import { Redis } from '@upstash/redis';
 import crypto from 'crypto';
+
+import { Redis } from '@upstash/redis';
 
 // ---------------------------------------------------------------------------
 // Configuration

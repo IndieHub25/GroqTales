@@ -33,8 +33,8 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { fetchStoryById } from '@/lib/mock-data';
 import { useStoryAnalytics } from '@/hooks/use-story-analysis';
+import { fetchStoryById } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
 
 interface Comment {

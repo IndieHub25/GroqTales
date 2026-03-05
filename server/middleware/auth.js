@@ -1,6 +1,6 @@
 /**
  * Authentication Middleware — Supabase JWT Verification
- * 
+ *
  * Verifies Supabase JWT tokens from the Authorization header.
  * Sets req.user with { id, email, role } from the Supabase user.
  */
@@ -17,14 +17,22 @@ const authRequired = async (req, res, next) => {
     }
 
     if (!supabaseAdmin) {
-      return res.status(503).json({ success: false, error: 'Authentication service not configured' });
+      return res.status(503).json({
+        success: false,
+        error: 'Authentication service not configured',
+      });
     }
 
     // Verify the token with Supabase
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await supabaseAdmin.auth.getUser(token);
 
     if (error || !user) {
-      return res.status(401).json({ success: false, error: 'Invalid or expired token' });
+      return res
+        .status(401)
+        .json({ success: false, error: 'Invalid or expired token' });
     }
 
     // Set req.user for downstream handlers
@@ -55,18 +63,24 @@ const refresh = async (req, res) => {
     const { refreshToken: token } = req.body;
 
     if (!token) {
-      return res.status(401).json({ success: false, message: 'Missing refresh token' });
+      return res
+        .status(401)
+        .json({ success: false, message: 'Missing refresh token' });
     }
 
     if (!supabaseAdmin) {
-      return res.status(503).json({ success: false, error: 'Authentication service not configured' });
+      return res.status(503).json({
+        success: false,
+        error: 'Authentication service not configured',
+      });
     }
 
     // Note: Supabase token refresh is typically done client-side.
     // This endpoint exists for compatibility with the existing frontend flow.
     return res.status(501).json({
       success: false,
-      message: 'Token refresh should be done through the Supabase client. Use supabase.auth.refreshSession().',
+      message:
+        'Token refresh should be done through the Supabase client. Use supabase.auth.refreshSession().',
     });
   } catch (err) {
     return res.status(401).json({
@@ -91,10 +105,15 @@ const isSuperAdmin = async (req, res, next) => {
 
       // Specifically check for the hardcoded superadmin email
       const User = require('../models/User'); // Delay require to avoid circular dependency
-      const user = await User.findById(req.user.id).select('email isAdmin role');
+      const user = await User.findById(req.user.id).select(
+        'email isAdmin role'
+      );
 
       if (!user || user.email !== 'indiehubexe@gmail.com') {
-        return res.status(403).json({ success: false, error: 'Forbidden. Superadmin access strictly required.' });
+        return res.status(403).json({
+          success: false,
+          error: 'Forbidden. Superadmin access strictly required.',
+        });
       }
 
       return next();

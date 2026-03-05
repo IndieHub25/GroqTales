@@ -13,9 +13,8 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { useWeb3 } from '@/components/providers/web3-provider';
 import { Button } from '@/components/ui/button';
@@ -34,8 +33,8 @@ import {
 } from '@/components/ui/sheet';
 import { useToast } from '@/components/ui/use-toast';
 import { UserNav } from '@/components/user-nav';
-import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
+import { cn } from '@/lib/utils';
 
 import { CreateStoryDialog } from './create-story-dialog';
 import { ModeToggle } from './mode-toggle';
@@ -72,7 +71,9 @@ export function Header() {
       setSession(session);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
@@ -242,7 +243,11 @@ export function Header() {
 
         <div className="flex items-center space-x-2">
           <div className="flex items-center gap-2 mr-2">
-            <UploadStoryTrigger variant="outline" className="hidden lg:flex" buttonText="Upload" />
+            <UploadStoryTrigger
+              variant="outline"
+              className="hidden lg:flex"
+              buttonText="Upload"
+            />
             <Button
               variant="outline"
               size="sm"

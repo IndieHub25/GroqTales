@@ -6,7 +6,6 @@
  * Active category highlighted with red bg and left bar indicator.
  */
 
-import React from 'react';
 import {
   BookOpen,
   Bot,
@@ -18,6 +17,7 @@ import {
   Theater,
   Users,
 } from 'lucide-react';
+import React from 'react';
 
 import { CATEGORY_CONFIG } from '@/lib/constants/proPanelDefaults';
 import type { CategoryKey } from '@/lib/schemas/proPanelSchemas';

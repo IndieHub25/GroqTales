@@ -11,8 +11,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
-import LegalHeader from '@/components/LegalHeader';
 
+import LegalHeader from '@/components/LegalHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 

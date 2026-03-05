@@ -6,7 +6,6 @@
  * Features: document header, watermark, stamps, aged paper texture, footer.
  */
 
-import React from 'react';
 import {
   BookOpen,
   Bot,
@@ -19,6 +18,7 @@ import {
   Theater,
   Users,
 } from 'lucide-react';
+import React from 'react';
 
 import { CATEGORY_CONFIG } from '@/lib/constants/proPanelDefaults';
 import type { CategoryKey } from '@/lib/schemas/proPanelSchemas';

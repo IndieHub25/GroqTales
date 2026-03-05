@@ -15,6 +15,7 @@ import {
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState, useEffect, Suspense } from 'react';
+
 import AIStoryGenerator from '@/components/ai-story-generator';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
@@ -48,8 +49,10 @@ function AIStoryContent() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       // Enforce authorization via secure server-validated source
       // Replace localStorage adminSession with authenticated API response reliance
       const isServerAdmin = session?.user?.user_metadata?.role === 'admin';

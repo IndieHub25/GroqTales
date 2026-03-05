@@ -66,7 +66,10 @@ export function useGroq(): UseGroqResult {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/groq/models');
+      const response = await fetch(
+        (process.env.NEXT_PUBLIC_API_URL ||
+          'https://groqtales-backend-api.onrender.com') + '/api/groq/models'
+      );
       if (!response.ok) {
         throw new Error(`Failed to fetch models: ${response.statusText}`);
       }
@@ -143,19 +146,23 @@ export function useGroq(): UseGroqResult {
         // Extract apiKey from options if present
         const { apiKey, ...restOptions } = options || {};
 
-        const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/groq', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'generate',
-            prompt,
-            model: model || defaultModel,
-            options: restOptions,
-            apiKey,
-          }),
-        });
+        const response = await fetch(
+          (process.env.NEXT_PUBLIC_API_URL ||
+            'https://groqtales-backend-api.onrender.com') + '/api/groq',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'generate',
+              prompt,
+              model: model || defaultModel,
+              options: restOptions,
+              apiKey,
+            }),
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -183,17 +190,21 @@ export function useGroq(): UseGroqResult {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/groq', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'analyze',
-            content,
-            apiKey,
-          }),
-        });
+        const response = await fetch(
+          (process.env.NEXT_PUBLIC_API_URL ||
+            'https://groqtales-backend-api.onrender.com') + '/api/groq',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'analyze',
+              content,
+              apiKey,
+            }),
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -226,19 +237,23 @@ export function useGroq(): UseGroqResult {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/groq', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'ideas',
-            genre,
-            theme,
-            length,
-            apiKey,
-          }),
-        });
+        const response = await fetch(
+          (process.env.NEXT_PUBLIC_API_URL ||
+            'https://groqtales-backend-api.onrender.com') + '/api/groq',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'ideas',
+              genre,
+              theme,
+              length,
+              apiKey,
+            }),
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -270,18 +285,22 @@ export function useGroq(): UseGroqResult {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/groq', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'improve',
-            content,
-            focus,
-            apiKey,
-          }),
-        });
+        const response = await fetch(
+          (process.env.NEXT_PUBLIC_API_URL ||
+            'https://groqtales-backend-api.onrender.com') + '/api/groq',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'improve',
+              content,
+              focus,
+              apiKey,
+            }),
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json();

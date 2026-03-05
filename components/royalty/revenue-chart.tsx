@@ -1,5 +1,6 @@
 'use client';
 
+import { format, parseISO } from 'date-fns';
 import { useMemo } from 'react';
 import {
   AreaChart,
@@ -10,7 +11,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { format, parseISO } from 'date-fns';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { RoyaltyTransaction } from '@/hooks/use-royalties';

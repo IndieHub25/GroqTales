@@ -1,10 +1,11 @@
 'use client';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ProfileForm } from './profile-form';
 import NotificationsSettings from '@/components/settings/notifications-settings';
-import WalletSettings from '@/components/settings/wallet-settings';
 import PrivacySettings from '@/components/settings/privacy-settings';
+import WalletSettings from '@/components/settings/wallet-settings';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import { ProfileForm } from './profile-form';
 
 export default function SettingsClient() {
   return (

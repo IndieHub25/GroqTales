@@ -1,5 +1,6 @@
 'use client';
 
+import { X, Download } from 'lucide-react';
 import React, {
   createContext,
   useContext,
@@ -7,7 +8,6 @@ import React, {
   useState,
   useCallback,
 } from 'react';
-import { X, Download } from 'lucide-react';
 // declare global{
 //   interface Window{
 //     ethereum?: any;

@@ -11,8 +11,8 @@
  * - Fire icon with pulse animation
  */
 
-import React, { useState } from 'react';
 import { Flame, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
 
 import { useToast } from '@/components/ui/use-toast';
 import {

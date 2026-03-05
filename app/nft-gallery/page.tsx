@@ -1,30 +1,6 @@
 'use client';
 
-import { useState, useEffect, memo, useCallback } from 'react';
-import dynamic from 'next/dynamic';
-import Image from 'next/image';
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
-import { useWeb3 } from '@/components/providers/web3-provider';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/use-toast';
 import {
   Heart,
   Eye,
@@ -38,6 +14,29 @@ import {
   Hexagon,
   Zap,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import React, { useState, useEffect, memo, useCallback } from 'react';
+
+import { useWeb3 } from '@/components/providers/web3-provider';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useToast } from '@/components/ui/use-toast';
 
 interface NFTStory {
   id: string;

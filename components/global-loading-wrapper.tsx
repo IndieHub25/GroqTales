@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
+import { usePathname } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+
 import LoadingScreen from '@/components/loading-screen';
 
 export function GlobalLoadingWrapper({

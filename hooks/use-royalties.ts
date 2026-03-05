@@ -57,7 +57,9 @@ export function useCreatorEarnings(walletAddress: string | undefined) {
     setError(null);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/royalties/earnings/${walletAddress}`);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/royalties/earnings/${walletAddress}`
+      );
       const data = await res.json();
 
       if (!res.ok) {
@@ -108,7 +110,8 @@ export function useCreatorTransactions(
         limit: String(limit),
       });
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/royalties/transactions/${walletAddress}?${params}`
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/royalties/transactions/${walletAddress}?${params}`
       );
       const data = await res.json();
 
@@ -166,7 +169,9 @@ export function useRoyaltyConfig(params: {
       if (params.creatorWallet)
         searchParams.set('creatorWallet', params.creatorWallet);
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/royalties/configure?${searchParams}`);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/royalties/configure?${searchParams}`
+      );
       const data = await res.json();
 
       if (!res.ok) {
@@ -209,11 +214,16 @@ export function useConfigureRoyalty() {
       setError(null);
 
       try {
-        const res = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/royalties/configure', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(params),
-        });
+        const res = await fetch(
+          (process.env.NEXT_PUBLIC_API_URL ||
+            'https://groqtales-backend-api.onrender.com') +
+            '/api/royalties/configure',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(params),
+          }
+        );
 
         const data = await res.json();
 

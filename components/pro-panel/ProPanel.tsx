@@ -13,7 +13,6 @@
  * - Noir footer
  */
 
-import React, { useState, useRef, useCallback } from 'react';
 import {
   Cake,
   ClipboardList,
@@ -22,6 +21,7 @@ import {
   Search,
   User,
 } from 'lucide-react';
+import React, { useState, useRef, useCallback } from 'react';
 
 import { Accordion } from '@/components/ui/accordion';
 import {
@@ -42,12 +42,6 @@ import { GenreGrid } from './GenreGrid';
 import { ICON_MAP } from './iconMap';
 import { MissionNavigator } from './MissionNavigator';
 import { PresetManager } from './PresetManager';
-import {
-  InspirationPanel,
-  LocationDocksPanel,
-  StyleDossierPanel,
-} from './SidebarPanels';
-import { StoryInputSection } from './StoryInputSection';
 import { AdvancedSection } from './sections/AdvancedSection';
 import { CharacterSection as CharacterSectionContent } from './sections/CharacterSection';
 import { LengthSection } from './sections/LengthSection';
@@ -57,6 +51,12 @@ import { ThemeSection } from './sections/ThemeSection';
 import { ToneStyleSection } from './sections/ToneStyleSection';
 import { VisualSection } from './sections/VisualSection';
 import { WorldSection } from './sections/WorldSection';
+import {
+  InspirationPanel,
+  LocationDocksPanel,
+  StyleDossierPanel,
+} from './SidebarPanels';
+import { StoryInputSection } from './StoryInputSection';
 
 const SECTION_COMPONENTS: { [K in CategoryKey]: React.FC } = {
   storyStructure: StoryStructureSection,

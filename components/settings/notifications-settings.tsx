@@ -1,9 +1,10 @@
 'use client';
-import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
-import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 
 type NotificationSettings = {
   email: {

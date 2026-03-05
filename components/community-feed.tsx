@@ -17,15 +17,15 @@ import {
   Zap,
   Hexagon,
 } from 'lucide-react';
+import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { cn } from '@/lib/utils';
-import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
+import { cn } from '@/lib/utils';
 
 interface CommunityPost {
   id: string;
