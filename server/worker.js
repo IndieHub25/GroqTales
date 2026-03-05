@@ -36,6 +36,8 @@ const metrics = {
   genreDistribution: {},
 };
 
+let isProcessing = false;
+
 // ---------------------------------------------------------------------------
 // Pipeline: Story Analytics
 // ---------------------------------------------------------------------------
@@ -121,18 +123,18 @@ async function runDataCleanup() {
   if (!supabaseAdmin) return;
 
   try {
-    // Archive old drafts (> 90 days old with no updates)
+    // Find stale unverified stories (> 90 days old with no updates)
     const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
 
-    const { data: oldDrafts, error } = await supabaseAdmin
+    const { data: staleStories, error } = await supabaseAdmin
       .from('stories')
       .select('id')
-      .eq('source', 'draft')
+      .is('is_verified', false)
       .lt('updated_at', ninetyDaysAgo)
       .limit(100);
 
-    if (!error && oldDrafts && oldDrafts.length > 0) {
-      console.log(`[Cleanup] Found ${oldDrafts.length} stale drafts older than 90 days`);
+    if (!error && staleStories && staleStories.length > 0) {
+      console.log(`[Cleanup] Found ${staleStories.length} stale unverified stories older than 90 days`);
       // Log for now — actual archival would move to an archive table
     }
   } catch (err) {
@@ -144,16 +146,30 @@ async function runDataCleanup() {
 // Main Job Runner
 // ---------------------------------------------------------------------------
 async function processJobs() {
+  if (isProcessing) {
+    console.log(`[Worker] Skipping pipeline run at ${new Date().toISOString()} — previous run still in progress`);
+    return { skipped: true, lastRun: metrics.lastRun };
+  }
+
+  isProcessing = true;
   const startTime = Date.now();
   console.log(`[Worker] Starting pipeline run at ${new Date().toISOString()}`);
 
-  await computeStoryAnalytics();
-  await runContentQualityChecks();
-  await runDataCleanup();
+  try {
+    await computeStoryAnalytics();
+    await runContentQualityChecks();
+    await runDataCleanup();
 
-  metrics.lastRun = new Date().toISOString();
-  const duration = Date.now() - startTime;
-  console.log(`[Worker] Pipeline run completed in ${duration}ms`);
+    metrics.lastRun = new Date().toISOString();
+    const duration = Date.now() - startTime;
+    console.log(`[Worker] Pipeline run completed in ${duration}ms`);
+    return { skipped: false, lastRun: metrics.lastRun, duration };
+  } catch (err) {
+    console.error('[Worker] Pipeline run failed:', err.message);
+    throw err;
+  } finally {
+    isProcessing = false;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -209,8 +225,15 @@ function workerAuth(req, res, next) {
 
 // Manual trigger for pipeline (for testing)
 app.post('/run', workerAuth, async (req, res) => {
-  await processJobs();
-  res.json({ message: 'Pipeline run completed', lastRun: metrics.lastRun });
+  try {
+    const result = await processJobs();
+    if (result?.skipped) {
+      return res.status(202).json({ message: 'Pipeline run skipped: already in progress', lastRun: metrics.lastRun });
+    }
+    return res.json({ message: 'Pipeline run completed', lastRun: metrics.lastRun });
+  } catch (err) {
+    return res.status(500).json({ error: 'Pipeline run failed', message: err.message });
+  }
 });
 
 // Record Groq API usage (called by the main backend)
@@ -229,8 +252,14 @@ app.post('/track-usage', express.json(), workerAuth, (req, res) => {
 // ---------------------------------------------------------------------------
 
 // Run pipeline immediately on start, then every 5 minutes
-processJobs();
-setInterval(processJobs, 5 * 60 * 1000);
+processJobs().catch(err => {
+  console.error('[Worker] Initial pipeline run failed:', err.message);
+});
+setInterval(() => {
+  processJobs().catch(err => {
+    console.error('[Worker] Scheduled pipeline run failed:', err.message);
+  });
+}, 5 * 60 * 1000);
 
 app.listen(PORT, () => {
   console.log(`⚙️ GroqTales Worker service running on port ${PORT}`);
