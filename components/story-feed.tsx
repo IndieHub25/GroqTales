@@ -237,7 +237,7 @@ export function StoryFeed() {
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
     fetch(`${baseUrl}/api/v1/stories?limit=6`)
       .then((r) => {
         if (!r.ok) throw new Error('Failed to fetch stories');

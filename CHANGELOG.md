@@ -9,7 +9,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Active full support: 1.3.9 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
 
-## [1.3.9] - 2026-03-01
+## [1.3.9] - Unreleased
+
+### Bug Fixes
+- **Cloudflare Pages Deployment Fix (Asset Validation)**: Fixed an issue where the Cloudflare Pages asset validation process would crash and timeout over 15 minutes due to an invalid C-style block comment (`/* ... */`) in `public/_headers`. Cloudflare treats `/*` as a path matcher for all routes, causing the subsequent comment text to be parsed as invalid HTTP headers. Replaced with valid `#` comments.
+- **Cloudflare Pages Deployment Fix (Actions)**: Fixed GitHub Action workflow `deployment.yml` to trigger on branches other than `main` and dynamically deploy to the current branch instead of hardcoding `main`. Also removed the restrictive repository name check.
+
+### Story Creation Reversion & Enhancements
+
+- **Create Story Reversion** (`app/create/page.tsx`): Reverted to the classic UI with manual input fields (title, description, genre, content, cover image) instead of the AI-generation layout.
+- **Enforced Authentication** (`app/create/page.tsx`): Restricted access to story creation; users must now have an active Supabase session (or admin override) to access the page and upload content.
+- **Supabase Schema Update** (Supabase Database): Added `description` and `cover_image` columns to the `stories` table to appropriately store the classic story form fields.
+- **API Form Processing** (`server/routes/stories.js`): Updated POST `/api/v1/stories/create` to capture and insert `description` and `cover_image` directly into Supabase.
+- **Real-time Feed Sync** (`server/routes/feed.js`): Feed now serves the `description` and `cover_image` for stories, allowing the frontend to display newly created manual stories properly.
+
+### Major: Full Supabase Backend Migration
+
+Migrated the entire backend database layer from MongoDB/Mongoose to **Supabase PostgreSQL**. This resolves all 500 errors caused by MongoDB not being connected on Render and fixes the auth token mismatch between the frontend (Supabase tokens) and backend (custom JWT).
+
+### Added
+- **`server/config/supabase.js`** — Supabase client configuration with admin client, per-user client factory, and health check function
+- **`server/config/supabase-schema.sql`** — Complete SQL schema with 4 tables (`profiles`, `stories`, `drafts`, `user_settings`), RLS policies, auto-profile creation trigger, and `updated_at` triggers
+- **`@supabase/supabase-js`** dependency added to `server/package.json`
+
+### Changed
+- **Auth Middleware** (`server/middleware/auth.js`) — Now verifies Supabase JWT tokens via `supabase.auth.getUser()` instead of custom JWT verification
+- **Auth Routes** (`server/routes/auth.js`) — Signup uses `supabase.auth.admin.createUser()`, login uses `supabase.auth.signInWithPassword()`
+- **Users Routes** (`server/routes/users.js`) — All queries use Supabase `profiles` + `stories` tables; auto-creates profile on first access; fixed Swagger docs (added proper parameters)
+- **Stories Routes** (`server/routes/stories.js`) — CRUD operations against Supabase `stories` table with author profile joins; removed CF D1 sync
+- **Feed Route** (`server/routes/feed.js`) — Queries Supabase directly instead of proxying through Cloudflare Worker; includes author profiles and content truncation
+- **Drafts Routes** (`server/routes/drafts.js`) — Full CRUD with version history via Supabase `drafts` table using JSONB
+- **Settings/Profile** (`server/routes/settings/profile.js`) — Uses Supabase `profiles` table; removed MongoDB and CF Worker sync
+- **Settings/Notifications** (`server/routes/settings/notifications.js`) — Uses Supabase `user_settings` table
+- **Settings/Privacy** (`server/routes/settings/privacy.js`) — Uses Supabase `user_settings` table
+- **Settings/Wallet** (`server/routes/settings/wallet.js`) — Uses Supabase `profiles` wallet fields
+- **Health Checks** (`server/backend.js`) — Shows Supabase connection status instead of MongoDB; server starts immediately without blocking on DB connection
+- **Root Endpoint** (`server/backend.js`) — Updated feed description from "Cloudflare D1" to "Supabase"
+- **Sign-In Page** (`app/sign-in/page.tsx`) — CRM-style UI overhaul, removed emojis, added strong validation, and password show/hide toggle.
+- **Sign-Up Page** (`app/sign-up/page.tsx`) — CRM-style UI overhaul, multi-step layout modernized, added password strength validation, and password show/hide toggle.
+
+### Fixed
+- **Cloudflare Build Error** — Fixed incorrect Supabase client import path in `app/create/page.tsx` (`@/utils/supabase/client` to `@/lib/supabase/client`) that was causing the build to fail on Cloudflare Pages.
+- **Render 429 Health Check Errors** — Moved `/api/health` routes above the global rate limiter in `server/backend.js` to prevent health check failures during instance deployment and monitoring.
+- **500 errors on all data endpoints** — Caused by MongoDB not being connected on Render
+- **401 errors on authenticated endpoints** — Frontend sends Supabase tokens but backend was verifying with custom JWT
+- **Missing Swagger parameters** — `/api/v1/users/profile` GET now shows auth parameters
+- **Profile dashboard not loading** — Profile data now served from Supabase, matching the frontend's auth flow
 
 ### Core Infrastructure
 

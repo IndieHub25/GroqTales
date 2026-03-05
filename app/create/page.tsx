@@ -144,10 +144,13 @@ interface StoryMetadata {
   createdAt: string;
   ipfsHash: string;
 }
+import { createClient } from '@/lib/supabase/client';
+
 export default function CreateStoryPage() {
   const router = useRouter();
   const { account } = useWeb3();
   const { toast } = useToast();
+  const supabase = createClient();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidEntry, setIsValidEntry] = useState(true);
@@ -354,18 +357,19 @@ export default function CreateStoryPage() {
 
   // Check authentication and restore draft context
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       console.log('Checking authentication and story data');
+      const { data: { session } } = await supabase.auth.getSession();
       const isAdmin = localStorage.getItem('adminSession') === 'true';
 
-      if (!account && !isAdmin) {
+      if (!session && !isAdmin) {
         toast({
           title: 'Access Denied',
           description:
-            'Please connect your wallet or login as admin to create stories',
+            'Please log in to create stories.',
           variant: 'destructive',
         });
-        router.push('/');
+        router.push('/sign-in');
         return;
       }
 
@@ -468,8 +472,8 @@ export default function CreateStoryPage() {
       }
     };
 
-    checkAuth();
-  }, [account, hasSnapshotContent, router, setRecoveryModalVisible, toast]);
+    void checkAuth();
+  }, [account, hasSnapshotContent, router, setRecoveryModalVisible, toast, supabase.auth]);
 
   // Try to hydrate from backend if a newer server draft exists.
   useEffect(() => {
@@ -800,18 +804,30 @@ export default function CreateStoryPage() {
 
   const saveToDatabase = async (metadata: StoryMetadata, nftData: any) => {
     try {
-      // Here you would save the story data to your backend
-      // For now, we'll simulate the database save
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/stories/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+        body: JSON.stringify({
+          title: metadata.title,
+          description: metadata.description,
+          content: metadata.content,
+          genre: metadata.genre,
+          coverImage: metadata.coverImage,
+        }),
+      });
 
-      // In production, you would make an API call:
-      // await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/stories`, {
-      //   method: 'POST',
-      //   body: JSON.stringify({ ...metadata, ...nftData }),
-      // });
-    } catch (error) {
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to save story data');
+      }
+      
+      return await response.json();
+    } catch (error: any) {
       console.error('Error saving to database:', error);
-      throw new Error('Failed to save story data');
+      throw new Error(error.message || 'Failed to save story data');
     }
   };
 

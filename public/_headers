@@ -1,11 +1,9 @@
-/*
- * Cloudflare Pages — custom HTTP headers for GroqTales
- * https://developers.cloudflare.com/pages/configuration/headers/
- *
- * These headers mirror the security headers already set in next.config.js
- * but ensure they are applied at the edge layer by Cloudflare Pages regardless
- * of whether a given route is served from a static asset or an edge function.
- */
+# Cloudflare Pages — custom HTTP headers for GroqTales
+# https://developers.cloudflare.com/pages/configuration/headers/
+#
+# These headers mirror the security headers already set in next.config.js
+# but ensure they are applied at the edge layer by Cloudflare Pages regardless
+# of whether a given route is served from a static asset or an edge function.
 
 # ── All routes ───────────────────────────────────────────────
 /*

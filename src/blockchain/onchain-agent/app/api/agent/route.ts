@@ -19,7 +19,7 @@ interface AgentResponse {
  *
  * Example usage:
  * ```typescript
- * const response = await fetch("/api/agent", {
+ * const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + "/api/agent", {
  *     method: "POST",
  *     headers: { "Content-Type": "application/json" },
  *     body: JSON.stringify({ userMessage: input }),

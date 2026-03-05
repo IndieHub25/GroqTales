@@ -46,7 +46,7 @@ import SettingsClient from '@/components/settings/settings-client';
 
 // const [loading, setLoading] = useState(true);
 // useEffect(() => {
-//   fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/settings/notifications`)
+//   fetch(`\${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/settings/notifications`)
 //   .then(res => res.json())
 //   .then(setNotifications);
 // })
@@ -55,7 +55,7 @@ import SettingsClient from '@/components/settings/settings-client';
 
 // useEffect(() => {
 //   if (address && chain) {
-//   fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/settings/wallet`,{
+//   fetch(`\${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/settings/wallet`,{
 //     method: "GET",
 //     headers:{"Content-Type": "application/json"},
 //     body: JSON.stringify({
@@ -160,7 +160,7 @@ export default function SettingsPage() {
 //                   <Switch
 //                   checked={notifications?.email.comments}
 //                   onCheckedChange={(v)=>
-//                     fetch(`\${process.env.NEXT_PUBLIC_API_URL || ''}/api/settings/notifications`, {
+//                     fetch(`\${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/settings/notifications`, {
 //                       method: "PUT",
 //                       headers:{"Content-Type": "application/json"},
 //                       body: JSON.stringify({

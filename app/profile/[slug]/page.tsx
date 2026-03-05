@@ -3,7 +3,7 @@
  * /profile/me → own profile (fetches auth'd endpoint)
  * /profile/<username> → public profile
  */
-export const dynamicParams = process.env.NEXT_PUBLIC_BUILD_MODE !== 'true';
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return [{ slug: 'me' }];

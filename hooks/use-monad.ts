@@ -36,7 +36,7 @@ export function useMonad(): UseMonadResult {
   // Fetch network info with error handling
   const fetchNetworkInfo = useCallback(async () => {
     try {
-      const response = await fetch('/api/monad/info');
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/monad/info');
       if (!response.ok) {
         throw new Error(`Failed to fetch network info: ${response.statusText}`);
       }
@@ -126,7 +126,7 @@ export function useMonad(): UseMonadResult {
           authorAddress: account,
         };
 
-        const response = await fetch('/api/monad', {
+        const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/monad', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -164,7 +164,7 @@ export function useMonad(): UseMonadResult {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch('/api/monad', {
+        const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/monad', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -212,7 +212,7 @@ export function useMonad(): UseMonadResult {
         // Extract API key if provided
         const { apiKey } = options || {};
 
-        const response = await fetch('/api/generate-and-mint', {
+        const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/generate-and-mint', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

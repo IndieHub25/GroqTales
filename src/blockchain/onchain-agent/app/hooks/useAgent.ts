@@ -11,7 +11,7 @@ interface AgentResponse {
 // Sends a user message to the AgentKit backend API and retrieves the agent's response.
 async function messageAgent(userMessage: string): Promise<string | null> {
   try {
-    const response = await fetch('/api/agent', {
+    const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/agent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userMessage } as AgentRequest),
