@@ -61,27 +61,37 @@ export function StepPreview({
     setIsGenerating(true);
 
     try {
+      const { storyLength, tone, ...restParams } = advancedParams;
+
       const payload = {
+        action: 'generate' as const,
         prompt: corePrompt.prompt,
-        title: corePrompt.title,
         genre: corePrompt.genre,
-        description: corePrompt.description,
-        mode: mode || 'story',
-        ...advancedParams,
+        length: storyLength,
+        options: {
+          tone,
+          title: corePrompt.title,
+          description: corePrompt.description,
+          mode: mode || 'story',
+          ...restParams,
+        },
       };
 
-      const response = await fetch('/api/generate-story', {
+      const response = await fetch('/api/groq', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error('Generation failed. Please try again.');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || 'Generation failed. Please try again.'
+        );
       }
 
       const data = await response.json();
-      const content = data.story || data.content || data.result || '';
+      const content = data.result || '';
       onContentChange(content);
       onContentAnalytics?.(content.length);
 
@@ -125,7 +135,11 @@ export function StepPreview({
 
       {/* Error banner */}
       {errors && (
-        <div className="border border-destructive bg-destructive/10 p-3 rounded-md text-sm font-medium text-destructive">
+        <div
+          role="alert"
+          aria-live="polite"
+          className="border border-destructive bg-destructive/10 p-3 rounded-md text-sm font-medium text-destructive"
+        >
           {errors}
         </div>
       )}
@@ -158,7 +172,7 @@ export function StepPreview({
       </div>
 
       {/* Generated content preview */}
-      {generatedContent ? (
+      {generatedContent !== null ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

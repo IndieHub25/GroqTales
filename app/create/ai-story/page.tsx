@@ -50,7 +50,9 @@ function AIStoryContent() {
   // Get parameters from URL
   const source = searchParams.get('source');
   const genre = searchParams.get('genre') || 'fantasy';
-  const format = (searchParams.get('format') || 'free') as 'free' | 'nft';
+  const rawFormat = searchParams.get('format');
+  const format: 'free' | 'nft' =
+    rawFormat === 'nft' || rawFormat === 'free' ? rawFormat : 'free';
 
   // Create story creation data from URL parameters
   useEffect(() => {

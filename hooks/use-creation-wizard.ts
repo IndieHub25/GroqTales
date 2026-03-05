@@ -155,9 +155,17 @@ export function useCreationWizard(
   const latestSigRef = useRef('');
   const draftKeyRef = useRef(draftKey);
 
-  useEffect(() => {
-    stateRef.current = wizardState;
-  }, [wizardState]);
+  const setWizardStateAndRef = useCallback(
+    (updater: (prev: WizardState) => WizardState) => {
+      setWizardState((prev) => {
+        const next = updater(prev);
+        stateRef.current = next;
+        return next;
+      });
+    },
+    []
+  );
+
   useEffect(() => {
     draftKeyRef.current = draftKey;
   }, [draftKey]);
@@ -244,9 +252,10 @@ export function useCreationWizard(
   // State setters (per field)
   // -------------------------------------------------------------------------
 
-  const setMode = useCallback((mode: StoryMode) => {
-    setWizardState((prev) => ({ ...prev, mode }));
-  }, []);
+  const setMode = useCallback(
+    (mode: StoryMode) => setWizardStateAndRef((prev) => ({ ...prev, mode })),
+    [setWizardStateAndRef]
+  );
 
   const setCorePrompt = useCallback((partial: Partial<CorePromptData>) => {
     setWizardState((prev) => ({
@@ -265,12 +274,22 @@ export function useCreationWizard(
   const setGeneratedContent = useCallback((content: string | null) => {
     setWizardState((prev) => ({ ...prev, generatedContent: content }));
   }, []);
+  const coverPreviewUrlRef = useRef<string | null>(null);
 
   const setCoverImage = useCallback((file: File | null) => {
     setWizardState((prev) => ({
       ...prev,
       coverImageFile: file,
-      coverImagePreview: file ? URL.createObjectURL(file) : null,
+      coverImagePreview: (() => {
+        if (coverPreviewUrlRef.current) {
+          URL.revokeObjectURL(coverPreviewUrlRef.current);
+          coverPreviewUrlRef.current = null;
+        }
+        if (!file) return null;
+        const url = URL.createObjectURL(file);
+        coverPreviewUrlRef.current = url;
+        return url;
+      })(),
     }));
   }, []);
 
@@ -484,6 +503,7 @@ export function useCreationWizard(
         genre: c.genre,
         prompt: c.content,
       },
+      generatedContent: c.content,
     }));
     setDraftVersions(recoveredDraft.versions);
     setLastSavedAt(recoveredDraft.updatedAt);
@@ -491,14 +511,16 @@ export function useCreationWizard(
   }, [recoveredDraft]);
 
   const discardRecoveredDraft = useCallback(() => {
-    if (draftKey) {
+    if (recoveredDraft) {
+      clearDraftRecord(recoveredDraft.draftKey);
+    } else if (draftKey) {
       clearDraftRecord(draftKey);
-      setActiveDraftKey(null);
     }
+    setActiveDraftKey(null);
     setRecoveredDraft(null);
     setDraftVersions([]);
     setLastSavedAt(null);
-  }, [draftKey]);
+  }, [draftKey, recoveredDraft]);
 
   // -------------------------------------------------------------------------
   // Reset
@@ -507,6 +529,10 @@ export function useCreationWizard(
   const resetWizard = useCallback(() => {
     setWizardState(INITIAL_STATE);
     setCurrentStep(1);
+    setDraftVersions([]);
+    setLastSavedAt(null);
+    setSyncError(null);
+    setRecoveredDraft(null);
     if (draftKey) {
       clearDraftRecord(draftKey);
       setActiveDraftKey(null);

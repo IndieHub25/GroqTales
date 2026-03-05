@@ -20,19 +20,54 @@ export default function CreateStoryPage() {
   const [isAuthorised, setIsAuthorised] = useState(false);
 
   useEffect(() => {
-    const isAdmin = localStorage.getItem('adminSession') === 'true';
-    if (!account && !isAdmin) {
-      toast({
-        title: 'Access Denied',
-        description:
-          'Please connect your wallet or login as admin to create stories.',
-        variant: 'destructive',
-      });
-      router.push('/');
-      return;
+    let cancelled = false;
+
+    async function verifyAccess() {
+      // Wallet-connected users are always authorised
+      if (account) {
+        if (!cancelled) {
+          setIsAuthorised(true);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      // For non-wallet users, verify admin status via the server
+      try {
+        const res = await fetch('/api/auth/admin-status', {
+          credentials: 'include', // send cookies
+        });
+        const data: { isAdmin?: boolean } = res.ok
+          ? await res.json()
+          : { isAdmin: false };
+
+        if (!cancelled && data.isAdmin) {
+          setIsAuthorised(true);
+          setIsLoading(false);
+          return;
+        }
+      } catch {
+        // Server unreachable – fall through to denial
+      }
+
+      if (!cancelled) {
+        toast({
+          title: 'Access Denied',
+          description:
+            'Please connect your wallet or login as admin to create stories.',
+          variant: 'destructive',
+        });
+        setIsAuthorised(false);
+        setIsLoading(false);
+        router.push('/');
+      }
     }
-    setIsAuthorised(true);
-    setIsLoading(false);
+
+    verifyAccess();
+
+    return () => {
+      cancelled = true;
+    };
   }, [account, router, toast]);
 
   if (isLoading) {

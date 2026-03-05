@@ -59,7 +59,8 @@ export function WizardStepper({
                 if (isAccessible) onStepClick(step);
               }}
               className={cn(
-                'group flex flex-col items-center gap-1.5 outline-none',
+                'group flex flex-col items-center gap-1.5',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                 isAccessible
                   ? 'cursor-pointer'
                   : 'cursor-not-allowed opacity-40'
@@ -73,7 +74,7 @@ export function WizardStepper({
                 className={cn(
                   'relative flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold transition-all',
                   isActive
-                    ? 'bg-primary border-primary shadow-md'
+                    ? 'bg-primary border-primary text-primary-foreground shadow-md'
                     : isCompleted
                       ? 'bg-green-500 text-white border-green-700'
                       : 'bg-card text-primary border-muted-foreground',

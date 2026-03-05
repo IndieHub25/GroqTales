@@ -93,7 +93,7 @@ export function StepPublish({
       if (coverImageFile) {
         const buf = await coverImageFile.arrayBuffer();
         const res = await ipfs.add(new Uint8Array(buf));
-        coverHash = res.path;
+        coverHash = res.path.toString();
       }
 
       const metadata = {
@@ -114,7 +114,7 @@ export function StepPublish({
       const contentFile = new File([contentBlob], 'story.json');
       const contentBuf = await contentFile.arrayBuffer();
       const contentRes = await ipfs.add(new Uint8Array(contentBuf));
-      metadata.ipfsHash = contentRes.path;
+      metadata.ipfsHash = contentRes.path.toString();
 
       // ── 2. Mint NFT or save to DB ──
       if (isNft) {

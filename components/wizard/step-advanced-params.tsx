@@ -36,7 +36,10 @@ export function StepAdvancedParams({
 }: StepAdvancedParamsProps) {
   const isComic = mode === 'comic';
 
-  const handleChange = (key: keyof AdvancedParams, value: unknown) => {
+  const handleChange = <K extends keyof AdvancedParams>(
+    key: K,
+    value: AdvancedParams[K]
+  ) => {
     onChange({ [key]: value });
     onParamAnalytics?.(key, value);
   };
@@ -324,7 +327,9 @@ export function StepAdvancedParams({
                 min={0}
                 max={1}
                 step={0.05}
-                onValueChange={([v]) => handleChange('temperature', v)}
+                onValueChange={([v]) =>
+                  v !== undefined && handleChange('temperature', v)
+                }
               />
               <p className="text-xs text-muted-foreground">
                 Lower = more deterministic, Higher = more creative
