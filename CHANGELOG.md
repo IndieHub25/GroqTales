@@ -7,7 +7,90 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 1.3.9 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+Active full support: 1.3.104 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+
+## [1.3.104] - 2026-03-05
+
+### Fixed
+- **Deprecated Groq Model**: Replaced `mixtral-8x7b-32768` with `mistral-saba-24b` in both `lib/groq-service.ts` (`GROQ_MODELS.CONTENT_IMPROVEMENT`) and `server/services/groqService.js` (`MODELS.LONG_CONTEXT`).
+- **Backend Test Lint**: Converted `forEach` expression-bodied arrow to block-bodied in `scripts/backend-test.js` (no implicit return).
+- **Backend Test Start Script**: Relaxed assertion to accept any `start*` script name (supports `start:backend`, `start-backend`, etc.).
+- **Test Fetch Leak**: Saved and restored `global.fetch` in `tests/backend/groq-service.test.js` via `afterAll` to prevent cross-test contamination.
+
+### Changed
+- **Groq Route Security** (`server/routes/groq.js`):
+  - `/models` now reads API key from `Authorization: Bearer …` header (query param kept as fallback).
+  - `ideas` action validates and clamps `count` to 1–20 range.
+  - Error responses no longer leak raw error messages; return generic `AI operation failed` with code.
+- **Groq Service Enhancements** (`server/services/groqService.js`):
+  - `buildIdeasPrompt` now incorporates the `theme` parameter.
+  - `callGroq` fetch calls protected by 30-second `AbortController` timeout.
+- **Worker Security** (`server/worker.js`):
+  - `/run` and `/track-usage` endpoints gated by `WORKER_SECRET` shared-secret auth.
+  - `tokens` payload validated as a finite positive number before accumulation.
+- **Backend Test**: Added `healthCheckPath: /healthz` assertion for Render config.
+
+### Documentation
+- **README.md**: Standardized `UNSPLASH_API_KEY` → `NEXT_PUBLIC_UNSPLASH_API_KEY` in env table and For Developers section.
+- **SECURITY.md**: Bumped latest version to 1.3.103→1.3.104, added worker secret and timeout notes.
+- **wiki/Backend-Testing.md**: Updated model list to include `mistral-saba-24b`.
+- **wiki/API-Documentation.md**: Corrected production base URL to `groqtales-backend-api.onrender.com/api`.
+
+## [1.3.103] - 2026-03-05
+
+### Fixed
+- **Cloudflare Pages Build Failure (`Invalid Version:`)**: Fixed `npm ci` crash caused by `@upstash/redis` having `"version": "v1.36.3"` in `package-lock.json`. The `v` prefix is not valid semver; npm 10.9.2 strictly validates version strings during `npm clean-install`, causing the build to exit with code 1. Corrected to `"1.36.3"`.
+
+### Changed
+- **ARCHITECTURE.md — Hybrid Database State**: Updated the Core Technologies section and added a "Data Layer — Transitional State" section documenting that MongoDB is still active for the NFT minting pipeline (`StoryMint` model via `lib/dbConnect.ts`). Includes a module-by-module audit table (live/stubbed/dead code), development guidance targeting Supabase for all new work, onboarding credentials, and a cleanup plan. Marked the document as transitional.
+
+## [1.3.102] - 2026-03-05
+
+### Added
+- **Groq AI Centralized Service**: Introduced `/server/services/groqService.js` to handle all Groq API calls (LLaMA 3.3/3.1, Mixtral) with 70+ parameters schema, robust error handling, and timeout limits.
+- **Groq Multiplexer Route**: Created `server/routes/groq.js` for flexible `/api/groq` requests matching the frontend `use-groq` hook exactly.
+- **Backend Worker Pipelines**: Implemented `server/worker.js` with functional ML analytics, background cleanup jobs, and metrics tracing.
+- **Automated Render Deployment Test**: Wrote `/scripts/backend-test.js` (`npm run test:backend`) to assert standard deployment structures, missing modules, package settings, and placeholder eliminations are completed securely.
+- **Documentation**: Updated `README.md`, `API-Documentation.md`, `AI-Prompt-Engineering.md`, and `Backend-Testing.md` to reflect full Groq backend operations.
+- **Swagger Updates**: Restructured and exposed endpoints across the backend properly replacing placeholder returns in `server/routes/stories.js` and `server/routes/ai.js`.
+
+### Fixed
+- **Render Health Check Flapping (429 Errors)**: Resolved an issue where Render liveness probes flap between "failed" and "recovered" due to HTTP 429 Too Many Requests.
+  - Added dedicated `/healthz` endpoints at the top of `backend.js` and `sdk-server.js` to ensure instantaneous, dependency-free responses.
+  - Safelisted `/healthz`, `/`, and `/api/health` in the global `express-rate-limit` configuration to guarantee liveness probes are never blocked.
+  - Updated `render.yaml` `healthCheckPath` from `/api/health` and `/sdk/health` to the isolated `/healthz` endpoint.
+  - Added explicit logging to `/healthz` requests for easier production debugging.
+- **Winston Crash Loop**: Designed fallback console logging for `groqService` execution in scenarios where `winston` modules suffer disk access issues.
+- **Module Resolution Issues**: Corrected EPERM/Lusca errors across testing infrastructure by designing standalone tester bypassing standard tree constraints.
+- **Model Namings**: Cleansed the frontend and backend of deprecated Groq mock-model nomenclature (e.g. `llama3-8b-8192-analysis`) ensuring legitimate tokens execute successfully.
+
+## [1.3.101] - 2026-03-03
+
+### Added
+- **Dynamic Blog Architecture**: Rebuilt the `/blog` system. Created a visually appealing Blog Index listing page at `/blog`, converting the previous statically-routed article into a dynamic nested route at `/blog/[slug]`. 
+- **Real-Time Marketplace Sync**: Overhauled the Marketplace feature. Renamed the legacy `/nft-marketplace` route to `/marketplace`, deleted all old static mock-data files, and constructed an intelligent UI that reads and syncs directly from the Supabase `stories` table in real time.
+
+### Fixed
+- **Image Overlays**: Configured the frontend to prioritize rendering external logo media located at `/blogs/blog-data/Blog 1/blog-logo.png` for both the index cover image and internal hero banner.
+
+## [1.3.100] - 2026-03-02
+
+### Added
+- **Top Creators API Endpoint**: Added a new `/api/v1/users/top-creators` route to fetch users and dynamically aggregate their statistics (likes, stories, views).
+- **Creators Page UI Overhaul**: Reworked `/community/creators` with a premium, sleek dark mode theme matching the platform's new aesthetic. Synced the page entirely with the new backend endpoint, replacing all mock data.
+- **Improved Contact Page**: Completely migrated the `/contact` page to a new professional layout and dark-mode premium look.
+- **Home Page Enhancements**: Updated specific links in the footer, implemented the required "Start Creating" hero navigation, and added a hero image to the "publish to the world" section.
+- **Gallery Upload Pipeline**: Added an interactive `/upload` page supporting 50MB PDF, DOCX, TXT, and MD files.
+- **Synoptic AI Agent**: Integrated Groq AI to automatically parse uploaded files and generate rich, 2-3 sentence synopses.
+- **Real-Time Archive Gallery**: Created a modern `/gallery` page to replace the old `/nft-gallery`, now perfectly synced with un-minted community works.
+- **Format Typings**: Authors can classify their uploads as 'Storybook' or 'Comic Book'.
+- **Blog Platform**: Created a premium `/blog` page containing the DEV.to article, built with custom typography and scroll progress indicators.
+
+### Fixed
+- **Floating Buttons**: Aligned the "Help Bot" and "Scroll to Top" floating action buttons horizontally on the screen.
+
+### Removed
+- **NFT Gallery**: The old static mock-data `/nft-gallery` was entirely removed and replaced with the real-time `/gallery`.
 
 ## [1.3.9] - Unreleased
 

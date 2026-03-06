@@ -51,6 +51,8 @@ Learn how to fully utilize GroqTales as a creator or user:
 
 - **[Creating Stories](Creating-Stories.md)** - Use the AI Story Generator to craft unique
   narratives with detailed customization.
+- **[AI Prompt Engineering](AI-Prompt-Engineering.md)** - Deep dive into the 70+ configurable
+  parameters, JSON output schema, and content safety rules that power story generation.
 - **[Minting NFTs](Minting-NFTs.md)** - Transform your stories into blockchain-based digital
   collectibles on Monad.
 - **[Managing Your Account](Managing-Your-Account.md)** - Connect wallets, adjust settings, and

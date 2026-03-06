@@ -92,57 +92,45 @@ simple and experiment with different inputs.
 ## 🎨 Customizing Your Story
 
 For creators seeking deeper control over their narrative, GroqTales offers an expanded "Story
-Outline" section in the AI Story Generator. This allows you to add detailed inputs that refine the
-AI's output, resulting in a more personalized story. Here's how to use each customization field:
+Outline" section with **9 collapsible accordion categories** and **70+ configurable parameters**.
+This allows you to fine-tune every aspect of the AI's output. Here's a summary of each category:
 
-- **Main Characters**: Describe the key characters who will drive your story. Include details like
-  names, personalities, motivations, and relationships to add depth. For example:
+- **Characters**: Define main characters with structured data — name, age, role, traits, and
+  background. Set the protagonist archetype (reluctant hero, antihero, chosen one) and relationship
+  dynamics between characters.
 
-  ```
-  Sir Eldric, a brave knight seeking to reclaim his lost kingdom, haunted by past failures. Lila, a witty rogue and Eldric's unlikely companion, skilled in stealth but distrustful of authority.
-  ```
+- **Plot & Structure**: Choose a plot structure (three-act, hero's journey, non-linear), define the
+  central conflict, set pacing, ending type, and specify plot twists the AI must incorporate. Control
+  foreshadowing and symbolism levels.
 
-  This helps the AI create consistent character arcs and interactions.
+- **Setting & World**: Define the time period, location, world-building depth, and atmospheric tone
+  to ground your story in a vivid environment.
 
-- **World & Setting**: Detail the environment, time period, and locations where your story unfolds.
-  A vivid setting anchors the narrative. For example:
+- **Writing Style & Tone**: Set the narrative voice (first person, third person, omniscient), tone
+  (darkly humorous, suspenseful), style (cinematic, poetic), reading level, dialogue-to-narration
+  ratio, and description detail.
 
-  ```
-  A medieval fantasy world with enchanted forests, ancient castles, and mystical creatures. The story begins in the shadowed village of Thornwick during a lunar eclipse.
-  ```
+- **Themes & Messages**: Specify primary and secondary themes, moral complexity level, and social
+  commentary depth to add layers of meaning.
 
-  This guides the AI in crafting immersive descriptions and context.
+- **Content Controls & Safety**: Set violence, romance, and language levels. Add mature content
+  warnings and specify strictly forbidden content. The AI enforces a priority chain:
+  `CONTENT SAFETY > COHERENCE > USER PREFERENCES`.
 
-- **Plot Outline**: Outline the main events, conflicts, and resolution to structure the story's
-  progression. This can be a high-level summary or specific beats. For example:
+- **Advanced Options**: Configure multiple POVs, narrative experiments (in-world documents, chat
+  logs), and recurring motifs for sophisticated storytelling.
 
-  ```
-  The knight must overcome a dark sorcerer to reclaim his throne, facing betrayal from a trusted ally along the way. The story resolves with a climactic battle at the sorcerer's tower.
-  ```
+- **Inspiration & References**: Reference similar works (for tone, not copying), and specify tropes
+  to include or avoid (Found Family, Deus Ex Machina, etc.).
 
-  This ensures the AI follows a coherent narrative arc.
+- **Technical Parameters**: Adjust AI creativity (maps to model temperature), coherence priority,
+  and hard constraints (e.g., "protagonist must survive").
 
-- **Themes & Motifs to Explore**: Specify underlying messages, recurring symbols, or emotional tones
-  you want woven into the story. For example:
+> **Tip**: Only the story overview/prompt is required — everything else is optional! The progressive
+> disclosure UI keeps simple tasks simple while offering full control when needed.
 
-  ```
-  Themes of courage and redemption, with motifs of light versus darkness symbolizing hope amidst despair.
-  ```
-
-  This adds layers of meaning to the narrative.
-
-- **Additional Details & Specific Instructions**: Add any extra requests or elements to further
-  tailor the output. This is a catch-all for unique ideas or stylistic preferences. For example:
-
-  ```
-  Include a surprising plot twist in the third act. Use a whimsical, fairy-tale tone with vivid imagery for nature scenes.
-  ```
-
-  This field lets you fine-tune aspects not covered by other inputs.
-
-**Tip**: While customization is optional, providing detailed inputs significantly enhances the AI's
-ability to create a story that matches your vision. Start with a few fields if you're new, and
-experiment with full customization as you get comfortable.
+For the **complete parameter reference** with types, examples, and the full JSON output schema, see
+the [AI Prompt Engineering](AI-Prompt-Engineering.md) wiki page.
 
 ---
 

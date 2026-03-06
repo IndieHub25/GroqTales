@@ -1,6 +1,11 @@
 // Jest setup file
 // This file runs after the test framework is initialized
 
+// Add TextEncoder/TextDecoder for Node.js environment
+const { TextEncoder, TextDecoder } = require('util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 // Mock next-auth
 jest.mock('next-auth', () => ({
   getServerSession: jest.fn(),

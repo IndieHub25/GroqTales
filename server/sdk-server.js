@@ -8,18 +8,35 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
+const { corsOriginCallback } = require('./config/cors');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
 
+// Super-fast, dependency-free health endpoint for Render liveness probes
+app.get('/healthz', (req, res) => {
+  console.log(`[${new Date().toISOString()}] GET /healthz - 200 OK`);
+  res.status(200).send('OK');
+});
+
 // Security and middleware
 app.use(helmet());
+
+// CORS configuration — imported from shared config
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || 'https://groqtales.xyz',
+    origin: corsOriginCallback,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-API-Key',
+      'X-Request-ID',
+    ],
   })
 );
+
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 

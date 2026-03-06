@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Github,
   Mail,
@@ -9,6 +10,9 @@ import {
   MapPin,
   Linkedin,
   Send,
+  Hexagon,
+  ArrowRight,
+  Globe2
 } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState } from 'react';
@@ -16,13 +20,6 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -34,51 +31,29 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-// Floating GitHub button component
-const FloatingGithub = () => (
-  <Link
-    href="https://github.com/Drago-03/GroqTales.git"
-    target="_blank"
-    className="fixed bottom-24 right-6 p-3 bg-black text-white border-4 border-white rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-300 z-50"
-  >
-    <Github className="w-8 h-8" />
-  </Link>
-);
-
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Name must be at least 2 characters.',
-  }),
-  email: z.string().email({
-    message: 'Please enter a valid email address.',
-  }),
-  subject: z.string().min(5, {
-    message: 'Subject must be at least 5 characters.',
-  }),
-  message: z.string().min(10, {
-    message: 'Message must be at least 10 characters.',
-  }),
+  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
+  email: z.string().email({ message: 'Please enter a valid email address.' }),
+  subject: z.string().min(5, { message: 'Subject must be at least 5 characters.' }),
+  message: z.string().min(10, { message: 'Message must be at least 10 characters.' }),
 });
 
 const ContactInfo = ({ icon: Icon, title, content, link }: any) => (
-  <div className="flex items-start space-x-4 p-4 border-4 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform">
-    <div className="p-2 bg-primary border-2 border-black">
-      <Icon className="w-6 h-6 text-white" />
+  <motion.div whileHover={{ scale: 1.02 }} className="flex items-start space-x-4 p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-500/30 hover:bg-white/10 transition-all group">
+    <div className="p-3 bg-black/40 rounded-xl border border-white/5 group-hover:border-emerald-500/30 group-hover:bg-emerald-500/10 transition-colors">
+      <Icon className="w-6 h-6 text-white/70 group-hover:text-emerald-400" />
     </div>
     <div>
-      <h3 className="font-black uppercase text-lg">{title}</h3>
+      <h3 className="font-semibold text-white/50 text-sm tracking-wider uppercase mb-1">{title}</h3>
       {link ? (
-        <Link
-          href={link}
-          className="text-sm font-bold text-gray-700 hover:text-primary hover:underline decoration-2"
-        >
+        <Link href={link} className="text-base font-medium text-white hover:text-emerald-300 transition-colors">
           {content}
         </Link>
       ) : (
-        <p className="text-sm font-bold text-gray-700">{content}</p>
+        <p className="text-base font-medium text-white">{content}</p>
       )}
     </div>
-  </div>
+  </motion.div>
 );
 
 export default function ContactPage() {
@@ -87,12 +62,7 @@ export default function ContactPage() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      subject: '',
-      message: '',
-    },
+    defaultValues: { name: '', email: '', subject: '', message: '' },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -103,223 +73,151 @@ export default function ContactPage() {
     setIsSubmitted(true);
     form.reset();
   }
+
+  const fadeUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  };
+
   return (
-    <div className="min-h-screen bg-yellow-50 pattern-dots">
-      <FloatingGithub />
+    <div className="min-h-screen bg-black text-white selection:bg-emerald-500/30 font-sans relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-emerald-500/10 blur-[150px] rounded-full translate-x-1/3 -translate-y-1/3" />
+        <div className="absolute bottom-0 left-0 w-[50vw] h-[50vw] bg-blue-500/10 blur-[150px] rounded-full -translate-x-1/3 translate-y-1/3" />
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
+      </div>
 
-      <div className="container mx-auto px-4 py-12 relative z-10">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12 bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-            <h1 className="text-5xl font-black uppercase mb-4 text-black [text-shadow:3px_3px_0px_#primary]">
-              Get in Touch
-            </h1>
-            <p className="text-black font-bold text-xl border-t-4 border-black pt-4 inline-block">
-              Have questions? We'd love to hear from you!
-            </p>
-          </div>
+      <div className="container mx-auto px-6 py-24 relative z-10 max-w-7xl">
+        
+        {/* Header Section */}
+        <motion.div initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }} className="text-center mb-20 max-w-3xl mx-auto">
+          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-semibold tracking-wider text-emerald-400 mb-6">
+            <Globe2 className="w-4 h-4" /> GLOBAL TRANSMISSION
+          </motion.div>
+          <motion.h1 variants={fadeUp} className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 relative">
+            Establish <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">Contact</span>
+          </motion.h1>
+          <motion.p variants={fadeUp} className="text-xl text-white/50 leading-relaxed font-light">
+            Whether you have a question about the protocol, need technical engineering support, or want to forge a creative partnership.
+          </motion.p>
+        </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Contact Form */}
-            <Card className="bg-white">
-              <CardHeader className="border-b-4 border-black bg-cyan-300">
-                <CardTitle className="text-2xl font-black uppercase">
-                  Send us a Message
-                </CardTitle>
-                <CardDescription className="text-black font-bold opacity-100">
-                  Fill out the form below and we'll get back to you ASAP!
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
+          
+          {/* Left Column: Form */}
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }} className="lg:col-span-7">
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 backdrop-blur-xl relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+              
+              <AnimatePresence mode="wait">
                 {isSubmitted ? (
-                  <div className="text-center py-8 border-4 border-black bg-green-100 p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                    <div className="bg-primary p-4 border-4 border-black w-fit mx-auto mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                      <Send className="w-8 h-8 text-white" />
+                  <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="text-center py-16 flex flex-col items-center">
+                    <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 mb-8 relative">
+                      <div className="absolute inset-0 rounded-full border border-emerald-500/30 animate-[ping_2s_ease-out_infinite]" />
+                      <Send className="w-8 h-8 text-emerald-400" />
                     </div>
-                    <h3 className="text-2xl font-black uppercase mb-2">
-                      Message Sent!
-                    </h3>
-                    <p className="text-black font-bold mb-6">
-                      Thank you for reaching out. We'll respond to your message
-                      soon.
+                    <h3 className="text-3xl font-bold mb-4 tracking-tight">Transmission Received</h3>
+                    <p className="text-white/60 mb-10 max-w-md mx-auto text-lg">
+                      Your message has been securely anchored into our network. Our specialists will respond shortly.
                     </p>
-                    <Button
-                      onClick={() => setIsSubmitted(false)}
-                      className="w-full"
-                    >
-                      Send Another Message
+                    <Button onClick={() => setIsSubmitted(false)} className="bg-white hover:bg-white/90 text-black rounded-full px-8 h-12 font-bold shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                      Initialize New Query
                     </Button>
-                  </div>
+                  </motion.div>
                 ) : (
-                  <Form {...form}>
-                    <form
-                      onSubmit={form.handleSubmit(onSubmit)}
-                      className="space-y-6"
-                    >
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
+                  <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <div className="mb-8">
+                       <h2 className="text-2xl font-semibold mb-2 flex items-center gap-2"><Hexagon className="w-5 h-5 text-emerald-400" /> Secure Terminal</h2>
+                       <p className="text-white/40 text-sm">All entries are encrypted and transmitted directly to the GroqTales support mainframe.</p>
+                    </div>
+
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 relative z-10">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <FormField control={form.control} name="name" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-white/70 font-medium">Designation</FormLabel>
+                              <FormControl>
+                                <Input placeholder="John Doe" {...field} className="bg-black/50 border-white/10 focus-visible:ring-emerald-500 h-14 rounded-xl text-white placeholder:text-white/20 transition-all hover:bg-black/70" />
+                              </FormControl>
+                              <FormMessage className="text-rose-400" />
+                            </FormItem>
+                          )} />
+                          <FormField control={form.control} name="email" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-white/70 font-medium">Network Address (Email)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="john@domain.com" {...field} className="bg-black/50 border-white/10 focus-visible:ring-emerald-500 h-14 rounded-xl text-white placeholder:text-white/20 transition-all hover:bg-black/70" />
+                              </FormControl>
+                              <FormMessage className="text-rose-400" />
+                            </FormItem>
+                          )} />
+                        </div>
+                        <FormField control={form.control} name="subject" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-black uppercase">
-                              Name
-                            </FormLabel>
+                            <FormLabel className="text-white/70 font-medium">Query Vector (Subject)</FormLabel>
                             <FormControl>
-                              <Input
-                                placeholder="YOUR NAME"
-                                {...field}
-                                className="dark:placeholder-black"
-                              />
+                              <Input placeholder="What do you need assistance with?" {...field} className="bg-black/50 border-white/10 focus-visible:ring-emerald-500 h-14 rounded-xl text-white placeholder:text-white/20 transition-all hover:bg-black/70" />
                             </FormControl>
-                            <FormMessage className="font-bold text-red-500" />
+                            <FormMessage className="text-rose-400" />
                           </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
+                        )} />
+                        <FormField control={form.control} name="message" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-black uppercase">
-                              Email
-                            </FormLabel>
+                            <FormLabel className="text-white/70 font-medium">Data Payload (Message)</FormLabel>
                             <FormControl>
-                              <Input
-                                placeholder="YOUR@EMAIL.COM"
-                                {...field}
-                                className="dark:placeholder-black"
-                              />
+                              <Textarea placeholder="Transmit your message here..." className="bg-black/50 border-white/10 focus-visible:ring-emerald-500 min-h-[160px] rounded-xl text-white placeholder:text-white/20 resize-none transition-all hover:bg-black/70 p-4" {...field} />
                             </FormControl>
-                            <FormMessage className="font-bold text-red-500" />
+                            <FormMessage className="text-rose-400" />
                           </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="subject"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="font-black uppercase">
-                              Subject
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="WHAT'S THIS ABOUT?"
-                                {...field}
-                                className="dark:placeholder-black"
-                              />
-                            </FormControl>
-                            <FormMessage className="font-bold text-red-500" />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="message"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="font-black uppercase">
-                              Message
-                            </FormLabel>
-                            <FormControl>
-                              <Textarea
-                                placeholder="YOUR MESSAGE..."
-                                className="min-h-[120px] dark:placeholder-black"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage className="font-bold text-red-500" />
-                          </FormItem>
-                        )}
-                      />
-                      <Button
-                        type="submit"
-                        className="w-full text-xl py-6 text-black"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? 'Sending...' : 'Send Message'}
-                      </Button>
-                    </form>
-                  </Form>
+                        )} />
+                        <Button type="submit" disabled={isSubmitting} className="w-full h-14 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-lg rounded-xl transition-all shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_40px_rgba(16,185,129,0.4)] group overflow-hidden relative mt-8">
+                          {isSubmitting ? (
+                            <span className="flex items-center gap-2 z-10 relative">Transmitting <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" /></span>
+                          ) : (
+                            <span className="flex items-center gap-2 z-10 relative text-primary-foreground group-hover:gap-3 transition-all">Send Transmission <ArrowRight className="w-5 h-5" /></span>
+                          )}
+                          <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] skew-x-12 z-0" />
+                        </Button>
+                      </form>
+                    </Form>
+                  </motion.div>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Contact Information */}
-            <div className="space-y-8">
-              <Card>
-                <CardHeader className="border-b-4 border-black bg-magenta-300">
-                  <CardTitle className="text-2xl font-black uppercase">
-                    Contact Information
-                  </CardTitle>
-                  <CardDescription className="text-black font-bold opacity-100">
-                    Reach out to us through any of these channels
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6 p-6">
-                  <ContactInfo
-                    icon={Mail}
-                    title="Email"
-                    content="mantejarora@gmail.com"
-                    link="mailto:mantejarora@gmail.com"
-                  />
-                  <ContactInfo
-                    icon={MessageSquare}
-                    title="Live Chat"
-                    content="Available 24/7 for premium users"
-                  />
-                  <ContactInfo
-                    icon={Phone}
-                    title="Phone"
-                    content="+91-1234567890"
-                    link="tel:+15551234567"
-                  />
-                  <ContactInfo
-                    icon={MapPin}
-                    title="Office"
-                    content="Indie Hub, India"
-                  />
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="border-b-4 border-black bg-yellow-300">
-                  <CardTitle className="text-2xl font-black uppercase">
-                    Connect With Us
-                  </CardTitle>
-                  <CardDescription className="text-black font-bold opacity-100">
-                    Follow us on social media for updates
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button
-                      variant="outline"
-                      className="w-full text-black border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-                      asChild
-                    >
-                      <Link href="https://github.com/Drago-03/" target="_blank">
-                        <Github className="w-5 h-5 mr-2" />
-                        GITHUB
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full text-black border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-                      asChild
-                    >
-                      <Link
-                        href="https://www.linkedin.com/in/mantej-singh-arora/"
-                        target="_blank"
-                      >
-                        <Linkedin className="w-5 h-5 mr-2" />
-                        LINKEDIN
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              </AnimatePresence>
             </div>
-          </div>
+          </motion.div>
+
+          {/* Right Column: Information & Socials */}
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="lg:col-span-5 flex flex-col gap-6">
+             <div className="bg-black/40 border border-white/10 rounded-3xl p-8 backdrop-blur-xl">
+               <h3 className="text-xl font-bold mb-6">Direct Channels</h3>
+               <div className="space-y-4">
+                  <ContactInfo icon={Mail} title="Support Node" content="mantejarora@gmail.com" link="mailto:mantejarora@gmail.com" />
+                  <ContactInfo icon={MessageSquare} title="Live Interface" content="24/7 Premium Relay" />
+                  <ContactInfo icon={Phone} title="Voice Comm" content="+91-1234567890" link="tel:+911234567890" />
+                  <ContactInfo icon={MapPin} title="Physical Core" content="Indie Hub HQ, India" />
+               </div>
+             </div>
+
+             <div className="bg-black/40 border border-white/10 rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden group">
+               <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+               <h3 className="text-xl font-bold mb-6 relative z-10">Network Links</h3>
+               <div className="grid grid-cols-2 gap-4 relative z-10">
+                 <Button variant="outline" className="h-14 bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-white rounded-xl transition-all hover:scale-[1.02]" asChild>
+                   <Link href="https://github.com/Drago-03/" target="_blank">
+                     <Github className="w-5 h-5 mr-2 text-white/70" /> GitHub
+                   </Link>
+                 </Button>
+                 <Button variant="outline" className="h-14 bg-white/5 border-white/10 hover:bg-blue-500/20 hover:border-blue-500/50 hover:text-blue-400 text-white rounded-xl transition-all hover:scale-[1.02]" asChild>
+                   <Link href="https://www.linkedin.com/in/mantej-singh-arora/" target="_blank">
+                     <Linkedin className="w-5 h-5 mr-2 text-[#0077b5]" /> LinkedIn
+                   </Link>
+                 </Button>
+               </div>
+             </div>
+          </motion.div>
+
         </div>
       </div>
     </div>

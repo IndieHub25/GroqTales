@@ -49,6 +49,7 @@ yarn-error.log*
 .cache/
 temp.md
 mgc.md
+.kiro/*
 
 # Large media files
 *.mp4
