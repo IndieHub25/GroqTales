@@ -139,10 +139,18 @@ export async function GET(request: NextRequest) {
     const action = searchParams.get('action');
     // Handle test action
     if (action === 'test') {
+      const internalToken = request.headers.get('x-internal-token');
+
+      if (!process.env.INTERNAL_API_TOKEN || internalToken !== process.env.INTERNAL_API_TOKEN) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+
       const useSpecialModel = searchParams.get('special') === 'true';
+
       const result = useSpecialModel
         ? await testGroqSpecialModel()
         : await testGroqConnection();
+
       return NextResponse.json(result);
     }
     // Default action: list models
