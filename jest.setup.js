@@ -24,7 +24,8 @@ jest.mock('mongoose', () => {
         actualMongoose.connection,
         { close: jest.fn().mockResolvedValue(true) }
       ),
-    },  };
+    },
+  };
 });
 
 // Mock dbConnect

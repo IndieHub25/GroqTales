@@ -190,7 +190,7 @@ describe('Pro Panel Zod Schemas', () => {
     it('should reject too many stop sequences', () => {
       const invalid = {
         ...validModelSettings,
-        stopSequences: ['END', 'STOP', 'FINISH', 'DONE', 'COMPLETE']
+        stopSequences: ['END', 'STOP', 'FINISH', 'DONE', 'COMPLETE'],
       };
       const result = ModelSettingsSchema.safeParse(invalid);
       expect(result.success).toBe(false);
@@ -206,7 +206,7 @@ describe('Pro Panel Zod Schemas', () => {
     it('should reject too many genre mashups', () => {
       const invalid = {
         ...validAdvanced,
-        genreMashup: ['fantasy', 'sci-fi', 'romance', 'thriller']
+        genreMashup: ['fantasy', 'sci-fi', 'romance', 'thriller'],
       };
       const result = AdvancedSchema.safeParse(invalid);
       expect(result.success).toBe(false);
@@ -237,7 +237,7 @@ describe('Pro Panel Zod Schemas', () => {
       expect(result.success).toBe(false);
 
       if (!result.success) {
-        const errorPaths = result.error.errors.map(e => e.path.join('.'));
+        const errorPaths = result.error.errors.map((e) => e.path.join('.'));
         expect(errorPaths).toContain('modelSettings.temperature');
         expect(errorPaths).toContain('advanced.targetAudience');
       }
@@ -281,13 +281,13 @@ describe('Pro Panel Zod Schemas', () => {
 
   describe('PresetsCollectionSchema', () => {
     const validCollection = {
-      'preset1': {
+      preset1: {
         name: 'Fantasy Epic',
         timestamp: Date.now(),
         version: 1,
         parameters: validParameters,
       },
-      'preset2': {
+      preset2: {
         name: 'Modern Romance',
         description: 'Contemporary love story',
         timestamp: Date.now(),
@@ -321,8 +321,16 @@ describe('Pro Panel Zod Schemas', () => {
     it('should enforce minimum and maximum constraints', () => {
       // Test various numeric constraints
       const testCases = [
-        { schema: CharacterSchema, field: 'protagonistDepth', invalidValue: -1 },
-        { schema: CharacterSchema, field: 'protagonistDepth', invalidValue: 101 },
+        {
+          schema: CharacterSchema,
+          field: 'protagonistDepth',
+          invalidValue: -1,
+        },
+        {
+          schema: CharacterSchema,
+          field: 'protagonistDepth',
+          invalidValue: 101,
+        },
         { schema: LengthSchema, field: 'targetWordCount', invalidValue: 50 },
         { schema: LengthSchema, field: 'chapterCount', invalidValue: 0 },
         { schema: ModelSettingsSchema, field: 'topK', invalidValue: 0 },
@@ -341,7 +349,14 @@ describe('Pro Panel Zod Schemas', () => {
       // Test theme secondary themes max constraint
       const tooManyThemes = {
         ...validTheme,
-        secondaryThemes: ['love', 'redemption', 'revenge', 'identity', 'power', 'survival']
+        secondaryThemes: [
+          'love',
+          'redemption',
+          'revenge',
+          'identity',
+          'power',
+          'survival',
+        ],
       };
       const result = ThemeSchema.safeParse(tooManyThemes);
       expect(result.success).toBe(false);
@@ -351,7 +366,7 @@ describe('Pro Panel Zod Schemas', () => {
       // Test visual art direction max length
       const tooLongDirection = {
         ...validVisual,
-        artDirection: 'x'.repeat(501)
+        artDirection: 'x'.repeat(501),
       };
       const result = VisualSchema.safeParse(tooLongDirection);
       expect(result.success).toBe(false);

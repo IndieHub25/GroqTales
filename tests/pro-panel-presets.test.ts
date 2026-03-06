@@ -94,7 +94,9 @@ describe('Preset Import', () => {
   });
 
   it('rejects valid JSON that is not an object', () => {
-    const result = PresetsCollectionSchema.safeParse(JSON.parse('"just a string"'));
+    const result = PresetsCollectionSchema.safeParse(
+      JSON.parse('"just a string"')
+    );
     expect(result.success).toBe(false);
   });
 
@@ -159,7 +161,10 @@ describe('Built-in Presets', () => {
       const result = ParametersSchema.safeParse(preset.parameters);
       expect(result.success).toBe(true);
       if (!result.success) {
-        console.error(`Built-in preset "${key}" failed validation:`, result.error.errors);
+        console.error(
+          `Built-in preset "${key}" failed validation:`,
+          result.error.errors
+        );
       }
     }
   });
@@ -179,7 +184,10 @@ describe('Built-in Presets', () => {
       const result = PresetSchema.safeParse(preset);
       expect(result.success).toBe(true);
       if (!result.success) {
-        console.error(`Initialized preset "${key}" failed:`, result.error.errors);
+        console.error(
+          `Initialized preset "${key}" failed:`,
+          result.error.errors
+        );
       }
     }
   });
@@ -252,7 +260,10 @@ describe('Import merge logic', () => {
       version: 1,
       parameters: {
         ...DEFAULT_PARAMETERS,
-        toneStyle: { ...DEFAULT_PARAMETERS.toneStyle, primaryTone: 'hopeful' as const },
+        toneStyle: {
+          ...DEFAULT_PARAMETERS.toneStyle,
+          primaryTone: 'hopeful' as const,
+        },
       },
     };
     const json = JSON.stringify({ 'noir-dossier': updated });

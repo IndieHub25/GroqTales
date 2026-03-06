@@ -51,9 +51,13 @@ describe('/api/groq Enhanced Security Tests', () => {
 
   describe('Request Size Validation', () => {
     it('should reject requests that are too large', async () => {
-      const request = createMockRequest('POST', { action: 'generate' }, {
-        'content-length': '200000', // 200KB, exceeds 100KB limit
-      });
+      const request = createMockRequest(
+        'POST',
+        { action: 'generate' },
+        {
+          'content-length': '200000', // 200KB, exceeds 100KB limit
+        }
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -64,14 +68,20 @@ describe('/api/groq Enhanced Security Tests', () => {
     });
 
     it('should accept requests within size limit', async () => {
-      (groqService.generateStoryContent as jest.Mock).mockResolvedValue('Generated story');
+      (groqService.generateStoryContent as jest.Mock).mockResolvedValue(
+        'Generated story'
+      );
 
-      const request = createMockRequest('POST', {
-        action: 'generate',
-        prompt: 'Test story prompt',
-      }, {
-        'content-length': '500', // Well within limit
-      });
+      const request = createMockRequest(
+        'POST',
+        {
+          action: 'generate',
+          prompt: 'Test story prompt',
+        },
+        {
+          'content-length': '500', // Well within limit
+        }
+      );
 
       const response = await POST(request);
 
@@ -132,7 +142,12 @@ describe('/api/groq Enhanced Security Tests', () => {
 
       expect(response.status).toBe(400);
       expect(data.error).toBe('Invalid action');
-      expect(data.validActions).toEqual(['generate', 'analyze', 'ideas', 'improve']);
+      expect(data.validActions).toEqual([
+        'generate',
+        'analyze',
+        'ideas',
+        'improve',
+      ]);
     });
   });
 
@@ -142,8 +157,14 @@ describe('/api/groq Enhanced Security Tests', () => {
         success: false,
         error: {
           errors: [
-            { path: ['modelSettings', 'temperature'], message: 'Must be between 0 and 2' },
-            { path: ['storyStructure', 'pacing'], message: 'Invalid enum value' },
+            {
+              path: ['modelSettings', 'temperature'],
+              message: 'Must be between 0 and 2',
+            },
+            {
+              path: ['storyStructure', 'pacing'],
+              message: 'Invalid enum value',
+            },
           ],
         },
       });
@@ -175,7 +196,9 @@ describe('/api/groq Enhanced Security Tests', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('Title must be a non-empty string for Pro Panel generation');
+      expect(data.error).toBe(
+        'Title must be a non-empty string for Pro Panel generation'
+      );
     });
   });
 
@@ -185,7 +208,9 @@ describe('/api/groq Enhanced Security Tests', () => {
         JSON.stringify({ error: 'Too many requests' }),
         { status: 429 }
       );
-      (rateLimit.checkRateLimit as jest.Mock).mockResolvedValue(rateLimitResponse);
+      (rateLimit.checkRateLimit as jest.Mock).mockResolvedValue(
+        rateLimitResponse
+      );
 
       const request = createMockRequest('POST', {
         action: 'generate',
@@ -296,7 +321,9 @@ describe('/api/groq Enhanced Security Tests', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('Genre is required and must be a non-empty string');
+      expect(data.error).toBe(
+        'Genre is required and must be a non-empty string'
+      );
     });
 
     it('should validate focus type for improve action', async () => {
@@ -320,7 +347,9 @@ describe('/api/groq Enhanced Security Tests', () => {
         JSON.stringify({ error: 'Too many requests' }),
         { status: 429 }
       );
-      (rateLimit.checkRateLimit as jest.Mock).mockResolvedValue(rateLimitResponse);
+      (rateLimit.checkRateLimit as jest.Mock).mockResolvedValue(
+        rateLimitResponse
+      );
 
       const url = new URL('http://localhost:3000/api/groq?action=test');
       const request = new NextRequest(url, { method: 'GET' });
@@ -347,12 +376,14 @@ describe('/api/groq Enhanced Security Tests', () => {
       expect(response.status).toBe(200);
       expect(data.models).toEqual(mockModels);
       expect(data.modelCapabilities).toBeDefined();
-      expect(data.modelCapabilities[mockModels.STORY_GENERATION]).toMatchObject({
-        maxTokens: 32768,
-        costTier: 'high',
-        qualityTier: 'premium',
-        speedTier: 'moderate',
-      });
+      expect(data.modelCapabilities[mockModels.STORY_GENERATION]).toMatchObject(
+        {
+          maxTokens: 32768,
+          costTier: 'high',
+          qualityTier: 'premium',
+          speedTier: 'moderate',
+        }
+      );
     });
   });
 
@@ -369,7 +400,9 @@ describe('/api/groq Enhanced Security Tests', () => {
     });
 
     it('should log successful requests', async () => {
-      (groqService.generateStoryContent as jest.Mock).mockResolvedValue('Generated story');
+      (groqService.generateStoryContent as jest.Mock).mockResolvedValue(
+        'Generated story'
+      );
 
       const request = createMockRequest('POST', {
         action: 'generate',

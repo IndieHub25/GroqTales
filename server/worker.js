@@ -18,7 +18,9 @@ try {
   const supabaseConfig = require('./config/supabase');
   supabaseAdmin = supabaseConfig.supabaseAdmin;
 } catch {
-  console.warn('[Worker] Supabase config not available — running in limited mode');
+  console.warn(
+    '[Worker] Supabase config not available — running in limited mode'
+  );
 }
 
 const app = express();
@@ -44,17 +46,17 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (Swagger UI, curl, server-to-server)
       if (!origin) return callback(null, true);
-      
+
       // Check if origin matches any allowed origin
-      const isAllowed = allowedOrigins.some(allowed => {
+      const isAllowed = allowedOrigins.some((allowed) => {
         try {
           const originUrl = new URL(origin);
           const originHostname = originUrl.hostname;
-          
+
           try {
             const allowedUrl = new URL(allowed);
             const allowedHost = allowedUrl.hostname;
-            
+
             // Exact hostname match
             if (originHostname === allowedHost) return true;
             // Subdomain match (e.g., preview.groqtales.xyz matches *.groqtales.xyz)
@@ -62,23 +64,31 @@ app.use(
           } catch {
             // allowed is not a valid URL, skip
           }
-          
+
           // Vercel preview: allow *.vercel.app
-          if (originHostname === 'vercel.app' || originHostname.endsWith('.vercel.app')) return true;
+          if (
+            originHostname === 'vercel.app' ||
+            originHostname.endsWith('.vercel.app')
+          )
+            return true;
           // Cloudflare Pages preview: allow *.pages.dev
-          if (originHostname === 'pages.dev' || originHostname.endsWith('.pages.dev')) return true;
-          
+          if (
+            originHostname === 'pages.dev' ||
+            originHostname.endsWith('.pages.dev')
+          )
+            return true;
+
           return false;
         } catch {
           // Invalid origin URL, reject
           return false;
         }
       });
-      
+
       if (isAllowed) {
         return callback(null, true);
       }
-      
+
       console.warn(`[CORS] Blocked origin: ${origin}`);
       return callback(new Error('Not allowed by CORS'));
     },
@@ -121,7 +131,9 @@ async function computeStoryAnalytics() {
 
   try {
     // Compute trending stories (most views in last 7 days)
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const sevenDaysAgo = new Date(
+      Date.now() - 7 * 24 * 60 * 60 * 1000
+    ).toISOString();
     const { data: trending, error: trendingErr } = await supabaseAdmin
       .from('stories')
       .select('id, title, genre, views, created_at')
@@ -130,7 +142,11 @@ async function computeStoryAnalytics() {
       .limit(20);
 
     if (!trendingErr && trending) {
-      metrics.trending = trending.map(s => ({ id: s.id, title: s.title, views: s.views }));
+      metrics.trending = trending.map((s) => ({
+        id: s.id,
+        title: s.title,
+        views: s.views,
+      }));
     }
 
     // Compute genre distribution
@@ -147,7 +163,9 @@ async function computeStoryAnalytics() {
       metrics.genreDistribution = distribution;
     }
 
-    console.log(`[Analytics] Computed: ${metrics.trending.length} trending, ${Object.keys(metrics.genreDistribution).length} genres`);
+    console.log(
+      `[Analytics] Computed: ${metrics.trending.length} trending, ${Object.keys(metrics.genreDistribution).length} genres`
+    );
   } catch (err) {
     console.error('[Analytics] Error:', err.message);
   }
@@ -177,12 +195,16 @@ async function runContentQualityChecks() {
       if (wordCount < 50) {
         flagged++;
         // Could update a quality_flag column if it exists
-        console.log(`[Quality] Flagged story ${story.id} (${story.title}): only ${wordCount} words`);
+        console.log(
+          `[Quality] Flagged story ${story.id} (${story.title}): only ${wordCount} words`
+        );
       }
     }
 
     metrics.storiesProcessed += shortStories.length;
-    console.log(`[Quality] Checked ${shortStories.length} stories, flagged ${flagged}`);
+    console.log(
+      `[Quality] Checked ${shortStories.length} stories, flagged ${flagged}`
+    );
   } catch (err) {
     console.error('[Quality] Error:', err.message);
   }
@@ -196,7 +218,9 @@ async function runDataCleanup() {
 
   try {
     // Find stale unverified stories (> 90 days old with no updates)
-    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    const ninetyDaysAgo = new Date(
+      Date.now() - 90 * 24 * 60 * 60 * 1000
+    ).toISOString();
 
     const { data: staleStories, error } = await supabaseAdmin
       .from('stories')
@@ -206,7 +230,9 @@ async function runDataCleanup() {
       .limit(100);
 
     if (!error && staleStories && staleStories.length > 0) {
-      console.log(`[Cleanup] Found ${staleStories.length} stale unverified stories older than 90 days`);
+      console.log(
+        `[Cleanup] Found ${staleStories.length} stale unverified stories older than 90 days`
+      );
       // Log for now — actual archival would move to an archive table
     }
   } catch (err) {
@@ -219,7 +245,9 @@ async function runDataCleanup() {
 // ---------------------------------------------------------------------------
 async function processJobs() {
   if (isProcessing) {
-    console.log(`[Worker] Skipping pipeline run at ${new Date().toISOString()} — previous run still in progress`);
+    console.log(
+      `[Worker] Skipping pipeline run at ${new Date().toISOString()} — previous run still in progress`
+    );
     return { skipped: true, lastRun: metrics.lastRun };
   }
 
@@ -300,11 +328,21 @@ app.post('/run', workerAuth, async (req, res) => {
   try {
     const result = await processJobs();
     if (result?.skipped) {
-      return res.status(202).json({ message: 'Pipeline run skipped: already in progress', lastRun: metrics.lastRun });
+      return res
+        .status(202)
+        .json({
+          message: 'Pipeline run skipped: already in progress',
+          lastRun: metrics.lastRun,
+        });
     }
-    return res.json({ message: 'Pipeline run completed', lastRun: metrics.lastRun });
+    return res.json({
+      message: 'Pipeline run completed',
+      lastRun: metrics.lastRun,
+    });
   } catch (err) {
-    return res.status(500).json({ error: 'Pipeline run failed', message: err.message });
+    return res
+      .status(500)
+      .json({ error: 'Pipeline run failed', message: err.message });
   }
 });
 
@@ -324,14 +362,17 @@ app.post('/track-usage', express.json(), workerAuth, (req, res) => {
 // ---------------------------------------------------------------------------
 
 // Run pipeline immediately on start, then every 5 minutes
-processJobs().catch(err => {
+processJobs().catch((err) => {
   console.error('[Worker] Initial pipeline run failed:', err.message);
 });
-setInterval(() => {
-  processJobs().catch(err => {
-    console.error('[Worker] Scheduled pipeline run failed:', err.message);
-  });
-}, 5 * 60 * 1000);
+setInterval(
+  () => {
+    processJobs().catch((err) => {
+      console.error('[Worker] Scheduled pipeline run failed:', err.message);
+    });
+  },
+  5 * 60 * 1000
+);
 
 app.listen(PORT, () => {
   console.log(`⚙️ GroqTales Worker service running on port ${PORT}`);

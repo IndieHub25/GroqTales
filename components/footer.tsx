@@ -25,15 +25,26 @@ import { UploadStoryTrigger } from './upload-story-trigger';
 export function Footer({ version }: { version?: string }) {
   const currentYear = new Date().getFullYear();
   const [showAdminModal, setShowAdminModal] = useState(false);
-  const [healthStatus, setHealthStatus] = useState<'loading' | 'ok' | 'degraded' | 'down'>('loading');
+  const [healthStatus, setHealthStatus] = useState<
+    'loading' | 'ok' | 'degraded' | 'down'
+  >('loading');
 
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/health`, { cache: 'no-store' });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/health`,
+          { cache: 'no-store' }
+        );
         if (res.ok) {
           const data = await res.json();
-          setHealthStatus((data.status === 'ok' || data.status === 'healthy') ? 'ok' : data.status === 'degraded' ? 'degraded' : 'down');
+          setHealthStatus(
+            data.status === 'ok' || data.status === 'healthy'
+              ? 'ok'
+              : data.status === 'degraded'
+                ? 'degraded'
+                : 'down'
+          );
         } else {
           setHealthStatus('down');
         }
@@ -52,7 +63,12 @@ export function Footer({ version }: { version?: string }) {
     },
     {
       icon: (
-        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          className="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
         </svg>
       ),
@@ -67,7 +83,10 @@ export function Footer({ version }: { version?: string }) {
   ];
 
   return (
-    <footer role="contentinfo" className="relative mt-20 border-t border-white/10 dark:border-white/10 bg-black dark:bg-black text-white selection:bg-white/20">
+    <footer
+      role="contentinfo"
+      className="relative mt-20 border-t border-white/10 dark:border-white/10 bg-black dark:bg-black text-white selection:bg-white/20"
+    >
       {/* Premium Background Glows */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute bottom-0 left-[-10%] w-[40vw] h-[40vw] bg-emerald-500/10 blur-[120px] rounded-full" />
@@ -87,10 +106,15 @@ export function Footer({ version }: { version?: string }) {
               </Link>
               <div className="text-left">
                 <p className="text-sm font-medium text-white/50 leading-relaxed max-w-sm">
-                  Empowering creators with AI-driven storytelling and Web3 ownership. The cinematic platform for your imagination.
+                  Empowering creators with AI-driven storytelling and Web3
+                  ownership. The cinematic platform for your imagination.
                 </p>
               </div>
-              <div className="flex gap-3 pt-2" role="group" aria-label="Social media links">
+              <div
+                className="flex gap-3 pt-2"
+                role="group"
+                aria-label="Social media links"
+              >
                 {socialLinks.map((link) => (
                   <Link
                     key={link.url}
@@ -128,7 +152,12 @@ export function Footer({ version }: { version?: string }) {
                     {link.isUpload ? (
                       <span className="relative group inline-block">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity absolute -left-3 top-[50%] -translate-y-[50%] pointer-events-none" />
-                        <UploadStoryTrigger variant="ghost" className="p-0 h-auto font-medium text-white/60 group-hover:text-white transition-colors duration-300" buttonText="Upload Story" icon={false} />
+                        <UploadStoryTrigger
+                          variant="ghost"
+                          className="p-0 h-auto font-medium text-white/60 group-hover:text-white transition-colors duration-300"
+                          buttonText="Upload Story"
+                          icon={false}
+                        />
                       </span>
                     ) : (
                       <Link
@@ -217,31 +246,50 @@ export function Footer({ version }: { version?: string }) {
             <div className="group relative flex items-center justify-center p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all cursor-default">
               <span className="text-white/40 mr-2">Powered by</span>
               <div className="relative inline-block overflow-hidden">
-                <span className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-emerald-600 relative z-10 group-hover:animate-glitch-1">Monad</span>
-                <span className="font-bold text-emerald-500 absolute top-0 left-0 -translate-x-[2px] opacity-0 group-hover:opacity-100 group-hover:animate-glitch-2">Monad</span>
-                <span className="font-bold text-blue-500 absolute top-0 left-0 translate-x-[2px] opacity-0 group-hover:opacity-100 group-hover:animate-glitch-3">Monad</span>
+                <span className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-emerald-600 relative z-10 group-hover:animate-glitch-1">
+                  Monad
+                </span>
+                <span className="font-bold text-emerald-500 absolute top-0 left-0 -translate-x-[2px] opacity-0 group-hover:opacity-100 group-hover:animate-glitch-2">
+                  Monad
+                </span>
+                <span className="font-bold text-blue-500 absolute top-0 left-0 translate-x-[2px] opacity-0 group-hover:opacity-100 group-hover:animate-glitch-3">
+                  Monad
+                </span>
               </div>
               <span className="text-white/30 mx-2">×</span>
               <div className="relative inline-block overflow-hidden">
-                <span className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600 relative z-10 group-hover:animate-glitch-1">Groq AI</span>
-                <span className="font-bold text-cyan-400 absolute top-0 left-0 -translate-x-[2px] opacity-0 group-hover:opacity-100 group-hover:animate-glitch-2">Groq AI</span>
-                <span className="font-bold text-red-500 absolute top-0 left-0 translate-x-[2px] opacity-0 group-hover:opacity-100 group-hover:animate-glitch-3">Groq AI</span>
+                <span className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600 relative z-10 group-hover:animate-glitch-1">
+                  Groq AI
+                </span>
+                <span className="font-bold text-cyan-400 absolute top-0 left-0 -translate-x-[2px] opacity-0 group-hover:opacity-100 group-hover:animate-glitch-2">
+                  Groq AI
+                </span>
+                <span className="font-bold text-red-500 absolute top-0 left-0 translate-x-[2px] opacity-0 group-hover:opacity-100 group-hover:animate-glitch-3">
+                  Groq AI
+                </span>
               </div>
             </div>
 
             <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 border border-white/10 rounded-full">
               <span
-                className={`w-1.5 h-1.5 rounded-full ${healthStatus === 'ok'
-                  ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse'
-                  : healthStatus === 'degraded'
-                    ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)] animate-pulse'
-                    : healthStatus === 'down'
-                      ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]'
-                      : 'bg-white/30'
-                  }`}
+                className={`w-1.5 h-1.5 rounded-full ${
+                  healthStatus === 'ok'
+                    ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse'
+                    : healthStatus === 'degraded'
+                      ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)] animate-pulse'
+                      : healthStatus === 'down'
+                        ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]'
+                        : 'bg-white/30'
+                }`}
               />
               <span className="text-xs font-medium text-white/50 tracking-wider uppercase">
-                {healthStatus === 'ok' ? 'System Operational' : healthStatus === 'degraded' ? 'Degraded Performance' : healthStatus === 'down' ? 'System Offline' : 'Checking Status...'}
+                {healthStatus === 'ok'
+                  ? 'System Operational'
+                  : healthStatus === 'degraded'
+                    ? 'Degraded Performance'
+                    : healthStatus === 'down'
+                      ? 'System Offline'
+                      : 'Checking Status...'}
               </span>
             </div>
 
@@ -252,7 +300,9 @@ export function Footer({ version }: { version?: string }) {
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-1.5 text-white/40 hover:text-white transition-colors"
               >
-                <span className="text-xs uppercase tracking-widest">Built by</span>
+                <span className="text-xs uppercase tracking-widest">
+                  Built by
+                </span>
                 <span className="font-bold">INDIE HUB</span>
                 <ExternalLink className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 transition-opacity group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </Link>
@@ -261,8 +311,9 @@ export function Footer({ version }: { version?: string }) {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @keyframes glitch-1 {
           0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
           20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
@@ -290,7 +341,9 @@ export function Footer({ version }: { version?: string }) {
         .animate-glitch-1 { animation: glitch-1 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite; }
         .animate-glitch-2 { animation: glitch-2 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite; }
         .animate-glitch-3 { animation: glitch-3 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite; }
-      `}} />
+      `,
+        }}
+      />
       <AdminLoginModal open={showAdminModal} onOpenChange={setShowAdminModal} />
     </footer>
   );

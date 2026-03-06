@@ -8,13 +8,15 @@ export const PARAMETER_TOOLTIPS = {
   narrativeStyle: {
     title: 'Narrative Structure',
     description: 'How the story is organized and told',
-    examples: 'Linear (chronological), Non-linear (jumps in time), Episodic (distinct chapters)',
+    examples:
+      'Linear (chronological), Non-linear (jumps in time), Episodic (distinct chapters)',
     powerLevel: 'High impact on readability',
   },
   pacing: {
     title: 'Story Pacing',
     description: 'Speed at which plot events unfold',
-    examples: 'Slow-burn (gradual buildup), Fast-paced (rapid events), Variable (mixed speeds)',
+    examples:
+      'Slow-burn (gradual buildup), Fast-paced (rapid events), Variable (mixed speeds)',
     powerLevel: 'Moderate impact on engagement',
   },
   plotComplexity: {
@@ -52,7 +54,8 @@ export const PARAMETER_TOOLTIPS = {
   dialogueStyle: {
     title: 'Character Speech',
     description: 'How characters speak and communicate',
-    examples: 'Naturalistic (realistic), Witty (clever banter), Poetic (lyrical)',
+    examples:
+      'Naturalistic (realistic), Witty (clever banter), Poetic (lyrical)',
     powerLevel: 'Moderate impact on character voice',
   },
 
@@ -72,7 +75,8 @@ export const PARAMETER_TOOLTIPS = {
   technologyLevel: {
     title: 'Tech Era',
     description: 'Technological advancement in the world',
-    examples: 'Medieval (swords/horses), Near-future (advanced but recognizable)',
+    examples:
+      'Medieval (swords/horses), Near-future (advanced but recognizable)',
     powerLevel: 'High impact on possibilities',
   },
   magicSystemComplexity: {
@@ -86,13 +90,15 @@ export const PARAMETER_TOOLTIPS = {
   primaryTone: {
     title: 'Story Mood',
     description: 'Overall emotional feel of the narrative',
-    examples: 'Dark (serious/grim), Humorous (light/funny), Suspenseful (tense)',
+    examples:
+      'Dark (serious/grim), Humorous (light/funny), Suspenseful (tense)',
     powerLevel: 'Foundational story element',
   },
   proseStyle: {
     title: 'Writing Style',
     description: 'How the text is written and structured',
-    examples: 'Literary (elegant prose), Pulpy (fast action), Cinematic (visual)',
+    examples:
+      'Literary (elegant prose), Pulpy (fast action), Cinematic (visual)',
     powerLevel: 'High impact on reading experience',
   },
   vocabularyLevel: {
@@ -172,7 +178,8 @@ export const PARAMETER_TOOLTIPS = {
   pointOfView: {
     title: 'Narrative Perspective',
     description: 'Who tells the story and how',
-    examples: 'First-person (I/me), Third-person limited (he/she, one viewpoint)',
+    examples:
+      'First-person (I/me), Third-person limited (he/she, one viewpoint)',
     powerLevel: 'Foundational: Major impact on reader experience',
   },
   unreliableNarrator: {

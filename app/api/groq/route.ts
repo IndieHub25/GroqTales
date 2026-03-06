@@ -48,7 +48,7 @@ function validateRequestSize(request: NextRequest): NextResponse | null {
     return NextResponse.json(
       {
         error: 'Request too large',
-        maxSize: `${MAX_REQUEST_SIZE / 1024}KB`
+        maxSize: `${MAX_REQUEST_SIZE / 1024}KB`,
       },
       { status: 413 }
     );
@@ -161,7 +161,11 @@ export async function POST(request: NextRequest) {
               (e) => `${e.path.join('.')}: ${e.message}`
             );
 
-            logRequest('POST', clientIp, action, false,
+            logRequest(
+              'POST',
+              clientIp,
+              action,
+              false,
               `Pro Panel validation failed: ${errorDetails.join(', ')}`
             );
 
@@ -176,10 +180,22 @@ export async function POST(request: NextRequest) {
           }
 
           // Additional validation for Pro Panel specific fields
-          if (title && (typeof title !== 'string' || title.trim().length === 0)) {
-            logRequest('POST', clientIp, action, false, 'Invalid title for Pro Panel generation');
+          if (
+            title &&
+            (typeof title !== 'string' || title.trim().length === 0)
+          ) {
+            logRequest(
+              'POST',
+              clientIp,
+              action,
+              false,
+              'Invalid title for Pro Panel generation'
+            );
             return NextResponse.json(
-              { error: 'Title must be a non-empty string for Pro Panel generation' },
+              {
+                error:
+                  'Title must be a non-empty string for Pro Panel generation',
+              },
               { status: 400 }
             );
           }
@@ -225,7 +241,13 @@ export async function POST(request: NextRequest) {
 
       case 'ideas': {
         if (!genre || typeof genre !== 'string' || genre.trim().length === 0) {
-          logRequest('POST', clientIp, action, false, 'Invalid or missing genre');
+          logRequest(
+            'POST',
+            clientIp,
+            action,
+            false,
+            'Invalid or missing genre'
+          );
           return NextResponse.json(
             { error: 'Genre is required and must be a non-empty string' },
             { status: 400 }
@@ -256,13 +278,18 @@ export async function POST(request: NextRequest) {
 
       default:
         // This should never be reached due to earlier validation
-        logRequest('POST', clientIp, action, false, `Unhandled action: ${action}`);
+        logRequest(
+          'POST',
+          clientIp,
+          action,
+          false,
+          `Unhandled action: ${action}`
+        );
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 
     logRequest('POST', clientIp, action, true);
     return NextResponse.json({ result });
-
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error));
 
@@ -271,13 +298,22 @@ export async function POST(request: NextRequest) {
     let errorCategory = 'internal_error';
 
     if (err.message) {
-      if (err.message.includes('Invalid input') || err.message.includes('validation')) {
+      if (
+        err.message.includes('Invalid input') ||
+        err.message.includes('validation')
+      ) {
         statusCode = 400;
         errorCategory = 'validation_error';
-      } else if (err.message.includes('rate limit') || err.message.includes('quota')) {
+      } else if (
+        err.message.includes('rate limit') ||
+        err.message.includes('quota')
+      ) {
         statusCode = 429;
         errorCategory = 'rate_limit_error';
-      } else if (err.message.includes('unauthorized') || err.message.includes('authentication')) {
+      } else if (
+        err.message.includes('unauthorized') ||
+        err.message.includes('authentication')
+      ) {
         statusCode = 401;
         errorCategory = 'auth_error';
       } else if (err.message.includes('timeout')) {
@@ -297,7 +333,13 @@ export async function POST(request: NextRequest) {
       stack: process.env.NODE_ENV === 'development' ? err.stack : undefined, // Only log stack in dev
     });
 
-    logRequest('POST', clientIp, action, false, `${errorCategory}: ${err.message}`);
+    logRequest(
+      'POST',
+      clientIp,
+      action,
+      false,
+      `${errorCategory}: ${err.message}`
+    );
 
     return NextResponse.json(
       {
@@ -323,7 +365,10 @@ export async function GET(request: NextRequest) {
     // Handle test action with additional security
     if (action === 'test') {
       // Rate limit test requests as well
-      const rateLimitResponse = await checkRateLimit(rateLimiters.general, clientIp);
+      const rateLimitResponse = await checkRateLimit(
+        rateLimiters.general,
+        clientIp
+      );
       if (rateLimitResponse) {
         logRequest('GET', clientIp, 'test', false, 'Rate limit exceeded');
         return rateLimitResponse;
@@ -349,8 +394,10 @@ export async function GET(request: NextRequest) {
       // Provide human-readable names for the models with enhanced metadata
       modelNames: {
         [GROQ_MODELS.STORY_GENERATION]: 'Llama 3.3 (70B) - Story Generation',
-        [GROQ_MODELS.STORY_ANALYSIS]: 'Llama 3.1 (8B) - Story Analysis & Recommendations',
-        [GROQ_MODELS.CONTENT_IMPROVEMENT]: 'Mixtral (8x7B) - Content Improvement',
+        [GROQ_MODELS.STORY_ANALYSIS]:
+          'Llama 3.1 (8B) - Story Analysis & Recommendations',
+        [GROQ_MODELS.CONTENT_IMPROVEMENT]:
+          'Mixtral (8x7B) - Content Improvement',
       },
       // Additional metadata for Pro Panel
       modelCapabilities: {
@@ -374,7 +421,6 @@ export async function GET(request: NextRequest) {
         },
       },
     });
-
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error));
 

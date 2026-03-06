@@ -154,21 +154,26 @@ const nextConfig = {
   },
 
   // Security headers (not supported with output: 'export', use public/_headers for CF)
-  ...(isCfBuild ? {} : {
-    async headers() {
-      return [
-        {
-          source: '/(.*)',
-          headers: [
-            { key: 'X-Frame-Options', value: 'DENY' },
-            { key: 'X-Content-Type-Options', value: 'nosniff' },
-            { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
-            { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
-          ],
+  ...(isCfBuild
+    ? {}
+    : {
+        async headers() {
+          return [
+            {
+              source: '/(.*)',
+              headers: [
+                { key: 'X-Frame-Options', value: 'DENY' },
+                { key: 'X-Content-Type-Options', value: 'nosniff' },
+                { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
+                {
+                  key: 'Permissions-Policy',
+                  value: 'camera=(), microphone=(), geolocation=()',
+                },
+              ],
+            },
+          ];
         },
-      ];
-    },
-  }),
+      }),
 
   // Webpack configuration
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
@@ -217,31 +222,41 @@ const nextConfig = {
   },
 
   // Redirects and rewrites (not supported with output: 'export')
-  ...(isCfBuild ? {} : {
-    async redirects() {
-      return [
-        { source: '/home', destination: '/', permanent: true },
-      ];
-    },
-    async rewrites() {
-      const envUrl = process.env.NEXT_PUBLIC_API_URL;
-      const apiUrl = (envUrl && envUrl.startsWith('http')) ? envUrl : 'http://localhost:3001';
+  ...(isCfBuild
+    ? {}
+    : {
+        async redirects() {
+          return [{ source: '/home', destination: '/', permanent: true }];
+        },
+        async rewrites() {
+          const envUrl = process.env.NEXT_PUBLIC_API_URL;
+          const apiUrl =
+            envUrl && envUrl.startsWith('http')
+              ? envUrl
+              : 'http://localhost:3001';
 
-      const sdkEnvUrl = process.env.NEXT_PUBLIC_SDK_URL;
-      const sdkUrl = (sdkEnvUrl && sdkEnvUrl.startsWith('http')) ? sdkEnvUrl : 'http://localhost:3002';
+          const sdkEnvUrl = process.env.NEXT_PUBLIC_SDK_URL;
+          const sdkUrl =
+            sdkEnvUrl && sdkEnvUrl.startsWith('http')
+              ? sdkEnvUrl
+              : 'http://localhost:3002';
 
-      return [
-        { source: '/api/:path*', destination: `${apiUrl}/api/:path*` },
-        { source: '/sdk/:path*', destination: `${sdkUrl}/sdk/:path*` },
-      ];
-    },
-  }),
+          return [
+            { source: '/api/:path*', destination: `${apiUrl}/api/:path*` },
+            { source: '/sdk/:path*', destination: `${sdkUrl}/sdk/:path*` },
+          ];
+        },
+      }),
 
   // Output configuration
   // For Cloudflare Pages: use undefined to allow @cloudflare/next-on-pages to handle dynamic routes
   // 'standalone' = self-contained Node.js server for Render
   // undefined = default Next.js behavior with dynamic routes and SSR
-  output: isCfBuild ? undefined : (process.env.BUILD_STANDALONE === 'true' ? 'standalone' : undefined),
+  output: isCfBuild
+    ? undefined
+    : process.env.BUILD_STANDALONE === 'true'
+      ? 'standalone'
+      : undefined,
 
   // Experimental features
   experimental: {

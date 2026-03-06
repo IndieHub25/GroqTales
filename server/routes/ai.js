@@ -94,7 +94,9 @@ router.post('/generate', async (req, res) => {
     const { prompt, model, formatType, parameters = {} } = req.body;
 
     if (!prompt && !parameters.theme) {
-      return res.status(400).json({ error: 'prompt or parameters.theme is required' });
+      return res
+        .status(400)
+        .json({ error: 'prompt or parameters.theme is required' });
     }
 
     const result = await groqService.generate({

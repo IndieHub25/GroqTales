@@ -1,7 +1,7 @@
 /**
  * CORS Configuration
  * Centralized CORS configuration shared by backend.js and sdk-server.js
- * 
+ *
  * Exports the allowedOrigins array and corsOriginCallback function
  * to ensure consistent CORS validation across all servers and tests.
  */
@@ -34,7 +34,7 @@ function normalizeOrigin(origin) {
  * CORS origin callback for express-cors
  * Performs exact equality checks after normalization to prevent
  * security issues with startsWith matching (e.g., groqtales.xyz.evil.com)
- * 
+ *
  * @param {string|undefined} origin - The origin header from the request
  * @param {function} callback - Express cors callback(err, allow)
  */
@@ -45,18 +45,18 @@ function corsOriginCallback(origin, callback) {
   const normalizedIncomingOrigin = normalizeOrigin(origin);
 
   // Check for exact match with allowed origins
-  const isAllowed = allowedOrigins.some(allowed => {
+  const isAllowed = allowedOrigins.some((allowed) => {
     const normalizedAllowed = normalizeOrigin(allowed);
-    
+
     // Exact match (after normalization)
     if (normalizedIncomingOrigin === normalizedAllowed) return true;
-    
+
     // Check for Vercel preview deployments (allow all *.vercel.app)
     if (origin.includes('vercel.app')) return true;
-    
+
     // Check for Cloudflare Pages preview deployments (allow all *.pages.dev)
     if (origin.includes('pages.dev')) return true;
-    
+
     return false;
   });
 

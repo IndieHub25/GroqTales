@@ -872,13 +872,12 @@
 
   /* Mugshot scanline overlay */
   .mugshot-overlay {
-    background-image:
-      linear-gradient(
-        to bottom,
-        transparent 0%,
-        transparent 85%,
-        rgba(0, 0, 0, 0.4) 100%
-      );
+    background-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 85%,
+      rgba(0, 0, 0, 0.4) 100%
+    );
     background-size: 100% 100%;
   }
 

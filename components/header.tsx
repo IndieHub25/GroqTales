@@ -72,7 +72,9 @@ export function Header() {
       setSession(session);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
@@ -119,13 +121,13 @@ export function Header() {
     { type: 'link', href: '/blog', label: 'Blogs' },
     ...(account
       ? [
-        {
-          type: 'link' as const,
-          href: '/dashboard/royalties',
-          label: 'Earnings',
-          icon: <DollarSign className="h-4 w-4 mr-1.5 colorful-icon" />,
-        },
-      ]
+          {
+            type: 'link' as const,
+            href: '/dashboard/royalties',
+            label: 'Earnings',
+            icon: <DollarSign className="h-4 w-4 mr-1.5 colorful-icon" />,
+          },
+        ]
       : []),
   ];
 
@@ -165,7 +167,11 @@ export function Header() {
             </span>
           </Link>
 
-          <nav role="navigation" aria-label="Primary navigation" className="hidden lg:flex items-center space-x-2">
+          <nav
+            role="navigation"
+            aria-label="Primary navigation"
+            className="hidden lg:flex items-center space-x-2"
+          >
             {navItems.map((item, index) => (
               <motion.div
                 key={
@@ -209,7 +215,9 @@ export function Header() {
                         <DropdownMenuItem key={subItem.href} asChild>
                           <Link
                             href={subItem.href}
-                            aria-current={pathname === subItem.href ? 'page' : undefined}
+                            aria-current={
+                              pathname === subItem.href ? 'page' : undefined
+                            }
                             className="flex items-center w-full text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
                           >
                             {subItem.icon && subItem.icon}
@@ -236,7 +244,11 @@ export function Header() {
 
         <div className="flex items-center space-x-2">
           <div className="flex items-center gap-2 mr-2">
-            <UploadStoryTrigger variant="outline" className="hidden lg:flex" buttonText="Upload" />
+            <UploadStoryTrigger
+              variant="outline"
+              className="hidden lg:flex"
+              buttonText="Upload"
+            />
             <Button
               variant="outline"
               size="sm"
@@ -321,7 +333,9 @@ export function Header() {
                                 : 'text-white/80 hover:text-white'
                             )}
                           >
-                            {item.icon && <span className="mr-3">{item.icon}</span>}
+                            {item.icon && (
+                              <span className="mr-3">{item.icon}</span>
+                            )}
                             {item.label}
                           </Link>
                         )

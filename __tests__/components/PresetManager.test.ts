@@ -169,7 +169,8 @@ describe('Pro Panel Preset Functionality', () => {
           description,
           timestamp: Date.now(),
         };
-        mockStoreState.presets[name.toLowerCase().replace(/\s+/g, '-')] = preset;
+        mockStoreState.presets[name.toLowerCase().replace(/\s+/g, '-')] =
+          preset;
         mockStoreState.currentPresetName = name;
         mockStoreState.isModified = false;
       }),
@@ -184,7 +185,9 @@ describe('Pro Panel Preset Functionality', () => {
 
       deletePreset: jest.fn((key: string) => {
         delete mockStoreState.presets[key];
-        if (mockStoreState.currentPresetName === mockStoreState.presets[key]?.name) {
+        if (
+          mockStoreState.currentPresetName === mockStoreState.presets[key]?.name
+        ) {
           mockStoreState.currentPresetName = 'Default';
         }
       }),
@@ -223,12 +226,14 @@ describe('Pro Panel Preset Functionality', () => {
     };
 
     // Mock the store hook
-    (useProPanelStore as jest.Mock).mockImplementation((selector?: Function) => {
-      if (selector) {
-        return selector(mockStoreState);
+    (useProPanelStore as jest.Mock).mockImplementation(
+      (selector?: Function) => {
+        if (selector) {
+          return selector(mockStoreState);
+        }
+        return { ...mockStoreState, ...mockStoreActions };
       }
-      return { ...mockStoreState, ...mockStoreActions };
-    });
+    );
   });
 
   describe('Preset Save Functionality', () => {
@@ -239,10 +244,17 @@ describe('Pro Panel Preset Functionality', () => {
         savePreset('My Awesome Story', 'A tale of adventure');
       });
 
-      expect(savePreset).toHaveBeenCalledWith('My Awesome Story', 'A tale of adventure');
+      expect(savePreset).toHaveBeenCalledWith(
+        'My Awesome Story',
+        'A tale of adventure'
+      );
       expect(mockStoreState.presets['my-awesome-story']).toBeDefined();
-      expect(mockStoreState.presets['my-awesome-story'].name).toBe('My Awesome Story');
-      expect(mockStoreState.presets['my-awesome-story'].description).toBe('A tale of adventure');
+      expect(mockStoreState.presets['my-awesome-story'].name).toBe(
+        'My Awesome Story'
+      );
+      expect(mockStoreState.presets['my-awesome-story'].description).toBe(
+        'A tale of adventure'
+      );
       expect(mockStoreState.currentPresetName).toBe('My Awesome Story');
       expect(mockStoreState.isModified).toBe(false);
     });
@@ -256,7 +268,9 @@ describe('Pro Panel Preset Functionality', () => {
 
       expect(savePreset).toHaveBeenCalledWith('Simple Story');
       expect(mockStoreState.presets['simple-story']).toBeDefined();
-      expect(mockStoreState.presets['simple-story'].description).toBeUndefined();
+      expect(
+        mockStoreState.presets['simple-story'].description
+      ).toBeUndefined();
     });
 
     it('should handle saving with empty name gracefully', () => {
@@ -498,7 +512,9 @@ describe('Pro Panel Preset Functionality', () => {
 
       importPresets(jsonWithTimestamp);
 
-      expect(mockStoreState.presets['timestamped-preset'].timestamp).toBe(fixedTimestamp);
+      expect(mockStoreState.presets['timestamped-preset'].timestamp).toBe(
+        fixedTimestamp
+      );
     });
   });
 });

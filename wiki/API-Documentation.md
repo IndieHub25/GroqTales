@@ -129,12 +129,13 @@ Endpoints for interacting directly with the centralized Groq AI service.
 
 ### Story Generation
 
-Endpoints for generating AI-powered stories using the Groq AI backend. They interact with `groqService` using a structured prompt
-engineering system with **70+ configurable parameters**. See the
-[AI Prompt Engineering](AI-Prompt-Engineering.md) wiki page for the full parameter reference.
+Endpoints for generating AI-powered stories using the Groq AI backend. They interact with
+`groqService` using a structured prompt engineering system with **70+ configurable parameters**. See
+the [AI Prompt Engineering](AI-Prompt-Engineering.md) wiki page for the full parameter reference.
 
 - **Generate Story** (POST `/api/v1/stories/generate`)
-  - **Description**: Generate AI story content from either a direct `prompt` or a themed configuration.
+  - **Description**: Generate AI story content from either a direct `prompt` or a themed
+    configuration.
   - **Request Body** (example — `prompt` or `theme` is required):
 
     ```json

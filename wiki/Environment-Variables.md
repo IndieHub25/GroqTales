@@ -133,12 +133,12 @@ variable includes its purpose, whether it's required, and default or example val
     PostgreSQL with Row Level Security.
   - **Required**: Yes, for all database and authentication operations.
   - **Example**: `https://your-project-id.supabase.co`
-  - **Source**: Create a project at [Supabase](https://supabase.com/) and find the URL in
-    Settings → API.
+  - **Source**: Create a project at [Supabase](https://supabase.com/) and find the URL in Settings →
+    API.
 - **NEXT_PUBLIC_SUPABASE_ANON_KEY**
   - **Purpose**: The anonymous/public API key for your Supabase project, used for client-side
-    access. This key is safe to expose in the browser as Row Level Security policies restrict
-    data access.
+    access. This key is safe to expose in the browser as Row Level Security policies restrict data
+    access.
   - **Required**: Yes, for all database and authentication operations.
   - **Example**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
   - **Source**: Available in your Supabase project under Settings → API → Project API Keys.
