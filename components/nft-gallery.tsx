@@ -2,6 +2,7 @@
 
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation'; // ✅ CHANGE 1: Added useRouter import
 import React, { useState, useEffect } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -25,9 +26,11 @@ interface Story {
   salesCount: number;
   royaltyPercentage?: number;
 }
+
 export function NFTGallery() {
   const [stories, setStories] = useState<Story[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     fetchStories();
@@ -45,7 +48,6 @@ export function NFTGallery() {
     }
   };
 
-  // Add a filter for best sellers based on a hypothetical salesCount property
   const bestSellers =
     stories
       ?.filter((story) => story.salesCount > 0)
@@ -58,6 +60,7 @@ export function NFTGallery() {
       </div>
     );
   }
+
   return (
     <div className="flex flex-col gap-6 px-2 py-6 max-w-7xl mx-auto">
       <h2 className="text-2xl font-bold text-foreground pl-2">NFT Gallery</h2>
@@ -88,15 +91,19 @@ export function NFTGallery() {
                 </div>
                 <p className="line-clamp-3">{story.content}</p>
               </CardContent>
-              <CardFooter className="flex justify-between items-center">
+              <CardFooter className="flex justify-between items-center gap-2">
                 <span className="text-sm text-muted-foreground">
                   By {story.author}
                 </span>
                 <span className="text-sm font-medium">
-                  Price: {story.price} ETH
+                  {story.price} ETH
                 </span>
-                <Button variant="outline" size="sm">
-                  View Details
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => router.push(`/nft/${story.id}`)}
+                >
+                  Buy Now
                 </Button>
               </CardFooter>
             </Card>
