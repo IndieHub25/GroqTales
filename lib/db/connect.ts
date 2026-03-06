@@ -71,9 +71,8 @@ export async function connectWithRetry(
   connectionPromise = (async () => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(
-          `[DB] Connection attempt ${attempt}/${maxRetries} to ${sanitizedUri}`
-        );
+        // 3. Log each specific attempt and the sanitized URI
+        console.log(`[DB] Attempt ${attempt}/${maxRetries}: Connecting to ${sanitizedUri}`);
         state.connectionAttempts = attempt;
 
         const client = new MongoClient(uri, {
@@ -85,13 +84,8 @@ export async function connectWithRetry(
         await client.connect();
 
         // Verify connection with ping
-        try {
-          const adminDb = client.db().admin();
-          await adminDb.ping();
-        } catch (pingError) {
-          await client.close();
-          throw pingError;
-        }
+        const adminDb = client.db().admin();
+        await adminDb.ping();
 
         // Update state
         state.client = client;
@@ -99,27 +93,21 @@ export async function connectWithRetry(
         state.lastError = null;
         state.lastConnectionTime = new Date();
 
-        console.log(`[DB] Connected successfully on attempt ${attempt}`);
+        
+        console.log(`[DB] SUCCESS: Connected to database on attempt ${attempt}`);
         return client;
+
       } catch (error: any) {
         const errorMessage = error.message || 'Unknown error';
         state.lastError = errorMessage;
-
-        // Calculate exponential backoff delay
         const delay = retryDelayMs * Math.pow(2, attempt - 1);
 
-        console.error(
-          `[DB] Attempt ${attempt}/${maxRetries} failed: ${errorMessage}`
-        );
+        console.error(`[DB] Attempt ${attempt} failed: ${errorMessage}`);
 
         if (attempt === maxRetries) {
-          console.error(
-            '[DB] Max retries reached. Failed to establish connection.'
-          );
+          console.error('[DB] CRITICAL: Max retries reached. Telemetry will be disabled for this session.');
           state.isConnected = false;
-          throw new Error(
-            `Failed to connect to MongoDB after ${maxRetries} attempts: ${errorMessage}`
-          );
+          throw new Error(`Failed to connect after ${maxRetries} attempts: ${errorMessage}`);
         }
 
         console.log(`[DB] Retrying in ${delay}ms...`);
@@ -251,4 +239,25 @@ export function setupGracefulShutdown(): void {
   process.on('SIGTERM', () => shutdownHandler('SIGTERM'));
 
   console.log('[Server] Graceful shutdown handlers registered');
+}
+
+export async function getDb(): Promise<Db> {
+  const uri = process.env.MONGODB_URI;
+  const dbName = process.env.MONGODB_DB_NAME;
+
+  if (!uri) {
+    throw new Error('MONGODB_URI is not configured');
+  }
+
+  if (!dbName) {
+    throw new Error('MONGODB_DB_NAME is not configured');
+  }
+
+  const client = await connectWithRetry({
+    uri,
+    maxRetries: 5,
+    retryDelayMs: 1000,
+  });
+
+  return client.db(dbName);
 }

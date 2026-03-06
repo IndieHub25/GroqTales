@@ -1,0 +1,12 @@
+{
+  "active_experiments": {
+    "primary_story_model": "gemini-3-flash-preview",
+    "fallback_story_model": "gemini-3.1-flash-lite-preview",
+    "current_prompt_variant": "v1_standard",
+    "enable_fallback_logic": true
+  },
+  "metadata": {
+    "last_updated": "2026-02-21",
+    "version": "1.0.0"
+  }
+}
