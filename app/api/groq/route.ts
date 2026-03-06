@@ -7,7 +7,6 @@ import {
   improveStoryContent,
   testGroqConnection,
   testGroqSpecialModel,
-  generateStoryWithProConfig,
 } from '@/lib/groq-service';
 import { checkRateLimit, getClientIp, rateLimiters } from '@/lib/rate-limit';
 import { ParametersSchema } from '@/lib/schemas/proPanelSchemas';
@@ -185,14 +184,13 @@ export async function POST(request: NextRequest) {
             );
           }
 
-          result = await generateStoryWithProConfig(
-            prompt,
-            validationResult.data,
-            {
-              title,
-              apiKey: updatedOptions?.apiKey,
-            }
-          );
+          result = await generateStoryContent({
+            theme: prompt,
+            genre: validationResult.data.toneStyle?.primaryTone || 'general',
+            tone: validationResult.data.toneStyle?.proseStyle,
+            characters: validationResult.data.characters?.supportingCastSize,
+            setting: validationResult.data.world?.settingType,
+          });
         } else {
           // Use standard generation with additional validation
           if (genre && typeof genre !== 'string') {
@@ -351,9 +349,8 @@ export async function GET(request: NextRequest) {
       // Provide human-readable names for the models with enhanced metadata
       modelNames: {
         [GROQ_MODELS.STORY_GENERATION]: 'Llama 3.3 (70B) - Story Generation',
-        [GROQ_MODELS.STORY_ANALYSIS]: 'Llama 3.1 (8B) - Story Analysis',
+        [GROQ_MODELS.STORY_ANALYSIS]: 'Llama 3.1 (8B) - Story Analysis & Recommendations',
         [GROQ_MODELS.CONTENT_IMPROVEMENT]: 'Mixtral (8x7B) - Content Improvement',
-        [GROQ_MODELS.RECOMMENDATIONS]: 'Llama 3.1 (8B) - Recommendations',
       },
       // Additional metadata for Pro Panel
       modelCapabilities: {
@@ -374,12 +371,6 @@ export async function GET(request: NextRequest) {
           costTier: 'moderate',
           qualityTier: 'high',
           speedTier: 'moderate',
-        },
-        [GROQ_MODELS.RECOMMENDATIONS]: {
-          maxTokens: 4096,
-          costTier: 'low',
-          qualityTier: 'good',
-          speedTier: 'fast',
         },
       },
     });
