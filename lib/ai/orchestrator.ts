@@ -6,7 +6,7 @@ export type QualityPreference = 'speed' | 'quality' | 'balanced';
 
 interface OrchestrationResult {
   model: string;
-  fallbackModel: string;
+  fallbackModel?: string;
   promptVariant: string;
   temperature: number;
 }
@@ -22,7 +22,7 @@ export function getOrchestrationPlan(
   if (preference === 'speed' || type === 'flash') {
     return {
       model: config.fallback_story_model, 
-      fallbackModel: config.primary_story_model, 
+      fallbackModel: config.enable_fallback_logic ? config.primary_story_model : undefined,
       promptVariant: 'v1_concise',
       temperature: 0.7
     };
@@ -31,7 +31,7 @@ export function getOrchestrationPlan(
   // Balanced or High Quality 
   return {
     model: config.primary_story_model,   
-    fallbackModel: config.fallback_story_model, 
+    fallbackModel: config.enable_fallback_logic ? config.primary_story_model : undefined, 
     promptVariant: config.current_prompt_variant,
     temperature: preference === 'quality' ? 0.85 : 0.8
   };

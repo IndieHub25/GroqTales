@@ -1,7 +1,7 @@
 {
   "active_experiments": {
-    "primary_story_model": "llama-3.3-6767",
-    "fallback_story_model": "llama-3.1-8b-instant",
+    "primary_story_model": "gemini-3-flash-preview",
+    "fallback_story_model": "gemini-3.1-flash-lite-preview",
     "current_prompt_variant": "v1_standard",
     "enable_fallback_logic": true
   },

@@ -241,14 +241,23 @@ export function setupGracefulShutdown(): void {
   console.log('[Server] Graceful shutdown handlers registered');
 }
 
-/**
- * Phase 3 Helper: Gets the native database instance
- */
-export async function getDb() {
+export async function getDb(): Promise<Db> {
+  const uri = process.env.MONGODB_URI;
+  const dbName = process.env.MONGODB_DB_NAME;
+
+  if (!uri) {
+    throw new Error('MONGODB_URI is not configured');
+  }
+
+  if (!dbName) {
+    throw new Error('MONGODB_DB_NAME is not configured');
+  }
+
   const client = await connectWithRetry({
-    uri: process.env.MONGODB_URI!,
+    uri,
     maxRetries: 5,
-    retryDelayMs: 1000
+    retryDelayMs: 1000,
   });
-  return client.db(); // Returns the native Db object
+
+  return client.db(dbName);
 }

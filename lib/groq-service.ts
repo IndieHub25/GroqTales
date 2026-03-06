@@ -65,9 +65,20 @@ export const GROQ_MODELS = {
 export async function generateStoryContent(
   params: StoryGenerationParams & { fallbackModel?: string }
 ): Promise<{ content: string; actualModel: string; fallbackUsed: boolean }> {
+
   const primaryModel = params.model || GROQ_MODELS.STORY_GENERATION;
-  const fallbackModel = params.fallbackModel; 
+  const fallbackModel = params.fallbackModel;
   const selectedTemp = params.temperature ?? 0.8;
+
+  const allowedModels = new Set(Object.values(GROQ_MODELS));
+
+  if (!allowedModels.has(primaryModel as any)) {
+    throw new Error(`Unsupported primary model: ${primaryModel}`);
+  }
+
+  if (fallbackModel && !allowedModels.has(fallbackModel as any)) {
+    throw new Error(`Unsupported fallback model: ${fallbackModel}`);
+  }
 
   async function performRequest(targetModel: string): Promise<string> {
     const groqApiKey = process.env.GROQ_API_KEY;

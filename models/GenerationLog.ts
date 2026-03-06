@@ -26,5 +26,9 @@ const GenerationLogSchema: Schema = new Schema({
   timestamp: { type: Date, default: Date.now }
 });
 
-export default mongoose.models.GenerationLog || 
-       mongoose.model<IGenerationLog>('GenerationLog', GenerationLogSchema);
+export default mongoose.models.GenerationLog ||
+  mongoose.model<IGenerationLog>(
+    'GenerationLog',
+    GenerationLogSchema,
+    'generationlogs'
+  );
