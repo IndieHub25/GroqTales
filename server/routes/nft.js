@@ -125,11 +125,12 @@ router.get('/', async (req, res) => {
     // If category (genre) filter provided, need to lookup Stories matching genre and filter NFTs by storyId
     if (category) {
       // Find story IDs matching genre (case insensitive)
-      const stories = await Story.find(
-        { genre: category.toLowerCase() },
-        { _id: 1 }
-      ).lean();
-      const storyIds = stories.map((s) => s._id);
+      const { data: stories, error: storiesError } = await supabaseAdmin
+        .from('stories')
+        .select('id')
+        .ilike('genre', `%${category}%`);
+      
+      const storyIds = stories?.map((s) => s.id) || [];
 
       // If no stories found for category, return empty results early
       if (storyIds.length === 0) {

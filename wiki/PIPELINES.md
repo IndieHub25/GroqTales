@@ -9,11 +9,16 @@ Welcome to the comprehensive guide for the automated pipelines, ML workflows, an
 To ensure that writers get the best possible visibility for their stories without manual effort, GroqTales utilizes an automated, zero-latency SEO and ML rating pipeline running entirely on the edge via powerful LLM APIs.
 
 ### How It Works
+
+**AI Model Architecture:**
+- **Groq**: Parameter parsing model — processes and extracts structured parameters from user input
+- **Gemini (gemini-1.5-flash)**: Chairman Model — primary decision engine for analysis and metadata generation
+
 When a user uploads a new story via the `POST /api/stories` endpoint:
 1. **Interception**: The raw content of the story is intercepted before being stored in the database.
-2. **AI Inference (Chairman Model)**: The text is passed to the **Google Gemini (gemini-1.5-flash)** model as the primary decision engine.
-3. **AI Inference (Fallback)**: If Gemini is unavailable, the system automatically falls back to the **Groq Llama 3 (`llama3-8b-8192`)** model.
-4. **Generation**: The AI model analyzes the narrative flow, character names, and themes to automatically generate:
+2. **Parameter Parsing (Groq)**: Story parameters (title, genre, theme, etc.) are parsed and validated using Groq.
+3. **AI Inference (Chairman - Gemini)**: The text is passed to the **Google Gemini (gemini-1.5-flash)** model as the primary decision engine.
+4. **Generation**: Gemini analyzes the narrative flow, character names, and themes to automatically generate:
    - A concise, 1-sentence **SEO Meta Description**.
    - An optimized JSON array of exactly 5 **SEO Keywords**.
    - An estimated **ML Quality Score** out of 10.0 based on narrative coherence.

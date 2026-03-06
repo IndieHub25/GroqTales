@@ -47,8 +47,9 @@ The story generation pipeline follows this flow:
 
 1. **Frontend** collects user inputs across 9 accordion sections (70+ params).
 2. **Backend API** (`POST /api/groq` or `POST /api/v1/ai/generate`) validates inputs and constructs a structured prompt using `groqService`.
-3. **Groq AI** processes the prompt using specific models (e.g., `llama-3.3-70b-versatile` for stories, `llama-3.1-8b-instant` for fast tasks).
-4. **Parser** validates the JSON schema, extracts chapters, characters, and comic panels.
+3. **Groq AI** parses and validates prompt parameters (parameter parsing model).
+4. **Gemini (Chairman Model)** processes the full request for story generation and analysis.
+5. **Parser** validates the JSON schema, extracts chapters, characters, and comic panels.
 5. **Frontend** renders the story for preview, editing, publishing, or NFT minting.
 
 ### Priority Chain
@@ -164,7 +165,7 @@ These parameters are used only when `target_format` includes `"comic"`:
 
 | Parameter              | Type   | Required | Example                  | Description                                            |
 | :--------------------- | :----- | :------: | :----------------------- | :----------------------------------------------------- |
-| `model`                | string |    No    | `"llama-3.3-70b-versatile"` | Overrides the default model. Default is Llama 3.3.     |
+| `model`                | string |    No    | `"gemini-1.5-flash"` | AI model for generation (Gemini is Chairman Model). Groq handles parameter parsing. Default is Gemini.     |
 | `creativity_level`     | string |    No    | `"low"`, `"medium"`, `"high"` | Maps to model temperature (0.3 to 1.1).                |
 | `coherence_priority`   | string |    No    | `"very high"`, `"medium"`| When in doubt, coherence over wildness.                |
 | `hard_constraints`     | array  |    No    | `["protagonist must survive"]` | Non-negotiable story rules.                      |

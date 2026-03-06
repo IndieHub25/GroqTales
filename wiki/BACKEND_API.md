@@ -129,16 +129,20 @@ Mint a new NFT from story content.
 
 ### AI API (`/api/v1/ai`)
 
+**Model Architecture:**
+- **Groq**: Parameter parsing model
+- **Gemini (gemini-1.5-flash)**: Chairman Model for generation and analysis
+
 #### POST `/api/v1/ai/generate`
 
-Generate content using AI models.
+Generate content using Gemini (Chairman Model).
 
 **Request Body:**
 
 ```json
 {
   "prompt": "Generate a story about...",
-  "model": "llama-3-70b",
+  "model": "gemini-1.5-flash",
   "parameters": {
     "temperature": 0.7,
     "max_tokens": 1000
@@ -148,7 +152,7 @@ Generate content using AI models.
 
 #### POST `/api/v1/ai/analyze`
 
-Analyze content with AI.
+Analyze content with Gemini (Chairman Model).
 
 **Request Body:**
 

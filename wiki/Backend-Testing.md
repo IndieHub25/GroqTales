@@ -27,9 +27,10 @@ The `test:backend` script verifies 50+ critical assertions across 7 different ca
 1. **File Structure**: Verifies all required backend files exist (`backend.js`, `worker.js`, `routes/*.js`, `render.yaml`, etc.).
 2. **Package Configuration**: Checks `server/package.json` for essential dependencies (`express`, `@supabase/supabase-js`, `cors`, etc.) and start scripts.
 3. **Render Configuration**: Analyzes `render.yaml` to ensure the `groqtales-backend-api` and `groqtales-worker` services are properly defined, with the required environment variables like `GROQ_API_KEY`.
-4. **Groq Service Module**: Verifies `groqService.js` structure:
-   - Ensuring `llama-3.3-70b-versatile`, `llama-3.1-8b-instant`, and `mistral-saba-24b` are configured.
-   - Asserting no deprecated or mock models exist.
+4. **AI Service Module**: Verifies service architecture:
+   - **Groq**: Parameter parsing model configured for input validation.
+   - **Gemini (gemini-1.5-flash)**: Chairman Model configured as primary inference engine.
+   - Asserting no deprecated models exist.
    - Validating retry logic and error handling fallbacks.
 5. **Route Registration**: Inspects `backend.js` to confirm that all routes (`/api/groq`, `/api/v1/ai`, etc.) and middleware (CORS, rate limiting) are effectively mounted.
 6. **No Placeholder Code**: Statically checks route controllers (`ai.js`, `stories.js`) to ensure all legacy placeholder code has been removed and replaced with actual `groqService` API calls.

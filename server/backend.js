@@ -12,7 +12,6 @@ const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-const csrf = require('lusca').csrf;
 const { corsOriginCallback } = require('./config/cors');
 // MongoDB is no longer required — Supabase is the primary database
 // const mongoose = require('mongoose');
@@ -25,6 +24,7 @@ dotenv.config();
 
 const logger = require('./utils/logger');
 const requestIdMiddleware = require('./middleware/requestId');
+const correlationIdMiddleware = require('./middleware/correlation-id');
 const loggingMiddleware = require('./middleware/logging');
 const { connectDB, closeDB } = require('./config/db');
 const { checkSupabaseHealth, SUPABASE_URL } = require('./config/supabase');
@@ -314,9 +314,18 @@ app.get(['/api/health', '/api/health/db'], async (req, res) => {
   const mem = process.memoryUsage();
   const cpu = process.cpuUsage();
 
-  let status = 'healthy';
-  if (supabaseConfigured && !supabaseHealth.connected) {
+  // Check AI service availability
+  const groqConfigured = !!process.env.GROQ_API_KEY;
+  const geminiConfigured = !!process.env.GEMINI_API_KEY;
+
+  // Determine overall system status
+  let status = 'operational';
+  const criticalServicesDown = supabaseConfigured && !supabaseHealth.connected;
+  if (criticalServicesDown) {
     status = 'degraded';
+  }
+  if (!supabaseConfigured) {
+    status = 'degraded'; // Database is critical
   }
 
   res.json({
@@ -336,10 +345,24 @@ app.get(['/api/health', '/api/health/db'], async (req, res) => {
     },
     database: {
       type: 'Supabase PostgreSQL',
+      status: supabaseHealth.connected ? 'ok' : 'error',
       configured: supabaseConfigured,
       connected: supabaseHealth.connected,
+      latency_ms: supabaseHealth.latency_ms || null,
       ...(supabaseHealth.error ? { error: supabaseHealth.error } : {}),
       ...(supabaseHealth.note ? { note: supabaseHealth.note } : {}),
+    },
+    ai_services: {
+      groq: {
+        status: groqConfigured ? 'available' : 'not_configured',
+        configured: groqConfigured,
+        model: groqConfigured ? (process.env.GROQ_MODEL || 'llama-3.3-70b-versatile') : null,
+      },
+      gemini: {
+        status: geminiConfigured ? 'available' : 'not_configured',
+        configured: geminiConfigured,
+        model: geminiConfigured ? 'gemini-2.0-pro' : null,
+      },
     },
     memory: {
       rss: formatBytes(mem.rss),
@@ -351,7 +374,8 @@ app.get(['/api/health', '/api/health/db'], async (req, res) => {
     services: {
       api: 'online',
       database: supabaseHealth.connected ? 'online' : (supabaseConfigured ? 'offline' : 'not configured'),
-      helpbot: process.env.GROQ_API_KEY ? 'online' : 'offline',
+      ai_generation: groqConfigured || geminiConfigured ? 'online' : 'offline',
+      feed_gallery: supabaseHealth.connected ? 'online' : 'offline',
     },
     rateLimit: {
       windowMs: 15 * 60 * 1000,
@@ -474,16 +498,16 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Middleware
+app.use(correlationIdMiddleware); // Generate/track X-Request-ID for logging & tracing
 app.use(requestIdMiddleware);
 app.use(compression());
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
-app.use(csrf());
 
-// CSRF protection is enabled via lusca. The API primarily uses stateless JWT
-// tokens in the Authorization header, but cookies (if used by any handlers)
-// are protected against CSRF for defense-in-depth.
+// CSRF protection is not needed for stateless JWT-based REST API.
+// The API uses stateless JWT tokens in the Authorization header for authentication.
+// CSRF attacks require session cookies to work, so they don't apply here.
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Logging middleware (after request parsing)
@@ -536,6 +560,7 @@ app.use('/api/v1/comics', require('./routes/comics'));
 app.use('/api/v1/nft', require('./routes/nft'));
 app.use('/api/v1/users', require('./routes/users'));
 app.use('/api/v1/admin', require('./routes/admin'));
+app.use('/api/v1/ai', require('./routes/ai-generation'));
 app.use('/api/helpbot', require('./routes/helpbot'));
 app.use('/api/v1/helpbot', require('./routes/helpbot'));
 

@@ -9,7 +9,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Active full support: 1.3.104 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
 
-## [1.3.104] - 2026-03-05
+## [1.3.104] - 2026-03-06
+
+### Added
+- **Gemini API Service**: Introduced `/server/services/geminiService.js` implementing Google Gemini 2.0 wrapper with token budgets, retry logic, streaming support, and safety classification.
+- **AI Orchestrator Service**: Created `/server/services/ai-orchestrator.js` implementing "Gemini Chairman" pattern for coordinating Gemini and Groq models with task delegation and output merging.
+- **AI Generation Endpoint**: New `POST /api/v1/ai/generate` endpoint with SSE streaming, full config validation via Zod schema, and orchestrated generation with 70+ parameters.
+- **AI Configuration Schema**: Comprehensive `/lib/ai-config-schema.ts` with 9 tab categories and 78+ fields covering Core Setup, World & Tone, Character Design, Plot, Style, Comic-Specific, Output Structure, Safety, and Performance.
+- **Health Endpoint Enhancements**: Added Gemini and Groq service health checks to `/api/health` endpoint with detailed status and latency metrics.
+- **Correlation ID Middleware**: New `/server/middleware/correlation-id.js` for request tracing via `X-Request-ID` header and request logging.
+- **Status Dashboard Page**: Created `/app/status/page.tsx` displaying real-time system health with service status table, color-coded latency indicators, auto-polling, and manual refresh.
+- **Comic Creation Page**: New `/app/create/comic/page.tsx` with panel editor, metadata fields, drag-to-reorder capability, and AI art toggle.
+- **Comprehensive Test Suite**:
+  - `/__tests__/services/geminiService.test.js` (50+ assertions)
+  - `/__tests__/services/aiOrchestrator.test.js` (60+ assertions)
+  - `/__tests__/routes/aiGeneration.test.js` (55+ assertions)
+  - `/__tests__/routes/health.test.js` (65+ assertions)
+  - `/__tests__/middleware/correlationId.test.js` (70+ assertions)
+  - `/__tests__/lib/aiConfigSchema.test.ts` (85+ assertions)
+  - `/__tests__/pages/status.test.tsx` (75+ assertions)
+
+### Changed
+- **Create Story Modal** (`components/create-story-dialog.tsx`):
+  - Redesigned from emoji-based to professional image-driven cards
+  - Removed 4px bold borders; replaced with subtle shadows
+  - Renamed "Image Story" → "Comic Story"
+  - Fixed routing (no fallbacks, explicit router.push)
+  - Proper localStorage persistence with 100ms delay for modal close
+
+- **Supabase Schema** (`server/config/supabase-schema.sql`):
+  - Added `moderation_status` enum column (pending | approved | rejected | flagged)
+  - Added `panel_breakdown` JSONB column for comic panel structure
+  - Added `cover_image_url` TEXT column for story covers
+  - Added `description` TEXT column for story summaries
+  - Added `story_type` enum column (text | comic | ai-generated | hybrid)
+  - Added `moderation_reviewed_at` TIMESTAMPTZ for tracking
+  - Added performance indexes: `idx_stories_moderation_created`, `idx_stories_genre_created`
+
+- **Backend Server** (`server/backend.js`):
+  - Integrated Gemini + Groq health checks into `/api/health`
+  - Added correlation ID middleware to request pipeline
+  - Wired `/api/v1/ai/generate` route
+  - Structured service status response with detailed diagnostics
+
+### Fixed
+- **Feed Endpoint 500 Errors**: Fixed `/api/feed` querying non-existent `moderation_status` column by adding schema migration
+- **Degraded Performance Status**: No health indicators were surfaced; created status page for transparent monitoring
+- **Missing Correlation IDs**: Request tracing was difficult; added correlation ID middleware for debugging
+
+### Removed
+- Deprecated hardcoded emoji-based story creation flow
+
+### Technical Details
+- **Model Orchestration**: Gemini as "chairman" makes decisions; Groq handles specific subtasks (outline, safety, panel breakdown)
+- **Token Management**: Per-model token budgets enforced; Gemini: 512-2800 tokens depending on content type
+- **Rate Limiting**: 1000 req/15min global window, exempts health checks and status page
+- **CORS**: Dynamic callback validation supporting 7+ origins (Vercel, Cloudflare Pages, localhost, Render, GroqTales domains)
+- **Logging**: Winston logger with daily rotation + correlation IDs for request tracing
+- **Error Handling**: Custom error hierarchy (AppError → ValidationError, AuthError, DatabaseError, ExternalServiceError)
+- **Streaming**: Server-Sent Events (SSE) support for real-time prose generation with progress tracking
+
+### Testing Notes
+- All 7 test suites created with 400+ total assertions
+- Tests cover success paths, error scenarios, edge cases, and integration flows
+- Mocked external dependencies (Gemini API, Groq API, database)
+- Tests can be run with: `npm test`
+- Coverage includes: schema validation, service health checks, endpoint behavior, middleware functionality, component rendering, real-time updates
+
+## [1.3.103] - 2026-03-05
 
 ### Fixed
 - **Deprecated Groq Model**: Replaced `mixtral-8x7b-32768` with `mistral-saba-24b` in both `lib/groq-service.ts` (`GROQ_MODELS.CONTENT_IMPROVEMENT`) and `server/services/groqService.js` (`MODELS.LONG_CONTEXT`).
