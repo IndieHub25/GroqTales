@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { Info } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +21,12 @@ import {
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 // ============================================================
 // NUMERIC SLIDER — Reference: "AI Creativity (Temp)" style
@@ -55,12 +62,24 @@ export function SliderControl({
   return (
     <div className="pb-4">
       <div className="flex items-center justify-between gap-2 mb-3">
-        <span
+        <Label
           id={labelId}
           className="font-condensed uppercase tracking-wider text-xs text-white leading-tight max-w-[55%] block"
         >
           {label}
-        </span>
+          {description && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="w-3 h-3 text-gray-400 inline-block ml-1 cursor-help" aria-hidden="true" />
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs text-xs">
+                  {description}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </Label>
         {showValue && (
           <span
             aria-live="polite"
@@ -141,6 +160,18 @@ export function SelectControl<T extends string>({
         className="font-condensed uppercase tracking-wider text-xs text-white"
       >
         {label}
+        {description && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="w-3 h-3 text-gray-400 inline-block ml-1 cursor-help" aria-hidden="true" />
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs text-xs">
+                {description}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </Label>
       {description && (
         <p
@@ -213,6 +244,18 @@ export function InputControl({
         className="font-condensed uppercase tracking-wider text-xs text-white"
       >
         {label}
+        {description && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="w-3 h-3 text-gray-400 inline-block ml-1 cursor-help" aria-hidden="true" />
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs text-xs">
+                {description}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </Label>
       {description && (
         <p
@@ -271,6 +314,18 @@ export function NumberInputControl({
         className="font-condensed uppercase tracking-wider text-xs text-white"
       >
         {label}
+        {description && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="w-3 h-3 text-gray-400 inline-block ml-1 cursor-help" aria-hidden="true" />
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs text-xs">
+                {description}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </Label>
       {description && (
         <p
@@ -330,6 +385,18 @@ export function TextareaControl({
           className="font-condensed uppercase tracking-wider text-xs text-white leading-tight"
         >
           {label}
+          {description && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="w-3 h-3 text-gray-400 inline-block ml-1 cursor-help" aria-hidden="true" />
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs text-xs">
+                  {description}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </Label>
         {maxLength && (
           <span
@@ -391,6 +458,18 @@ export function SwitchControl({
           className="font-condensed font-bold uppercase tracking-widest text-sm text-white"
         >
           {label}
+          {description && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="w-3 h-3 text-gray-400 inline-block ml-1 cursor-help" aria-hidden="true" />
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs text-xs">
+                  {description}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </Label>
         {description && (
           <p
@@ -658,7 +737,7 @@ export function CollapsibleGroup({
         id={contentId}
         role="region"
         aria-hidden={!isOpen}
-        {...(!isOpen ? { inert: true } : {})}
+        {...(!isOpen ? { inert: '' as unknown as boolean } : {})}
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
           isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
         }`}

@@ -9,10 +9,16 @@ import {
   testGroqSpecialModel,
   generateStoryWithProConfig,
 } from '@/lib/groq-service';
+import { checkRateLimit, getClientIp, rateLimiters } from '@/lib/rate-limit';
 import { ParametersSchema } from '@/lib/schemas/proPanelSchemas';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: AI generation tier (10 req / 60s per IP)
+    const clientIp = getClientIp(request);
+    const rateLimitResponse = await checkRateLimit(rateLimiters.ai, clientIp);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await request.json();
     const {
       action,
@@ -45,6 +51,10 @@ export async function POST(request: NextRequest) {
           // Validate the proConfig
           const validationResult = ParametersSchema.safeParse(proConfig);
           if (!validationResult.success) {
+            console.warn(
+              '[groq/generate] Pro Panel validation failed:',
+              validationResult.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`)
+            );
             return NextResponse.json(
               {
                 error: 'Invalid Pro Panel configuration',
@@ -107,7 +117,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ result });
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error));
-    console.error('Groq API error:', err);
+    console.error('[groq] API error:', {
+      message: err.message,
+      stack: err.stack,
+    });
 
     // Return 400 for input validation errors, 500 for everything else
     const isValidationError =

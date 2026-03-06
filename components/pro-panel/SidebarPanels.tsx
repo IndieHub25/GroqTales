@@ -159,10 +159,11 @@ export function LocationDocksPanel() {
       </div>
       <div className="p-4 space-y-4">
         <div className="space-y-2">
-          <label className="flex items-center gap-2 font-condensed text-black font-bold uppercase text-xs">
+          <label htmlFor="sidebar-time-period" className="flex items-center gap-2 font-condensed text-black font-bold uppercase text-xs">
             <Clock className="w-4 h-4 text-black" /> Time Period
           </label>
           <select
+            id="sidebar-time-period"
             value={world.technologyLevel}
             onChange={(e) =>
               updateParameter(
@@ -181,10 +182,11 @@ export function LocationDocksPanel() {
           </select>
         </div>
         <div className="space-y-2">
-          <label className="flex items-center gap-2 font-condensed text-black font-bold uppercase text-xs">
+          <label htmlFor="sidebar-atmosphere" className="flex items-center gap-2 font-condensed text-black font-bold uppercase text-xs">
             <Cloud className="w-4 h-4 text-black" /> Atmosphere
           </label>
           <select
+            id="sidebar-atmosphere"
             value={world.settingType}
             onChange={(e) =>
               updateParameter(
@@ -246,10 +248,11 @@ export function StyleDossierPanel() {
       </h3>
       <div className="space-y-4">
         <div className="space-y-1">
-          <label className="flex items-center gap-2 font-condensed text-black font-bold uppercase text-xs">
+          <label htmlFor="sidebar-writing-style" className="flex items-center gap-2 font-condensed text-black font-bold uppercase text-xs">
             <FileText className="w-4 h-4 text-[#8a0000]" /> Writing Style
           </label>
           <select
+            id="sidebar-writing-style"
             value={tone.proseStyle}
             onChange={(e) =>
               updateParameter(
@@ -268,10 +271,11 @@ export function StyleDossierPanel() {
           </select>
         </div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2 font-condensed text-black font-bold uppercase text-xs">
+          <label htmlFor="sidebar-narrative-tone" className="flex items-center gap-2 font-condensed text-black font-bold uppercase text-xs">
             <Meh className="w-4 h-4 text-[#8a0000]" /> Narrative Tone
           </label>
           <select
+            id="sidebar-narrative-tone"
             value={tone.primaryTone}
             onChange={(e) =>
               updateParameter(
@@ -292,11 +296,12 @@ export function StyleDossierPanel() {
 
         {/* Dialogue % slider */}
         <div className="space-y-2 pt-4 border-t border-black/20">
-          <label className="flex justify-between font-condensed text-black uppercase text-xs font-bold">
+          <label htmlFor="sidebar-dialogue-pct" className="flex justify-between font-condensed text-black uppercase text-xs font-bold">
             <span>Dialogue %</span>
             <span>{tone.humorLevel}%</span>
           </label>
           <input
+            id="sidebar-dialogue-pct"
             type="range"
             min={0}
             max={100}
@@ -364,13 +369,14 @@ export function ContentControlsPanel() {
           CONTENT CONTROLS
         </h4>
         <div className="space-y-3">
-          <div className="flex items-center justify-between text-sm uppercase font-bold font-condensed">
+          <label htmlFor="content-violence" className="flex items-center justify-between text-sm uppercase font-bold font-condensed">
             <span>Violence</span>
             <span className="text-[#8a0000]">
               {formatLabel(tone.violenceLevel)}
             </span>
-          </div>
+          </label>
           <select
+            id="content-violence"
             value={tone.violenceLevel}
             onChange={(e) =>
               updateParameter(
@@ -387,13 +393,14 @@ export function ContentControlsPanel() {
               </option>
             ))}
           </select>
-          <div className="flex items-center justify-between text-sm uppercase font-bold font-condensed mt-2">
+          <label htmlFor="content-romance" className="flex items-center justify-between text-sm uppercase font-bold font-condensed mt-2">
             <span>Romance</span>
             <span className="text-[#8a0000]">
               {formatLabel(tone.romanceLevel)}
             </span>
-          </div>
+          </label>
           <select
+            id="content-romance"
             value={tone.romanceLevel}
             onChange={(e) =>
               updateParameter(
@@ -460,10 +467,11 @@ export function InspirationPanel() {
 
       {/* Similar To */}
       <div className="space-y-1">
-        <label className="font-condensed text-white font-bold uppercase text-xs">
+        <label htmlFor="inspiration-similar" className="font-condensed text-white font-bold uppercase text-xs">
           Similar To (e.g., &quot;X meets Y&quot;)
         </label>
         <input
+          id="inspiration-similar"
           type="text"
           placeholder="e.g., 'Lord of the Rings meets Cyberpunk 2077'"
           value={storyInput.inspirationPrompt || ''}
@@ -476,10 +484,11 @@ export function InspirationPanel() {
 
       {/* Inspired By */}
       <div className="space-y-1">
-        <label className="font-condensed text-white font-bold uppercase text-xs">
+        <label htmlFor="inspiration-author" className="font-condensed text-white font-bold uppercase text-xs">
           Inspired By (Authors/Works)
         </label>
         <input
+          id="inspiration-author"
           type="text"
           placeholder="e.g., 'Tolkien, Asimov, Blade Runner'"
           value={storyInput.inspirationAuthor || ''}
@@ -492,16 +501,17 @@ export function InspirationPanel() {
 
       {/* Tropes to Avoid */}
       <div className="space-y-2">
-        <label className="font-condensed text-white font-bold uppercase text-[10px] tracking-wide">
+        <span id="tropes-avoid-label" className="font-condensed text-white font-bold uppercase text-[10px] tracking-wide block">
           Tropes to Avoid
-        </label>
-        <div className="flex flex-wrap gap-1.5">
+        </span>
+        <div className="flex flex-wrap gap-1.5" role="group" aria-labelledby="tropes-avoid-label">
           {TROPES_AVOID.map((trope) => {
             const selected = (storyInput.tropesToAvoid || []).includes(trope);
             return (
               <button
                 key={trope}
                 type="button"
+                aria-pressed={selected}
                 onClick={() => toggleTrope('tropesToAvoid', trope)}
                 className={`border-2 px-2 py-0.5 font-condensed text-[10px] font-bold transition-colors ${
                   selected
@@ -518,16 +528,17 @@ export function InspirationPanel() {
 
       {/* Tropes to Include */}
       <div className="space-y-2">
-        <label className="font-condensed text-white font-bold uppercase text-[10px] tracking-wide">
+        <span id="tropes-include-label" className="font-condensed text-white font-bold uppercase text-[10px] tracking-wide block">
           Tropes to Include
-        </label>
-        <div className="flex flex-wrap gap-1.5">
+        </span>
+        <div className="flex flex-wrap gap-1.5" role="group" aria-labelledby="tropes-include-label">
           {TROPES_INCLUDE.map((trope) => {
             const selected = (storyInput.tropesToInclude || []).includes(trope);
             return (
               <button
                 key={trope}
                 type="button"
+                aria-pressed={selected}
                 onClick={() => toggleTrope('tropesToInclude', trope)}
                 className={`border-2 px-2 py-0.5 font-condensed text-[10px] font-bold transition-colors ${
                   selected

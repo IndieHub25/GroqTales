@@ -16,6 +16,7 @@ const customJestConfig = {
     '^@/app/(.*)$': '<rootDir>/app/$1',
     '^@/config/(.*)$': '<rootDir>/config/$1',
     '^@/models/(.*)$': '<rootDir>/models/$1',
+    '^@/store/(.*)$': '<rootDir>/src/store/$1',
   },
   testEnvironment: 'jest-environment-jsdom',
   testPathIgnorePatterns: [

@@ -37,11 +37,18 @@ export function ModelSettingsSection() {
 
   return (
     <div className="space-y-6">
-      {/* Warning Banner */}
-      <div className="p-3 bg-primary/10 border-2 border-primary text-sm">
+      {/* Info Banner: Power vs Cost vs Quality */}
+      <div className="p-3 bg-primary/10 border-2 border-primary text-sm space-y-2">
         <strong className="text-primary">⚠️ Advanced Settings:</strong> These
         parameters directly affect AI generation. Changes can significantly
         impact output quality and behavior.
+        <ul className="text-xs text-gray-300 list-disc pl-5 space-y-1 mt-2">
+          <li><strong>LLaMA 3.3 70B</strong> — Best quality, slower, higher cost per call</li>
+          <li><strong>LLaMA 3.1 8B Instant</strong> — Fastest, lowest cost, good for drafts</li>
+          <li><strong>Mixtral 8x7B</strong> — Long context (32k), balanced quality &amp; speed</li>
+          <li><strong>Temperature</strong> — Default 0.8. Lower = predictable; higher = creative</li>
+          <li><strong>Max Tokens</strong> — Default 4096. Increase for longer stories</li>
+        </ul>
       </div>
 
       <SelectControl
