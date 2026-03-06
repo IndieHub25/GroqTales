@@ -83,6 +83,7 @@ export function AdvancedSection() {
           value={advanced.pointOfView}
           options={POINT_OF_VIEW_OPTIONS}
           onChange={(v) => updateParameter('advanced', 'pointOfView', v)}
+          parameterKey="pointOfView"
         />
         <SelectControl
           label="Tense"
@@ -99,6 +100,7 @@ export function AdvancedSection() {
         value={advanced.targetAudience}
         options={TARGET_AUDIENCES}
         onChange={(v) => updateParameter('advanced', 'targetAudience', v)}
+        parameterKey="targetAudience"
       />
 
       <MultiSelectControl
@@ -117,6 +119,7 @@ export function AdvancedSection() {
           description="The narrator may mislead the reader"
           checked={advanced.unreliableNarrator}
           onChange={(v) => updateParameter('advanced', 'unreliableNarrator', v)}
+          parameterKey="unreliableNarrator"
         />
         <SliderControl
           label="Metafictional Elements"

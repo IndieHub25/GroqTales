@@ -70,6 +70,7 @@ export function StoryStructureSection() {
           onChange={(v) =>
             updateParameter('storyStructure', 'narrativeStyle', v)
           }
+          parameterKey="narrativeStyle"
         />
         <SelectControl
           label="Pacing"
@@ -77,6 +78,7 @@ export function StoryStructureSection() {
           value={structure.pacing}
           options={PACING_OPTIONS}
           onChange={(v) => updateParameter('storyStructure', 'pacing', v)}
+          parameterKey="pacing"
         />
       </ControlGrid>
 
@@ -109,6 +111,7 @@ export function StoryStructureSection() {
             onChange={(v) =>
               updateParameter('storyStructure', 'plotComplexity', v)
             }
+            parameterKey="plotComplexity"
           />
           <SliderControl
             label="Conflict Intensity"
@@ -117,6 +120,7 @@ export function StoryStructureSection() {
             onChange={(v) =>
               updateParameter('storyStructure', 'conflictIntensity', v)
             }
+            parameterKey="conflictIntensity"
           />
           <SliderControl
             label="Flashback Frequency"

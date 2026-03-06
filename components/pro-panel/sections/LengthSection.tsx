@@ -108,6 +108,7 @@ export function LengthSection() {
           max={200000}
           step={100}
           onChange={(v) => updateParameter('length', 'targetWordCount', v)}
+          parameterKey="targetWordCount"
         />
         <SelectControl
           label="Format Type"
@@ -128,6 +129,7 @@ export function LengthSection() {
             min={1}
             max={100}
             onChange={(v) => updateParameter('length', 'chapterCount', v)}
+            parameterKey="chapterCount"
           />
           <NumberInputControl
             label="Average Chapter Length"

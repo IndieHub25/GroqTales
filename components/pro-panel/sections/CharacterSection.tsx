@@ -60,6 +60,7 @@ export function CharacterSection() {
           onChange={(v) =>
             updateParameter('characters', 'supportingCastSize', v)
           }
+          parameterKey="supportingCastSize"
         />
         <SelectControl
           label="Character Growth Arc"
@@ -78,6 +79,7 @@ export function CharacterSection() {
         value={chars.dialogueStyle}
         options={DIALOGUE_STYLES}
         onChange={(v) => updateParameter('characters', 'dialogueStyle', v)}
+        parameterKey="dialogueStyle"
       />
 
       {/* ── ADVANCED: Collapsed by default ── */}
@@ -90,6 +92,7 @@ export function CharacterSection() {
             onChange={(v) =>
               updateParameter('characters', 'protagonistDepth', v)
             }
+            parameterKey="protagonistDepth"
           />
           <SliderControl
             label="Antagonist Complexity"
@@ -98,6 +101,7 @@ export function CharacterSection() {
             onChange={(v) =>
               updateParameter('characters', 'antagonistComplexity', v)
             }
+            parameterKey="antagonistComplexity"
           />
           <SliderControl
             label="Voice Distinctness"

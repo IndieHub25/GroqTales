@@ -67,6 +67,7 @@ export function WorldSection() {
           value={world.settingType}
           options={SETTING_TYPES}
           onChange={(v) => updateParameter('world', 'settingType', v)}
+          parameterKey="settingType"
         />
         <SelectControl
           label="Geographic Scope"
@@ -83,6 +84,7 @@ export function WorldSection() {
         value={world.technologyLevel}
         options={TECHNOLOGY_LEVELS}
         onChange={(v) => updateParameter('world', 'technologyLevel', v)}
+        parameterKey="technologyLevel"
       />
 
       {/* ── ADVANCED: Collapsed by default ── */}
@@ -93,6 +95,7 @@ export function WorldSection() {
             description="Overall detail of world creation"
             value={world.worldBuildingDepth}
             onChange={(v) => updateParameter('world', 'worldBuildingDepth', v)}
+            parameterKey="worldBuildingDepth"
           />
           <SliderControl
             label="Culture Detail"
@@ -107,6 +110,7 @@ export function WorldSection() {
             onChange={(v) =>
               updateParameter('world', 'magicSystemComplexity', v)
             }
+            parameterKey="magicSystemComplexity"
           />
           <SliderControl
             label="Environmental Detail"

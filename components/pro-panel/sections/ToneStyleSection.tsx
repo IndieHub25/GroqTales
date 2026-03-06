@@ -78,6 +78,7 @@ export function ToneStyleSection() {
           value={tone.primaryTone}
           options={PRIMARY_TONES}
           onChange={(v) => updateParameter('toneStyle', 'primaryTone', v)}
+          parameterKey="primaryTone"
         />
         <SelectControl
           label="Prose Style"
@@ -85,6 +86,7 @@ export function ToneStyleSection() {
           value={tone.proseStyle}
           options={PROSE_STYLES}
           onChange={(v) => updateParameter('toneStyle', 'proseStyle', v)}
+          parameterKey="proseStyle"
         />
       </ControlGrid>
 
@@ -95,6 +97,7 @@ export function ToneStyleSection() {
           value={tone.vocabularyLevel}
           options={VOCABULARY_LEVELS}
           onChange={(v) => updateParameter('toneStyle', 'vocabularyLevel', v)}
+          parameterKey="vocabularyLevel"
         />
         <SelectControl
           label="Violence Level"
@@ -102,6 +105,7 @@ export function ToneStyleSection() {
           value={tone.violenceLevel}
           options={VIOLENCE_LEVELS}
           onChange={(v) => updateParameter('toneStyle', 'violenceLevel', v)}
+          parameterKey="violenceLevel"
         />
       </ControlGrid>
 
@@ -133,6 +137,7 @@ export function ToneStyleSection() {
             description="Amount of comedic elements"
             value={tone.humorLevel}
             onChange={(v) => updateParameter('toneStyle', 'humorLevel', v)}
+            parameterKey="humorLevel"
           />
           <SliderControl
             label="Descriptive Balance"

@@ -57,6 +57,7 @@ export function ModelSettingsSection() {
         value={model.modelSelection}
         options={MODEL_OPTIONS}
         onChange={(v) => updateParameter('modelSettings', 'modelSelection', v)}
+        parameterKey="modelSelection"
       />
 
       {/* ── CORE: Generation Parameters ── */}
@@ -69,6 +70,7 @@ export function ModelSettingsSection() {
           max={2}
           step={0.1}
           onChange={(v) => updateParameter('modelSettings', 'temperature', v)}
+          parameterKey="temperature"
         />
         <NumberInputControl
           label="Max Tokens"
@@ -78,6 +80,7 @@ export function ModelSettingsSection() {
           max={32768}
           step={256}
           onChange={(v) => updateParameter('modelSettings', 'maxTokens', v)}
+          parameterKey="maxTokens"
         />
       </ControlGrid>
 
@@ -92,6 +95,7 @@ export function ModelSettingsSection() {
             max={1}
             step={0.05}
             onChange={(v) => updateParameter('modelSettings', 'topP', v)}
+            parameterKey="topP"
           />
           <NumberInputControl
             label="Top K"

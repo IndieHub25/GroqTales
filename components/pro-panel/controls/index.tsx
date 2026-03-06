@@ -9,6 +9,10 @@
 import React from 'react';
 import { Info } from 'lucide-react';
 
+import {
+  formatTooltipContent,
+  type ParameterKey,
+} from '@/lib/constants/parameterTooltips';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -26,7 +30,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from '@/components/ui/tooltip-enhanced';
 
 // ============================================================
 // NUMERIC SLIDER — Reference: "AI Creativity (Temp)" style
@@ -41,6 +45,7 @@ interface SliderControlProps {
   onChange: (value: number) => void;
   showValue?: boolean;
   suffix?: string;
+  parameterKey?: string; // New: for enhanced tooltips
 }
 
 /** Numeric slider control with min/max/step and formatted value display. */
@@ -54,10 +59,15 @@ export function SliderControl({
   onChange,
   showValue = true,
   suffix = '',
+  parameterKey,
 }: SliderControlProps) {
   const id = React.useId();
   const labelId = `${id}-label`;
   const descId = `${id}-desc`;
+
+  // Get enhanced tooltip content if parameter key is provided
+  const tooltipContent = parameterKey ? formatTooltipContent(parameterKey) : null;
+  const hasEnhancedTooltip = tooltipContent && typeof tooltipContent === 'object' && tooltipContent.title;
 
   return (
     <div className="pb-4">
@@ -67,14 +77,33 @@ export function SliderControl({
           className="font-condensed uppercase tracking-wider text-xs text-white leading-tight max-w-[55%] block"
         >
           {label}
-          {description && (
+          {(description || hasEnhancedTooltip) && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="w-3 h-3 text-gray-400 inline-block ml-1 cursor-help" aria-hidden="true" />
+                  <span role="img" aria-label="More info" className="inline-flex items-center ml-1 cursor-help" tabIndex={0}>
+                    <Info className="w-3 h-3 text-gray-400" />
+                  </span>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs text-xs">
-                  {description}
+                <TooltipContent side="top" variant="pro-panel" className="max-w-xs">
+                  {hasEnhancedTooltip ? (
+                    <div className="space-y-2">
+                      <div className="font-bold text-black">{tooltipContent.title}</div>
+                      <div className="text-xs text-gray-800">{tooltipContent.description}</div>
+                      {tooltipContent.examples && (
+                        <div className="text-xs text-gray-700">
+                          <span className="font-semibold">Examples:</span> {tooltipContent.examples}
+                        </div>
+                      )}
+                      {tooltipContent.powerLevel && (
+                        <div className="text-xs text-red-700 font-semibold">
+                          {tooltipContent.powerLevel}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    description
+                  )}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -101,22 +130,7 @@ export function SliderControl({
         className="w-full [&_[role=slider]]:bg-noir-primary [&_[role=slider]]:border-2 [&_[role=slider]]:border-white/40 [&_[role=slider]]:w-4 [&_[role=slider]]:h-4"
       />
       {description && (
-        <span
-          id={descId}
-          className="block text-[10px] text-gray-500 mt-2 leading-tight"
-          style={{
-            fontFamily: 'Roboto Condensed, sans-serif',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            fontWeight: 400,
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            margin: 0,
-          }}
-        >
-          {description}
-        </span>
+        <span id={descId} className="sr-only">{description}</span>
       )}
     </div>
   );
@@ -132,6 +146,7 @@ interface SelectControlProps<T extends string> {
   options: readonly T[] | readonly { value: T; label: string }[];
   onChange: (value: T) => void;
   placeholder?: string;
+  parameterKey?: string; // New: for enhanced tooltips
 }
 
 /** Dropdown select control with label and options. */
@@ -142,6 +157,7 @@ export function SelectControl<T extends string>({
   options,
   onChange,
   placeholder,
+  parameterKey,
 }: SelectControlProps<T>) {
   const id = React.useId();
   const controlId = `${id}-select`;
@@ -153,6 +169,10 @@ export function SelectControl<T extends string>({
       : opt
   );
 
+  // Get enhanced tooltip content if parameter key is provided
+  const tooltipContent = parameterKey ? formatTooltipContent(parameterKey) : null;
+  const hasEnhancedTooltip = tooltipContent && typeof tooltipContent === 'object' && tooltipContent.title;
+
   return (
     <div className="space-y-1.5">
       <Label
@@ -160,26 +180,40 @@ export function SelectControl<T extends string>({
         className="font-condensed uppercase tracking-wider text-xs text-white"
       >
         {label}
-        {description && (
+        {(description || hasEnhancedTooltip) && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="w-3 h-3 text-gray-400 inline-block ml-1 cursor-help" aria-hidden="true" />
+                <span role="img" aria-label="More info" className="inline-flex items-center ml-1 cursor-help" tabIndex={0}>
+                  <Info className="w-3 h-3 text-gray-400" />
+                </span>
               </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs text-xs">
-                {description}
+              <TooltipContent side="top" variant="pro-panel" className="max-w-xs">
+                {hasEnhancedTooltip ? (
+                  <div className="space-y-2">
+                    <div className="font-bold text-black">{tooltipContent.title}</div>
+                    <div className="text-xs text-gray-800">{tooltipContent.description}</div>
+                    {tooltipContent.examples && (
+                      <div className="text-xs text-gray-700">
+                        <span className="font-semibold">Examples:</span> {tooltipContent.examples}
+                      </div>
+                    )}
+                    {tooltipContent.powerLevel && (
+                      <div className="text-xs text-red-700 font-semibold">
+                        {tooltipContent.powerLevel}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  description
+                )}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         )}
       </Label>
       {description && (
-        <p
-          id={descId}
-          className="text-[10px] font-condensed uppercase tracking-wider text-gray-500"
-        >
-          {description}
-        </p>
+        <span id={descId} className="sr-only">{description}</span>
       )}
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger
@@ -248,9 +282,11 @@ export function InputControl({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="w-3 h-3 text-gray-400 inline-block ml-1 cursor-help" aria-hidden="true" />
+                <span role="img" aria-label="More info" className="inline-flex items-center ml-1 cursor-help" tabIndex={0}>
+                  <Info className="w-3 h-3 text-gray-400" />
+                </span>
               </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs text-xs">
+              <TooltipContent side="top" variant="pro-panel" className="max-w-xs text-xs">
                 {description}
               </TooltipContent>
             </Tooltip>
@@ -258,12 +294,7 @@ export function InputControl({
         )}
       </Label>
       {description && (
-        <p
-          id={descId}
-          className="text-[10px] font-condensed uppercase tracking-wider text-gray-500"
-        >
-          {description}
-        </p>
+        <span id={descId} className="sr-only">{description}</span>
       )}
       <Input
         id={controlId}
@@ -291,6 +322,7 @@ interface NumberInputControlProps {
   min?: number;
   max?: number;
   step?: number;
+  parameterKey?: string; // New: for enhanced tooltips
 }
 
 /** Numeric input control with min/max validation. */
@@ -302,10 +334,15 @@ export function NumberInputControl({
   min,
   max,
   step = 1,
+  parameterKey,
 }: NumberInputControlProps) {
   const id = React.useId();
   const controlId = `${id}-num`;
   const descId = `${id}-desc`;
+
+  // Get enhanced tooltip content if parameter key is provided
+  const tooltipContent = parameterKey ? formatTooltipContent(parameterKey) : null;
+  const hasEnhancedTooltip = tooltipContent && typeof tooltipContent === 'object' && tooltipContent.title;
 
   return (
     <div className="space-y-1.5">
@@ -314,26 +351,40 @@ export function NumberInputControl({
         className="font-condensed uppercase tracking-wider text-xs text-white"
       >
         {label}
-        {description && (
+        {(description || hasEnhancedTooltip) && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="w-3 h-3 text-gray-400 inline-block ml-1 cursor-help" aria-hidden="true" />
+                <span role="img" aria-label="More info" className="inline-flex items-center ml-1 cursor-help" tabIndex={0}>
+                  <Info className="w-3 h-3 text-gray-400" />
+                </span>
               </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs text-xs">
-                {description}
+              <TooltipContent side="top" variant="pro-panel" className="max-w-xs">
+                {hasEnhancedTooltip ? (
+                  <div className="space-y-2">
+                    <div className="font-bold text-black">{tooltipContent.title}</div>
+                    <div className="text-xs text-gray-800">{tooltipContent.description}</div>
+                    {tooltipContent.examples && (
+                      <div className="text-xs text-gray-700">
+                        <span className="font-semibold">Examples:</span> {tooltipContent.examples}
+                      </div>
+                    )}
+                    {tooltipContent.powerLevel && (
+                      <div className="text-xs text-red-700 font-semibold">
+                        {tooltipContent.powerLevel}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  description
+                )}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         )}
       </Label>
       {description && (
-        <p
-          id={descId}
-          className="text-[10px] font-condensed uppercase tracking-wider text-gray-500"
-        >
-          {description}
-        </p>
+        <span id={descId} className="sr-only">{description}</span>
       )}
       <Input
         id={controlId}
@@ -389,7 +440,9 @@ export function TextareaControl({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="w-3 h-3 text-gray-400 inline-block ml-1 cursor-help" aria-hidden="true" />
+                  <span role="img" aria-label="More info" className="inline-flex items-center ml-1 cursor-help" tabIndex={0}>
+                    <Info className="w-3 h-3 text-gray-400" />
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-xs text-xs">
                   {description}
@@ -408,12 +461,7 @@ export function TextareaControl({
         )}
       </div>
       {description && (
-        <p
-          id={descId}
-          className="text-[10px] font-condensed uppercase tracking-wider text-gray-500"
-        >
-          {description}
-        </p>
+        <span id={descId} className="sr-only">{description}</span>
       )}
       <Textarea
         id={controlId}
@@ -437,6 +485,7 @@ interface SwitchControlProps {
   description?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
+  parameterKey?: string; // New: for enhanced tooltips
 }
 
 /** On/off toggle switch with label and description. */
@@ -445,10 +494,15 @@ export function SwitchControl({
   description,
   checked,
   onChange,
+  parameterKey,
 }: SwitchControlProps) {
   const id = React.useId();
   const controlId = `${id}-switch`;
   const descId = `${id}-desc`;
+
+  // Get enhanced tooltip content if parameter key is provided
+  const tooltipContent = parameterKey ? formatTooltipContent(parameterKey) : null;
+  const hasEnhancedTooltip = tooltipContent && typeof tooltipContent === 'object' && tooltipContent.title;
 
   return (
     <div className="flex items-center justify-between py-2 border-b border-white/10">
@@ -458,31 +512,45 @@ export function SwitchControl({
           className="font-condensed font-bold uppercase tracking-widest text-sm text-white"
         >
           {label}
-          {description && (
+          {(description || hasEnhancedTooltip) && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="w-3 h-3 text-gray-400 inline-block ml-1 cursor-help" aria-hidden="true" />
+                  <span role="img" aria-label="More info" className="inline-flex items-center ml-1 cursor-help" tabIndex={0}>
+                    <Info className="w-3 h-3 text-gray-400" />
+                  </span>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs text-xs">
-                  {description}
+                <TooltipContent side="top" variant="pro-panel" className="max-w-xs">
+                  {hasEnhancedTooltip ? (
+                    <div className="space-y-2">
+                      <div className="font-bold text-black">{tooltipContent.title}</div>
+                      <div className="text-xs text-gray-800">{tooltipContent.description}</div>
+                      {tooltipContent.examples && (
+                        <div className="text-xs text-gray-700">
+                          <span className="font-semibold">Examples:</span> {tooltipContent.examples}
+                        </div>
+                      )}
+                      {tooltipContent.powerLevel && (
+                        <div className="text-xs text-red-700 font-semibold">
+                          {tooltipContent.powerLevel}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    description
+                  )}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
         </Label>
         {description && (
-          <p
-            id={descId}
-            className="text-xs text-gray-400 font-condensed uppercase tracking-wider"
-          >
-            {description}
-          </p>
+          <span id={descId} className="sr-only">{description}</span>
         )}
       </div>
       <Switch
         id={controlId}
-        aria-describedby={description ? descId : undefined}
+        aria-describedby={(description) ? descId : undefined}
         checked={checked}
         onCheckedChange={onChange}
         className="data-[state=checked]:bg-noir-primary"
@@ -543,12 +611,7 @@ export function MultiSelectControl<T extends string>({
         )}
       </div>
       {description && (
-        <p
-          id={descId}
-          className="text-[10px] font-condensed uppercase tracking-wider text-gray-500"
-        >
-          {description}
-        </p>
+        <span id={descId} className="sr-only">{description}</span>
       )}
       <div
         role="group"
@@ -648,12 +711,7 @@ export function TagsInputControl({
         </span>
       </div>
       {description && (
-        <p
-          id={descId}
-          className="text-[10px] font-condensed uppercase tracking-wider text-gray-500"
-        >
-          {description}
-        </p>
+        <span id={descId} className="sr-only">{description}</span>
       )}
       <div
         className="flex flex-wrap gap-2 mb-2"

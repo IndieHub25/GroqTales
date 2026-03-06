@@ -69,6 +69,7 @@ export function VisualSection() {
           value={visual.coverImageStyle}
           options={COVER_STYLES}
           onChange={(v) => updateParameter('visual', 'coverImageStyle', v)}
+          parameterKey="coverImageStyle"
         />
         <SelectControl
           label="Color Palette"
@@ -76,6 +77,7 @@ export function VisualSection() {
           value={visual.colorPalette}
           options={COLOR_PALETTES}
           onChange={(v) => updateParameter('visual', 'colorPalette', v)}
+          parameterKey="colorPalette"
         />
       </ControlGrid>
 
