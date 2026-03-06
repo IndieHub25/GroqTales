@@ -44,7 +44,10 @@ export function GenerateStoryButton() {
     setIsGenerating(true);
 
     try {
-      const response = await fetch('/api/groq', {
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        'https://groqtales-backend-api.onrender.com';
+      const response = await fetch(`${apiUrl}/api/groq`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

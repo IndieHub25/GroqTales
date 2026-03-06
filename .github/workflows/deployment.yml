@@ -54,7 +54,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.99.0'
-          command: pages deploy .vercel/output/static --project-name=groqtales --branch=main
+          command: pages deploy --project-name=groqtales --branch=main
 
   deploy-preview:
     if: github.ref_name != 'main'
@@ -100,4 +100,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.99.0'
-          command: pages deploy .vercel/output/static --project-name=groqtales --branch=${{ github.ref_name }}
+          command: pages deploy --project-name=groqtales --branch=${{ github.ref_name }}
