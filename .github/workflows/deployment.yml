@@ -48,6 +48,9 @@ jobs:
           NEXT_PUBLIC_SPLASH_IMAGE_URL: 'https://groqtales.xyz/splash.jpg'
           NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR: '#1a1a2e'
 
+      - name: Install Wrangler
+        run: npm install -g wrangler@3.99.0
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
@@ -93,6 +96,9 @@ jobs:
           NEXT_PUBLIC_IMAGE_URL: 'https://groqtales.xyz/images'
           NEXT_PUBLIC_SPLASH_IMAGE_URL: 'https://groqtales.xyz/splash.jpg'
           NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR: '#1a1a2e'
+
+      - name: Install Wrangler
+        run: npm install -g wrangler@3.99.0
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
