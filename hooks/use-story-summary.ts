@@ -51,7 +51,7 @@ export function useStorySummary(): UseStorySummaryResult {
     setError(null);
 
     try {
-      const response = await fetch('/api/story-summaries', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/story-summaries', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ export function useStorySummary(): UseStorySummaryResult {
     setError(null);
 
     try {
-      const response = await fetch(`/api/story-summaries?storyId=${storyId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/story-summaries?storyId=${storyId}`, {
         method: 'GET',
       });
 
@@ -124,7 +124,7 @@ export function useStorySummary(): UseStorySummaryResult {
     setError(null);
 
     try {
-      const response = await fetch('/api/story-summaries', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/story-summaries', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -160,7 +160,7 @@ export function useStorySummary(): UseStorySummaryResult {
     setError(null);
 
     try {
-      const response = await fetch(`/api/story-summaries?id=${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/story-summaries?id=${id}`, {
         method: 'DELETE',
       });
 

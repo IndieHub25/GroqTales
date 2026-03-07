@@ -139,10 +139,10 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] p-0 border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-white max-h-[90vh] flex flex-col overflow-hidden" aria-describedby="create-story-description">
+      <DialogContent className="sm:max-w-[500px] p-0 border-4 border-black dark:border-slate-200 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] dark:shadow-[12px_12px_0px_0px_rgba(255,255,255,0.2)] bg-white dark:bg-slate-950 text-foreground max-h-[90vh] flex flex-col overflow-hidden" aria-describedby="create-story-description">
         <DialogHeader className="p-6 pb-2 text-left sm:text-left items-start space-y-0">
           <DialogTitle className="flex items-center gap-4 text-2xl font-black uppercase italic tracking-tight">
-            <div className="flex items-center justify-center w-10 h-10 bg-black text-white shrink-0" aria-hidden="true">
+            <div className="flex items-center justify-center w-10 h-10 bg-black text-white dark:bg-white dark:text-black shrink-0" aria-hidden="true">
               <PenSquare className="w-6 h-6" />
             </div>
             <span>{currentStep === 1 ? 'Create Story' : 'Story Details'}</span>
@@ -151,7 +151,7 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
                 variant="ghost"
                 size="icon"
                 aria-label="Go back to story type selection"
-                className="h-8 w-8 ml-auto border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0"
+                className="h-8 w-8 ml-auto border-2 border-black dark:border-slate-200 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:translate-y-0"
                 onClick={handleBack}
               >
                 <ChevronLeft className="h-5 w-5" />
@@ -171,14 +171,13 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
                 variant="outline"
                 aria-label={`${option.title}: ${option.description}`}
                 aria-pressed={selectedOption === option.id}
-                className={`w-full h-auto p-4 justify-start gap-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none whitespace-normal text-left transition-all bg-white ${
-                  selectedOption === option.id
-                    ? 'bg-primary/10 border-primary ring-2 ring-primary ring-inset'
-                    : ''
-                }`}
+                className={`w-full h-auto p-4 justify-start gap-5 border-4 border-black dark:border-slate-200 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-[6px_6px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)] active:translate-y-0 active:shadow-none whitespace-normal text-left transition-all bg-white dark:bg-slate-900 ${selectedOption === option.id
+                  ? 'bg-primary/10 border-primary ring-2 ring-primary ring-inset'
+                  : ''
+                  }`}
                 onClick={() => handleOptionSelect(option)}
               >
-                <div className="flex items-center justify-center w-12 h-12 rounded-none bg-black text-white shrink-0 border-2 border-white/20 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" aria-hidden="true">
+                <div className="flex items-center justify-center w-12 h-12 rounded-none bg-black text-white dark:bg-white dark:text-black shrink-0 border-2 border-white/20 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-none" aria-hidden="true">
                   {React.cloneElement(option.icon as React.ReactElement, {
                     className: 'w-6 h-6',
                     color: 'white',
@@ -210,7 +209,7 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
                 className="grid grid-cols-2 gap-4"
               >
                 <div
-                  className={`flex items-center space-x-3 border-4 border-black p-4 cursor-pointer hover:bg-black/5 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${selectedFormat === 'free' ? 'bg-primary/5 border-primary' : ''}`}
+                  className={`flex items-center space-x-3 border-4 border-black dark:border-slate-200 p-4 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${selectedFormat === 'free' ? 'bg-primary/5 border-primary' : ''}`}
                 >
                   <RadioGroupItem
                     value="free"
@@ -228,7 +227,7 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
                   </Label>
                 </div>
                 <div
-                  className={`flex items-center space-x-3 border-4 border-black p-4 cursor-pointer hover:bg-black/5 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${selectedFormat === 'nft' ? 'bg-primary/5 border-primary' : ''}`}
+                  className={`flex items-center space-x-3 border-4 border-black dark:border-slate-200 p-4 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${selectedFormat === 'nft' ? 'bg-primary/5 border-primary' : ''}`}
                 >
                   <RadioGroupItem
                     value="nft"
@@ -254,11 +253,10 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
                   <div
                     key={genre.slug}
                     onClick={() => handleGenreChange(genre.slug)}
-                    className={`border-4 border-black p-4 cursor-pointer hover:bg-black/5 flex items-center space-x-3 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
-                      selectedGenre === genre.slug
-                        ? 'bg-primary/10 border-primary shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] translate-x-[2px] translate-y-[2px]'
-                        : ''
-                    }`}
+                    className={`border-4 border-black dark:border-slate-200 p-4 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 flex items-center space-x-3 bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${selectedGenre === genre.slug
+                      ? 'bg-primary/10 border-primary shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] translate-x-[2px] translate-y-[2px]'
+                      : ''
+                      }`}
                   >
                     <div className="text-2xl shrink-0">{genre.icon}</div>
                     <span className="text-xs font-black uppercase tracking-tighter">
@@ -273,11 +271,10 @@ export function CreateStoryDialog({ isOpen, onClose }: CreateStoryDialogProps) {
               <Button
                 onClick={handleContinue}
                 disabled={!selectedGenre}
-                className={`w-full h-14 text-lg font-black uppercase italic tracking-widest border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all ${
-                  !selectedGenre
-                    ? 'bg-gray-200 text-gray-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] translate-y-0 opacity-100 cursor-not-allowed'
-                    : 'bg-primary text-white hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none'
-                }`}
+                className={`w-full h-14 text-lg font-black uppercase italic tracking-widest border-4 border-black dark:border-slate-200 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-[6px_6px_0px_0px_rgba(255,255,255,0.2)] transition-all ${!selectedGenre
+                  ? 'bg-gray-200 dark:bg-slate-800 text-gray-500 dark:text-slate-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] translate-y-0 opacity-100 cursor-not-allowed'
+                  : 'bg-primary text-white hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)] active:translate-y-0 active:shadow-none'
+                  }`}
               >
                 Go to Editor!
               </Button>

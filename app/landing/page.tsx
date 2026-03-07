@@ -20,12 +20,16 @@ import React, { useState, useEffect } from 'react';
 
 import { LoadingAnimation } from '@/components/loading-animation';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
+
 
 export default function LandingPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [account, setAccount] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const { toast } = useToast();
+
 
   useEffect(() => {
     // Simulate loading
@@ -53,12 +57,22 @@ export default function LandingPage() {
           router.push('/');
         }, 1000);
       } else {
-        alert('Please install MetaMask to use this feature!');
+        toast({
+          title: 'Wallet Connection',
+          description: 'Please install MetaMask to use this feature!',
+          variant: 'destructive',
+        });
       }
+
     } catch (error) {
       console.error('Error connecting to MetaMask', error);
-      alert('Failed to connect to MetaMask.');
+      toast({
+        title: 'Connection Failed',
+        description: 'Failed to connect to MetaMask. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
+
       setIsConnecting(false);
     }
   };
@@ -217,9 +231,10 @@ export default function LandingPage() {
               </div>
               <h4 className="text-lg font-semibold mb-2">AI-Powered Writing</h4>
               <p className="text-sm text-muted-foreground">
-                Get creative suggestions and overcome writer's block with AI
+                Get creative suggestions and overcome writer&apos;s block with AI
                 assistance.
               </p>
+
             </div>
 
             <div className="bg-card border border-border p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">

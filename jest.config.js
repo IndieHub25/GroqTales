@@ -5,9 +5,9 @@ const createJestConfig = nextJest({
 });
 
 const customJestConfig = {
-  testEnvironment: 'jest-environment-jsdom',
-  setupFilesAfterEnv: ['<rootDir>/tests/setup-jest.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/$1',
     '^@/components/(.*)$': '<rootDir>/components/$1',
     '^@/lib/(.*)$': '<rootDir>/lib/$1',
     '^@/types/(.*)$': '<rootDir>/types/$1',
@@ -15,13 +15,23 @@ const customJestConfig = {
     '^@/utils/(.*)$': '<rootDir>/utils/$1',
     '^@/app/(.*)$': '<rootDir>/app/$1',
     '^@/config/(.*)$': '<rootDir>/config/$1',
-    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@/models/(.*)$': '<rootDir>/models/$1',
   },
-  modulePathIgnorePatterns: [
+  testEnvironment: 'jest-environment-jsdom',
+  testPathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/.next/',
     '<rootDir>/GroqTales/',
-    '<rootDir>/src/blockchain/alchemy/node_modules/',
   ],
-  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  collectCoverageFrom: [
+    'app/**/*.{ts,tsx}',
+    'lib/**/*.{ts,tsx}',
+    'components/**/*.{ts,tsx}',
+    '!**/*.d.ts',
+    '!**/node_modules/**',
+    '!**/.next/**',
+  ],
 };
 
 module.exports = createJestConfig(customJestConfig);

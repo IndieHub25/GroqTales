@@ -1,101 +1,48 @@
-/**
- * Database Health Check Endpoint
- * Provides connection status and latency metrics for monitoring
- * Part of Issue #166: Database Connection Retries and Health Check Endpoint
- */
-
 import { NextResponse } from 'next/server';
 
-import {
-  getConnectionStatus,
-  getConnectionState,
-  measureLatency,
-} from '@/lib/db/connect';
-
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
-
-interface HealthResponse {
-  status: 'ok' | 'degraded' | 'down';
-  timestamp: string;
-  latencyMs?: number;
-  details?: {
-    connected: boolean;
-    lastConnectionTime?: string;
-    connectionAttempts?: number;
-  };
-  message?: string;
-}
-
 /**
- * GET /api/health/db
- * Returns database connection status and health metrics
+ * Database Health Check API Route
+ * Proxies to the backend server database health endpoint
  */
-export async function GET(): Promise<NextResponse<HealthResponse>> {
+export async function GET() {
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
+  const controller = new AbortController();
+  const timeoutMs = 3000; // 3 second timeout
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  
   try {
-    const isConnected = getConnectionStatus();
-    const connectionState = getConnectionState();
-
-    if (!isConnected) {
-      return NextResponse.json(
-        {
-          status: 'down',
-          timestamp: new Date().toISOString(),
-          message: 'Database connection not established',
-          details: {
-            connected: false,
-            connectionAttempts: connectionState.connectionAttempts,
-          },
-        },
-        { status: 503 }
-      );
-    }
-
-    // Measure latency with ping
-    const latencyMs = await measureLatency();
-
-    if (latencyMs === null) {
-      return NextResponse.json(
-        {
-          status: 'degraded',
-          timestamp: new Date().toISOString(),
-          message: 'Database ping failed',
-          details: {
-            connected: true,
-            lastConnectionTime:
-              connectionState.lastConnectionTime?.toISOString(),
-          },
-        },
-        { status: 503 }
-      );
-    }
-
-    // Determine status based on latency
-    const status = latencyMs > 1000 ? 'degraded' : 'ok';
-    const statusCode = 200; // Always 200 if connected; monitoring tools check status field
-
-    return NextResponse.json(
-      {
-        status,
-        timestamp: new Date().toISOString(),
-        latencyMs,
-        details: {
-          connected: true,
-          lastConnectionTime: connectionState.lastConnectionTime?.toISOString(),
-          connectionAttempts: connectionState.connectionAttempts,
-        },
+    const response = await fetch(`${backendUrl}/api/health/db`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      { status: statusCode }
-    );
-  } catch (error: any) {
-    // Never expose stack traces or credentials in health endpoint
-    console.error('[Health] Database health check error:', error.message);
+      cache: 'no-store',
+      signal: controller.signal,
+    });
 
+    clearTimeout(timeout);
+    if (!response.ok) {
+      return NextResponse.json(
+        { 
+          status: 'down',
+          service: 'database',
+          error: 'Backend database health check failed',
+          timestamp: new Date().toISOString(),
+        },
+        { status: response.status }
+      );
+    }
+
+    const data = await response.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    clearTimeout(timeout);
     return NextResponse.json(
-      {
+      { 
         status: 'down',
+        service: 'database',
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString(),
-        message: 'Database health check failed',
       },
       { status: 503 }
     );

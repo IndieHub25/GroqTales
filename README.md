@@ -1,24 +1,19 @@
-<h1 align="center">GroqTales</h1>
+<h1 align="center">
+  <img src="public/logo.png" alt="GroqTales Logo" width="150" />
+  <br />
+  GroqTales
+</h1>
 <p align="center"><b>AI-Powered Web3 Storytelling Platform</b></p>
 <p align="center">Create, share, and own AI-generated stories and comics as NFTs on the Monad blockchain.</p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.2.5-blue?style=flat-square" alt="Version"/>
-  <img src="https://img.shields.io/github/deployments/Drago-03/GroqTales/Production?label=deploy%20(prod)&logo=vercel&style=flat-square" alt="Production Deployment"/>
-  <img src="https://img.shields.io/github/deployments/Drago-03/GroqTales/Preview?label=deploy%20(preview)&logo=vercel&style=flat-square" alt="Preview Deployments"/>
-  <img src="https://img.shields.io/github/actions/workflow/status/Drago-03/GroqTales/ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"/>
-  <img src="https://img.shields.io/github/last-commit/Drago-03/GroqTales?style=flat-square" alt="Last Commit"/>
-  <img src="https://img.shields.io/github/commit-activity/m/Drago-03/GroqTales?style=flat-square" alt="Commit Activity"/>
   <img src="https://img.shields.io/github/issues/Drago-03/GroqTales?style=flat-square" alt="Open Issues"/>
   <img src="https://img.shields.io/github/issues-pr/Drago-03/GroqTales?style=flat-square" alt="Open PRs"/>
   <img src="https://img.shields.io/github/license/Drago-03/GroqTales?style=flat-square" alt="License"/>
-  <img src="https://img.shields.io/badge/status-active-brightgreen?style=flat-square" alt="Active"/>
-  <img src="https://img.shields.io/badge/contributions-welcome-blueviolet?style=flat-square" alt="Contributions Welcome"/>
   <img src="https://img.shields.io/badge/website-groqtales.xyz-0052cc?style=flat-square" alt="Website"/>
   <a href="mailto:mantejarora@gmail.com"><img src="https://img.shields.io/badge/contact-mantejarora%40gmail.com-orange?style=flat-square" alt="Contact Us"/></a>
   <a href="https://discord.gg/JK29FZRm"><img src="https://img.shields.io/discord/1245696768829601812?label=Discord&logo=discord&style=flat-square" alt="Discord"/></a>
 </p>
-
 <p align="center">
   <img src="https://img.shields.io/badge/SWOC'26-Open%20Source-orange?style=flat-square" alt="SWOC'26"/>
   <img src="https://img.shields.io/badge/OSGC'26-Open%20Source-purple?style=flat-square" alt="OSGC'26"/>
@@ -31,6 +26,18 @@
   <img src="https://img.shields.io/badge/Open%20Source%20Community-Welcome-0052cc?style=flat-square" alt="Open Source Community"/>
   <img src="https://img.shields.io/badge/Investment%20Partners-Applications%20Open-0052cc?style=flat-square" alt="Investment Partners"/>
 </p>
+  <b>Built by Indie Hub</b> ✨
+</p>
+
+<div align="center">
+  <a href="https://github.com/IndieHub25/GroqTales/stargazers">
+    <img src="https://img.shields.io/github/stars/IndieHub25/GroqTales?style=social" alt="Star on GitHub" />
+  </a>
+  <br />
+  ⭐ <b>If you like this project, please consider giving it a star!</b> ⭐
+</div>
+
+<br />
 
 <p align="center">
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&duration=4000&pause=600&color=F97316&center=true&vCenter=true&width=800&lines=---+AI-powered+Web3+Storytelling+on+the+Monad+Blockchain+---" alt="Animated Divider" />
@@ -45,10 +52,12 @@
 - [Tech Stack](#tech-stack)
 - [Quick Start](#quick-start)
 - [🛠️ Environment Configuration](#️-environment-configuration)
+- [🐳 Docker](#-docker)
 - [📜 Smart Contracts](#-smart-contracts)
 - [🏗️ System Architecture](#️-system-architecture)
 - [For Developers](#for-developers)
 - [🤝 Contributing](#-contributing)
+- [🎨 Spline 3D Guide](#-spline-3d-guide)
 - [Roadmap](#roadmap)
 - [Contributors](#contributors)
 - [Documentation & Architecture](#documentation--architecture)
@@ -105,11 +114,11 @@ world of creative writing, generative AI, and decentralized technology.
 ## Tech Stack
 
 - **Frontend:** Next.js, React, TailwindCSS, shadcn/ui
-- **Backend:** Node.js, API Routes
-- **AI:** Groq API (story generation), Unsplash API (optional visuals)
+- **Backend:** Node.js, Express.js API (Render), Cloudflare Workers
+- **AI:** Groq API (story generation with 70+ configurable parameters), Unsplash API (optional visuals)
 - **Blockchain:** Monad SDK, Solidity Smart Contracts
-- **Database:** MongoDB
-- **Hosting:** Vercel
+- **Database:** Supabase (PostgreSQL) with Row Level Security
+- **Hosting:** Cloudflare Pages (frontend), Render (backend API)
 
 ---
 
@@ -131,6 +140,17 @@ npm run dev
 See the [Wiki](https://github.com/IndieHub25/GroqTales/wiki) for configuration, environment
 variables, and deployment details.
 
+## API Access & Monitoring
+
+Base API URL (Production): `https://groqtales-backend-api.onrender.com`
+
+### Health Checks
+
+For continuous uptime monitoring (e.g., UptimeRobot, Render Health Checks, Datadog), always point to the dedicated, robust liveness probe:
+
+- **Liveness Probe**: `GET /healthz` — Returns an instant `200 OK` bypassing all middleware, rate limiters, and external database latency. Use this for raw "is the server running?" checks.
+- **Deep Diagnostics**: `GET /api/health` — Returns extremely detailed server diagnostics including Supabase connectivity, process memory usage, and uptime. (Subject to rate limits).
+
 ---
 
 ## 🛠️ Environment Configuration
@@ -140,26 +160,99 @@ To run this project locally, you must set up your environment variables. Create 
 
 ### `.env.local` Setup
 
-| Variable                    | Requirement  | Description                                                          |
-| :-------------------------- | :----------: | :------------------------------------------------------------------- |
-| `GROQ_API_KEY`              | **Required** | Powers the AI story generation engine via Groq LPU.                  |
-| `MONAD_RPC_URL`             | **Required** | The RPC endpoint for interacting with the Monad Testnet.             |
-| `MONGODB_URI`               | **Required** | Connection string for the database storing user profiles and drafts. |
-| `UNSPLASH_API_KEY`          |  _Optional_  | API key used for fetching high-quality cover images for stories.     |
-| `NEXT_PUBLIC_CONTRACT_ADDR` | **Required** | The smart contract address for the deployed NFT collection.          |
+| Variable                            | Requirement  | Description                                                          |
+| :---------------------------------- | :----------: | :------------------------------------------------------------------- |
+| `GROQ_API_KEY`                      | **Required** | Powers the AI story generation engine via Groq LPU.                  |
+| `NEXT_PUBLIC_SUPABASE_URL`          | **Required** | Your Supabase project URL for database and authentication.           |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`     | **Required** | Supabase anonymous/public API key for client-side access.            |
+| `MONAD_RPC_URL`                     | **Required** | The RPC endpoint for interacting with the Monad Testnet.             |
+| `NEXT_PUBLIC_API_URL`               | **Required** | Backend API URL (e.g., `https://groqtales-backend-api.onrender.com`).|
+| `NEXT_PUBLIC_UNSPLASH_API_KEY`          |  _Optional_  | API key used for fetching high-quality cover images for stories.     |
+| `NEXT_PUBLIC_CONTRACT_ADDR`         | **Required** | The smart contract address for the deployed NFT collection.          |
+| `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | **Required** | WalletConnect project ID for wallet integration.                 |
 
 ### 🔑 How to get these keys:
 
 1. **Groq API:** Generate a key at [Groq Cloud Console](https://console.groq.com/).
-2. **Monad RPC:** Use the official [Monad Testnet docs](https://docs.monad.xyz/) to find the latest
+2. **Supabase:** Create a free project at [Supabase](https://supabase.com/) and copy the project URL
+   and anon key from Settings → API.
+3. **Monad RPC:** Use the official [Monad Testnet docs](https://docs.monad.xyz/) to find the latest
    RPC URL.
-3. **MongoDB:** Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
 4. **Unsplash:** Register an application on the
    [Unsplash Developer Portal](https://unsplash.com/developers).
+5. **WalletConnect:** Create a project at [WalletConnect Cloud](https://cloud.walletconnect.com/).
 
 > [!WARNING]  
 > Never commit your `.env.local` file to version control. Ensure it is listed in your `.gitignore`
 > to prevent leaking sensitive API keys.
+
+---
+
+## 🐳 Docker
+
+GroqTales ships with a production-ready Docker setup. The `docker-compose.yml` spins up all required
+services in one command.
+
+### Services
+
+| Service   | Image                                   | Port(s)        | Purpose                              |
+| --------- | --------------------------------------- | -------------- | ------------------------------------ |
+| `server`  | Built from `Dockerfile` (Node 22)       | `3000`, `3001` | Next.js frontend + Express backend   |
+
+| `anvil`   | `ghcr.io/foundry-rs/foundry:v1.0.0`    | `8545`         | Local Ethereum-compatible dev chain   |
+
+### Quick Start
+
+```bash
+# Build & launch everything (Anvil, app)
+docker compose up --build
+
+# Run in detached mode
+docker compose up --build -d
+
+# View logs
+docker compose logs -f server
+
+# Stop all services
+docker compose down
+```
+
+Your application will be available at **http://localhost:3000** (frontend) and
+**http://localhost:3001** (backend API).
+
+### Building for Cloud Deployment
+
+```bash
+# Build the image
+docker build -t groqtales .
+
+# Cross-platform build (e.g., Mac M-series → amd64 cloud)
+docker build --platform=linux/amd64 -t groqtales .
+
+# Push to your registry
+docker push myregistry.com/groqtales
+```
+
+### Environment Variables
+
+Docker Compose sets these automatically. Override them in a `.env` file or in
+`docker-compose.override.yml`:
+
+| Variable                  | Default (Docker)                    |
+| ------------------------- | ----------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL` | `http://supabase:54321`             |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `your-anon-key`                |
+| `NEXT_PUBLIC_RPC_URL`     | `http://anvil:8545`                 |
+| `NODE_ENV`                | `development`                       |
+
+> [!TIP]
+> For production, set `NODE_ENV=production` and add your `GROQ_API_KEY`, `MONAD_RPC_URL`, and other
+> secrets via environment variables — never bake them into the image.
+
+### References
+
+- [Docker's Node.js guide](https://docs.docker.com/language/nodejs/)
+- [Docker Compose getting started](https://docs.docker.com/go/get-started-sharing/)
 
 ---
 
@@ -188,10 +281,10 @@ ownership.
 
 ```mermaid
 graph TD
-    A[User Interface - Next.js] -->|Prompt| B[Backend API - Node.js]
+    A[User Interface - Next.js] -->|Prompt with 70+ Params| B[Backend API - Node.js]
     B -->|Inference Request| C[Groq AI LPU Engine]
-    C -->|Streamed Story| B
-    B -->|Metadata| D[MongoDB]
+    C -->|Structured JSON Story| B
+    B -->|Metadata| D[Supabase PostgreSQL]
     B -->|IPFS Upload| E[Story/Image Data]
     A -->|Mint NFT| F[Monad Testnet Blockchain]
     F --- G[Smart Contracts - Solidity]
@@ -212,7 +305,7 @@ graph TD
 
 - **Environment Variables:**
   - `GROQ_API_KEY` – Your Groq AI API key
-  - `UNSPLASH_API_KEY` – (Optional) for placeholder visuals
+  - `NEXT_PUBLIC_UNSPLASH_API_KEY` – (Optional) for placeholder visuals
   - `MONAD_RPC_URL` – Monad blockchain RPC endpoint
 
 - **Smart Contract Deployment:**
@@ -244,8 +337,7 @@ GroqTales/
 ├── app/                      # Next.js App Router (pages, layouts, routes)
 ├── components/               # Reusable UI components
 ├── config/                   # App-wide configuration files
-├── deployment/
-│   └── vercel/               # Vercel deployment-related configs
+├── deployment/               # Deployment configurations
 ├── docs/                     # Documentation and guides
 ├── hooks/                    # Custom React hooks
 ├── lib/                      # Shared libraries and helper logic
@@ -283,16 +375,8 @@ GroqTales/
 ├── build_log.txt             # Build logs
 ├── foundry.toml              # Foundry configuration (smart contracts)
 ├── lighthouserc.json         # Lighthouse performance config
-├── netlify.toml              # Netlify deployment config
-├── next.config.js            # Next.js configuration
-├── package.json              # Project dependencies & scripts
-├── package-lock.json         # Locked dependency versions
-├── postcss.config.js         # PostCSS configuration
-├── render.yaml               # Render deployment config
-├── tailwind.config.js        # Tailwind CSS configuration (JS)
-├── tailwind.config.ts        # Tailwind CSS configuration (TS)
-├── tsconfig.json             # TypeScript configuration
-└── vercel.json               # Vercel deployment settings
+├── wrangler.toml             # Cloudflare Pages/Workers configuration
+└── MIGRATION-TO-CLOUDFLARE.md # Cloudflare migration guide
 ```
 
 ## 📸 Screenshots
@@ -362,6 +446,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
+## 🎨 Spline 3D Guide
+
+For detailed information on how to work with 3D models, performance rules, and our model protection
+policy, please refer to the [Spline 3D Contributor Guide](docs/SPLINE_GUIDE.md).
+
+---
+
 ## Roadmap
 
 - AI visuals: Integrate Stable Diffusion/DALL·E for comic panels [Phase 2]
@@ -396,6 +487,10 @@ Thanks to these amazing people for making GroqTales better!
 
 - **Architecture Overview:** [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Comprehensive system design
   and technical architecture
+- **AI Prompt Engineering:** [Wiki/AI-Prompt-Engineering](https://github.com/IndieHub25/GroqTales/wiki/AI-Prompt-Engineering) - AI system prompt parameter reference
+- **Pipelines & Automation:** [PIPELINES.md](docs/PIPELINES.md) - Comprehensive guide for the Cloudflare AI ML rankings, SEO RAG loops, and Admin queues
+- **Spline 3D Guide:** [SPLINE_GUIDE.md](docs/SPLINE_GUIDE.md) - Essential guide for 3D model
+  contributions and protection policy
 - **Project Wiki:** [GitHub Wiki](https://github.com/IndieHub25/GroqTales/wiki) - Detailed guides
   and documentation
 - **API Documentation:** [Wiki/API](https://github.com/IndieHub25/GroqTales/wiki/API) - Backend API
@@ -456,4 +551,12 @@ tuned!_
 
 ---
 
-<p align="center"><i>Support the project and share it with others.</i></p>
+<h2 align="center">Active At</h2>
+
+<p align="center">
+  <img src="public/OSCG26%20Label.jpg%20(1).jpeg" alt="OSCG'26 — Open Source Community Gathering 2026" width="600" />
+</p>
+
+---
+
+<p align="center"><i>Support the project by giving us a follow & a Star ⭐️ and share it with others.</i></p>

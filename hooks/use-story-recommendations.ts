@@ -52,7 +52,7 @@ export function useStoryRecommendations(): UseStoryRecommendationsResult {
     setError(null);
 
     try {
-      const response = await fetch('/api/story-recommendations', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/story-recommendations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

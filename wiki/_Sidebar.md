@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://www.groqtales.xyz/groq_tales_logo.png" alt="GroqTales Logo" width="150" />
+</p>
+
 # GroqTales Wiki Navigation
 
 Welcome to the GroqTales Wiki! Use the links below to explore our comprehensive documentation.
@@ -12,6 +16,7 @@ Welcome to the GroqTales Wiki! Use the links below to explore our comprehensive 
 ## User Guide
 
 - [Creating Stories](Creating-Stories.md)
+- [AI Prompt Engineering](AI-Prompt-Engineering.md)
 - [Minting NFTs](Minting-NFTs.md)
 - [Managing Your Account](Managing-Your-Account.md)
 
@@ -20,6 +25,7 @@ Welcome to the GroqTales Wiki! Use the links below to explore our comprehensive 
 - [API Documentation](API-Documentation.md)
 - [Smart Contracts](Smart-Contracts.md)
 - [Development Setup](Development-Setup.md)
+- [Backend Testing](Backend-Testing.md)
 - [Environment Variables](Environment-Variables.md)
 
 ## Community & Support

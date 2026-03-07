@@ -233,6 +233,70 @@ export function StoryCard({ story }: { story: Story }) {
   );
 }
 export function StoryFeed() {
+  const [stories, setStories] = React.useState<Story[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
+    fetch(`${baseUrl}/api/v1/stories?limit=6`)
+      .then((r) => {
+        if (!r.ok) throw new Error('Failed to fetch stories');
+        return r.json();
+      })
+      .then((json) => {
+        const data = json.data || [];
+        const mapped: Story[] = data.map((s: any) => ({
+          id: s._id || s.id,
+          title: s.title || 'Untitled',
+          excerpt: s.content?.slice(0, 150) || '',
+          content: s.content || '',
+          genre: s.genre || 'other',
+          coverImage:
+            s.coverImage ||
+            `https://images.unsplash.com/photo-1538370965046-79c0d6907d47?w=800&auto=format&fit=crop`,
+          author: {
+            name: s.author?.username || s.author?.firstName || 'Anonymous',
+            avatar:
+              s.author?.avatar ||
+              `https://api.dicebear.com/9.x/personas/svg?seed=${s.author?.username || 'default'}`,
+            address: s.author?.walletAddress || '',
+          },
+          createdAt: new Date(s.createdAt || Date.now()),
+          likes: s.stats?.likes || 0,
+          comments: 0,
+          isNft: s.isMinted || false,
+        }));
+        setStories(mapped);
+      })
+      .catch((err) => {
+        console.error('Story feed fetch error:', err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h2 className="text-2xl font-bold mb-6">Community Stories</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="bg-card rounded-lg overflow-hidden shadow-md animate-pulse"
+            >
+              <div className="h-48 bg-slate-800" />
+              <div className="p-4 space-y-3">
+                <div className="h-5 bg-slate-800 rounded w-3/4" />
+                <div className="h-3 bg-slate-800 rounded w-full" />
+                <div className="h-3 bg-slate-800 rounded w-2/3" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -241,11 +305,19 @@ export function StoryFeed() {
           <Link href="/stories">View All</Link>
         </Button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {communityStories.slice(0, 6).map((story) => (
-          <StoryCard key={story.id} story={story} />
-        ))}
-      </div>
+      {stories.length === 0 ? (
+        <div className="text-center py-12 text-slate-500">
+          <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-30" />
+          <p className="text-lg font-medium">No stories yet</p>
+          <p className="text-sm mt-1">Be the first to share a story!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {stories.map((story) => (
+            <StoryCard key={story.id} story={story} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

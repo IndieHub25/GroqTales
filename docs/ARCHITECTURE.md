@@ -28,10 +28,41 @@ extensibility.
 - **Frontend**: Next.js 14 with App Router, React 18, TypeScript
 - **Styling**: Tailwind CSS, shadcn/ui components
 - **Backend**: Next.js API Routes, Node.js runtime
-- **Database**: MongoDB with Mongoose ODM
+- **Database**: Supabase PostgreSQL (primary) with legacy MongoDB paths (NFT minting) — see [Data Layer — Transitional State](#data-layer--transitional-state)
 - **Blockchain**: Monad SDK, Solidity Smart Contracts
 - **AI**: Groq API for story generation
-- **Deployment**: Vercel with edge runtime optimization
+- **Deployment**: Cloudflare Pages with edge network optimization
+
+> [!WARNING]
+> **This document is transitional.** The data layer is mid-migration from MongoDB to Supabase. The sections below describe the *current* runtime reality. Once the MongoDB modules listed below are fully removed, this warning and the transitional section should be deleted.
+
+### Data Layer — Transitional State
+
+| Layer | Database | Status |
+|---|---|---|
+| Express backend (`server/`) — all routes | Supabase PostgreSQL + RLS | ✅ Fully migrated |
+| Next.js frontend auth & data | Supabase Auth + PostgREST | ✅ Fully migrated |
+| NFT minting pipeline | MongoDB via Mongoose | ⚠️ **Still active** |
+| Seed script (`scripts/seed.js`) | MongoDB via Mongoose | ⚠️ Still active |
+
+#### MongoDB modules still in the codebase
+
+| Module | Runtime Status | Notes |
+|---|---|---|
+| `lib/dbConnect.ts` | **Live** — called by `lib/mint-service.ts`, `workers/mintWorker.ts` | Mongoose connection helper with mock mode for builds |
+| `lib/mongodb.ts` | **Live** — imported by `lib/db.ts` | Native `MongoClient` connection with retry logic |
+| `lib/db.ts` | **Dead code** — `connectMongoose()` and CRUD helpers are exported but never imported outside this file | Can be removed |
+| `lib/mongoose.ts` | **Dead code** — `connectDB()` exported but never called | Can be removed |
+| `models/StoryMint.ts` | **Live** — fully active Mongoose model for NFT mint tracking | Used by `lib/mint-service.ts` |
+| `models/User.ts` | **Stubbed** — export set to `null as any`, schema commented out | Safe to remove |
+| `models/UserInteraction.ts` | **Stubbed** — export set to `null as any`, schema commented out | Safe to remove |
+| `scripts/seed.js` | **Live** — uses `require('mongoose')` | Dev-only; can remain until MongoDB is removed |
+
+#### Development guidance
+
+- **All new feature development must target Supabase PostgreSQL.** Do not add new Mongoose models or MongoDB queries.
+- **Onboarding**: To run the full application locally you need both a `MONGODB_URI` (for the minting pipeline) and Supabase credentials (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`). During builds the MongoDB mock mode activates automatically via `NEXT_PUBLIC_BUILD_MODE=true`.
+- **Cleanup plan**: Migrate `StoryMint` tracking to a Supabase `story_mints` table, then delete `lib/db.ts`, `lib/dbConnect.ts`, `lib/mongodb.ts`, `lib/mongoose.ts`, `models/User.ts`, `models/UserInteraction.ts`, `models/StoryMint.ts`, and remove `mongodb` / `mongoose` from `package.json`.
 
 ## System Architecture
 
@@ -66,7 +97,7 @@ graph TB
     end
 
     subgraph "Data Layer"
-        DB --> MongoDB[(MongoDB)]
+        DB --> Supabase[(Supabase PostgreSQL)]
         DB --> Models[Data Models]
         DB --> Queries[Query Layer]
     end
@@ -167,7 +198,7 @@ graph TB
         AIService[AI Service]
     end
 
-    Database --> MongoDB[(MongoDB)]
+    Database --> Supabase[(Supabase PostgreSQL)]
     External --> GroqAPI[Groq AI API]
     External --> BlockchainAPI[Blockchain API]
 
@@ -445,7 +476,7 @@ graph TB
     end
 
     subgraph "CDN & Edge"
-        Vercel[Vercel Edge Network]
+        CF[Cloudflare Pages + Edge Network]
         CDN[Static Assets CDN]
     end
 
@@ -464,7 +495,7 @@ graph TB
     end
 
     subgraph "Data Layer"
-        MongoDB[(MongoDB Atlas)]
+        Supabase[(Supabase PostgreSQL)]
         Redis[(Redis Cache)]
         IPFS[(IPFS Storage)]
     end
@@ -476,11 +507,11 @@ graph TB
         Web3Provider[Web3 Provider]
     end
 
-    Browser --> Vercel
-    Mobile --> Vercel
+    Browser --> CF
+    Mobile --> CF
     PWA --> CDN
 
-    Vercel --> NextJS
+    CF --> NextJS
     NextJS --> SSR
     NextJS --> API
     API --> Middleware
@@ -490,7 +521,7 @@ graph TB
     Middleware --> NFTService
     Middleware --> AIService
 
-    StoryService --> MongoDB
+    StoryService --> Supabase
     AuthService --> Redis
     NFTService --> IPFS
 
@@ -722,7 +753,7 @@ graph LR
     end
 
     subgraph "Production"
-        Vercel[Vercel Platform]
+        CF[Cloudflare Pages]
         Edge[Edge Functions]
         CDN[Global CDN]
         Monitor[Monitoring]
@@ -736,10 +767,10 @@ graph LR
     Build --> Test
     Test --> Deploy
 
-    Deploy --> Vercel
-    Vercel --> Edge
-    Vercel --> CDN
-    Vercel --> Monitor
+    Deploy --> CF
+    CF --> Edge
+    CF --> CDN
+    CF --> Monitor
 ```
 
 ### Environment Architecture
@@ -748,7 +779,7 @@ graph LR
 graph TB
     subgraph "Development Environment"
         DevLocal[Local Development]
-        DevDB[Local MongoDB]
+        DevDB[Local Supabase]
         DevAPI[Development APIs]
     end
 

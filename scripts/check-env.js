@@ -11,7 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 
-// In production environments like Vercel, env vars are set in the platform
+// In production environments like Cloudflare Pages, env vars are set in the platform dashboard
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Load environment variables from .env.local if it exists
@@ -21,7 +21,7 @@ if (fs.existsSync(envLocalPath)) {
 }
 
 // Required environment variables
-const requiredVars = ['NEXT_PUBLIC_GROQ_API_KEY'];
+const requiredVars = ['NEXT_PUBLIC_GROQ_API_KEY', 'NEXT_PUBLIC_API_URL'];
 
 // Optional environment variables (only checked in development)
 const developmentVars = ['MONGODB_URI', 'MONGODB_DB_NAME'];

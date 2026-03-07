@@ -15,11 +15,11 @@ const OutboxSchema = new Schema<IOutbox>({
   eventType: { type: String, required: true, index: true },
   aggregateId: { type: String, required: true },
   payload: { type: Schema.Types.Mixed, required: true },
-  status: { 
-    type: String, 
-    enum: ['pending', 'processing', 'completed', 'failed'], 
+  status: {
+    type: String,
+    enum: ['pending', 'processing', 'completed', 'failed'],
     default: 'pending',
-    index: true 
+    index: true
   },
   attempts: { type: Number, default: 0 },
   lastError: { type: String },
@@ -28,4 +28,5 @@ const OutboxSchema = new Schema<IOutbox>({
 
 OutboxSchema.index({ processedAt: 1 }, { expireAfterSeconds: 604800, partialFilterExpression: { status: 'completed' } });
 
-export default mongoose.models.Outbox || mongoose.model<IOutbox>('Outbox', OutboxSchema);
+// export default mongoose.models.Outbox || mongoose.model<IOutbox>('Outbox', OutboxSchema);
+export default null as any;
