@@ -1,9 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Wallet, User, Settings, LogOut, BookOpen } from 'lucide-react';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { Wallet, User, Settings, LogOut, BookOpen, Bell, Shield, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
+import { fetchNotifications } from '@/lib/feeds-client';
+
+// Simple deterministic hash to avoid sending raw PII or identifiers to third parties
+const generateSeed = (input?: string) => {
+  if (!input) return "default";
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    const char = input.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(16);
+};
 
 import { useWeb3 } from '@/components/providers/web3-provider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -20,6 +33,8 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { truncateAddress } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
+import { useUserRole } from '@/hooks/use-user-role';
+import { roleBadgeStyles } from '@/lib/rbac';
 
 export function UserNav() {
   const { account, connectWallet, disconnectWallet } = useWeb3();
@@ -27,13 +42,14 @@ export function UserNav() {
   const [dbUser, setDbUser] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
   const supabase = React.useMemo(() => createClient(), []);
+  const { role, isAdmin, isModerator, isModOrAdmin, isOverridden, toggleViewMode } = useUserRole();
 
   useEffect(() => {
     // Check Supabase session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
-        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url });
+        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url, id: session.user.id });
       }
     });
 
@@ -42,7 +58,7 @@ export function UserNav() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session?.user) {
-        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url });
+        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url, id: session.user.id });
       } else if (!account) {
         setDbUser(null);
       }
@@ -53,20 +69,61 @@ export function UserNav() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (account) {
+      if (account || session) {
         try {
-          const res = await fetch(`/api/v1/users/profile/${account}`);
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
+          let fetchUrl = `${baseUrl}/api/v1/users/profile/${account}`;
+          const headers: Record<string, string> = {};
+
+          if (session) {
+            const token = session.access_token;
+            if (token) {
+              headers['Authorization'] = `Bearer ${token}`;
+            }
+            fetchUrl = `${baseUrl}/api/v1/users/profile`;
+          }
+
+          const res = await fetch(fetchUrl, { headers });
           if (res.ok) {
             const data = await res.json();
-            setDbUser(data.user);
+            setDbUser(data.data?.user || data.data || data.user || data);
           }
         } catch (err) {
           console.error("Failed to fetch nav user data", err);
         }
       }
     };
-    if (account) fetchUserData();
-  }, [account]);
+    if (account || session) fetchUserData();
+
+    // Listen for global profile updates (e.g. from settings page)
+    const handleProfileUpdate = () => fetchUserData();
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+    };
+  }, [account, session]);
+
+  // Notification badge count — poll every 20s
+  const [unreadCount, setUnreadCount] = useState(0);
+  const notifIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const loadUnreadCount = useCallback(async () => {
+    try {
+      const notifs = await fetchNotifications(true, 50);
+      setUnreadCount(notifs.filter(n => !n.read).length);
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    if (account || session) {
+      loadUnreadCount();
+      notifIntervalRef.current = setInterval(loadUnreadCount, 20_000);
+    }
+    return () => {
+      if (notifIntervalRef.current) clearInterval(notifIntervalRef.current);
+    };
+  }, [account, session, loadUnreadCount]);
 
   const handleLogout = async () => {
     if (account) await disconnectWallet();
@@ -92,7 +149,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" aria-label="User menu" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={dbUser?.avatar || `https://api.dicebear.com/7.x/personas/svg?seed=${dbUser?.username || "You"}`} alt="User Avatar" />
+            <AvatarImage src={dbUser?.avatar || `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(generateSeed(dbUser?.id || account || session?.user?.id))}`} alt="User Avatar" />
             <AvatarFallback>{dbUser?.username?.slice(0, 2).toUpperCase() || "U"}</AvatarFallback>
           </Avatar>
         </Button>
@@ -101,8 +158,13 @@ export function UserNav() {
         className="w-72 p-0 overflow-hidden border border-white/10 shadow-2xl bg-black/95 backdrop-blur-xl rounded-xl"
         align="end"
       >
-        <DropdownMenuLabel className="bg-emerald-500/10 text-emerald-400 border-b border-white/10 py-3 font-semibold uppercase tracking-wider text-xs">
-          User Controls
+        <DropdownMenuLabel className="bg-emerald-500/10 text-emerald-400 border-b border-white/10 py-3 font-semibold uppercase tracking-wider text-xs flex items-center justify-between">
+          <span>User Controls</span>
+          {role !== 'user' && (
+            <span className={`text-[9px] px-1.5 py-0.5 rounded border ${roleBadgeStyles[role].className}`}>
+              {roleBadgeStyles[role].label}
+            </span>
+          )}
         </DropdownMenuLabel>
 
         <div className="bg-transparent p-1">
@@ -112,7 +174,7 @@ export function UserNav() {
               className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all"
             >
               <Link
-                href={`/profile/${account || session?.user?.id}`}
+                href={`/profile/${dbUser?.username || 'me'}`}
                 className="flex items-center w-full uppercase py-2"
               >
                 <User className="mr-2 h-4 w-4" />
@@ -124,7 +186,7 @@ export function UserNav() {
               className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all"
             >
               <Link
-                href={`/profile/${account || session?.user?.id}`}
+                href={`/profile/${dbUser?.username || 'me'}`}
                 className="flex items-center w-full uppercase py-2"
               >
                 <BookOpen className="mr-2 h-4 w-4" />
@@ -157,6 +219,70 @@ export function UserNav() {
           </DropdownMenuGroup>
 
           <DropdownMenuSeparator className="h-px bg-white/10 mx-0 my-1" />
+
+          {/* Role-based items */}
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              asChild
+              className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all uppercase py-2"
+            >
+              <Link href="/settings" className="flex items-center w-full">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              asChild
+              className="cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all uppercase py-2"
+            >
+              <Link href="/notifications" className="flex items-center w-full">
+                <Bell className="mr-2 h-4 w-4" />
+                <span>Notifications</span>
+                {unreadCount > 0 && (
+                  <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold rounded-full bg-violet-500 text-white">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </Link>
+            </DropdownMenuItem>
+
+            {isAdmin && (
+              <DropdownMenuItem
+                asChild
+                className="cursor-pointer focus:bg-red-500/10 focus:text-red-400 rounded-none transition-all uppercase py-2 text-red-400"
+              >
+                <Link href="/admin" className="flex items-center w-full">
+                  <Shield className="mr-2 h-4 w-4" />
+                  <span>Admin Panel</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
+
+            {isModOrAdmin && (
+              <DropdownMenuItem
+                asChild
+                className="cursor-pointer focus:bg-amber-500/10 focus:text-amber-400 rounded-none transition-all uppercase py-2 text-amber-400"
+              >
+                <Link href="/admin/moderation" className="flex items-center w-full">
+                  <Shield className="mr-2 h-4 w-4" />
+                  <span>Moderation</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
+
+            {isModOrAdmin && (
+              <DropdownMenuItem
+                onClick={toggleViewMode}
+                className="cursor-pointer focus:bg-blue-500/10 focus:text-blue-400 rounded-none transition-all uppercase py-2 text-blue-400"
+              >
+                {isOverridden ? (
+                  <><Eye className="mr-2 h-4 w-4" /><span>Switch to Admin View</span></>
+                ) : (
+                  <><EyeOff className="mr-2 h-4 w-4" /><span>Switch to User View</span></>
+                )}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuGroup>
 
           <DropdownMenuItem
             onClick={handleLogout}

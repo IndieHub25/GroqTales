@@ -21,7 +21,7 @@ if (fs.existsSync(envLocalPath)) {
 }
 
 // Required environment variables
-const requiredVars = ['NEXT_PUBLIC_GROQ_API_KEY'];
+const requiredVars = ['NEXT_PUBLIC_GROQ_API_KEY', 'NEXT_PUBLIC_API_URL'];
 
 // Optional environment variables (only checked in development)
 const developmentVars = ['MONGODB_URI', 'MONGODB_DB_NAME'];

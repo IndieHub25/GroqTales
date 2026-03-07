@@ -54,7 +54,7 @@ const { authRequired } = require('../middleware/auth');
  *         schema:
  *           type: string
  *           example: "10-100"
- *         description: Filter NFTs by price range (format: min-max).
+ *         description: "Filter NFTs by price range (format: min-max)."
  *     responses:
  *       200:
  *         description: NFTs retrieved successfully.
@@ -326,7 +326,7 @@ router.post('/mint', authRequired, async (req, res) => {
 
     return res.status(500).json({ error: 'Internal server error' });
   }
-  
+
 });
 
 /**

@@ -7,12 +7,305 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 1.3.9 (latest), 1.3.8 (previous). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+Active full support: 1.3.104 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
 
-## [1.3.9] - 2026-02-28
+## [1.3.104] - 2026-03-05
+
+### Fixed
+- **Deprecated Groq Model**: Replaced `mixtral-8x7b-32768` with `mistral-saba-24b` in both `lib/groq-service.ts` (`GROQ_MODELS.CONTENT_IMPROVEMENT`) and `server/services/groqService.js` (`MODELS.LONG_CONTEXT`).
+- **Backend Test Lint**: Converted `forEach` expression-bodied arrow to block-bodied in `scripts/backend-test.js` (no implicit return).
+- **Backend Test Start Script**: Relaxed assertion to accept any `start*` script name (supports `start:backend`, `start-backend`, etc.).
+- **Test Fetch Leak**: Saved and restored `global.fetch` in `tests/backend/groq-service.test.js` via `afterAll` to prevent cross-test contamination.
+
+### Changed
+- **Groq Route Security** (`server/routes/groq.js`):
+  - `/models` now reads API key from `Authorization: Bearer …` header (query param kept as fallback).
+  - `ideas` action validates and clamps `count` to 1–20 range.
+  - Error responses no longer leak raw error messages; return generic `AI operation failed` with code.
+- **Groq Service Enhancements** (`server/services/groqService.js`):
+  - `buildIdeasPrompt` now incorporates the `theme` parameter.
+  - `callGroq` fetch calls protected by 30-second `AbortController` timeout.
+- **Worker Security** (`server/worker.js`):
+  - `/run` and `/track-usage` endpoints gated by `WORKER_SECRET` shared-secret auth.
+  - `tokens` payload validated as a finite positive number before accumulation.
+- **Backend Test**: Added `healthCheckPath: /healthz` assertion for Render config.
+
+### Documentation
+- **README.md**: Standardized `UNSPLASH_API_KEY` → `NEXT_PUBLIC_UNSPLASH_API_KEY` in env table and For Developers section.
+- **SECURITY.md**: Bumped latest version to 1.3.103→1.3.104, added worker secret and timeout notes.
+- **wiki/Backend-Testing.md**: Updated model list to include `mistral-saba-24b`.
+- **wiki/API-Documentation.md**: Corrected production base URL to `groqtales-backend-api.onrender.com/api`.
+
+## [1.3.103] - 2026-03-05
+
+### Fixed
+- **Cloudflare Pages Build Failure (`Invalid Version:`)**: Fixed `npm ci` crash caused by `@upstash/redis` having `"version": "v1.36.3"` in `package-lock.json`. The `v` prefix is not valid semver; npm 10.9.2 strictly validates version strings during `npm clean-install`, causing the build to exit with code 1. Corrected to `"1.36.3"`.
+
+### Changed
+- **ARCHITECTURE.md — Hybrid Database State**: Updated the Core Technologies section and added a "Data Layer — Transitional State" section documenting that MongoDB is still active for the NFT minting pipeline (`StoryMint` model via `lib/dbConnect.ts`). Includes a module-by-module audit table (live/stubbed/dead code), development guidance targeting Supabase for all new work, onboarding credentials, and a cleanup plan. Marked the document as transitional.
+
+## [1.3.102] - 2026-03-05
+
+### Added
+- **Groq AI Centralized Service**: Introduced `/server/services/groqService.js` to handle all Groq API calls (LLaMA 3.3/3.1, Mixtral) with 70+ parameters schema, robust error handling, and timeout limits.
+- **Groq Multiplexer Route**: Created `server/routes/groq.js` for flexible `/api/groq` requests matching the frontend `use-groq` hook exactly.
+- **Backend Worker Pipelines**: Implemented `server/worker.js` with functional ML analytics, background cleanup jobs, and metrics tracing.
+- **Automated Render Deployment Test**: Wrote `/scripts/backend-test.js` (`npm run test:backend`) to assert standard deployment structures, missing modules, package settings, and placeholder eliminations are completed securely.
+- **Documentation**: Updated `README.md`, `API-Documentation.md`, `AI-Prompt-Engineering.md`, and `Backend-Testing.md` to reflect full Groq backend operations.
+- **Swagger Updates**: Restructured and exposed endpoints across the backend properly replacing placeholder returns in `server/routes/stories.js` and `server/routes/ai.js`.
+
+### Fixed
+- **Render Health Check Flapping (429 Errors)**: Resolved an issue where Render liveness probes flap between "failed" and "recovered" due to HTTP 429 Too Many Requests.
+  - Added dedicated `/healthz` endpoints at the top of `backend.js` and `sdk-server.js` to ensure instantaneous, dependency-free responses.
+  - Safelisted `/healthz`, `/`, and `/api/health` in the global `express-rate-limit` configuration to guarantee liveness probes are never blocked.
+  - Updated `render.yaml` `healthCheckPath` from `/api/health` and `/sdk/health` to the isolated `/healthz` endpoint.
+  - Added explicit logging to `/healthz` requests for easier production debugging.
+- **Winston Crash Loop**: Designed fallback console logging for `groqService` execution in scenarios where `winston` modules suffer disk access issues.
+- **Module Resolution Issues**: Corrected EPERM/Lusca errors across testing infrastructure by designing standalone tester bypassing standard tree constraints.
+- **Model Namings**: Cleansed the frontend and backend of deprecated Groq mock-model nomenclature (e.g. `llama3-8b-8192-analysis`) ensuring legitimate tokens execute successfully.
+
+## [1.3.101] - 2026-03-03
+
+### Added
+- **Dynamic Blog Architecture**: Rebuilt the `/blog` system. Created a visually appealing Blog Index listing page at `/blog`, converting the previous statically-routed article into a dynamic nested route at `/blog/[slug]`. 
+- **Real-Time Marketplace Sync**: Overhauled the Marketplace feature. Renamed the legacy `/nft-marketplace` route to `/marketplace`, deleted all old static mock-data files, and constructed an intelligent UI that reads and syncs directly from the Supabase `stories` table in real time.
+
+### Fixed
+- **Image Overlays**: Configured the frontend to prioritize rendering external logo media located at `/blogs/blog-data/Blog 1/blog-logo.png` for both the index cover image and internal hero banner.
+
+## [1.3.100] - 2026-03-02
+
+### Added
+- **Top Creators API Endpoint**: Added a new `/api/v1/users/top-creators` route to fetch users and dynamically aggregate their statistics (likes, stories, views).
+- **Creators Page UI Overhaul**: Reworked `/community/creators` with a premium, sleek dark mode theme matching the platform's new aesthetic. Synced the page entirely with the new backend endpoint, replacing all mock data.
+- **Improved Contact Page**: Completely migrated the `/contact` page to a new professional layout and dark-mode premium look.
+- **Home Page Enhancements**: Updated specific links in the footer, implemented the required "Start Creating" hero navigation, and added a hero image to the "publish to the world" section.
+- **Gallery Upload Pipeline**: Added an interactive `/upload` page supporting 50MB PDF, DOCX, TXT, and MD files.
+- **Synoptic AI Agent**: Integrated Groq AI to automatically parse uploaded files and generate rich, 2-3 sentence synopses.
+- **Real-Time Archive Gallery**: Created a modern `/gallery` page to replace the old `/nft-gallery`, now perfectly synced with un-minted community works.
+- **Format Typings**: Authors can classify their uploads as 'Storybook' or 'Comic Book'.
+- **Blog Platform**: Created a premium `/blog` page containing the DEV.to article, built with custom typography and scroll progress indicators.
+
+### Fixed
+- **Floating Buttons**: Aligned the "Help Bot" and "Scroll to Top" floating action buttons horizontally on the screen.
+
+### Removed
+- **NFT Gallery**: The old static mock-data `/nft-gallery` was entirely removed and replaced with the real-time `/gallery`.
+
+## [1.3.9] - Unreleased
+
+### Bug Fixes
+- **Cloudflare Pages Deployment Fix (Asset Validation)**: Fixed an issue where the Cloudflare Pages asset validation process would crash and timeout over 15 minutes due to an invalid C-style block comment (`/* ... */`) in `public/_headers`. Cloudflare treats `/*` as a path matcher for all routes, causing the subsequent comment text to be parsed as invalid HTTP headers. Replaced with valid `#` comments.
+- **Cloudflare Pages Deployment Fix (Actions)**: Fixed GitHub Action workflow `deployment.yml` to trigger on branches other than `main` and dynamically deploy to the current branch instead of hardcoding `main`. Also removed the restrictive repository name check.
+
+### Story Creation Reversion & Enhancements
+
+- **Create Story Reversion** (`app/create/page.tsx`): Reverted to the classic UI with manual input fields (title, description, genre, content, cover image) instead of the AI-generation layout.
+- **Enforced Authentication** (`app/create/page.tsx`): Restricted access to story creation; users must now have an active Supabase session (or admin override) to access the page and upload content.
+- **Supabase Schema Update** (Supabase Database): Added `description` and `cover_image` columns to the `stories` table to appropriately store the classic story form fields.
+- **API Form Processing** (`server/routes/stories.js`): Updated POST `/api/v1/stories/create` to capture and insert `description` and `cover_image` directly into Supabase.
+- **Real-time Feed Sync** (`server/routes/feed.js`): Feed now serves the `description` and `cover_image` for stories, allowing the frontend to display newly created manual stories properly.
+
+### Major: Full Supabase Backend Migration
+
+Migrated the entire backend database layer from MongoDB/Mongoose to **Supabase PostgreSQL**. This resolves all 500 errors caused by MongoDB not being connected on Render and fixes the auth token mismatch between the frontend (Supabase tokens) and backend (custom JWT).
+
+### Added
+- **`server/config/supabase.js`** — Supabase client configuration with admin client, per-user client factory, and health check function
+- **`server/config/supabase-schema.sql`** — Complete SQL schema with 4 tables (`profiles`, `stories`, `drafts`, `user_settings`), RLS policies, auto-profile creation trigger, and `updated_at` triggers
+- **`@supabase/supabase-js`** dependency added to `server/package.json`
+
+### Changed
+- **Auth Middleware** (`server/middleware/auth.js`) — Now verifies Supabase JWT tokens via `supabase.auth.getUser()` instead of custom JWT verification
+- **Auth Routes** (`server/routes/auth.js`) — Signup uses `supabase.auth.admin.createUser()`, login uses `supabase.auth.signInWithPassword()`
+- **Users Routes** (`server/routes/users.js`) — All queries use Supabase `profiles` + `stories` tables; auto-creates profile on first access; fixed Swagger docs (added proper parameters)
+- **Stories Routes** (`server/routes/stories.js`) — CRUD operations against Supabase `stories` table with author profile joins; removed CF D1 sync
+- **Feed Route** (`server/routes/feed.js`) — Queries Supabase directly instead of proxying through Cloudflare Worker; includes author profiles and content truncation
+- **Drafts Routes** (`server/routes/drafts.js`) — Full CRUD with version history via Supabase `drafts` table using JSONB
+- **Settings/Profile** (`server/routes/settings/profile.js`) — Uses Supabase `profiles` table; removed MongoDB and CF Worker sync
+- **Settings/Notifications** (`server/routes/settings/notifications.js`) — Uses Supabase `user_settings` table
+- **Settings/Privacy** (`server/routes/settings/privacy.js`) — Uses Supabase `user_settings` table
+- **Settings/Wallet** (`server/routes/settings/wallet.js`) — Uses Supabase `profiles` wallet fields
+- **Health Checks** (`server/backend.js`) — Shows Supabase connection status instead of MongoDB; server starts immediately without blocking on DB connection
+- **Root Endpoint** (`server/backend.js`) — Updated feed description from "Cloudflare D1" to "Supabase"
+- **Sign-In Page** (`app/sign-in/page.tsx`) — CRM-style UI overhaul, removed emojis, added strong validation, and password show/hide toggle.
+- **Sign-Up Page** (`app/sign-up/page.tsx`) — CRM-style UI overhaul, multi-step layout modernized, added password strength validation, and password show/hide toggle.
+
+### Fixed
+- **Cloudflare Build Error** — Fixed incorrect Supabase client import path in `app/create/page.tsx` (`@/utils/supabase/client` to `@/lib/supabase/client`) that was causing the build to fail on Cloudflare Pages.
+- **Render 429 Health Check Errors** — Moved `/api/health` routes above the global rate limiter in `server/backend.js` to prevent health check failures during instance deployment and monitoring.
+- **500 errors on all data endpoints** — Caused by MongoDB not being connected on Render
+- **401 errors on authenticated endpoints** — Frontend sends Supabase tokens but backend was verifying with custom JWT
+- **Missing Swagger parameters** — `/api/v1/users/profile` GET now shows auth parameters
+- **Profile dashboard not loading** — Profile data now served from Supabase, matching the frontend's auth flow
+
+### Core Infrastructure
+
+- Implement core application structure, API routes, UI components, and Cloudflare Worker for GroqTales.
+
+### Backend Integration & Production Config
+
+#### Backend API Wiring
+- **`lib/api-client.ts`** [NEW]: Centralized `apiFetch()` and `authHeaders()` helpers for consistent API base URL usage across all frontend components.
+- **`.env.example`**: Added `NEXT_PUBLIC_API_URL`, `PROD_URL`, `CORS_ORIGIN` environment variables.
+- **`scripts/check-env.js`**: Added `NEXT_PUBLIC_API_URL` to required environment variables validation.
+
+#### Production Config Fix — Localhost Removal
+- **`server/backend.js`**: Swagger server URL changed from `process.env.URL || 'http://localhost:PORT'` → `process.env.PROD_URL || 'https://groqtales-backend-api.onrender.com/api'` with "Production" description. CORS origin default changed from `localhost:3000` → `https://groqtales.xyz`. Health check startup logs now use `PROD_URL`.
+- **`server/sdk-server.js`**: CORS origin default changed from `localhost:3000` → `https://groqtales.xyz`.
+
+#### Health Endpoints
+- **`server/backend.js`**: Added `GET /api/health/db` (database connectivity) and `GET /api/health/bot` (help bot availability) endpoints.
+- **`hooks/use-system-health.ts`** [NEW]: Frontend hook that polls backend health endpoints, used to show/hide the "System Offline" banner.
+- **`components/footer.tsx`**: Fixed health check parsing — was checking for `'ok'` status but backend returns `'healthy'`.
+
+### RBAC — Role-Based Access Control
+
+- **`lib/rbac.ts`** [NEW]: Role helper functions (`getUserRoles()`, `isAdmin()`, `isModerator()`, `isModOrAdmin()`, `getPrimaryRole()`) reading from Supabase `user_metadata.roles`. Includes `roleBadgeStyles` config for Admin (red), Moderator (amber), User (emerald) badges.
+- **`hooks/use-user-role.ts`** [NEW]: React hook reading Supabase session roles with `localStorage`-based view-switching so admins/mods can preview the UI as a regular user.
+- **`components/user-nav.tsx`**: Added RBAC-aware dropdown items — role badge next to "User Controls", conditional "Admin Panel" (admin only), "Moderation" (admin + mod), "Settings", "Notifications" (all users), and "Switch to User/Admin View" toggle (admin + mod).
+
+### MADHAVA Help Bot — Express Backend
+
+- **`server/routes/helpbot.js`** [NEW]: `POST /api/helpbot/chat` endpoint integrating with Groq LLM API. Includes system prompt with GroqTales knowledge base and fallback message when `GROQ_API_KEY` is not configured.
+- **`server/backend.js`**: Mounted helpbot route at `/api/helpbot`.
+
+### Profile Refactor — Username-Based URLs
+
+- **`server/routes/users.js`**: Added `GET /api/v1/users/profile/username/:username` route for fetching profiles by username.
+- **`app/profile/[slug]/page.tsx`** [NEW]: Server component for username-based profile routing.
+- **`app/profile/[slug]/client.tsx`** [NEW]: Full profile client component — handles `/profile/me` (authenticated) and `/profile/:username` (public), displays moderation status badges, user stats, story list, and "Mint NFT" button for owned approved stories.
+- **`app/profile/page.tsx`**: Now redirects to `/profile/me`.
+- **`app/profile/[id]/`** [DELETED]: Removed old ObjectId-based profile pages.
+
+### Story Moderation System
+
+- **`server/models/Story.js`**: Added `moderationStatus` (`pending`/`approved`/`rejected`), `moderatorId`, and `moderationNotes` fields to the Story schema.
+- **`server/routes/stories.js`**: `GET /` now filters by `moderationStatus` (defaults to `approved`, accepts `?status=` query param). `POST /create` sets new stories to `pending`. Added `PATCH /:id/moderate` for admin approval/rejection.
+- **`app/admin/moderation/page.tsx`** [NEW]: Admin-only moderation queue page with approve/reject UI for pending stories.
+
+### Real Data Integration
+
+- **`scripts/seed.js`**: Rewritten with 10 users (including admin) and 10 diverse stories (8 approved, 2 pending) for development and testing.
+- **`components/story-feed.tsx`**: Replaced hardcoded mock data with live fetch from `/api/v1/stories?limit=6`. Added loading skeleton placeholders and empty state.
+- **`components/community-feed.tsx`**: Fixed broken API URL (was `\${}` escaped template literal + non-existent `/api/feed` endpoint → now properly interpolates `NEXT_PUBLIC_API_URL` and fetches from `/api/v1/stories`).
+
+### Cloudflare Worker — D1 Feeds (Trending & Notifications)
+
+- **`cf-worker/schema.sql`**: Added `trending_stories` table (`story_id`, `score`, `period`, indexed by `period + score DESC`) and `notifications` table (`id`, `user_id`, `type`, `title`, `body`, `read`, `metadata`, indexed by `user_id + read + created_at`).
+- **`cf-worker/src/routes/feeds.ts`** [NEW]: Hono route group — `GET /api/feeds/trending`, `GET /api/feeds/notifications/:userId`, `POST /api/feeds/notifications/:id/read`, `POST /api/feeds/notifications/mark-all-read`.
+- **`cf-worker/src/index.ts`**: Imported and mounted feeds route at `/api/feeds`.
+- **`lib/feeds-client.ts`** [NEW]: Frontend helper — `fetchTrending()`, `fetchNotifications()`, `markNotificationRead()`, `markAllNotificationsRead()`. Tries CF Worker URL first (`NEXT_PUBLIC_CF_WORKER_URL`), falls back to Express backend.
+
+### New Pages
+
+- **`app/notifications/page.tsx`** [NEW]: Notifications list page with type-aware icons, unread count badge, mark-as-read, and mark-all-read functionality. Fetches from CF Worker D1 feeds endpoint.
+
+### Bug Fixes — 2026-03-01
+
+- **Broken Logger Imports**: Fixed `Cannot find module '../lib/logger'` crash in `server/routes/helpbot.js`, `server/routes/feed.js`, and `server/routes/settings/profile.js`. All three files referenced `../lib/logger` (or `../../lib/logger`) but the module lives at `server/utils/logger.js`. Updated import paths accordingly.
+- **Feed Route Error Handling**: Improved `server/routes/feed.js` — added 10s timeout to the CF Worker proxy call, fixed error logging that was printing `undefined` instead of the actual error message, and changed response status from 500 to 502 (Bad Gateway) for upstream failures.
+- **Dead Romance Genre Image**: Replaced `escapetoromance.com` image URL (timing out / unreachable) with a working Unsplash image in `app/page.tsx` and `app/genres/page.tsx`. Removed `escapetoromance.com` from `next.config.js` `remotePatterns`.
+- **Hydration Mismatch Fix**: Fixed React hydration error ("Text content does not match server-rendered HTML") caused by `MadhavaHelpBot` rendering `new Date().toLocaleTimeString()` at module level during SSR. The timestamp was baked into server HTML then differed on the client (e.g. "02:48 PM" vs "02:49 PM"). Fixed by deferring timestamp rendering to client-only with an `isMounted` pattern and `suppressHydrationWarning`. This also resolved the cascading CSS MIME type error that occurred when hydration crashed.
+
+### Swagger API Documentation Overhaul
+
+- **Comprehensive Swagger Coverage**: Added `@swagger` JSDoc annotations to **10 route files** covering **30+ endpoints** that were previously undocumented in the Swagger UI at `/api/docs`.
+  - `server/routes/ai.js` — AI generate and analyze endpoints
+  - `server/routes/feed.js` — Public story feed proxy endpoint
+  - `server/routes/helpbot.js` — MADHAVA AI helpbot chat endpoint
+  - `server/routes/users.js` — 4 user profile endpoints (self, by ID, by wallet, update)
+  - `server/routes/sdk.js` — SDK health and docs endpoints
+  - `server/routes/settings/profile.js` — Profile get/update settings
+  - `server/routes/settings/notifications.js` — Notification preferences get/update
+  - `server/routes/settings/privacy.js` — Privacy settings get/update
+  - `server/routes/settings/wallet.js` — Wallet connection get/update
+- **Expanded Swagger Config** (`server/backend.js`): Added 11 tag groups (Health, Authentication, Stories, AI, Users, Feed, Helpbot, Settings, NFT, Comics, SDK), reusable `Error` and `Pagination` schemas, API contact/license info, and expanded `apis` glob to `['./routes/*.js', './routes/**/*.js', './backend.js']` to include nested `settings/` routes.
+
+### Health Endpoint Improvements
+
+- **Smart No-DB Mode**: Health endpoint (`/api/health`) now reports `healthy` when `MONGODB_URI` is not configured instead of falsely reporting `degraded`. Only shows `degraded` when the DB is configured but the connection failed.
+- **Rich Diagnostics**: Health response now includes uptime, memory usage (RSS, heap), service statuses (API, database, helpbot), and descriptive notes explaining connection state.
+- **Swagger Annotations**: Added `@swagger` JSDoc to `/api/health`, `/api/health/db`, and `/api/health/bot` endpoints.
+
+### Backend & API Routing Fixes
+
+- **Backend Versioning**: Bumped the Render backend API package version to `1.2.0`.
+- **Feed API Endpoint [NEW]**: Added `server/routes/feed.js` to securely proxy requests to the Cloudflare D1 database, resolving persistent `/api/feed` 404 errors on the frontend.
+- **MADHAVA Bot API Proxy [NEW]**: Added `server/routes/helpbot.js` to the Render backend to pass `GROQ_API_KEY` authenticated requests to the Cloudflare Worker, fixing the `/api/helpbot/chat` 405 error. 
+- **DB Health Endpoint Fix**: Fixed `/api/health/db` route resolution resolving a frontend 404.
+- **Bot Health API Endpoint [NEW]**: Implemented `/api/health/bot` on the Render backend to specifically test Groq AI Bot availability.
+- **Cloudflare Story Sync**: Modified `server/routes/stories.js` to automatically proxy new MongoDB story creation payloads to the Cloudflare Worker via `axios.post`, keeping D1 fully synced in real-time.
+
+### Frontend UI & State Enhancements
+
+- **Discover Worlds Fix**: Removed the duplicate mapping block that was causing genres to appear twice in the grid layout.
+- **Trending Stories Error State**: Suppressed the scary "Something Went Wrong: 404" block for empty feed arrays. It now correctly shows a friendly "No Stories Yet" CTA until stories are created. Real 5xx errors still trigger the error block.
+- **Dynamic AI Health Status**: The Footer "Groq AI" label and MADHAVA Help Bot now check real backend health routes before displaying "System Operational" or "System Offline," preventing false marketing claims when services are down.
+- **Create Story CTA Redirect**: Updated the "Start Creating" buttons to navigate directly to `/create/ai-story` (the active creator form) instead of the empty layout wrapper at `/create`.
+- **Profile D1 Sync**: Enhanced `profile-form.tsx` to push essential profile fields (Avatar, Username) to the Cloudflare Worker (`/api/profiles`) immediately after saving to Supabase. This ensures feed items sourced from Cloudflare D1 reflect real-time profile data.
+- **Dual DB Profile Sync**: Upgraded `profile-form.tsx` to explicitly upsert profile changes into the Supabase PostgREST `profiles` table in addition to Auth and Cloudflare, ensuring comprehensive global consistency.
+- **Navigation UX**: Moved the "Top Creators" link from the Main Navigation Header to the Footer section under Explore.
+- **Bot Health UI Polling**: Updated the frontend Helpbot (`components/madhava-helpbot.tsx`) to poll the specific bot health route.
+- **Service Worker Patch**: Created a minimal `public/sw.js` to intercept frontend PWA registration attempts gracefully, preventing browser console 404 logs.
+
+#### Deleted — Unnecessary Files & Directories
+
+- **`GroqTales/`**: Removed duplicate nested project scaffold (had its own `package.json`, `next.config.js`, etc.) — never imported by root project.
+- **`path/to/your/`**: Removed accidental placeholder directory containing `file.css` and `file.html`.
+- **`deployment/`**: Removed empty directory (contents were deleted during Cloudflare migration).
+- **`temp.md`**: Removed scratch PR template file.
+- **`app/test-buttons/`**: Removed dev-only test page (`layout.tsx` + `page.tsx`).
+- **`components/nft-purchase.tsx`**: Removed empty 0-byte placeholder file.
+- **`components/ui/tooltip.tsx.backup`**: Removed backup file.
+- **`.zap/`**: Removed ZAP security scan artifact (`rules.tsv`).
+- **`.npm-cache/`**: Removed local npm cache directory.
+- **`.DS_Store`**: Removed macOS filesystem artifact.
+- **Docker files**: Removed `Dockerfile`, `docker-compose.yml`, `.env.docker`, `.dockerignore` — project fully migrated to Cloudflare Pages + Render.
+
+#### Changed — Config Consolidation
+
+- **Merged `tailwind.config.ts` into `tailwind.config.js`**: Moved comic `fontFamily`, `boxShadow`, `borderWidth`, `spin-slow` keyframes, and `shimmer` keyframes/animations into the primary `.js` config. Added `./src/**/*.{js,ts,jsx,tsx,mdx}` to content paths. Deleted the duplicate `tailwind.config.ts`.
+- **Removed `yarn` from `dependencies`**: The project uses npm; `yarn@^1.22.22` was incorrectly listed as a production dependency.
+- **Updated `.gitignore`**: Added `GroqTales/` and `path/` to prevent re-creation of accidental nested dirs. Removed duplicate `.DS_Store` entry.
+
+#### Files Deleted
+`GroqTales/`, `path/`, `deployment/`, `temp.md`, `.zap/`, `.npm-cache/`, `.DS_Store`, `app/test-buttons/`, `components/nft-purchase.tsx`, `components/ui/tooltip.tsx.backup`, `Dockerfile`, `docker-compose.yml`, `.env.docker`, `.dockerignore`, `tailwind.config.ts`
+
+#### Files Modified
+`tailwind.config.js`, `package.json`, `.gitignore`, `CHANGELOG.md`, `VERSION`
+
+### New Feature — MADHAVA Help Bot (Cloudflare Workers AI)
+
+- **AI Help Bot**: Introduced **MADHAVA**, a floating AI-powered help bot available on every page of the GroqTales platform.
+  - Uses the `@cf/fblgit/una-cybertron-7b-v2-bf16` model via **Cloudflare Workers AI**.
+  - Contains a comprehensive knowledge base covering every aspect of GroqTales: features, story creation, NFT minting, wallet setup, troubleshooting, project structure, deployment, contributing, security, and more.
+  - Supports multi-turn conversations (last 10 turns retained for context).
+  - Input validation and rate limiting (max 2000 characters per message).
+- **Backend**: Added `ai` binding to `cf-worker/wrangler.jsonc`. Created `cf-worker/src/routes/helpbot.ts` with Hono route at `/api/helpbot/chat`. Updated `cf-worker/src/index.ts` with `AI` binding and helpbot route.
+- **Frontend**: Created `components/madhava-helpbot.tsx` — premium glassmorphic floating chat widget with pulsing FAB, slide-in panel, typing indicator, auto-scroll, and responsive design. Added ~390 lines of styles to `app/globals.css`. Mounted globally in `app/layout.tsx`.
+
+### Code Quality Sweep
+
+- Fixed escaped template literals (`\${}` → `${}`) in **10 components** (20 fetch calls) so `NEXT_PUBLIC_API_URL` interpolates correctly at runtime: `footer.tsx`, `trending-stories.tsx`, `story-generator.tsx`, `user-nav.tsx`, `web3-provider.tsx`, `notifications-settings.tsx`, `privacy-settings.tsx`, `profile-form.tsx`, `story-comments-dialog.tsx`, `create/page.tsx`.
+- **`app/auth/callback/page.tsx`**: Removed duplicate `mt-4` Tailwind class (only `mt-8` remains).
+- **`components/user-nav.tsx`**: Fixed hash function no-op `hash = hash & hash` → `hash |= 0` for proper 32-bit integer coercion.
+- **`cf-worker/src/routes/stories.ts`**: Story IDs are now generated server-side via `crypto.randomUUID()` instead of trusting client-provided `body.id`.
+- **`components/settings/profile-form.tsx`**: Updated from `/api/settings/profile` to `/api/v1/settings/profile`. Added Bearer token auth from Supabase session.
+- **`docs/PIPELINES.md`**: Updated admin auth references from `x-admin-id` header to `Authorization: Bearer <token>`.
+
+### SEO
+
+- **`public/sitemap.xml`** [NEW]: Comprehensive XML sitemap covering 19 URLs with appropriate change frequencies and priorities.
+- **`public/robots.txt`** [NEW]: Proper robots.txt allowing public page crawling, disallowing API/auth/private routes, referencing the sitemap, and blocking AI scrapers.
+- **`.gitignore`**: Removed `sitemap*.xml`, `robots.txt`, and `temp.md` from ignore list so these files are tracked in version control.
 
 ### Bug Fixes & Infrastructure
 
+- **Exhaustive Security Sweep**: Addressed 10 critical security findings across the repository: secured unprotected Cloudflare KV routes with Admin secrets, overhauled the `cf-worker` Admin middleware to use Bearer tokens instead of trusted headers with row-level affect checks, secured Profile/Story/Marketplace mutation endpoints with JWT authorization, enforced server-side UUID generation for marketplace listings, fixed a dead fallback `baseUrl` injected into the frontend, removed leaked MongoDB credentials from `wrangler.toml`, and alphabetized `.env.example` configurations.
+- **Supabase OAuth Callback Recovery**: Restored the missing `app/auth/callback/page.tsx` required for Supabase OAuth login. Rewrote the OAuth PKCE exchange logic into a pure client component (`'use client'`) using `@supabase/ssr` to ensure full authentication compatibility with Cloudflare Pages edge deployments. Removed the `rm -rf app/auth/callback` destructive command from the `cf-build` script.
+- **Dynamic API Routing Fix**: Mass-injected `process.env.NEXT_PUBLIC_API_URL` prefix into all 16 client-side `fetch('/api/...)` calls across the `app/` and `components/` directories. This prevents 404 errors on Cloudflare Pages static exports by ensuring fetches route to the external Render/Cloudflare Worker backend instead of the static frontend host.
+- **ServiceWorker Registration Fix**: Created a minimal, pass-through `public/sw.js` file to intercept Next.js PWA background registration attempts, silencing persistent 404 Not Found console errors on Cloudflare Pages.
 - **Cloudflare Pages Static Export Fix**: Resolved `output: 'export'` build failure caused by missing `generateStaticParams()` on dynamic routes. Next.js static export requires every `[param]` route to explicitly return at least one path (e.g. `[{ id: 'default' }]`) or the build fails with a generic missing error.
   - **`app/nft-marketplace/comic-stories/[id]/page.tsx`**: Added default static params and `dynamicParams = false`.
   - **`app/nft-marketplace/text-stories/[id]/page.tsx`**: Added default static params and `dynamicParams = false`.
@@ -127,8 +420,8 @@ Go to **GitHub → IndieHub25/GroqTales → Settings → Secrets and variables �
 |---|---|
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API token with Pages edit permission |
 | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID (from Cloudflare dashboard) |
-| `NEXT_PUBLIC_API_URL` | `https://groqtales-api.onrender.com` |
-| `NEXT_PUBLIC_GROQ_API_KEY` | Your Groq API key |
+| `NEXT_PUBLIC_API_URL` | `https://groqtales-backend-api.onrender.com` |
+| `GROQ_API_KEY` | Your Groq API key |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
 | `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | WalletConnect project ID |

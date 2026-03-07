@@ -1,12 +1,13 @@
+/**
+ * Auth Routes — Supabase Authentication
+ * Handles user signup, login, and token refresh via Supabase Auth
+ */
+
 const express = require('express');
 const router = express.Router();
-const ms = require('ms');
-const User = require('../models/User');
-const { signAccessToken, signRefreshToken } = require('../utils/jwt');
-const { refresh } = require('../middleware/auth');
+const { supabaseAdmin } = require('../config/supabase');
 const logger = require('../utils/logger');
-
-const REFRESH_TIME_MS = ms(process.env.JWT_REFRESH_EXPIRES || '7d');
+const { refresh } = require('../middleware/auth');
 
 /**
  * @swagger
@@ -15,7 +16,9 @@ const REFRESH_TIME_MS = ms(process.env.JWT_REFRESH_EXPIRES || '7d');
  *     tags:
  *       - Authentication
  *     summary: User signup
- *     description: Creates a new user account and returns user details with an access token. A refresh token is set in an HTTP-only cookie.
+ *     description: |
+ *       Creates a new user account via Supabase Auth and auto-creates a profile.
+ *       Returns user details with access and refresh tokens.
  *     requestBody:
  *       required: true
  *       content:
@@ -25,9 +28,6 @@ const REFRESH_TIME_MS = ms(process.env.JWT_REFRESH_EXPIRES || '7d');
  *             required:
  *               - email
  *               - password
- *               - firstName
- *               - lastName
- *               - role
  *             properties:
  *               email:
  *                 type: string
@@ -45,20 +45,14 @@ const REFRESH_TIME_MS = ms(process.env.JWT_REFRESH_EXPIRES || '7d');
  *                 example: Doe
  *               role:
  *                 type: string
- *                 enum: [user, admin,moderator]
+ *                 enum: [user, admin, moderator]
  *                 example: user
  *               adminSecret:
  *                 type: string
  *                 description: Required only if role is admin
- *                 example: adminSecretKey
  *     responses:
  *       200:
  *         description: Signup successful.
- *         headers:
- *           Set-Cookie:
- *             description: HTTP-only refresh token cookie.
- *             schema:
- *               type: string
  *         content:
  *           application/json:
  *             schema:
@@ -72,29 +66,13 @@ const REFRESH_TIME_MS = ms(process.env.JWT_REFRESH_EXPIRES || '7d');
  *                   properties:
  *                     user:
  *                       type: object
- *                       properties:
- *                         id:
- *                           type: string
- *                           example: 65f1c9e2d3a4b567890abc12
- *                         email:
- *                           type: string
- *                           format: email
- *                           example: user@example.com
- *                         firstName:
- *                           type: string
- *                           example: John
- *                         lastName:
- *                           type: string
- *                           example: Doe
- *                         role:
- *                           type: string
- *                           example: user
  *                     tokens:
  *                       type: object
  *                       properties:
  *                         accessToken:
  *                           type: string
- *                           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                         refreshToken:
+ *                           type: string
  *       400:
  *         description: Missing required fields or missing admin secret.
  *       403:
@@ -104,104 +82,97 @@ const REFRESH_TIME_MS = ms(process.env.JWT_REFRESH_EXPIRES || '7d');
  *       500:
  *         description: Internal server error.
  */
-
-// POST /api/v1/auth/signup - User signup
 router.post('/signup', async (req, res) => {
   try {
-    const { email, password, firstName, lastName, role, adminSecret } =
-      req.body;
+    const { email, password, firstName, lastName, role, adminSecret } = req.body;
 
-    if (!email || !password || !firstName || !lastName || !role) {
-      logger.warn('Signup validation failed: missing required fields', {
-        requestId: req.id,
-      });
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-    if (role === 'admin' && !adminSecret) {
-      logger.warn(
-        'Signup validation failed: missing admin secret for admin role',
-        {
-          requestId: req.id,
-        }
-      );
-      return res
-        .status(400)
-        .json({ error: 'Missing admin secret for admin role' });
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const exists = await User.findOne({ email }).exec();
-    if (exists) {
-      logger.warn('Signup failed: email already registered', {
-        requestId: req.id,
-      });
-      return res.status(409).json({ error: 'Email already registered' });
-    }
-
+    // Admin role check
     let assignedRole = 'user';
-
     if (role === 'admin') {
+      if (!adminSecret) {
+        return res.status(400).json({ error: 'Missing admin secret for admin role' });
+      }
       if (adminSecret !== process.env.ADMIN_SECRET) {
-        logger.warn('Signup failed: invalid admin secret', {
-          requestId: req.id,
-        });
         return res.status(403).json({ error: 'Invalid admin secret' });
       }
       assignedRole = 'admin';
     }
-    const user = new User({
-      email: email,
-      password: password,
-      firstName: firstName,
-      lastName: lastName,
-      role: assignedRole,
+
+    if (!supabaseAdmin) {
+      return res.status(503).json({ error: 'Authentication service not configured' });
+    }
+
+    // Create user in Supabase Auth
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // Auto-confirm for now
+      user_metadata: {
+        firstName: firstName || 'Anonymous',
+        lastName: lastName || 'Creator',
+        name: `${firstName || 'Anonymous'} ${lastName || 'Creator'}`.trim(),
+        role: assignedRole,
+      },
     });
 
-    await user.save();
+    if (authError) {
+      if (authError.message?.includes('already') || authError.status === 422) {
+        return res.status(409).json({ error: 'Email already registered' });
+      }
+      logger.error('Supabase signup error:', authError);
+      return res.status(500).json({ error: authError.message });
+    }
 
-    logger.info('User signup successful', {
-      requestId: req.id,
-      userId: user._id.toString(),
-      role: assignedRole,
+    // Sign in to get tokens
+    const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+      email,
+      password,
     });
 
-    const accessToken = signAccessToken({ id: user._id, role: assignedRole });
-    const refreshToken = signRefreshToken({ id: user._id, role: assignedRole });
+    if (signInError) {
+      logger.error('Supabase sign-in after signup error:', signInError);
+      // User created but sign-in failed — still return success
+      return res.json({
+        message: 'Signup successful. Please log in.',
+        data: {
+          user: {
+            id: authData.user.id,
+            email: authData.user.email,
+            firstName: firstName || 'Anonymous',
+            lastName: lastName || 'Creator',
+            role: assignedRole,
+          },
+        },
+      });
+    }
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
-      path: '/api/v1/auth',
-      maxAge: REFRESH_TIME_MS, // 7 days
-    });
+    logger.info('User signup successful', { userId: authData.user.id, role: assignedRole });
 
     return res.json({
       message: 'Signup successful',
       data: {
         user: {
-          id: user._id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
+          id: authData.user.id,
+          email: authData.user.email,
+          firstName: firstName || 'Anonymous',
+          lastName: lastName || 'Creator',
           role: assignedRole,
         },
-        tokens: { accessToken },
+        tokens: {
+          accessToken: signInData.session?.access_token,
+          refreshToken: signInData.session?.refresh_token,
+        },
       },
     });
   } catch (error) {
-    logger.error('Signup failed', {
-      requestId: req.id,
-      component: 'auth/signup',
-      code: error.code,
-    });
-    console.log(error)
-    if (error.code === 11000) {
-      return res.status(409).json({ error: 'Email already registered' });
-    }
-    return res.status(500).json({ message: 'Internal Server error' });
+    logger.error('Signup failed', { error: error.message });
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 /**
  * @swagger
@@ -210,7 +181,8 @@ router.post('/signup', async (req, res) => {
  *     tags:
  *       - Authentication
  *     summary: User login
- *     description: logs into user account and returns user details with an access token. A refresh token is set in an HTTP-only cookie.
+ *     description: |
+ *       Authenticates a user via Supabase Auth and returns access + refresh tokens.
  *     requestBody:
  *       required: true
  *       content:
@@ -231,12 +203,7 @@ router.post('/signup', async (req, res) => {
  *                 example: strongPassword123
  *     responses:
  *       200:
- *         description: Signup successful.
- *         headers:
- *           Set-Cookie:
- *             description: HTTP-only refresh token cookie.
- *             schema:
- *               type: string
+ *         description: Login successful.
  *         content:
  *           application/json:
  *             schema:
@@ -250,96 +217,57 @@ router.post('/signup', async (req, res) => {
  *                   properties:
  *                     user:
  *                       type: object
- *                       properties:
- *                         id:
- *                           type: string
- *                           example: 65f1c9e2d3a4b567890abc12
- *                         email:
- *                           type: string
- *                           format: email
- *                           example: user@example.com
- *                         firstName:
- *                           type: string
- *                           example: John
- *                         lastName:
- *                           type: string
- *                           example: Doe
- *                         role:
- *                           type: string
- *                           example: user
  *                     tokens:
  *                       type: object
- *                       properties:
- *                         accessToken:
- *                           type: string
- *                           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       401:
- *         description: Login failed invalid credentials.
+ *         description: Invalid credentials.
  *       500:
  *         description: Internal server error.
  */
-
-// POST /api/v1/auth/login - User login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
-      logger.warn('Login validation failed: missing email or password', {
-        requestId: req.id,
-      });
       return res.status(400).json({ error: 'Missing email or password' });
     }
-    const user = await User.findOne({ email }).select('+password');
-    if (!user) {
-      logger.warn('Login failed: invalid credentials', {
-        requestId: req.id,
-      });
-      return res.status(401).json({ error: 'Invalid credentials' });
+
+    if (!supabaseAdmin) {
+      return res.status(503).json({ error: 'Authentication service not configured' });
     }
-    const okPw = await user.comparePassword(password);
-    if (!okPw) {
-      logger.warn('Login failed: invalid credentials', {
-        requestId: req.id,
-      });
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-    logger.info('User login successful', {
-      requestId: req.id,
-      userId: user._id.toString(),
-      role: user.role,
+
+    const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+      email,
+      password,
     });
 
-    const accessToken = signAccessToken({ id: user._id, role: user.role });
-    const refreshToken = signRefreshToken({ id: user._id, role: user.role });
+    if (error) {
+      logger.warn('Login failed: invalid credentials');
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
-      path: '/api/v1/auth',
-      maxAge: REFRESH_TIME_MS, // 7 days
-    });
+    const user = data.user;
+    logger.info('User login successful', { userId: user.id });
 
     return res.json({
       message: 'Login successful',
       data: {
         user: {
-          id: user._id,
+          id: user.id,
           email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
+          firstName: user.user_metadata?.firstName || user.user_metadata?.name?.split(' ')[0] || 'Anonymous',
+          lastName: user.user_metadata?.lastName || '',
+          role: user.user_metadata?.role || 'user',
         },
-        tokens: { accessToken },
+        tokens: {
+          accessToken: data.session?.access_token,
+          refreshToken: data.session?.refresh_token,
+        },
       },
     });
   } catch (error) {
-    logger.error('Login failed', {
-      requestId: req.id,
-      component: 'auth/login',
-    });
-    console.log(error);
-    return res.status(500).json({ message: 'Internal Server error' });
+    logger.error('Login failed', { error: error.message });
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
 
@@ -350,55 +278,21 @@ router.post('/login', async (req, res) => {
  *     tags:
  *       - Authentication
  *     summary: Refresh access token
- *     description: Generates a new access token using the refresh token stored in HTTP-only cookies.
+ *     description: |
+ *       Token refresh is handled by the Supabase client-side SDK.
+ *       This endpoint returns guidance on how to refresh tokens.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
  *     responses:
- *       200:
- *         description: Access token refreshed successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 accessToken:
- *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *       401:
- *         description: Missing, invalid, or expired refresh token.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Invalid or expired refresh token
  *       501:
- *         description: Authentication not configured (JWT secret missing).
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   example: Authentication not configured
+ *         description: Use Supabase client for token refresh.
  */
-// POST /api/v1/auth/refresh - Refresh access token
 router.post('/refresh', refresh);
-
-// // POST /api/v1/auth/logout - User logout
-// router.post('/logout', async (req, res) => {});
-
-// // get /api/v1/auth/me - Get current user
-// router.get('/me', async (req, res) => {});
 
 module.exports = router;

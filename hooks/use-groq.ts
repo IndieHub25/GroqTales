@@ -66,7 +66,7 @@ export function useGroq(): UseGroqResult {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch('/api/groq/models');
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/groq/models');
       if (!response.ok) {
         throw new Error(`Failed to fetch models: ${response.statusText}`);
       }
@@ -143,7 +143,7 @@ export function useGroq(): UseGroqResult {
         // Extract apiKey from options if present
         const { apiKey, ...restOptions } = options || {};
 
-        const response = await fetch('/api/groq', {
+        const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/groq', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -183,7 +183,7 @@ export function useGroq(): UseGroqResult {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch('/api/groq', {
+        const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/groq', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -226,7 +226,7 @@ export function useGroq(): UseGroqResult {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch('/api/groq', {
+        const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/groq', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -270,7 +270,7 @@ export function useGroq(): UseGroqResult {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch('/api/groq', {
+        const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/groq', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

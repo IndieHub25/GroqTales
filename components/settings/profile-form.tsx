@@ -33,7 +33,9 @@ export function ProfileForm() {
 
   useEffect(() => {
     if (!supabase) return;
-    supabase.auth.getUser().then(({ data }) => setSessionUser(data?.user));
+    supabase.auth.getSession().then(({ data }) => {
+      setSessionUser(data?.session?.user ?? null);
+    });
   }, []);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +58,11 @@ export function ProfileForm() {
   useEffect(() => {
     async function loadProfile() {
       try {
-        const res = await fetch("/api/settings/profile");
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData?.session?.access_token;
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/v1/settings/profile`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         if (!res.ok) throw new Error();
 
           const data = await res.json();
@@ -83,10 +89,42 @@ export function ProfileForm() {
   const onSubmit = async (data: ProfileData) => {
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/settings/profile`, {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+
+      // 1. Update Supabase Auth metadata
+      await supabase.auth.updateUser({
+        data: {
+          name: data.displayName,
+          username: data.username,
+          bio: data.bio,
+          website: data.website,
+          location: data.location,
+          primaryGenre: data.primaryGenre
+        }
+      });
+
+      // 1.5 Update Supabase Database (Profiles Table)
+      if (sessionData?.session?.user?.id) {
+        await supabase.from('profiles').upsert({
+          id: sessionData.session.user.id,
+          username: data.username,
+          full_name: data.displayName,
+          avatar_url: avatarUrl,
+          bio: data.bio,
+          website: data.website,
+          updated_at: new Date().toISOString(),
+        });
+      }
+
+      // 2. Sync to Render backend (which proxies to Mongo and CF D1)
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/v1/settings/profile`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ ...data, avatarUrl }),
       });
 
       if (!res.ok) throw new Error("Failed to update profile");

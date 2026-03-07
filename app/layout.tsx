@@ -1,8 +1,6 @@
 import React from 'react';
 
 import './globals.css';
-import fs from 'fs';
-import path from 'path';
 
 import type { Metadata } from 'next';
 import { Inter, Comic_Neue } from 'next/font/google';
@@ -20,6 +18,7 @@ import { QueryProvider } from '@/components/query-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import BackToTop from '@/components/back-to-top';
+import MadhavaHelpBot from '@/components/madhava-helpbot';
 import { GlobalLoadingWrapper } from '@/components/global-loading-wrapper';
 
 // Optimize font loading
@@ -84,19 +83,10 @@ if (
   }
 }
 
-// Get quick boot script content
-function getQuickBootScript(): string {
-  try {
-    const filePath = path.join(process.cwd(), 'public', 'quick-boot.js');
-    return fs.readFileSync(filePath, 'utf8');
-  } catch (e) {
-    console.warn('Could not read quick-boot.js:', e);
-    return ''; // Return empty string if file reading fails
-  }
-}
-
-// Quick boot script to prevent flashing and improve initial load
-const quickBootScript = getQuickBootScript();
+// Quick boot script is not loaded in Edge Runtime
+// Edge Runtime doesn't support fs/path modules needed to read the file
+// The script is optional and gracefully degrades when not available
+const quickBootScript = '';
 
 /**
  * App version is injected by next.config.js at build time from the root VERSION file.
@@ -187,10 +177,16 @@ export default function RootLayout({
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js').catch(function(err) {
-                  console.log('ServiceWorker registration failed: ', err);
-                });
+              try {
+                if ('serviceWorker' in navigator) {
+                  window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                      console.log('ServiceWorker registration gracefully failed or blocked: ', err.message);
+                    });
+                  });
+                }
+              } catch (e) {
+                // Ignore SW errors, likely blocked by client
               }
             `,
           }}
@@ -240,6 +236,7 @@ export default function RootLayout({
           </QueryProvider>
         </Web3Provider>
         <BackToTop />
+        <MadhavaHelpBot />
       </body>
     </html>
   );

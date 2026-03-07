@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createClient } from '@/lib/supabase/client';
 
 interface StoryAuthor {
   name: string;
@@ -61,6 +62,7 @@ export const StoryCard = memo(function StoryCard({
   const router = useRouter();
   const [isFlipped, setIsFlipped] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const supabase = React.useMemo(() => createClient(), []);
 
   const authorName = typeof story.author === 'string' ? story.author : story.author?.name || 'Anonymous';
   const authorAvatar = typeof story.author === 'string' ? story.authorAvatar : story.author?.avatar || story.authorAvatar;
@@ -71,7 +73,15 @@ export const StoryCard = memo(function StoryCard({
     router.push(`/story/${story.id}`);
   };
 
-  const handleCreateSimilar = () => {
+  const handleCreateSimilar = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const isServerAdmin = session?.user?.app_metadata?.role === 'admin';
+    
+    // Check if they are authenticated or possess admin privileges
+    if (!session && !isAdmin && !isServerAdmin) {
+      router.push('/sign-in');
+      return;
+    }
     router.push(`/create?similar=${story.id}`);
   };
 

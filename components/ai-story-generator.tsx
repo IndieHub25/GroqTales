@@ -6,488 +6,243 @@ import {
   Wand2,
   BookOpen,
   Users,
-  Sparkles,
-  Zap,
-  MessageSquare,
-  Send,
-  Save,
-  Wallet,
-  ChevronDown,
-  Settings,
-  Palette,
-  Map,
-  Target,
-  Shield,
+  MapPin,
   Lightbulb,
+  Sparkles,
 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import { useWeb3 } from '@/components/providers/web3-provider';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { generateContentHash } from '@/lib/story-hash';
 import { useToast } from '@/components/ui/use-toast';
-import { truncateAddress } from '@/lib/utils';
 
 interface AIStoryGeneratorProps {
   className?: string;
 }
 
-const DRAFT_KEY = "groqtales_story_draft_v1";
+interface StoryData {
+  title: string;
+  content: string;
+  genre: string[];
+  characters: string[];
+  setting: string;
+  themes: string[];
+}
 
-interface StoryDraft {
-  prompt: string;
-  storyTitle: string;
-  selectedGenres: string[];
-  storyLength: string;
-  mainCharacterName: string;
-  characterCount: string;
-  characterTraits: string[];
-  characterAge: string;
-  characterBackground: string;
-  protagonistType: string;
-  plotType: string;
-  conflictType: string;
-  storyArc: string;
-  pacing: string;
-  endingType: string;
-  plotTwists: string;
-  includeFlashbacks: boolean;
-  timePeriod: string;
-  locationType: string;
-  worldBuildingDepth: string;
-  atmosphere: string;
-  narrativeVoice: string;
-  tone: string;
-  writingStyle: string;
-  readingLevel: string;
-  mood: string;
-  dialoguePercentage: number[];
-  descriptionDetail: string;
-  primaryTheme: string;
-  secondaryThemes: string[];
-  moralComplexity: string;
-  socialCommentary: boolean;
-  socialCommentaryTopic: string;
-  violenceLevel: string;
-  romanceLevel: string;
-  languageLevel: string;
-  matureContent: boolean;
-  chapterCount: string;
-  foreshadowing: string;
-  symbolism: string;
-  multiplePOVs: boolean;
-  povCount: string;
-  similarTo: string;
-  inspiredBy: string;
-  avoidCliches: string[];
-  includeTropes: string[];
-  temperature: number[];
-  modelSelection: string;
-  updatedAt: number;
-  version: number;
+const genres = [
+  'Fantasy',
+  'Sci-Fi',
+  'Mystery',
+  'Romance',
+  'Thriller',
+  'Horror',
+  'Adventure',
+  'Comedy',
+  'Drama',
+  'Historical',
+  'Western',
+  'Cyberpunk',
+];
+
+const storyFormats = [
+  { id: 'short', name: 'Short Story', description: '2,000-5,000 words' },
+  { id: 'novella', name: 'Novella', description: '17,500-40,000 words' },
+  { id: 'novel', name: 'Novel', description: '80,000+ words' },
+  { id: 'comic', name: 'Comic Script', description: 'Panel-based narrative' },
+];
+
+function LoadingStateIndicator({ message }: { message: string | null }) {
+  const messages = [
+    'Generating story',
+    'Creating worlds',
+    'Crafting characters',
+    'Building plot',
+    'Finalizing details',
+  ];
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % messages.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex items-center justify-center space-x-3">
+      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      <span className="text-lg font-medium">
+        {message || messages[currentIndex]}
+      </span>
+    </div>
+  );
 }
 
 export default function AIStoryGenerator({
   className = '',
 }: AIStoryGeneratorProps) {
-  // Core required fields
   const [prompt, setPrompt] = useState('');
-
-  // Core optional fields
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [storyLength, setStoryLength] = useState('medium');
-  const [storyTitle, setStoryTitle] = useState('');
-
-  // Character customization
-  const [mainCharacterName, setMainCharacterName] = useState('');
-  const [characterCount, setCharacterCount] = useState('1');
-  const [characterTraits, setCharacterTraits] = useState<string[]>([]);
-  const [characterAge, setCharacterAge] = useState('');
-  const [characterBackground, setCharacterBackground] = useState('');
-  const [protagonistType, setProtagonistType] = useState('');
-
-  // Plot & Structure
-  const [plotType, setPlotType] = useState('');
-  const [conflictType, setConflictType] = useState('');
-  const [storyArc, setStoryArc] = useState('');
-  const [pacing, setPacing] = useState('moderate');
-  const [endingType, setEndingType] = useState('');
-
-  // Setting & World
-  const [timePeriod, setTimePeriod] = useState('');
-  const [locationType, setLocationType] = useState('');
-  const [worldBuildingDepth, setWorldBuildingDepth] = useState('moderate');
-  const [atmosphere, setAtmosphere] = useState('');
-
-  // Writing Style & Tone
-  const [narrativeVoice, setNarrativeVoice] = useState('');
-  const [tone, setTone] = useState('');
-  const [writingStyle, setWritingStyle] = useState('');
-  const [readingLevel, setReadingLevel] = useState('adult');
-  const [mood, setMood] = useState('');
-
-  // Themes
-  const [primaryTheme, setPrimaryTheme] = useState('');
-  const [secondaryThemes, setSecondaryThemes] = useState<string[]>([]);
-  const [moralComplexity, setMoralComplexity] = useState('');
-  const [socialCommentary, setSocialCommentary] = useState(false);
-  const [socialCommentaryTopic, setSocialCommentaryTopic] = useState('');
-
-  // Content Controls
-  const [violenceLevel, setViolenceLevel] = useState('moderate');
-  const [romanceLevel, setRomanceLevel] = useState('none');
-  const [languageLevel, setLanguageLevel] = useState('family-friendly');
-  const [matureContent, setMatureContent] = useState(false);
-
-  // Advanced Options
-  const [dialoguePercentage, setDialoguePercentage] = useState([50]);
-  const [descriptionDetail, setDescriptionDetail] = useState('moderate');
-  const [plotTwists, setPlotTwists] = useState('1');
-  const [includeFlashbacks, setIncludeFlashbacks] = useState(false);
-  const [chapterCount, setChapterCount] = useState('');
-  const [foreshadowing, setForeshadowing] = useState('');
-  const [symbolism, setSymbolism] = useState('');
-  const [multiplePOVs, setMultiplePOVs] = useState(false);
-  const [povCount, setPovCount] = useState('1');
-
-  // Inspiration & References
-  const [similarTo, setSimilarTo] = useState('');
-  const [inspiredBy, setInspiredBy] = useState('');
-  const [avoidCliches, setAvoidCliches] = useState<string[]>([]);
-  const [includeTropes, setIncludeTropes] = useState<string[]>([]);
-
-  // Technical Parameters
-  const [temperature, setTemperature] = useState([0.7]);
-  const [modelSelection, setModelSelection] = useState('default');
-
-  // UI State
+  const [storyFormat, setStoryFormat] = useState('short');
+  const [title, setTitle] = useState('');
+  const [mainCharacters, setMainCharacters] = useState('');
+  const [plotOutline, setPlotOutline] = useState('');
+  const [setting, setSetting] = useState('');
+  const [themes, setThemes] = useState('');
+  const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedStory, setGeneratedStory] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('input');
   const [isMinting, setIsMinting] = useState(false);
-  const [mintSuccess, setMintSuccess] = useState(false);
+  const [mintedNftUrl, setMintedNftUrl] = useState('');
+  const [activeTab, setActiveTab] = useState('input');
+  const [mintStatus, setMintStatus] = useState<'idle' | 'checking' | 'minted' | 'pending' | 'failed'>('idle');
+  const [currentStoryHash, setCurrentStoryHash] = useState('');
 
-  // Draft Recovery State
-  const [recoveredDraft, setRecoveredDraft] = useState<StoryDraft | null>(null);
-  const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+  // Session lock to prevent double-clicks during mint
+  const mintSessionLock = useRef(false);
 
   const { toast } = useToast();
   const { account, connected, connectWallet } = useWeb3();
 
-  // Load initial data from local storage
-  useEffect(() => {
-    const storedData = localStorage.getItem('storyCreationData');
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        if (parsedData.genre) {
-          setSelectedGenres([parsedData.genre]);
-        }
-        localStorage.removeItem('storyCreationData');
-      } catch (e) {
-        console.error('Error parsing stored story data', e);
-      }
-    }
-  }, []);
-
-  // Draft recovery detection on mount
-  useEffect(() => {
-    const saved = localStorage.getItem(DRAFT_KEY);
-    if (!saved) return;
-
-    try {
-      const draft = JSON.parse(saved);
-      if (draft?.prompt?.trim()) {
-        setRecoveredDraft(draft);
-        setShowRecoveryModal(true);
-      }
-    } catch (error) {
-      console.error('Error parsing draft:', error);
-      try {
-        localStorage.removeItem(DRAFT_KEY);
-      } catch (removeError) {
-        console.warn('Draft cleanup failed:', removeError);
-      }
-    }
-  }, []);
-
-  // Autosave logic with debounce
-  useEffect(() => {
-    if (!prompt.trim()) return;
-
-    const timeout = setTimeout(() => {
-      const draft: StoryDraft = {
-        prompt,
-        storyTitle,
-        selectedGenres,
-        storyLength,
-        mainCharacterName,
-        characterCount,
-        characterTraits,
-        characterAge,
-        characterBackground,
-        protagonistType,
-        plotType,
-        conflictType,
-        storyArc,
-        pacing,
-        endingType,
-        plotTwists,
-        includeFlashbacks,
-        timePeriod,
-        locationType,
-        worldBuildingDepth,
-        atmosphere,
-        narrativeVoice,
-        tone,
-        writingStyle,
-        readingLevel,
-        mood,
-        dialoguePercentage,
-        descriptionDetail,
-        primaryTheme,
-        secondaryThemes,
-        moralComplexity,
-        socialCommentary,
-        socialCommentaryTopic,
-        violenceLevel,
-        romanceLevel,
-        languageLevel,
-        matureContent,
-        chapterCount,
-        foreshadowing,
-        symbolism,
-        multiplePOVs,
-        povCount,
-        similarTo,
-        inspiredBy,
-        avoidCliches,
-        includeTropes,
-        temperature,
-        modelSelection,
-        updatedAt: Date.now(),
-        version: 1,
-      };
-      try {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-      } catch (error) {
-        console.warn('Autosave failed:', error);
-      }
-    }, 1000); // autosave every 1s after typing stops
-
-    return () => clearTimeout(timeout);
-  }, [
-    prompt,
-    storyTitle,
-    selectedGenres,
-    storyLength,
-    mainCharacterName,
-    characterCount,
-    characterTraits,
-    characterAge,
-    characterBackground,
-    protagonistType,
-    plotType,
-    conflictType,
-    storyArc,
-    pacing,
-    endingType,
-    plotTwists,
-    includeFlashbacks,
-    timePeriod,
-    locationType,
-    worldBuildingDepth,
-    atmosphere,
-    narrativeVoice,
-    tone,
-    writingStyle,
-    readingLevel,
-    mood,
-    dialoguePercentage,
-    descriptionDetail,
-    primaryTheme,
-    secondaryThemes,
-    moralComplexity,
-    socialCommentary,
-    socialCommentaryTopic,
-    violenceLevel,
-    romanceLevel,
-    languageLevel,
-    matureContent,
-    chapterCount,
-    foreshadowing,
-    symbolism,
-    multiplePOVs,
-    povCount,
-    similarTo,
-    inspiredBy,
-    avoidCliches,
-    includeTropes,
-    temperature,
-    modelSelection,
-  ]);
-
-  const genres = [
-    'Fantasy',
-    'Sci-Fi',
-    'Horror',
-    'Mystery',
-    'Romance',
-    'Adventure',
-    'Comedy',
-    'Cyberpunk',
-    'Thriller',
-    'Drama',
-  ];
-
-  const characterTraitOptions = [
-    'Brave',
-    'Cunning',
-    'Mysterious',
-    'Compassionate',
-    'Ruthless',
-    'Wise',
-    'Impulsive',
-    'Loyal',
-  ];
-
-  const themeOptions = [
-    'Love',
-    'Betrayal',
-    'Redemption',
-    'Power',
-    'Freedom',
-    'Identity',
-    'Sacrifice',
-    'Revenge',
-    'Hope',
-    'Justice',
-  ];
-
-  const toggleGenre = (genre: string) => {
-    if (selectedGenres.includes(genre)) {
-      setSelectedGenres(selectedGenres.filter((g) => g !== genre));
-    } else {
-      if (selectedGenres.length < 3) {
-        setSelectedGenres([...selectedGenres, genre]);
-      } else {
-        toast({
-          title: 'MAXIMUM POWER REACHED!',
-          description: 'You can only select up to 3 genres, hero!',
-          variant: 'destructive',
-          className:
-            'font-semibold tracking-wide border border-white/10 shadow-2xl shadow-black/50',
-        });
-      }
-    }
+  const handleGenreToggle = (genre: string) => {
+    setSelectedGenres((prev) =>
+      prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre]
+    );
   };
 
-  const toggleTrait = (trait: string) => {
-    if (characterTraits.includes(trait)) {
-      setCharacterTraits(characterTraits.filter((t) => t !== trait));
-    } else {
-      if (characterTraits.length < 5) {
-        setCharacterTraits([...characterTraits, trait]);
-      }
-    }
-  };
-
-  const toggleTheme = (theme: string) => {
-    if (secondaryThemes.includes(theme)) {
-      setSecondaryThemes(secondaryThemes.filter((t) => t !== theme));
-    } else {
-      if (secondaryThemes.length < 3) {
-        setSecondaryThemes([...secondaryThemes, theme]);
-      }
-    }
-  };
-
-  const handleGenerate = async () => {
+  const generateStory = async () => {
     if (!prompt.trim()) {
       toast({
-        title: 'EMPTY BUBBLE!',
-        description: 'Please enter a prompt to start the adventure!',
+        title: 'Missing Prompt',
+        description: 'Please enter a story prompt to generate content.',
         variant: 'destructive',
-        className:
-          'font-semibold tracking-wide border border-white/10 shadow-2xl shadow-black/50',
       });
       return;
     }
 
     setIsGenerating(true);
-    setActiveTab('preview');
+    setMintStatus('idle');
+    setCurrentStoryHash('');
+    try {      // Simulate AI story generation
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
-    // Build comprehensive prompt from all parameters
-    const storyParams = {
-      prompt,
-      title: storyTitle,
-      genres: selectedGenres,
-      length: storyLength,
-      character: {
-        name: mainCharacterName,
-        count: characterCount,
-        traits: characterTraits,
-        age: characterAge,
-        type: protagonistType,
-      },
-      plot: {
-        type: plotType,
-        conflict: conflictType,
-        arc: storyArc,
-        pacing,
-        ending: endingType,
-        twists: plotTwists,
-      },
-      setting: {
-        timePeriod,
-        location: locationType,
-        worldBuilding: worldBuildingDepth,
-        atmosphere,
-      },
-      style: {
-        voice: narrativeVoice,
-        tone,
-        writingStyle,
-        readingLevel,
-        mood,
-        dialoguePercentage: dialoguePercentage[0],
-        descriptionDetail,
-      },
-      themes: {
-        primary: primaryTheme,
-        secondary: secondaryThemes,
-        moralComplexity,
-      },
-      content: {
-        violence: violenceLevel,
-        romance: romanceLevel,
-        language: languageLevel,
-      },
-      advanced: {
-        flashbacks: includeFlashbacks,
-      },
-    };
+      const mockStory = `# ${title || 'Generated Story'}
 
-    console.log('Story Parameters:', storyParams);
+## Chapter 1: The Beginning
+
+${prompt}
+
+In the ${setting || 'mysterious realm'}, our protagonist ${
+        mainCharacters || 'a brave hero'
+      } embarked on an extraordinary journey. The themes of ${
+        themes || 'courage and discovery'
+      } wove through every aspect of this ${
+        selectedGenres.join(', ') || 'adventure'
+      } tale.
+
+The story unfolded with unexpected twists and turns, leading to a climactic confrontation that would change everything. Through trials and tribulations, our characters discovered the true meaning of ${
+        themes || 'friendship and perseverance'
+      }.
+
+## Chapter 2: The Journey Continues
+
+As the adventure progressed, new challenges emerged. The ${storyFormat} format allowed for deep exploration of character development and plot complexity. Each scene built upon the last, creating a rich tapestry of narrative elements.
+
+The setting of ${
+        setting || 'an enchanted world'
+      } provided the perfect backdrop for the unfolding drama. Characters faced their deepest fears and highest aspirations, all while navigating the intricate plot outlined in the initial concept.
+
+## Conclusion
+
+This generated story demonstrates the power of AI-assisted creative writing, combining user input with intelligent narrative construction to create engaging, original content ready for publication or NFT minting.`;
+
+      // Generate content hash for idempotent minting
+      const contentHash = generateContentHash(mockStory);
+      setCurrentStoryHash(contentHash);
+      
+      // Check if this content has already been minted
+      try {
+        const checkResponse = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com') + '/api/mint/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            storyHash: contentHash,
+            authorAddress: account // Include wallet address for ownership check
+          }),
+        });
+        
+        if (checkResponse.ok) {
+          const checkData = await checkResponse.json();
+          if (checkData.status === 'MINTED') {
+            setMintStatus('minted');
+          } else if (checkData.status === 'PENDING') {
+            setMintStatus('pending');
+          }
+        }
+      } catch (error) {
+        // If check fails, allow minting attempt
+        console.error('Failed to check mint status:', error);
+      }
+      
+      setGeneratedContent(mockStory);
+      setActiveTab('preview');
+
+      toast({
+        title: 'Story Generated!',
+        description: 'Your AI-powered story has been created successfully.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Generation Failed',
+        description: 'Failed to generate story. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleMintNFT = async () => {
+    // Step 1: Guard to prevent double-click spam using session lock
+    if (mintSessionLock.current) {
+      console.log("Mint blocked: Session lock is active");
+      return;
+    }
+
+    // Acquire session lock immediately
+    mintSessionLock.current = true;
+
+    console.log("MINT FUNCTION TRIGGERED");
+
+    try {
+      if (!connected) {
+        toast({
+          title: 'Wallet Not Connected',
+          description: 'Please connect your wallet to mint NFTs.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (!generatedContent) {
+        toast({
+          title: 'No Content',
+          description: 'Please generate a story first before minting.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setIsMinting(true);
+      setMintStatus('checking');
+
+      // Generate content hash for idempotent minting
+      const storyHash = currentStoryHash || generateContentHash(generatedContent);
 
     // Simulate API call
     setTimeout(() => {
@@ -505,97 +260,64 @@ Suddenly, a shadow detached itself from the alley wall. "Hand it over, ${mainCha
 ${mainCharacterName || 'Kael'} smirked, pulling ${mainCharacterName ? 'their' : 'his'
         } plasma-pistol from its holster. "Come and get it, tin can."
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to generate story');
+      if (!mintResponse.ok) {
+        // Other errors - but not 409 which we handled above
+        throw new Error(mintData.error || 'Failed to mint NFT');
       }
 
-      const data = await response.json();
-      setGeneratedStory(data.result);
+      // Success case
+      setMintStatus('minted');
+
+      // Set NFT URL if we have tokenId and contract address from the backend
+      // Otherwise leave it empty and hide the OpenSea link
+      const { tokenId, contractAddress } = mintData.record ?? {};
+      if (tokenId && contractAddress) {
+        setMintedNftUrl(`https://opensea.io/assets/${contractAddress}/${tokenId}`);
+      } else {
+        setMintedNftUrl('');
+      }
       toast({
-        title: 'BOOM! STORY GENERATED!',
-        description: 'Your epic tale is ready for review!',
-        className:
-          'font-semibold tracking-wide bg-green-400 text-black border border-white/10 shadow-2xl shadow-black/50',
+        title: 'NFT Minted Successfully!',
+        description: 'Your story has been minted as an NFT on the blockchain.',
       });
-    } catch (error) {
-      console.error('Story generation error:', error);
+    } catch (error: unknown) {
+      setMintStatus('failed');
+      const errMsg = error instanceof Error ? error.message : String(error);
       toast({
-        title: 'OOPS! GENERATION FAILED!',
-        description:
-          error instanceof Error
-            ? error.message
-            : 'Something went wrong. Please try again!',
+        title: 'Minting Failed',
+        description: errMsg || 'Failed to mint NFT. Please try again.',
         variant: 'destructive',
-        className:
-          'font-semibold tracking-wide border border-white/10 shadow-2xl shadow-black/50',
       });
     } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleMint = async () => {
-    if (!connected) {
-      toast({
-        title: 'WALLET LOCKED!',
-        description: 'Please connect your wallet to mint this masterpiece!',
-        variant: 'destructive',
-        className:
-          'font-semibold tracking-wide border border-white/10 shadow-2xl shadow-black/50',
-      });
-      return;
-    }
-
-    setIsMinting(true);
-
-    setTimeout(() => {
+      // Always release the session lock and reset minting state
       setIsMinting(false);
-      setMintSuccess(true);
-      // Clear draft on successful mint
-      try {
-        localStorage.removeItem(DRAFT_KEY);
-      } catch (error) {
-        console.warn('Draft cleanup failed:', error);
-      }
-      toast({
-        title: 'KAZAM! NFT MINTED!',
-        description: 'Your story is now eternal on the blockchain!',
-        className:
-          'font-semibold tracking-wide bg-green-400 text-black border border-white/10 shadow-2xl shadow-black/50',
-      });
-    }, 3000);
+      mintSessionLock.current = false;
+    }
   };
 
   const resetForm = () => {
     setPrompt('');
+    setTitle('');
+    setMainCharacters('');
+    setPlotOutline('');
+    setSetting('');
+    setThemes('');
     setSelectedGenres([]);
-    setGeneratedStory(null);
-    setMintSuccess(false);
+    setGeneratedContent('');
+    setMintedNftUrl('');
     setActiveTab('input');
+    setMintStatus('idle');
+    setCurrentStoryHash('');
   };
 
   return (
-    <div className={`w-full max-w-5xl mx-auto ${className}`}>
-      <Card className="border border-white/10 shadow-2xl shadow-black/50 bg-white dark:bg-gray-900 overflow-hidden rounded-3xl">
-        <CardHeader className="bg-emerald-500 hover:bg-emerald-400 text-black border-b-4 border-black p-6 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:8px_8px]" />
-
-          <div className="relative z-10 flex items-center justify-between">
-            <CardTitle className="flex items-center space-x-3">
-              <div className="bg-white p-2 rounded-full border border-white/10 shadow-2xl shadow-black/50">
-                <Wand2 className="h-8 w-8 text-black" />
-              </div>
-              <span className="font-semibold tracking-wide text-4xl tracking-wide text-black drop-shadow-sm">
-                STORY MAKER 3000
-              </span>
-            </CardTitle>
-            <div className="hidden md:flex space-x-2">
-              <div className="w-4 h-4 rounded-full bg-rose-500/20 text-rose-300 border-2 border-black" />
-              <div className="w-4 h-4 rounded-full bg-yellow-500 border-2 border-black" />
-              <div className="w-4 h-4 rounded-full bg-green-500 border-2 border-black" />
-            </div>
-          </div>
+    <div className={`w-full max-w-6xl mx-auto p-6 space-y-6 ${className}`}>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Wand2 className="h-6 w-6 text-primary" />
+            <span>AI Story Generator</span>
+          </CardTitle>
         </CardHeader>
 
         <CardContent className="p-0">
@@ -771,31 +493,23 @@ ${mainCharacterName || 'Kael'} smirked, pulling ${mainCharacterName ? 'their' : 
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                     />
-                    <div className="absolute bottom-4 right-4 text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-black px-2 py-1 border-2 border-black rounded">
-                      {prompt.length} CHARS
-                    </div>
                   </div>
                 </div>
 
-                {/* Optional Title */}
-                <div className="space-y-4">
-                  <Label className="font-semibold tracking-wide text-xl flex items-center gap-2">
-                    <BookOpen className="w-5 h-5" />
-                    STORY TITLE (Optional)
-                  </Label>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Main Characters
+                  </label>
                   <Input
-                    placeholder="Leave blank for auto-generation"
-                    className="border border-white/10 rounded-lg p-4 text-lg font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
-                    value={storyTitle}
-                    onChange={(e) => setStoryTitle(e.target.value)}
+                    placeholder="Describe your main characters..."
+                    value={mainCharacters}
+                    onChange={(e) => setMainCharacters(e.target.value)}
                   />
                 </div>
 
-                {/* Genre Selection */}
-                <div className="space-y-4">
-                  <label className="font-semibold tracking-wide text-2xl flex items-center gap-2">
-                    <Zap className="fill-blue-400 stroke-current" />
-                    CHOOSE YOUR FLAVOR (MAX 3)
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Themes
                   </label>
                   <div className="flex flex-wrap gap-3">
                     {genres.map((g) => (
@@ -810,49 +524,34 @@ ${mainCharacterName || 'Kael'} smirked, pulling ${mainCharacterName ? 'their' : 
                           }
                         `}
                       >
-                        {g.toUpperCase()}
-                      </button>
+                        {genre}
+                      </Badge>
                     ))}
                   </div>
                 </div>
 
-                {/* Story Length */}
-                <div className="space-y-4">
-                  <Label className="font-semibold tracking-wide text-xl flex items-center gap-2">
-                    <Target className="w-5 h-5" />
-                    STORY LENGTH
-                  </Label>
-                  <Select value={storyLength} onValueChange={setStoryLength}>
-                    <SelectTrigger className="border border-white/10 rounded-lg p-4 text-lg font-semibold tracking-wide">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="flash">
-                        FLASH (100-500 words)
-                      </SelectItem>
-                      <SelectItem value="short">
-                        SHORT (500-2000 words)
-                      </SelectItem>
-                      <SelectItem value="medium">
-                        MEDIUM (2000-5000 words)
-                      </SelectItem>
-                      <SelectItem value="long">
-                        LONG (5000-10000 words)
-                      </SelectItem>
-                      <SelectItem value="epic">EPIC (10000+ words)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Advanced Options Accordion */}
-                <div className="bg-gray-50 dark:bg-gray-800 border border-white/10 rounded-2xl p-6 shadow-2xl shadow-black/50">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Settings className="w-6 h-6" />
-                    <h3 className="font-semibold tracking-wide text-2xl">ADVANCED OPTIONS</h3>
-                    <Badge className="bg-emerald-500 hover:bg-emerald-400 text-black text-black border-2 border-black font-semibold tracking-wide">
-                      OPTIONAL
-                    </Badge>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Story Format
+                  </label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {storyFormats.map((format) => (
+                      <Button
+                        key={format.id}
+                        variant={
+                          storyFormat === format.id ? 'default' : 'outline'
+                        }
+                        className="h-auto p-3 flex flex-col items-start"
+                        onClick={() => setStoryFormat(format.id)}
+                      >
+                        <span className="font-medium">{format.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {format.description}
+                        </span>
+                      </Button>
+                    ))}
                   </div>
+                </div>
 
                   <Accordion type="multiple" className="space-y-2">
                     {/* Characters Section */}
@@ -1945,230 +1644,147 @@ ${mainCharacterName || 'Kael'} smirked, pulling ${mainCharacterName ? 'their' : 
                       </AccordionContent>
                     </AccordionItem>
 
-                    {/* Technical Parameters Section */}
-                    <AccordionItem
-                      value="technical"
-                      className="border border-white/10 rounded-xl bg-white dark:bg-gray-900 overflow-hidden"
+            <TabsContent value="preview" className="space-y-4">
+              {generatedContent ? (
+                <div className="space-y-4">
+                  <div className="prose prose-sm max-w-none bg-muted/50 p-6 rounded-lg">
+                    <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
+                      {generatedContent}
+                    </pre>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={() => setActiveTab('mint')}
+                      className="flex-1"
                     >
-                      <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-indigo-50 dark:hover:bg-indigo-950 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <Zap className="w-6 h-6 text-indigo-500" />
-                          <span className="font-semibold tracking-wide text-xl">
-                            TECHNICAL PARAMETERS
-                          </span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="px-6 pb-6 space-y-4">
-                        <div>
-                          <Label className="font-bold mb-2 block">
-                            AI Creativity (Temperature):{' '}
-                            {temperature[0]?.toFixed(1) ?? '0.7'}
-                          </Label>
-                          <Slider
-                            value={temperature}
-                            onValueChange={setTemperature}
-                            min={0.1}
-                            max={1.0}
-                            step={0.1}
-                            className="w-full"
-                            aria-label="AI Creativity Temperature"
-                          />
-                          <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                            <span>More Focused</span>
-                            <span>More Creative</span>
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="font-bold mb-2 block">
-                            AI Model Selection
-                          </Label>
-                          <Select
-                            value={modelSelection}
-                            onValueChange={setModelSelection}
-                          >
-                            <SelectTrigger className="border-2 border-black" aria-label="AI Model Selection">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="default">
-                                Default (Balanced)
-                              </SelectItem>
-                              <SelectItem value="creative">
-                                Creative Mode
-                              </SelectItem>
-                              <SelectItem value="precise">
-                                Precise Mode
-                              </SelectItem>
-                              <SelectItem value="fast">
-                                Fast Generation
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </div>
-
-                {/* Generate Button */}
-                <div className="flex justify-end pt-4">
-                  <Button
-                    onClick={handleGenerate}
-                    className="bg-rose-500/20 hover:bg-red-600 text-white font-semibold tracking-wide text-3xl px-10 py-8 rounded-2xl border border-white/10 shadow-2xl shadow-black/50 active:translate-x-[4px] active:translate-y-[4px] active:shadow-2xl active:shadow-black/50 transition-all w-full md:w-auto group"
-                  >
-                    <Sparkles className="mr-3 h-8 w-8 group-hover:animate-spin" />
-                    GENERATE STORY!
-                  </Button>
-                </div>
-              </div>
-
-              <TabsContent value="preview" className="mt-0">
-                {isGenerating ? (
-                  <div className="flex flex-col items-center justify-center py-20 space-y-8">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full animate-ping opacity-20" />
-                      <Loader2 className="h-24 w-24 animate-spin text-black" />
-                    </div>
-                    <h3 className="font-semibold tracking-wide text-4xl animate-bounce text-center">
-                      CRUNCHING DATA...
-                      <br />
-                      <span className="text-blue-500">MAKING MAGIC!</span>
-                    </h3>
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      Mint as NFT
+                    </Button>
+                    <Button onClick={resetForm} variant="outline">
+                      Create New Story
+                    </Button>
                   </div>
-                ) : (
-                  <div className="space-y-8">
-                    <div className="bg-white border border-white/10 p-8 shadow-2xl shadow-black/50 rounded-xl relative">
-                      <div className="absolute -top-5 -left-5 bg-emerald-500 hover:bg-emerald-400 text-black border border-white/10 px-4 py-2 font-semibold tracking-wide text-xl rotate-[-5deg] shadow-2xl shadow-black/50">
-                        YOUR STORY
-                      </div>
-                      <div className="prose prose-lg max-w-none font-medium leading-relaxed">
-                        {generatedStory?.split('\n\n').map((paragraph, i) => (
-                          <p
-                            key={i}
-                            className="mb-4 first-letter:text-5xl first-letter:font-semibold tracking-wide first-letter:float-left first-letter:mr-3 first-letter:mt-[-10px]"
-                          >
-                            {paragraph}
-                          </p>
-                        ))}
-                      </div>
-                    </div>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    No story generated yet. Go to Story Input to create one.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
 
-                    <div className="flex justify-between items-center">
-                      <Button
-                        onClick={() => setActiveTab('input')}
-                        className="font-semibold tracking-wide text-xl border border-white/10 bg-white hover:bg-white/5"
-                      >
-                        EDIT PARAMETERS
-                      </Button>
-                      <Button
-                        onClick={() => setActiveTab('mint')}
-                        className="bg-green-500 hover:bg-green-600 text-white font-semibold tracking-wide text-2xl px-8 py-6 rounded-xl border border-white/10 shadow-2xl shadow-black/50 active:translate-x-[3px] active:translate-y-[3px] active:shadow-2xl shadow-black/50 transition-all"
-                      >
-                        PROCEED TO MINT <Save className="ml-2 h-6 w-6" />
-                      </Button>
+            <TabsContent value="mint" className="space-y-4">
+              {!connected ? (
+                <div className="text-center py-12 space-y-4">
+                  <Users className="h-12 w-12 text-muted-foreground mx-auto" />
+                  <div>
+                    <h3 className="text-lg font-medium">Connect Your Wallet</h3>
+                    <p className="text-muted-foreground">
+                      Connect your Web3 wallet to mint your story as an NFT
+                    </p>
+                  </div>
+                  <Button onClick={connectWallet}>Connect Wallet</Button>
+                </div>
+              ) : !generatedContent ? (
+                <div className="text-center py-12">
+                  <Wand2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    Generate a story first before minting an NFT.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="bg-muted/50 p-6 rounded-lg">
+                    <h3 className="font-medium mb-2">Story Details</h3>
+                    <div className="space-y-2 text-sm">
+                      <p>
+                        <strong>Title:</strong> {title || 'Untitled Story'}
+                      </p>
+                      <p>
+                        <strong>Genres:</strong>{' '}
+                        {selectedGenres.join(', ') || 'None selected'}
+                      </p>
+                      <p>
+                        <strong>Format:</strong>{' '}
+                        {storyFormats.find((f) => f.id === storyFormat)?.name}
+                      </p>
+                      <p>
+                        <strong>Length:</strong> ~{generatedContent.length}{' '}
+                        characters
+                      </p>
                     </div>
                   </div>
-                )}
-              </TabsContent>
 
-              <TabsContent value="mint" className="mt-0">
-                <div className="text-center space-y-8 py-10">
-                  {!mintSuccess ? (
-                    <>
-                      <div className="inline-block relative">
-                        <div className="absolute inset-0 bg-blue-400 blur-xl opacity-20 rounded-full" />
-                        <Wallet className="h-32 w-32 mx-auto text-black relative z-10" />
-                      </div>
+                  {(() => {
+                    const isMinted = Boolean(mintedNftUrl) || String(mintStatus) === 'minted';
+                    const isPending = String(mintStatus) === 'pending';
 
-                      <div className="space-y-2">
-                        <h3 className="font-semibold tracking-wide text-4xl">
-                          READY TO IMMORTALIZE?
-                        </h3>
-                        <p className="text-xl font-medium text-muted-foreground max-w-md mx-auto">
-                          Mint your story as a unique NFT on the Monad
-                          blockchain.
-                        </p>
-                      </div>
-
-                      {!connected ? (
-                        <Button
-                          onClick={connectWallet}
-                          className="bg-black text-white hover:bg-gray-800 font-semibold tracking-wide text-2xl px-10 py-6 rounded-xl border-4 border-transparent hover:border-yellow-400 transition-all shadow-lg"
-                        >
-                          CONNECT WALLET FIRST
-                        </Button>
-                      ) : (
-                        <div className="space-y-6">
-                          <div className="bg-white/5 border border-white/10 p-4 rounded-lg inline-block">
-                            <p className="font-mono text-sm">
-                              Connected: {truncateAddress(account)}
-                            </p>
+                    if (isMinted && mintedNftUrl) {
+                      return (
+                        <div className="text-center space-y-4">
+                          <div className="text-green-600">
+                            <Sparkles className="h-12 w-12 mx-auto mb-2" />
+                            <h3 className="text-lg font-medium">NFT Minted Successfully!</h3>
                           </div>
-                          <br />
-                          <Button
-                            onClick={handleMint}
-                            disabled={isMinting}
-                            className="bg-purple-500 hover:bg-purple-600 text-white font-semibold tracking-wide text-3xl px-12 py-8 rounded-2xl border border-white/10 shadow-2xl shadow-black/50 active:translate-x-[4px] active:translate-y-[4px] active:shadow-2xl shadow-black/50 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-                          >
-                            {isMinting ? (
-                              <span className="flex items-center">
-                                <Loader2 className="mr-3 h-8 w-8 animate-spin" />
-                                MINTING...
-                              </span>
-                            ) : (
-                              <span className="flex items-center">
-                                <Zap className="mr-3 h-8 w-8 fill-emerald-400 stroke-white" />
-                                MINT NFT NOW!
-                              </span>
-                            )}
+                          <Button asChild>
+                            <a href={mintedNftUrl} target="_blank" rel="noopener noreferrer">
+                              View on OpenSea
+                            </a>
                           </Button>
                         </div>
-                      )}
-                    </>
-                  ) : (
-                    <motion.div
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="space-y-8"
-                    >
-                      <div className="inline-block bg-green-400 p-8 rounded-full border border-white/10 shadow-2xl shadow-black/50">
-                        <Sparkles className="h-20 w-20 text-white stroke-current stroke-2" />
-                      </div>
+                      );
+                    }
 
-                      <div className="space-y-2">
-                        <h3 className="font-semibold tracking-wide text-5xl text-green-600 drop-shadow-sm">
-                          SUCCESS!
-                        </h3>
-                        <p className="text-xl font-bold">
-                          Your story has been minted successfully!
-                        </p>
-                      </div>
+                    if (isMinted && !mintedNftUrl) {
+                      // Minted but no URL available - show success without link
+                      return (
+                        <div className="text-center space-y-4">
+                          <div className="text-green-600">
+                            <Sparkles className="h-12 w-12 mx-auto mb-2" />
+                            <h3 className="text-lg font-medium">NFT Minted Successfully!</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Your story has been minted. Transaction details will be available shortly.
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
 
-                      <div className="flex justify-center gap-4 pt-4">
-                        <Button
-                          onClick={() =>
-                            window.open(
-                              `https://explorer.monad.xyz/tx/0x...`,
-                              '_blank'
-                            )
-                          }
-                          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold tracking-wide text-xl border border-white/10 shadow-2xl shadow-black/50"
-                        >
-                          VIEW ON EXPLORER
-                        </Button>
-                        <Button
-                          onClick={resetForm}
-                          className="bg-white hover:bg-white/5 text-black font-semibold tracking-wide text-xl border border-white/10 shadow-2xl shadow-black/50"
-                        >
-                          CREATE ANOTHER
-                        </Button>
-                      </div>
-                    </motion.div>
-                  )}
+                    if (isPending) {
+                      return (
+                        <div className="text-center space-y-4">
+                          <div className="text-yellow-600">
+                            <Loader2 className="h-12 w-12 mx-auto mb-2 animate-spin" />
+                            <h3 className="text-lg font-medium">Minting In Progress</h3>
+                            <p className="text-sm text-muted-foreground">
+                              A minting request is already in progress for this story.
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <Button onClick={handleMintNFT} disabled={isMinting} className="w-full" size="lg">
+                        {isMinting ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            Minting NFT...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="mr-2 h-5 w-5" />
+                            Mint Story as NFT
+                          </>
+                        )}
+                      </Button>
+                    );
+                  })()}
                 </div>
-              </TabsContent>
-            </div>
+              )}
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>

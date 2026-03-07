@@ -125,10 +125,6 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'escapetoromance.com',
-      },
-      {
-        protocol: 'https',
         hostname: 'www.nyfa.edu',
       },
       {
@@ -186,6 +182,15 @@ const nextConfig = {
       };
     }
 
+    // Fix path aliases for webpack - ensures models and other @/* imports resolve correctly
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname),
+      '@/models': require('path').resolve(__dirname, 'models'),
+      '@/lib': require('path').resolve(__dirname, 'lib'),
+      '@/components': require('path').resolve(__dirname, 'components'),
+    };
+
     // Silence warnings for specific packages
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
 
@@ -221,16 +226,22 @@ const nextConfig = {
     async rewrites() {
       const envUrl = process.env.NEXT_PUBLIC_API_URL;
       const apiUrl = (envUrl && envUrl.startsWith('http')) ? envUrl : 'http://localhost:3001';
+
+      const sdkEnvUrl = process.env.NEXT_PUBLIC_SDK_URL;
+      const sdkUrl = (sdkEnvUrl && sdkEnvUrl.startsWith('http')) ? sdkEnvUrl : 'http://localhost:3002';
+
       return [
         { source: '/api/:path*', destination: `${apiUrl}/api/:path*` },
+        { source: '/sdk/:path*', destination: `${sdkUrl}/sdk/:path*` },
       ];
     },
   }),
 
   // Output configuration
-  // 'export' = static HTML/JS/CSS for Cloudflare Pages (no server needed)
+  // For Cloudflare Pages: use undefined to allow @cloudflare/next-on-pages to handle dynamic routes
   // 'standalone' = self-contained Node.js server for Render
-  output: isCfBuild ? 'export' : (process.env.BUILD_STANDALONE === 'true' ? 'standalone' : undefined),
+  // undefined = default Next.js behavior with dynamic routes and SSR
+  output: isCfBuild ? undefined : (process.env.BUILD_STANDALONE === 'true' ? 'standalone' : undefined),
 
   // Experimental features
   experimental: {

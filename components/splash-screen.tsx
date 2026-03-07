@@ -50,6 +50,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
               src="/logo.png"
               alt="GroqTales"
               fill
+              sizes="(max-width: 768px) 100vw, 33vw"
               className="object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
               priority
             />

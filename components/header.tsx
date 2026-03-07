@@ -15,6 +15,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { useWeb3 } from '@/components/providers/web3-provider';
 import { Button } from '@/components/ui/button';
@@ -34,9 +35,11 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { UserNav } from '@/components/user-nav';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
 
 import { CreateStoryDialog } from './create-story-dialog';
 import { ModeToggle } from './mode-toggle';
+import { UploadStoryTrigger } from './upload-story-trigger';
 
 // Type definitions for nav items
 type NavSubItem = {
@@ -60,6 +63,21 @@ export function Header() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const router = useRouter();
+  const [session, setSession] = useState<any>(null);
+  const supabase = React.useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
 
   // Track scroll position for adding box shadow to header
   useEffect(() => {
@@ -86,19 +104,8 @@ export function Header() {
   };
 
   const handleCreateClick = () => {
-    // Check if user is authenticated
-    const isAdmin =
-      typeof window !== 'undefined' && window.localStorage
-        ? localStorage.getItem('adminSession')
-        : null;
-
-    if (!account && !isAdmin) {
-      toast({
-        title: 'Authentication Required',
-        description:
-          'Please connect your wallet or login as admin to create stories',
-        variant: 'destructive',
-      });
+    if (!account && !session) {
+      router.push('/sign-in');
       return;
     }
     setShowCreateDialog(true);
@@ -107,14 +114,9 @@ export function Header() {
   const navItems: NavItem[] = [
     { type: 'link', href: '/genres', label: 'Genres' },
     { type: 'link', href: '/community', label: 'Community Hub' },
-    {
-      type: 'link',
-      href: '/community/creators',
-      label: 'Top Creators',
-      icon: <Trophy className="h-4 w-4 mr-1.5 text-emerald-400" />,
-    },
-    { type: 'link', href: '/nft-gallery', label: 'NFT Gallery' },
-    { type: 'link', href: '/nft-marketplace', label: 'NFT Marketplace' },
+    { type: 'link', href: '/gallery', label: 'Gallery' },
+    { type: 'link', href: '/marketplace', label: 'Marketplace' },
+    { type: 'link', href: '/blog', label: 'Blogs' },
     ...(account
       ? [
         {
@@ -153,6 +155,7 @@ export function Header() {
                 src="/logo.png"
                 alt="GroqTales Logo"
                 fill
+                sizes="(max-width: 768px) 100vw, 33vw"
                 className="object-contain drop-shadow-lg"
                 priority
               />
@@ -232,16 +235,19 @@ export function Header() {
         </div>
 
         <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="hidden lg:flex items-center gap-2 px-5 py-2 rounded-full border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-semibold shadow-[0_0_15px_rgba(16,185,129,0.2)] hover:bg-emerald-500 hover:text-black hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all duration-300"
-            onClick={handleCreateClick}
-            aria-label="Create a new story"
-          >
-            <PenSquare className="h-4 w-4 mr-2" />
-            Create
-          </Button>
+          <div className="flex items-center gap-2 mr-2">
+            <UploadStoryTrigger variant="outline" className="hidden lg:flex" buttonText="Upload" />
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden lg:flex items-center gap-2 px-5 py-2 rounded-full border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-semibold shadow-[0_0_15px_rgba(16,185,129,0.2)] hover:bg-emerald-500 hover:text-black hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all duration-300"
+              onClick={handleCreateClick}
+              aria-label="Create a new story"
+            >
+              <PenSquare className="h-4 w-4 mr-2" />
+              Create
+            </Button>
+          </div>
           {/* <ModeToggle /> Temporarily disabled */}
           <UserNav />
 
@@ -269,6 +275,7 @@ export function Header() {
                         src="/logo.png"
                         alt="Logo"
                         fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
                         className="object-contain"
                       />
                     </div>
@@ -321,7 +328,12 @@ export function Header() {
                       )}
                     </div>
                   ))}
-                  <div className="pt-4 mt-4 border-t-2 border-white/10">
+                  <div className="pt-4 mt-4 border-t-2 border-white/10 space-y-3">
+                    <UploadStoryTrigger
+                      variant="outline"
+                      className="w-full justify-start text-lg text-white border-white/50 hover:bg-white/10"
+                      buttonText="Upload Story"
+                    />
                     <Button
                       variant="outline"
                       className="w-full justify-start text-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full font-semibold"

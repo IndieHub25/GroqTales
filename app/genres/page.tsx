@@ -40,7 +40,7 @@ import {
 const genreImages: Record<string, string> = {
   'Science Fiction': 'https://ik.imagekit.io/panmac/tr:f-auto,w-740,pr-true//bcd02f72-b50c-0179-8b4b-5e44f5340bd4/175e79ee-ed99-45d5-846f-5af0be2ab75b/sub%20genre%20guide.webp',
   'Fantasy': 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhv_45322WkBmu9o8IvYfcxEXDTbGzORCAgwdP0OF1Zq4izhDr6PT-bkqYj0BJJ_HP02Op2Y0vrNOQlN6tuf0cnu4GwWqprIJrcn89pYY6uiu89gXLr5UXIZ3h6-2HWvO-SjaqzeMRoiXk/s1600/latest.jpg',
-  'Romance': 'https://escapetoromance.com/wp-content/uploads/sites/172/2017/05/iStock-503130452.jpg',
+  'Romance': 'https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=600&q=80',
   'Horror': 'https://www.nyfa.edu/wp-content/uploads/2022/11/nosferatu.jpg',
   'Mystery': 'https://celadonbooks.com/wp-content/uploads/2020/03/what-is-a-mystery.jpg',
   'Historical Fiction': 'https://celadonbooks.com/wp-content/uploads/2020/03/Historical-Fiction-scaled.jpg',

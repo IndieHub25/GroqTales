@@ -10,7 +10,7 @@ services:
     plan: starter
     buildCommand: npm install && npm run build:backend
     startCommand: npm run start:backend
-    healthCheckPath: /api/health
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
         value: production
@@ -20,18 +20,20 @@ services:
         sync: false
       - key: OPENAI_API_KEY
         sync: false
-      - key: MONGODB_URI
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
       - key: REDIS_URL
         sync: false
       - key: JWT_SECRET
         sync: false
       - key: CORS_ORIGIN
-        value: https://groqtales.xyz/
+        value: https://groqtales.xyz
       - key: API_VERSION
         value: v1
-    domains:
-      - groqtales-api.onrender.com
 
   # SDK Service (for future SDK implementations)
   - type: web
@@ -41,7 +43,7 @@ services:
     plan: starter
     buildCommand: npm install && npm run build:sdk
     startCommand: npm run start:sdk
-    healthCheckPath: /sdk/health
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
         value: production
@@ -52,9 +54,7 @@ services:
       - key: SDK_VERSION
         value: v1.0.0
       - key: CORS_ORIGIN
-        value: https://groqtales.xyz/
-    domains:
-      - groqtales-sdk.onrender.com
+        value: https://groqtales.xyz
 
   # Background Worker Service
   - type: worker
@@ -69,7 +69,11 @@ services:
         value: production
       - key: GROQ_API_KEY
         sync: false
-      - key: MONGODB_URI
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
       - key: REDIS_URL
         sync: false
