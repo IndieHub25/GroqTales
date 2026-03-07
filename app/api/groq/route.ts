@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       return rateLimitResponse;
     }
 
-    let body: any;
+    let body: Record<string, unknown>;
     try {
       body = await request.json();
     } catch (parseError) {
@@ -123,7 +123,20 @@ export async function POST(request: NextRequest) {
       apiKey,
       proConfig, // Pro Panel configuration
       title, // Story title for Pro Panel generation
-    } = body;
+    } = body as {
+      action?: string;
+      prompt: string;
+      content: string;
+      genre?: string;
+      theme?: string;
+      length?: 'short' | 'medium' | 'long';
+      model?: string;
+      options?: Record<string, unknown>;
+      focus?: string;
+      apiKey?: string;
+      proConfig?: unknown;
+      title?: string;
+    };
 
     action = requestAction || 'unknown';
 
@@ -221,9 +234,9 @@ export async function POST(request: NextRequest) {
             theme: prompt,
             genre,
             length,
-            tone: updatedOptions?.tone,
-            characters: updatedOptions?.characters,
-            setting: updatedOptions?.setting,
+            tone: updatedOptions?.tone as string | undefined,
+            characters: updatedOptions?.characters as string | undefined,
+            setting: updatedOptions?.setting as string | undefined,
           });
         }
         break;
