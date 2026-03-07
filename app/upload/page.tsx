@@ -25,6 +25,11 @@ import { useToast } from '@/components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
+/** Only allow blob: URLs created by URL.createObjectURL — blocks injected strings. */
+function sanitizeBlobUrl(url: string): string | null {
+  return url.startsWith('blob:') ? url : null;
+}
+
 export default function UploadPage() {
   const [activeTab, setActiveTab] = useState<'document' | 'write'>('document');
   const [isHovering, setIsHovering] = useState(false);
@@ -415,10 +420,10 @@ export default function UploadPage() {
                         }
                       }}
                     />
-                    {coverImagePreview ? (
+                    {coverImagePreview && sanitizeBlobUrl(coverImagePreview) ? (
                       <div className="absolute inset-0">
                         <img
-                          src={coverImagePreview}
+                          src={sanitizeBlobUrl(coverImagePreview)!}
                           alt="Cover Preview"
                           className="w-full h-full object-cover"
                         />
@@ -634,9 +639,9 @@ export default function UploadPage() {
                         </div>
 
                         <div className="flex-1 w-full bg-black/80 rounded-2xl border border-white/10 overflow-hidden relative group">
-                          {filePreview ? (
+                          {filePreview && sanitizeBlobUrl(filePreview) ? (
                             <object
-                              data={filePreview}
+                              data={sanitizeBlobUrl(filePreview)!}
                               type="application/pdf"
                               className="w-full h-full rounded-2xl"
                               aria-label="PDF Preview"
