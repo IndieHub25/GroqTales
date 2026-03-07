@@ -14,14 +14,29 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/client';
+
+interface Story {
+  id: string;
+  title: string;
+  content: string | null;
+  genre: string | null;
+  author_id: string | null;
+  author_name: string | null;
+  views: number;
+  likes: number;
+  is_minted: boolean;
+  file_url: string | null;
+  format_type: string | null;
+  created_at: string;
+}
 
 export default function MarketplacePage() {
-  const [stories, setStories] = useState<any[]>([]);
+  const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 

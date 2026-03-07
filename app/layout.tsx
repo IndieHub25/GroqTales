@@ -1,11 +1,8 @@
-import React from 'react';
-
-import './globals.css';
-
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
+import React from 'react';
 
 import BackToTop from '@/components/back-to-top';
 import ClientLayout from '@/components/client-layout';
@@ -18,6 +15,8 @@ import { Web3Provider } from '@/components/providers/web3-provider'; // DISABLED
 import { QueryProvider } from '@/components/query-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
+
+import './globals.css';
 
 // Build-time environment variable validation
 const requiredEnvVars = [
@@ -177,9 +176,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body
-        className="optimize-paint"
-      >
+      <body className="optimize-paint">
         {/* Skip link for keyboard users to jump to main content */}
         <a
           href="#main-content"
