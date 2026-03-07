@@ -148,6 +148,7 @@
     "react-joyride": "^2.9.3",
     "react-resizable-panels": "^2.1.8",
     "recharts": "^2.15.3",
+    "server-only": "^0.0.1",
     "siwe": "^2.1.4",
     "sonner": "^1.4.41",
     "swagger-jsdoc": "^6.2.8",

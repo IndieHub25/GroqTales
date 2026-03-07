@@ -7,12 +7,9 @@
  */
 
 import React from 'react';
+
 import { Info } from 'lucide-react';
 
-import {
-  formatTooltipContent,
-  type ParameterKey,
-} from '@/lib/constants/parameterTooltips';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -31,6 +28,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip-enhanced';
+import { formatTooltipContent } from '@/lib/constants/parameterTooltips';
 
 // ============================================================
 // NUMERIC SLIDER — Reference: "AI Creativity (Temp)" style
@@ -86,14 +84,13 @@ export function SliderControl({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span
-                    role="img"
+                  <button
+                    type="button"
                     aria-label="More info"
-                    className="inline-flex items-center ml-1 cursor-help"
-                    tabIndex={0}
+                    className="inline-flex items-center ml-1 cursor-help bg-transparent border-0 p-0"
                   >
                     <Info className="w-3 h-3 text-gray-400" />
-                  </span>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent
                   side="top"
@@ -210,14 +207,13 @@ export function SelectControl<T extends string>({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span
-                  role="img"
+                <button
+                  type="button"
                   aria-label="More info"
-                  className="inline-flex items-center ml-1 cursor-help"
-                  tabIndex={0}
+                  className="inline-flex items-center ml-1 cursor-help bg-transparent border-0 p-0"
                 >
                   <Info className="w-3 h-3 text-gray-400" />
-                </span>
+                </button>
               </TooltipTrigger>
               <TooltipContent
                 side="top"
@@ -324,14 +320,13 @@ export function InputControl({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span
-                  role="img"
+                <button
+                  type="button"
                   aria-label="More info"
-                  className="inline-flex items-center ml-1 cursor-help"
-                  tabIndex={0}
+                  className="inline-flex items-center ml-1 cursor-help bg-transparent border-0 p-0"
                 >
                   <Info className="w-3 h-3 text-gray-400" />
-                </span>
+                </button>
               </TooltipTrigger>
               <TooltipContent
                 side="top"
@@ -413,14 +408,13 @@ export function NumberInputControl({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span
-                  role="img"
+                <button
+                  type="button"
                   aria-label="More info"
-                  className="inline-flex items-center ml-1 cursor-help"
-                  tabIndex={0}
+                  className="inline-flex items-center ml-1 cursor-help bg-transparent border-0 p-0"
                 >
                   <Info className="w-3 h-3 text-gray-400" />
-                </span>
+                </button>
               </TooltipTrigger>
               <TooltipContent
                 side="top"
@@ -514,14 +508,13 @@ export function TextareaControl({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span
-                    role="img"
+                  <button
+                    type="button"
                     aria-label="More info"
-                    className="inline-flex items-center ml-1 cursor-help"
-                    tabIndex={0}
+                    className="inline-flex items-center ml-1 cursor-help bg-transparent border-0 p-0"
                   >
                     <Info className="w-3 h-3 text-gray-400" />
-                  </span>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-xs text-xs">
                   {description}
@@ -602,14 +595,13 @@ export function SwitchControl({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span
-                    role="img"
+                  <button
+                    type="button"
                     aria-label="More info"
-                    className="inline-flex items-center ml-1 cursor-help"
-                    tabIndex={0}
+                    className="inline-flex items-center ml-1 cursor-help bg-transparent border-0 p-0"
                   >
                     <Info className="w-3 h-3 text-gray-400" />
-                  </span>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent
                   side="top"

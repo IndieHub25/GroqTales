@@ -231,7 +231,7 @@ export default function UploadPage() {
       }
 
       let endpoint = '';
-      let requestOptions: RequestInit = {
+      const requestOptions: RequestInit = {
         headers: { Authorization: `Bearer ${token}` },
       };
 
