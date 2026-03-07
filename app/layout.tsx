@@ -3,7 +3,6 @@ import React from 'react';
 import './globals.css';
 
 import type { Metadata } from 'next';
-import { Inter, Comic_Neue } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
@@ -19,21 +18,6 @@ import { Web3Provider } from '@/components/providers/web3-provider'; // DISABLED
 import { QueryProvider } from '@/components/query-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
-
-// Optimize font loading
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: true,
-  fallback: ['system-ui', 'sans-serif'],
-});
-
-const comicNeue = Comic_Neue({
-  weight: ['300', '400', '700'],
-  subsets: ['latin'],
-  variable: '--font-comic',
-  display: 'swap',
-});
 
 // Build-time environment variable validation
 const requiredEnvVars = [
@@ -194,7 +178,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.className} ${comicNeue.variable} optimize-paint`}
+        className="optimize-paint"
       >
         {/* Skip link for keyboard users to jump to main content */}
         <a

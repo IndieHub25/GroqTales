@@ -81,7 +81,7 @@ const nextConfig = {
 
   // Performance optimizations
   compress: true,
-  optimizeFonts: true,
+  optimizeFonts: false,
 
   // Image optimization
   images: {
