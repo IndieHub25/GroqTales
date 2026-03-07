@@ -1,40 +1,22 @@
-import React from 'react';
-
-import './globals.css';
-
 import type { Metadata } from 'next';
-import { Inter, Comic_Neue } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
+import React from 'react';
 
-
+import BackToTop from '@/components/back-to-top';
 import ClientLayout from '@/components/client-layout';
 import { Footer } from '@/components/footer';
+import { GlobalLoadingWrapper } from '@/components/global-loading-wrapper';
 import { Header } from '@/components/header';
 import { AnimatedLayout } from '@/components/layout/animated-layout';
+import MadhavaHelpBot from '@/components/madhava-helpbot';
 import { Web3Provider } from '@/components/providers/web3-provider'; // DISABLED VERSION FOR PRODUCTION
 import { QueryProvider } from '@/components/query-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
-import BackToTop from '@/components/back-to-top';
-import MadhavaHelpBot from '@/components/madhava-helpbot';
-import { GlobalLoadingWrapper } from '@/components/global-loading-wrapper';
 
-// Optimize font loading
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: true,
-  fallback: ['system-ui', 'sans-serif'],
-});
-
-const comicNeue = Comic_Neue({
-  weight: ['300', '400', '700'],
-  subsets: ['latin'],
-  variable: '--font-comic',
-  display: 'swap',
-});
+import './globals.css';
 
 // Build-time environment variable validation
 const requiredEnvVars = [
@@ -63,7 +45,9 @@ if (
   // CF_PAGES_URL is automatically set by Cloudflare Pages during builds
   const cfPagesUrl = process.env.CF_PAGES_URL;
   const defaultEnvVars: Record<string, string> = {
-    NEXT_PUBLIC_URL: cfPagesUrl ? `https://${cfPagesUrl}` : 'http://localhost:3000',
+    NEXT_PUBLIC_URL: cfPagesUrl
+      ? `https://${cfPagesUrl}`
+      : 'http://localhost:3000',
     // 'NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME': 'GroqTales', // Commented out OnChain references
     // NEXT_PUBLIC_VERSION is injected by next.config.js from the VERSION file at build time.
     // It does not need a default here — if it is missing the build itself is misconfigured.
@@ -192,9 +176,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body
-        className={`${inter.className} ${comicNeue.variable} optimize-paint`}
-      >
+      <body className="optimize-paint">
         {/* Skip link for keyboard users to jump to main content */}
         <a
           href="#main-content"
@@ -222,9 +204,7 @@ export default function RootLayout({
                       className="container mx-auto px-4 py-6 flex-grow focus:outline-2 focus:outline-primary"
                     >
                       <React.Suspense fallback={null}>
-                        <GlobalLoadingWrapper>
-                          {children}
-                        </GlobalLoadingWrapper>
+                        <GlobalLoadingWrapper>{children}</GlobalLoadingWrapper>
                       </React.Suspense>
                     </main>
                     <Footer version={appVersion} />

@@ -48,12 +48,14 @@ jobs:
           NEXT_PUBLIC_SPLASH_IMAGE_URL: 'https://groqtales.xyz/splash.jpg'
           NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR: '#1a1a2e'
 
+      - name: Install Wrangler
+        run: npm install -g wrangler@3.99.0
+
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy out --project-name=groqtales --branch=main
+        run: wrangler pages deploy --project-name=groqtales --branch=main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-preview:
     if: github.ref_name != 'main'
@@ -93,9 +95,11 @@ jobs:
           NEXT_PUBLIC_SPLASH_IMAGE_URL: 'https://groqtales.xyz/splash.jpg'
           NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR: '#1a1a2e'
 
+      - name: Install Wrangler
+        run: npm install -g wrangler@3.99.0
+
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy out --project-name=groqtales --branch=${{ github.ref_name }}
+        run: wrangler pages deploy --project-name=groqtales --branch=${{ github.ref_name }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

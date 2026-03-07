@@ -1,11 +1,11 @@
 /**
  * Bug Condition Exploration Test - Query Parameter API Key
- * 
+ *
  * **CRITICAL**: This test is EXPECTED TO FAIL on unfixed code.
  * Failure confirms Bug 2 exists (API keys accepted via query parameters).
- * 
+ *
  * **DO NOT attempt to fix the test or the code when it fails.**
- * 
+ *
  * This test validates Requirements 2.3, 2.4:
  * - 2.3: System SHALL only accept API keys from Authorization header
  * - 2.4: System SHALL reject query parameter API keys with error message
@@ -23,19 +23,19 @@ jest.mock('../../server/services/groqService', () => ({
       return {
         success: true,
         message: 'Connected to Groq API',
-        apiKeySource: 'received' // Indicates API key was passed
+        apiKeySource: 'received', // Indicates API key was passed
       };
     }
     return {
       success: false,
-      message: 'No API key provided'
+      message: 'No API key provided',
     };
   }),
   MODELS: {
-    PRIMARY: 'test-model'
+    PRIMARY: 'test-model',
   },
   MODEL_DISPLAY_NAMES: {},
-  TOKEN_BUDGETS: {}
+  TOKEN_BUDGETS: {},
 }));
 
 const groqService = require('../../server/services/groqService');
@@ -52,11 +52,11 @@ describe('Bug Exploration: Query Parameter API Key', () => {
 
   /**
    * Test 1.2: Query parameter API key is accepted (security vulnerability)
-   * 
+   *
    * Expected behavior (after fix):
    * - System should reject API key from query parameter
    * - Return 400 error with message about using Authorization header
-   * 
+   *
    * Current behavior (unfixed):
    * - API key is accepted from query string
    * - This exposes the key in URLs, logs, and browser history
@@ -69,7 +69,7 @@ describe('Bug Exploration: Query Parameter API Key', () => {
     // After fix, should return error message
     expect(response.body.error).toBeDefined();
     expect(response.body.error).toMatch(/authorization|header/i);
-    
+
     // groqService.testConnection should NOT be called with query param API key
     // OR if called, the route should reject before passing it through
     if (groqService.testConnection.mock.calls.length > 0) {
@@ -111,7 +111,7 @@ describe('Bug Exploration: Query Parameter API Key', () => {
       'API keys in URLs are logged by proxy servers',
       'API keys in URLs appear in referrer headers',
       'API keys in URLs can be captured by network monitoring tools',
-      'API keys in URLs can be shared accidentally via copy-paste'
+      'API keys in URLs can be shared accidentally via copy-paste',
     ];
 
     // After fix, query parameter API keys should be rejected to prevent these risks

@@ -151,7 +151,6 @@ ComicPageSchema.post('save', async function () {
   await Comic.findByIdAndUpdate(this.comicId, { totalPages: count });
 });
 
-
 // Static utility to recalculate totalPages after bulk ops
 /**
  * Recalculate and update the totalPages field on the Comic document after bulk page operations.

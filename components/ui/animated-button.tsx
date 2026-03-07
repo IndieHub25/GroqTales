@@ -7,8 +7,7 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-interface AnimatedButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   gradientColors?: string;
   glowColor?: string;
   icon?: React.ReactNode;

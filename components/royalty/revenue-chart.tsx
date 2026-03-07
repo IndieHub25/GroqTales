@@ -1,5 +1,6 @@
 'use client';
 
+import { format, parseISO } from 'date-fns';
 import { useMemo } from 'react';
 import {
   AreaChart,
@@ -10,7 +11,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { format, parseISO } from 'date-fns';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { RoyaltyTransaction } from '@/hooks/use-royalties';
@@ -59,15 +59,24 @@ export function RevenueChart({ transactions }: RevenueChartProps) {
       <CardContent>
         {chartData.length === 0 ? (
           <div className="flex items-center justify-center h-[300px] text-muted-foreground font-bold">
-            No revenue data yet. Earnings will appear here after your first sale.
+            No revenue data yet. Earnings will appear here after your first
+            sale.
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  <stop
+                    offset="5%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity={0.3}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />

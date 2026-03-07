@@ -28,7 +28,13 @@ export const GalaxyBackground = () => {
   // Reduce star count on mobile for performance
   const stars = useMemo(() => {
     const count = isMobile ? 50 : 200;
-    const colors = ['#ffffff', '#ffd700', '#ff8f00', '#ff69b4', '#4169e1'] as const;
+    const colors = [
+      '#ffffff',
+      '#ffd700',
+      '#ff8f00',
+      '#ff69b4',
+      '#4169e1',
+    ] as const;
     return Array.from({ length: count }, () => {
       const colorIndex = Math.floor(Math.random() * colors.length);
       return {
@@ -111,7 +117,10 @@ export const GalaxyBackground = () => {
           />
 
           {/* Saturn-like planet with rings */}
-          <div className="absolute w-48 h-48" style={{ top: '40%', left: '20%' }}>
+          <div
+            className="absolute w-48 h-48"
+            style={{ top: '40%', left: '20%' }}
+          >
             <motion.div
               className="absolute w-32 h-32 rounded-full bg-gradient-radial from-yellow-200 via-yellow-600 to-transparent blur-sm"
               animate={{ scale: [1, 1.1, 1], opacity: [0.7, 0.9, 0.7] }}
@@ -188,12 +197,18 @@ export const GalaxyBackground = () => {
               style={{
                 width: `${10 + Math.random() * 6}px`,
                 height: `${10 + Math.random() * 6}px`,
-                boxShadow: '0 0 15px #fff, 0 0 25px #fff, 0 0 35px #f59e0b, 0 0 45px #f59e0b',
+                boxShadow:
+                  '0 0 15px #fff, 0 0 25px #fff, 0 0 35px #f59e0b, 0 0 45px #f59e0b',
                 zIndex: 3,
               }}
               animate={{
                 x: [0, dimensions.width * 1.2],
-                y: [0, isFromCorner ? dimensions.height * 0.8 : dimensions.height * 0.5],
+                y: [
+                  0,
+                  isFromCorner
+                    ? dimensions.height * 0.8
+                    : dimensions.height * 0.5,
+                ],
                 opacity: [0, 1, 1, 0],
               }}
               transition={{
@@ -216,7 +231,12 @@ export const GalaxyBackground = () => {
               }}
               animate={{
                 x: [0, dimensions.width * 1.2],
-                y: [0, isFromCorner ? dimensions.height * 0.8 : dimensions.height * 0.5],
+                y: [
+                  0,
+                  isFromCorner
+                    ? dimensions.height * 0.8
+                    : dimensions.height * 0.5,
+                ],
                 opacity: [0, 0.9, 0.9, 0],
               }}
               transition={{
@@ -240,28 +260,61 @@ export const GalaxyBackground = () => {
           <motion.div
             key={`large-meteor-${i}`}
             className="absolute"
-            style={{ top: `${startY}px`, left: `${startX}px`, zIndex: 3, transform: `rotate(${isFromCorner ? 45 : 35}deg)` }}
+            style={{
+              top: `${startY}px`,
+              left: `${startX}px`,
+              zIndex: 3,
+              transform: `rotate(${isFromCorner ? 45 : 35}deg)`,
+            }}
           >
             <motion.div
               className="absolute rounded-full bg-gradient-to-br from-orange-200 to-red-500"
-              style={{ width: '28px', height: '28px', boxShadow: '0 0 30px #fff, 0 0 50px #f59e0b, 0 0 70px #dc2626' }}
+              style={{
+                width: '28px',
+                height: '28px',
+                boxShadow: '0 0 30px #fff, 0 0 50px #f59e0b, 0 0 70px #dc2626',
+              }}
               animate={{
                 x: [0, dimensions.width * 1.5],
-                y: [0, isFromCorner ? dimensions.height : dimensions.height * 0.6],
+                y: [
+                  0,
+                  isFromCorner ? dimensions.height : dimensions.height * 0.6,
+                ],
                 opacity: [0, 1, 1, 0],
                 rotate: [0, 360],
               }}
-              transition={{ duration: 5 + Math.random() * 2, repeat: Infinity, repeatDelay: Math.random() * 5, ease: [0.1, 0.01, 0.9, 0.99] }}
+              transition={{
+                duration: 5 + Math.random() * 2,
+                repeat: Infinity,
+                repeatDelay: Math.random() * 5,
+                ease: [0.1, 0.01, 0.9, 0.99],
+              }}
             />
             <motion.div
               className="absolute"
-              style={{ width: '350px', height: '12px', background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95), transparent)', boxShadow: '0 0 60px rgba(255, 255, 255, 0.5)', borderRadius: '6px', filter: 'blur(3px)' }}
+              style={{
+                width: '350px',
+                height: '12px',
+                background:
+                  'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95), transparent)',
+                boxShadow: '0 0 60px rgba(255, 255, 255, 0.5)',
+                borderRadius: '6px',
+                filter: 'blur(3px)',
+              }}
               animate={{
                 x: [0, dimensions.width * 1.5],
-                y: [0, isFromCorner ? dimensions.height : dimensions.height * 0.6],
+                y: [
+                  0,
+                  isFromCorner ? dimensions.height : dimensions.height * 0.6,
+                ],
                 opacity: [0, 0.95, 0.95, 0],
               }}
-              transition={{ duration: 5 + Math.random() * 2, repeat: Infinity, repeatDelay: Math.random() * 5, ease: [0.1, 0.01, 0.9, 0.99] }}
+              transition={{
+                duration: 5 + Math.random() * 2,
+                repeat: Infinity,
+                repeatDelay: Math.random() * 5,
+                ease: [0.1, 0.01, 0.9, 0.99],
+              }}
             />
           </motion.div>
         );

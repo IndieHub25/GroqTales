@@ -1,9 +1,9 @@
 /**
  * Standalone Story Hash Tests
- * 
+ *
  * Tests the story hashing functionality without Next.js dependencies.
  * This file imports from lib/story-hash.ts to test the actual production implementation.
- * 
+ *
  * Run with: node tests/story-hash.test.js
  */
 
@@ -68,8 +68,8 @@ function expect(value) {
         if (value.includes(expected)) {
           throw new Error(`Expected "${value}" not to contain "${expected}"`);
         }
-      }
-    }
+      },
+    },
   };
 }
 
@@ -79,10 +79,10 @@ console.log('\n=== Story Hash Tests ===\n');
 test('should generate consistent story hash for same content', () => {
   const content = 'Once upon a time in a digital world...';
   const author = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
-  
+
   const storyHash1 = generateStoryHash(content, author);
   const storyHash2 = generateStoryHash(content, author);
-  
+
   expect(storyHash1).toBe(storyHash2);
 });
 
@@ -91,20 +91,20 @@ test('should generate different hash for different authors', () => {
   const content = 'Once upon a time in a digital world...';
   const author1 = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
   const author2 = '0xDifferentAddress';
-  
+
   const storyHash1 = generateStoryHash(content, author1);
   const storyHash2 = generateStoryHash(content, author2);
-  
+
   expect(storyHash1).not.toBe(storyHash2);
 });
 
 // Test 3: Content-only hash is consistent
 test('should generate consistent content-only hash', () => {
   const content = 'Once upon a time in a digital world...';
-  
+
   const contentHash1 = generateContentHash(content);
   const contentHash2 = generateContentHash(content);
-  
+
   expect(contentHash1).toBe(contentHash2);
 });
 
@@ -126,9 +126,9 @@ test('should reject invalid story hash format', () => {
 test('should produce 64-character hex strings', () => {
   const content = 'Test story content';
   const author = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
-  
+
   const hash = generateStoryHash(content, author);
-  
+
   expect(hash.length).toBe(64);
 });
 
@@ -136,10 +136,10 @@ test('should produce 64-character hex strings', () => {
 test('should produce deterministic hashes', () => {
   const content = 'Secret story content';
   const author = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
-  
+
   const hash1 = generateStoryHash(content, author);
   const hash2 = generateStoryHash(content, author);
-  
+
   // Same inputs should always produce same hash
   expect(hash1).toBe(hash2);
 });
@@ -148,10 +148,10 @@ test('should produce deterministic hashes', () => {
 test('should handle special characters in content', () => {
   const content = 'Story with special chars: !@#$%^&*()_+-=[]{}|;:,.<>?';
   const author = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
-  
+
   const hash1 = generateStoryHash(content, author);
   const hash2 = generateStoryHash(content, author);
-  
+
   expect(hash1).toBe(hash2);
 });
 
@@ -159,10 +159,10 @@ test('should handle special characters in content', () => {
 test('should handle unicode characters in content', () => {
   const content = 'Story with unicode: 你好世界 🔐 NFT 🎭';
   const author = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
-  
+
   const hash1 = generateStoryHash(content, author);
   const hash2 = generateStoryHash(content, author);
-  
+
   expect(hash1).toBe(hash2);
 });
 
@@ -170,10 +170,10 @@ test('should handle unicode characters in content', () => {
 test('should handle empty content', () => {
   const content = '';
   const author = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
-  
+
   const hash1 = generateStoryHash(content, author);
   const hash2 = generateStoryHash(content, author);
-  
+
   expect(hash1).toBe(hash2);
 });
 

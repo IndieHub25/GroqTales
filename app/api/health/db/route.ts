@@ -5,11 +5,13 @@ import { NextResponse } from 'next/server';
  * Proxies to the backend server database health endpoint
  */
 export async function GET() {
-  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
+  const backendUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    'https://groqtales-backend-api.onrender.com';
   const controller = new AbortController();
   const timeoutMs = 3000; // 3 second timeout
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  
+
   try {
     const response = await fetch(`${backendUrl}/api/health/db`, {
       method: 'GET',
@@ -23,7 +25,7 @@ export async function GET() {
     clearTimeout(timeout);
     if (!response.ok) {
       return NextResponse.json(
-        { 
+        {
           status: 'down',
           service: 'database',
           error: 'Backend database health check failed',
@@ -38,7 +40,7 @@ export async function GET() {
   } catch (error) {
     clearTimeout(timeout);
     return NextResponse.json(
-      { 
+      {
         status: 'down',
         service: 'database',
         error: error instanceof Error ? error.message : 'Unknown error',

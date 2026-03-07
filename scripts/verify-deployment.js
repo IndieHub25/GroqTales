@@ -114,7 +114,9 @@ const renderConfig = fs.existsSync('render.yaml');
 addCheck(
   'Frontend Deployment',
   cloudflareConfig,
-  cloudflareConfig ? 'Cloudflare Pages configured (wrangler.toml)' : 'No frontend deployment config'
+  cloudflareConfig
+    ? 'Cloudflare Pages configured (wrangler.toml)'
+    : 'No frontend deployment config'
 );
 addCheck(
   'Backend Deployment',

@@ -1,11 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import {
-  TrendingUp,
-  BookOpen,
-  PenSquare,
-} from 'lucide-react';
+import { TrendingUp, BookOpen, PenSquare } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
@@ -36,25 +32,36 @@ export function TrendingStories() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/feed?limit=6&page=1`, { signal });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/feed?limit=6&page=1`,
+        { signal }
+      );
       if (res.ok) {
         const json = await res.json();
         const feedData = json.data || json.stories || json;
 
         if (Array.isArray(feedData) && feedData.length > 0) {
-          const mapped: TrendingStory[] = feedData.slice(0, 6).map((story: any, i: number) => ({
-            id: story._id || story.id || `story-${i + 1}`,
-            title: story.title || 'Untitled Story',
-            author: {
-              name: story.author?.name || story.authorName || 'Anonymous',
-              avatar: story.author?.avatar || story.authorAvatar || `https://api.dicebear.com/7.x/personas/svg?seed=author${i + 1}`,
-            },
-            genre: story.genre || 'General',
-            likes: story.likes ?? story.likesCount ?? 0,
-            comments: story.comments ?? story.commentsCount ?? 0,
-            views: story.views ?? story.viewsCount ?? 0,
-            coverImage: story.coverImage || story.image || `https://picsum.photos/seed/${story._id || i}/800/600`,
-          }));
+          const mapped: TrendingStory[] = feedData
+            .slice(0, 6)
+            .map((story: any, i: number) => ({
+              id: story._id || story.id || `story-${i + 1}`,
+              title: story.title || 'Untitled Story',
+              author: {
+                name: story.author?.name || story.authorName || 'Anonymous',
+                avatar:
+                  story.author?.avatar ||
+                  story.authorAvatar ||
+                  `https://api.dicebear.com/7.x/personas/svg?seed=author${i + 1}`,
+              },
+              genre: story.genre || 'General',
+              likes: story.likes ?? story.likesCount ?? 0,
+              comments: story.comments ?? story.commentsCount ?? 0,
+              views: story.views ?? story.viewsCount ?? 0,
+              coverImage:
+                story.coverImage ||
+                story.image ||
+                `https://picsum.photos/seed/${story._id || i}/800/600`,
+            }));
           setStories(mapped);
         } else {
           setStories([]);
@@ -96,9 +103,7 @@ export function TrendingStories() {
           <h3 className="text-xl font-black uppercase text-foreground mb-2">
             Something Went Wrong
           </h3>
-          <p className="text-muted-foreground font-bold mb-6">
-            {error}
-          </p>
+          <p className="text-muted-foreground font-bold mb-6">{error}</p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Button
               onClick={() => fetchTrendingStories()}
@@ -125,11 +130,13 @@ export function TrendingStories() {
   return (
     <section className="py-4">
       <div className="container">
-
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className="h-[320px] animate-pulse border-4 border-foreground/20">
+              <Card
+                key={i}
+                className="h-[320px] animate-pulse border-4 border-foreground/20"
+              >
                 <div className="h-40 bg-muted" />
                 <CardContent className="p-4">
                   <div className="h-4 w-2/3 bg-muted rounded mb-2" />
@@ -147,7 +154,10 @@ export function TrendingStories() {
             <p className="text-muted-foreground font-bold mb-6">
               Be the first to create a story on GroqTales!
             </p>
-            <Button asChild className="bg-[var(--comic-red)] text-white border-4 border-foreground shadow-[4px_4px_0px_0px_var(--shadow-color)] font-black uppercase rounded-none">
+            <Button
+              asChild
+              className="bg-[var(--comic-red)] text-white border-4 border-foreground shadow-[4px_4px_0px_0px_var(--shadow-color)] font-black uppercase rounded-none"
+            >
               <Link href="/create/ai-story">
                 <PenSquare className="mr-2 h-4 w-4" />
                 Create Your First Story

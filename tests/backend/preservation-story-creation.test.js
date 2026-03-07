@@ -1,16 +1,16 @@
 /**
  * Preservation Test - Story Creation Flow
- * 
+ *
  * **IMPORTANT**: This test should PASS on UNFIXED code.
  * It establishes baseline behavior that must be preserved after the fix.
- * 
+ *
  * This test validates Preservation Requirements 3.5, 3.6:
  * - 3.5: Story creation must continue to save to Supabase correctly
  * - 3.6: Story retrieval must continue to return paginated results with proper filtering
- * 
+ *
  * Note: This test focuses on the /generate endpoint's story generation logic.
  * We test the groqService integration and parameter handling directly.
- * 
+ *
  * **Validates: Requirements 3.5, 3.6**
  */
 
@@ -21,8 +21,8 @@ jest.mock('../../server/services/groqService', () => ({
   generate: jest.fn(async (params) => ({
     content: `Generated story: ${params.prompt || params.theme}`,
     model: 'llama-3.3-70b-versatile',
-    tokensUsed: { prompt: 50, completion: 200, total: 250 }
-  }))
+    tokensUsed: { prompt: 50, completion: 200, total: 250 },
+  })),
 }));
 
 describe('Preservation: Story Creation Flow', () => {
@@ -36,20 +36,20 @@ describe('Preservation: Story Creation Flow', () => {
         prompt: 'Write a story about dragons',
         genre: 'fantasy',
         length: 'medium',
-        tone: 'epic'
+        tone: 'epic',
       });
 
       expect(result.content).toContain('Generated story');
       expect(result.model).toBe('llama-3.3-70b-versatile');
       expect(result.tokensUsed).toBeDefined();
       expect(result.tokensUsed.total).toBe(250);
-      
+
       expect(groqService.generate).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: 'Write a story about dragons',
           genre: 'fantasy',
           length: 'medium',
-          tone: 'epic'
+          tone: 'epic',
         })
       );
     });
@@ -58,7 +58,7 @@ describe('Preservation: Story Creation Flow', () => {
       const result = await groqService.generate({
         theme: 'space exploration',
         genre: 'sci-fi',
-        length: 'long'
+        length: 'long',
       });
 
       expect(result.content).toContain('space exploration');
@@ -66,7 +66,7 @@ describe('Preservation: Story Creation Flow', () => {
         expect.objectContaining({
           theme: 'space exploration',
           genre: 'sci-fi',
-          length: 'long'
+          length: 'long',
         })
       );
     });
@@ -80,12 +80,12 @@ describe('Preservation: Story Creation Flow', () => {
         theme: 'friendship',
         characters: 'A young wizard and a talking cat',
         setting: 'Enchanted forest',
-        formatType: 'story'
+        formatType: 'story',
       });
 
       expect(result.content).toBeDefined();
       expect(result.model).toBe('llama-3.3-70b-versatile');
-      
+
       expect(groqService.generate).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: 'A magical adventure',
@@ -95,18 +95,18 @@ describe('Preservation: Story Creation Flow', () => {
           tone: 'whimsical',
           characters: 'A young wizard and a talking cat',
           setting: 'Enchanted forest',
-          formatType: 'story'
+          formatType: 'story',
         })
       );
     });
 
     test('should handle formatType parameter correctly', async () => {
       const formatTypes = ['story', 'poem', 'script', 'novel'];
-      
+
       for (const formatType of formatTypes) {
         const result = await groqService.generate({
           prompt: 'Test content',
-          formatType: formatType
+          formatType: formatType,
         });
 
         expect(result.content).toBeDefined();
@@ -116,10 +116,11 @@ describe('Preservation: Story Creation Flow', () => {
 
     test('should handle string formatType with charAt and slice operations', async () => {
       const formatType = 'story';
-      
+
       // This simulates what the stories.js route does on line 395-396
-      const capitalizedFormat = formatType.charAt(0).toUpperCase() + formatType.slice(1);
-      
+      const capitalizedFormat =
+        formatType.charAt(0).toUpperCase() + formatType.slice(1);
+
       expect(capitalizedFormat).toBe('Story');
       expect(typeof formatType.charAt(0)).toBe('string');
       expect(typeof formatType.slice(1)).toBe('string');
@@ -127,11 +128,11 @@ describe('Preservation: Story Creation Flow', () => {
 
     test('should handle different formatType strings correctly', async () => {
       const formatTypes = ['story', 'poem', 'script', 'novel', 'comic'];
-      
+
       for (const formatType of formatTypes) {
         // Simulate the title generation logic from stories.js
         const title = `AI Generated ${formatType.charAt(0).toUpperCase() + formatType.slice(1)}`;
-        
+
         expect(title).toContain('AI Generated');
         expect(title).toContain(formatType.charAt(0).toUpperCase());
       }
@@ -143,7 +144,7 @@ describe('Preservation: Story Creation Flow', () => {
       const result = await groqService.generate({
         prompt: '',
         theme: 'mystery',
-        genre: ''
+        genre: '',
       });
 
       expect(result.content).toBeDefined();
@@ -154,14 +155,14 @@ describe('Preservation: Story Creation Flow', () => {
       const result = await groqService.generate({
         prompt: 'A story with "quotes" and \'apostrophes\' & symbols!',
         genre: 'sci-fi',
-        characters: 'Dr. Smith & Mr. Jones'
+        characters: 'Dr. Smith & Mr. Jones',
       });
 
       expect(result.content).toBeDefined();
       expect(groqService.generate).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: 'A story with "quotes" and \'apostrophes\' & symbols!',
-          characters: 'Dr. Smith & Mr. Jones'
+          characters: 'Dr. Smith & Mr. Jones',
         })
       );
     });
@@ -170,14 +171,14 @@ describe('Preservation: Story Creation Flow', () => {
       const result = await groqService.generate({
         prompt: 'Une histoire en français avec des émojis 🎭🎨',
         genre: 'fantasy',
-        setting: 'Paris, France 🇫🇷'
+        setting: 'Paris, France 🇫🇷',
       });
 
       expect(result.content).toBeDefined();
       expect(groqService.generate).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: 'Une histoire en français avec des émojis 🎭🎨',
-          setting: 'Paris, France 🇫🇷'
+          setting: 'Paris, France 🇫🇷',
         })
       );
     });
@@ -186,13 +187,13 @@ describe('Preservation: Story Creation Flow', () => {
       const longPrompt = 'A'.repeat(5000);
       const result = await groqService.generate({
         prompt: longPrompt,
-        genre: 'fantasy'
+        genre: 'fantasy',
       });
 
       expect(result.content).toBeDefined();
       expect(groqService.generate).toHaveBeenCalledWith(
         expect.objectContaining({
-          prompt: longPrompt
+          prompt: longPrompt,
         })
       );
     });
@@ -203,7 +204,7 @@ describe('Preservation: Story Creation Flow', () => {
       const result = await groqService.generate({
         prompt: 'Test story',
         genre: 'mystery',
-        length: 'short'
+        length: 'short',
       });
 
       expect(result.model).toBeDefined();
@@ -224,8 +225,15 @@ describe('Preservation: Story Creation Flow', () => {
 
   describe('FormatType String Operations', () => {
     test('should handle formatType.charAt() operation', async () => {
-      const formatTypes = ['story', 'poem', 'script', 'novel', 'comic', 'essay'];
-      
+      const formatTypes = [
+        'story',
+        'poem',
+        'script',
+        'novel',
+        'comic',
+        'essay',
+      ];
+
       for (const formatType of formatTypes) {
         // This is what stories.js does on line 395
         const firstChar = formatType.charAt(0);
@@ -236,8 +244,15 @@ describe('Preservation: Story Creation Flow', () => {
     });
 
     test('should handle formatType.slice() operation', async () => {
-      const formatTypes = ['story', 'poem', 'script', 'novel', 'comic', 'essay'];
-      
+      const formatTypes = [
+        'story',
+        'poem',
+        'script',
+        'novel',
+        'comic',
+        'essay',
+      ];
+
       for (const formatType of formatTypes) {
         // This is what stories.js does on line 395
         const restOfString = formatType.slice(1);
@@ -248,11 +263,14 @@ describe('Preservation: Story Creation Flow', () => {
 
     test('should handle combined charAt and slice operations', async () => {
       const formatTypes = ['story', 'poem', 'script', 'novel'];
-      
+
       for (const formatType of formatTypes) {
         // This is the exact operation from stories.js line 395
-        const capitalized = formatType.charAt(0).toUpperCase() + formatType.slice(1);
-        expect(capitalized).toBe(formatType.charAt(0).toUpperCase() + formatType.slice(1));
+        const capitalized =
+          formatType.charAt(0).toUpperCase() + formatType.slice(1);
+        expect(capitalized).toBe(
+          formatType.charAt(0).toUpperCase() + formatType.slice(1)
+        );
         expect(capitalized[0]).toBe(formatType[0].toUpperCase());
       }
     });
@@ -261,8 +279,9 @@ describe('Preservation: Story Creation Flow', () => {
       const formatType = '';
       // This simulates the defensive check: (formatType || 'story')
       const safeFormatType = formatType || 'story';
-      const capitalized = safeFormatType.charAt(0).toUpperCase() + safeFormatType.slice(1);
-      
+      const capitalized =
+        safeFormatType.charAt(0).toUpperCase() + safeFormatType.slice(1);
+
       expect(capitalized).toBe('Story');
     });
 
@@ -270,8 +289,9 @@ describe('Preservation: Story Creation Flow', () => {
       const formatType = undefined;
       // This simulates the defensive check: (formatType || 'story')
       const safeFormatType = formatType || 'story';
-      const capitalized = safeFormatType.charAt(0).toUpperCase() + safeFormatType.slice(1);
-      
+      const capitalized =
+        safeFormatType.charAt(0).toUpperCase() + safeFormatType.slice(1);
+
       expect(capitalized).toBe('Story');
     });
   });

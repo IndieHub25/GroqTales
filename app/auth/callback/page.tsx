@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { Loader2 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+
+import { createClient } from '@/lib/supabase/client';
 
 function CallbackContent() {
   const router = useRouter();
@@ -19,19 +20,22 @@ function CallbackContent() {
 
       if (code) {
         const supabase = createClient();
-        
+
         // Exchange the authorization code for a session token
-        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-        
+        const { error: exchangeError } =
+          await supabase.auth.exchangeCodeForSession(code);
+
         if (exchangeError) {
-          console.error("Supabase Auth Code Exchange Error:", exchangeError);
-          setError(exchangeError.message || "Failed to exchange authentication code.");
+          console.error('Supabase Auth Code Exchange Error:', exchangeError);
+          setError(
+            exchangeError.message || 'Failed to exchange authentication code.'
+          );
           // Redirect to sign in with error after a brief delay
           setTimeout(() => router.push('/sign-in?error=AuthFailed'), 3000);
           return;
         }
 
-        console.log("Supabase Auth successful, redirecting to", next);
+        console.log('Supabase Auth successful, redirecting to', next);
         // Successful login! Redirect the user
         router.push(next);
       } else {
@@ -52,7 +56,9 @@ function CallbackContent() {
             Authentication Failed
           </h2>
           <p className="text-foreground font-bold">{error}</p>
-          <p className="text-muted-foreground text-sm mt-8">Redirecting back to login...</p>
+          <p className="text-muted-foreground text-sm mt-8">
+            Redirecting back to login...
+          </p>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-6">
@@ -60,7 +66,9 @@ function CallbackContent() {
           <h2 className="text-3xl font-black uppercase tracking-wider text-foreground font-display">
             Authenticating...
           </h2>
-          <p className="text-muted-foreground font-bold">Please wait while we log you into GroqTales.</p>
+          <p className="text-muted-foreground font-bold">
+            Please wait while we log you into GroqTales.
+          </p>
         </div>
       )}
     </div>
@@ -69,11 +77,13 @@ function CallbackContent() {
 
 export default function AuthCallbackPage() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-[var(--comic-blue)]" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen bg-background">
+          <Loader2 className="h-12 w-12 animate-spin text-[var(--comic-blue)]" />
+        </div>
+      }
+    >
       <CallbackContent />
     </Suspense>
   );

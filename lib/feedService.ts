@@ -1,6 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 
-export async function getPersonalizedFeed(userId: string, page = 1, limit = 10) {
+export async function getPersonalizedFeed(
+  userId: string,
+  page = 1,
+  limit = 10
+) {
   const supabase = createClient();
   const skip = (page - 1) * limit;
 
@@ -51,10 +55,14 @@ export async function getPersonalizedFeed(userId: string, page = 1, limit = 10) 
   const scoredStories = candidateStories.map((story: any) => {
     let score = 0;
     const storyTags = Array.isArray(story.tags) ? story.tags : [];
-    const matchCount = storyTags.filter((t: string) => topTags.includes(t)).length;
+    const matchCount = storyTags.filter((t: string) =>
+      topTags.includes(t)
+    ).length;
     score += matchCount * WEIGHTS.TAG_MATCH;
 
-    const daysOld = (Date.now() - new Date(story.created_at).getTime()) / (1000 * 60 * 60 * 24);
+    const daysOld =
+      (Date.now() - new Date(story.created_at).getTime()) /
+      (1000 * 60 * 60 * 24);
     score += (100 - daysOld) * 0.5;
     score += (story.likes_count || 0) * 1;
 

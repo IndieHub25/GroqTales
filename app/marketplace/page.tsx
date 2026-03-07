@@ -14,14 +14,29 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/client';
+
+interface Story {
+  id: string;
+  title: string;
+  content: string | null;
+  genre: string | null;
+  author_id: string | null;
+  author_name: string | null;
+  views: number;
+  likes: number;
+  is_minted: boolean;
+  file_url: string | null;
+  format_type: string | null;
+  created_at: string;
+}
 
 export default function MarketplacePage() {
-  const [stories, setStories] = useState<any[]>([]);
+  const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
@@ -30,7 +45,8 @@ export default function MarketplacePage() {
       // Fetch all stories for the marketplace, ideally those intended for sale or minting
       const { data, error } = await supabase
         .from('stories')
-        .select(`
+        .select(
+          `
           id,
           title,
           content,
@@ -43,7 +59,8 @@ export default function MarketplacePage() {
           file_url,
           format_type,
           created_at
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (!error && data) {
@@ -63,9 +80,7 @@ export default function MarketplacePage() {
           icon="shopping-cart"
         />
         <Link href="/upload">
-          <Button
-            className="bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-2"
-          >
+          <Button className="bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-2">
             <Upload className="h-4 w-4" />
             Upload Story
           </Button>
@@ -84,8 +99,8 @@ export default function MarketplacePage() {
           </div>
           <h2 className="text-2xl font-bold mb-2">Comic Stories</h2>
           <p className="text-muted-foreground mb-6 flex-grow">
-            Explore visual storytelling through comic NFTs with stunning
-            artwork and engaging narratives.
+            Explore visual storytelling through comic NFTs with stunning artwork
+            and engaging narratives.
           </p>
         </div>
 
@@ -103,14 +118,16 @@ export default function MarketplacePage() {
 
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-8">Latest Community Additions</h2>
-        
+
         {loading ? (
           <div className="flex justify-center p-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : stories.length === 0 ? (
           <div className="text-center p-12 border border-dashed border-white/20 rounded-xl">
-            <p className="text-muted-foreground">No stories found in the marketplace yet.</p>
+            <p className="text-muted-foreground">
+              No stories found in the marketplace yet.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -143,7 +160,9 @@ export default function MarketplacePage() {
                     <h3 className="font-bold text-lg line-clamp-1">
                       {story.title}
                     </h3>
-                    <p className="text-xs text-white/70">by {story.author_name || 'Anonymous'}</p>
+                    <p className="text-xs text-white/70">
+                      by {story.author_name || 'Anonymous'}
+                    </p>
                   </div>
                 </div>
                 <CardContent className="p-4">
@@ -171,7 +190,7 @@ export default function MarketplacePage() {
                     size="sm"
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                     onClick={() => {
-                        window.location.href = `/story/${story.id}`;
+                      window.location.href = `/story/${story.id}`;
                     }}
                   >
                     View Details

@@ -1,6 +1,7 @@
 'use client';
 
 import { PenLine, ImagePlus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
 import { ImageStoryForm } from '@/components/image-story-form';
@@ -13,7 +14,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 export function CreateStoryButton() {
@@ -22,15 +22,17 @@ export function CreateStoryButton() {
   const supabase = React.useMemo(() => createClient(), []);
 
   const handleOpen = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-          router.push('/sign-in');
-          return;
-      }
-      
-      const isServerAdmin = session?.user?.user_metadata?.role === 'admin';
-      setOpen(true);
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      router.push('/sign-in');
+      return;
+    }
+
+    const isServerAdmin = session?.user?.user_metadata?.role === 'admin';
+    setOpen(true);
   };
 
   return (

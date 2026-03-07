@@ -7,22 +7,14 @@ import { fetchStoryById } from '@/lib/mock-data';
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  const params = [
-    { id: 'top-1' },
-    { id: 'top-2' },
-    { id: 'top-3' },
-  ];
+  const params = [{ id: 'top-1' }, { id: 'top-2' }, { id: 'top-3' }];
   for (let i = 1; i <= 90; i++) {
     params.push({ id: `story-${i}` });
   }
   return params;
 }
 
-export default function StoryPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function StoryPage({ params }: { params: { id: string } }) {
   const story = fetchStoryById(params.id) as any;
 
   if (!story) {
@@ -82,13 +74,11 @@ export default function StoryPage({
           <div className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12">
             <h3 className="text-2xl font-bold mb-8">Synopsis</h3>
             <div className="prose prose-invert prose-lg max-w-none text-white/70 leading-relaxed">
-              {story.description
-                ?.split('\n\n')
-                .map((p: string, i: number) => (
-                  <p key={i} className="mb-6">
-                    {p}
-                  </p>
-                ))}
+              {story.description?.split('\n\n').map((p: string, i: number) => (
+                <p key={i} className="mb-6">
+                  {p}
+                </p>
+              ))}
             </div>
           </div>
         </div>

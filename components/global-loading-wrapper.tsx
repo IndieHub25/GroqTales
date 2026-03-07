@@ -1,11 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
+import { usePathname } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+
 import LoadingScreen from '@/components/loading-screen';
 
-export function GlobalLoadingWrapper({ children }: { children: React.ReactNode }) {
+export function GlobalLoadingWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
 
@@ -50,18 +55,24 @@ export function GlobalLoadingWrapper({ children }: { children: React.ReactNode }
             key="global-loader"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
+            transition={{ duration: 0.6, ease: 'easeInOut' }}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-2xl"
           >
-            <LoadingScreen fullScreen={false} size="lg" message="Loading GroqTales..." />
+            <LoadingScreen
+              fullScreen={false}
+              size="lg"
+              message="Loading GroqTales..."
+            />
           </motion.div>
         )}
       </AnimatePresence>
-      <div 
-        style={{ 
-          opacity: loading ? 0 : 1, 
-          filter: loading ? 'blur(10px) brightness(0.5)' : 'blur(0px) brightness(1)',
-          transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)' 
+      <div
+        style={{
+          opacity: loading ? 0 : 1,
+          filter: loading
+            ? 'blur(10px) brightness(0.5)'
+            : 'blur(0px) brightness(1)',
+          transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
         className="w-full min-h-screen relative z-0"
       >

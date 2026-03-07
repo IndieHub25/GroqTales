@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="fantasy-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a148c"/>
+      <stop offset="50%" style="stop-color:#6a1b9a"/>
+      <stop offset="100%" style="stop-color:#1a237e"/>
+    </linearGradient>
+  </defs>
+  <rect fill="url(#fantasy-grad)" width="400" height="300"/>
+  <circle cx="100" cy="80" r="30" fill="#ffd700" opacity="0.4"/>
+  <circle cx="320" cy="60" r="15" fill="#fff" opacity="0.3"/>
+  <circle cx="280" cy="100" r="8" fill="#fff" opacity="0.2"/>
+  <polygon points="200,80 220,140 280,140 230,180 250,240 200,200 150,240 170,180 120,140 180,140" fill="#ffd700" opacity="0.6"/>
+  <text x="200" y="280" font-family="serif" font-size="24" fill="#e0e0e0" text-anchor="middle" opacity="0.7">✨ EPIC FANTASY ✨</text>
+</svg>

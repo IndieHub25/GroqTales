@@ -34,14 +34,19 @@ export default function NotFound() {
           </p>
 
           <div className="flex flex-wrap gap-4 justify-center">
-            <Button asChild className="bg-[var(--comic-red)] hover:bg-[var(--comic-red)]/90 text-white border-4 border-foreground shadow-[6px_6px_0px_0px_var(--shadow-color)] hover:shadow-[3px_3px_0px_0px_var(--shadow-color)] hover:-translate-y-0.5 transition-all duration-200 text-base font-black uppercase px-8 py-5 h-auto rounded-none">
+            <Button
+              asChild
+              className="bg-[var(--comic-red)] hover:bg-[var(--comic-red)]/90 text-white border-4 border-foreground shadow-[6px_6px_0px_0px_var(--shadow-color)] hover:shadow-[3px_3px_0px_0px_var(--shadow-color)] hover:-translate-y-0.5 transition-all duration-200 text-base font-black uppercase px-8 py-5 h-auto rounded-none"
+            >
               <Link href="/">
                 <Home className="mr-2 h-5 w-5" />
                 Back Home
               </Link>
             </Button>
             <Button
-              onClick={() => typeof window !== 'undefined' && window.history.back()}
+              onClick={() =>
+                typeof window !== 'undefined' && window.history.back()
+              }
               variant="outline"
               className="border-4 border-foreground shadow-[6px_6px_0px_0px_var(--shadow-color)] hover:shadow-[3px_3px_0px_0px_var(--shadow-color)] hover:-translate-y-0.5 transition-all duration-200 text-base font-black uppercase px-8 py-5 h-auto rounded-none"
             >

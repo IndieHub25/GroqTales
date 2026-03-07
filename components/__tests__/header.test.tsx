@@ -34,19 +34,29 @@ jest.mock('next/image', () => ({
 }));
 
 // Mock framer-motion to render plain DOM elements
+/* eslint-disable react/display-name */
 jest.mock('framer-motion', () => ({
   motion: {
-    header: React.forwardRef(
-      (props: Record<string, unknown>, ref: React.Ref<HTMLElement>) =>
-        React.createElement('header', { ...props, ref })
+    header: Object.assign(
+      React.forwardRef(
+        (props: Record<string, unknown>, ref: React.Ref<HTMLElement>) =>
+          React.createElement('header', { ...props, ref })
+      ),
+      { displayName: 'motion.header' }
     ),
-    div: React.forwardRef(
-      (props: Record<string, unknown>, ref: React.Ref<HTMLDivElement>) =>
-        React.createElement('div', { ...props, ref })
+    div: Object.assign(
+      React.forwardRef(
+        (props: Record<string, unknown>, ref: React.Ref<HTMLDivElement>) =>
+          React.createElement('div', { ...props, ref })
+      ),
+      { displayName: 'motion.div' }
     ),
-    button: React.forwardRef(
-      (props: Record<string, unknown>, ref: React.Ref<HTMLButtonElement>) =>
-        React.createElement('button', { ...props, ref })
+    button: Object.assign(
+      React.forwardRef(
+        (props: Record<string, unknown>, ref: React.Ref<HTMLButtonElement>) =>
+          React.createElement('button', { ...props, ref })
+      ),
+      { displayName: 'motion.button' }
     ),
   },
   AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
@@ -65,7 +75,12 @@ jest.mock('@/components/ui/use-toast', () => ({
 // Mock child components that are complex and not under test
 jest.mock('@/components/wallet-connect', () => ({
   __esModule: true,
-  default: () => React.createElement('div', { 'data-testid': 'wallet-connect' }, 'WalletConnect'),
+  default: () =>
+    React.createElement(
+      'div',
+      { 'data-testid': 'wallet-connect' },
+      'WalletConnect'
+    ),
 }));
 
 jest.mock('../create-story-dialog', () => ({
@@ -73,11 +88,13 @@ jest.mock('../create-story-dialog', () => ({
 }));
 
 jest.mock('../mode-toggle', () => ({
-  ModeToggle: () => React.createElement('div', { 'data-testid': 'mode-toggle' }, 'ModeToggle'),
+  ModeToggle: () =>
+    React.createElement('div', { 'data-testid': 'mode-toggle' }, 'ModeToggle'),
 }));
 
 jest.mock('@/components/user-nav', () => ({
-  UserNav: () => React.createElement('div', { 'data-testid': 'user-nav' }, 'UserNav'),
+  UserNav: () =>
+    React.createElement('div', { 'data-testid': 'user-nav' }, 'UserNav'),
 }));
 
 // ---------------------------------------------------------------------------

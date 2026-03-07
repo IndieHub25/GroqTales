@@ -6,7 +6,10 @@ import { createHash } from 'crypto';
  * @param authorAddress - The author's wallet address
  * @returns A SHA-256 hash of the content
  */
-export function generateStoryHash(content: string, authorAddress: string): string {
+export function generateStoryHash(
+  content: string,
+  authorAddress: string
+): string {
   const data = `${encodeURIComponent(content)}|${authorAddress}`;
   return createHash('sha256').update(data).digest('hex');
 }

@@ -1,12 +1,12 @@
 /**
  * Mint Idempotency Tests
- * 
+ *
  * Tests for the double-minting prevention system.
  * These tests verify the idempotency protections implemented in:
  * - app/api/mint/route.ts
  * - app/api/mint/check/route.ts
  * - lib/mint-service.ts
- * 
+ *
  * Run with: npm test -- tests/mint-idempotency.test.ts
  */
 
@@ -36,13 +36,13 @@ describe('Mint Idempotency API', () => {
     it('should generate consistent story hash for same content', () => {
       const content = 'Once upon a time in a digital world...';
       const author = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
-      
+
       const storyHash1 = generateStoryHash(content, author);
       const storyHash2 = generateStoryHash(content, author);
-      
+
       // Same content + author should produce same hash
       expect(storyHash1).toBe(storyHash2);
-      
+
       // Different author should produce different hash
       const storyHash3 = generateStoryHash(content, '0xDifferentAddress');
       expect(storyHash1).not.toBe(storyHash3);
@@ -50,7 +50,7 @@ describe('Mint Idempotency API', () => {
 
     it('should generate consistent content-only hash', () => {
       const content = 'Once upon a time in a digital world...';
-      
+
       const contentHash1 = generateContentHash(content);
       const contentHash2 = generateContentHash(content);
       expect(contentHash1).toBe(contentHash2);
@@ -59,7 +59,7 @@ describe('Mint Idempotency API', () => {
     it('should validate story hash format', () => {
       // Valid 64-character hex string
       expect(isValidStoryHash(VALID_STORY_HASH)).toBe(true);
-      
+
       // Invalid formats
       expect(isValidStoryHash('invalid')).toBe(false);
       expect(isValidStoryHash('')).toBe(false);
@@ -88,10 +88,10 @@ describe('Mint Idempotency API', () => {
       const content1 = 'Story number one';
       const content2 = 'Story number two';
       const author = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
-      
+
       const hash1 = generateStoryHash(content1, author);
       const hash2 = generateStoryHash(content2, author);
-      
+
       expect(hash1).not.toBe(hash2);
     });
 
@@ -99,19 +99,19 @@ describe('Mint Idempotency API', () => {
       const content = 'Same story content';
       const author1 = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
       const author2 = '0x9b3a53ba88d8b1f8d2a4f5b7c8e3a1f2b5d6c7e8';
-      
+
       const hash1 = generateStoryHash(content, author1);
       const hash2 = generateStoryHash(content, author2);
-      
+
       expect(hash1).not.toBe(hash2);
     });
 
     it('should produce 64-character hex strings', () => {
       const content = 'Test story content';
       const author = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
-      
+
       const hash = generateStoryHash(content, author);
-      
+
       expect(hash).toHaveLength(64);
       expect(/^[a-f0-9]{64}$/i.test(hash)).toBe(true);
     });
@@ -121,9 +121,9 @@ describe('Mint Idempotency API', () => {
     it('should not expose wallet addresses in hash', () => {
       const content = 'Secret story content';
       const author = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
-      
+
       const hash = generateStoryHash(content, author);
-      
+
       // The hash should not contain the wallet address
       expect(hash).not.toContain(author.toLowerCase());
       expect(hash).not.toContain(author.toUpperCase());
@@ -132,20 +132,20 @@ describe('Mint Idempotency API', () => {
     it('should handle special characters in content', () => {
       const content = 'Story with special chars: !@#$%^&*()_+-=[]{}|;:,.<>?';
       const author = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
-      
+
       const hash1 = generateStoryHash(content, author);
       const hash2 = generateStoryHash(content, author);
-      
+
       expect(hash1).toBe(hash2);
     });
 
     it('should handle unicode characters in content', () => {
       const content = 'Story with unicode: 你好世界 🔐 NFT 🎭';
       const author = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
-      
+
       const hash1 = generateStoryHash(content, author);
       const hash2 = generateStoryHash(content, author);
-      
+
       expect(hash1).toBe(hash2);
     });
   });
@@ -156,7 +156,7 @@ describe('Integration: Double-Mint Prevention', () => {
   // - Running MongoDB instance
   // - Running Next.js server
   // - Proper authentication setup
-  
+
   it.todo('First mint should succeed');
   it.todo('Subsequent mint with same hash should show Already Minted');
   it.todo('UI button should be disabled during minting');

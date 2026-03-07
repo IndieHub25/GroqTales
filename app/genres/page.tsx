@@ -38,18 +38,29 @@ import {
 
 // Genre images mapping (same as home page)
 const genreImages: Record<string, string> = {
-  'Science Fiction': 'https://ik.imagekit.io/panmac/tr:f-auto,w-740,pr-true//bcd02f72-b50c-0179-8b4b-5e44f5340bd4/175e79ee-ed99-45d5-846f-5af0be2ab75b/sub%20genre%20guide.webp',
-  'Fantasy': 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhv_45322WkBmu9o8IvYfcxEXDTbGzORCAgwdP0OF1Zq4izhDr6PT-bkqYj0BJJ_HP02Op2Y0vrNOQlN6tuf0cnu4GwWqprIJrcn89pYY6uiu89gXLr5UXIZ3h6-2HWvO-SjaqzeMRoiXk/s1600/latest.jpg',
-  'Romance': 'https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=600&q=80',
-  'Horror': 'https://www.nyfa.edu/wp-content/uploads/2022/11/nosferatu.jpg',
-  'Mystery': 'https://celadonbooks.com/wp-content/uploads/2020/03/what-is-a-mystery.jpg',
-  'Historical Fiction': 'https://celadonbooks.com/wp-content/uploads/2020/03/Historical-Fiction-scaled.jpg',
-  'Adventure': 'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=600&q=80',
-  'Young Adult': 'https://advicewonders.wordpress.com/wp-content/uploads/2014/09/ya.jpg',
-  'Comedy': 'https://motivatevalmorgan.com/wp-content/uploads/2021/01/Why-Comedy-is-a-Genre-for-All.png',
-  'Dystopian': 'https://storage.googleapis.com/lr-assets/shared/1655140535-shutterstock_1936124599.jpg',
-  'Historical Fantasy': 'https://upload.wikimedia.org/wikipedia/commons/1/16/The_violet_fairy_book_%281906%29_%2814566722029%29.jpg',
-  'Paranormal': 'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=600&h=400&fit=crop',
+  'Science Fiction':
+    'https://ik.imagekit.io/panmac/tr:f-auto,w-740,pr-true//bcd02f72-b50c-0179-8b4b-5e44f5340bd4/175e79ee-ed99-45d5-846f-5af0be2ab75b/sub%20genre%20guide.webp',
+  Fantasy:
+    'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhv_45322WkBmu9o8IvYfcxEXDTbGzORCAgwdP0OF1Zq4izhDr6PT-bkqYj0BJJ_HP02Op2Y0vrNOQlN6tuf0cnu4GwWqprIJrcn89pYY6uiu89gXLr5UXIZ3h6-2HWvO-SjaqzeMRoiXk/s1600/latest.jpg',
+  Romance:
+    'https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=600&q=80',
+  Horror: 'https://www.nyfa.edu/wp-content/uploads/2022/11/nosferatu.jpg',
+  Mystery:
+    'https://celadonbooks.com/wp-content/uploads/2020/03/what-is-a-mystery.jpg',
+  'Historical Fiction':
+    'https://celadonbooks.com/wp-content/uploads/2020/03/Historical-Fiction-scaled.jpg',
+  Adventure:
+    'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=600&q=80',
+  'Young Adult':
+    'https://advicewonders.wordpress.com/wp-content/uploads/2014/09/ya.jpg',
+  Comedy:
+    'https://motivatevalmorgan.com/wp-content/uploads/2021/01/Why-Comedy-is-a-Genre-for-All.png',
+  Dystopian:
+    'https://storage.googleapis.com/lr-assets/shared/1655140535-shutterstock_1936124599.jpg',
+  'Historical Fantasy':
+    'https://upload.wikimedia.org/wikipedia/commons/1/16/The_violet_fairy_book_%281906%29_%2814566722029%29.jpg',
+  Paranormal:
+    'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=600&h=400&fit=crop',
 };
 
 // Genre data
@@ -69,8 +80,18 @@ const genreData = [
     color: 'var(--comic-purple)',
     description:
       'Stories with magical elements, mythical creatures, supernatural powers, and worlds that operate on different laws of reality.',
-    popularElements: ['Magic', 'Dragons', 'Quests', 'Magical Creatures', 'Chosen One'],
-    famousWorks: ['The Lord of the Rings', 'A Song of Ice and Fire', 'The Name of the Wind'],
+    popularElements: [
+      'Magic',
+      'Dragons',
+      'Quests',
+      'Magical Creatures',
+      'Chosen One',
+    ],
+    famousWorks: [
+      'The Lord of the Rings',
+      'A Song of Ice and Fire',
+      'The Name of the Wind',
+    ],
   },
   {
     name: 'Romance',
@@ -78,7 +99,13 @@ const genreData = [
     color: 'var(--comic-pink)',
     description:
       'Stories focused on romantic relationships, emotional development between characters, and the pursuit of love.',
-    popularElements: ['Love Triangle', 'First Love', 'Forbidden Romance', 'Second Chance', 'Slow Burn'],
+    popularElements: [
+      'Love Triangle',
+      'First Love',
+      'Forbidden Romance',
+      'Second Chance',
+      'Slow Burn',
+    ],
     famousWorks: ['Pride and Prejudice', 'Outlander', 'The Notebook'],
   },
   {
@@ -87,7 +114,13 @@ const genreData = [
     color: 'var(--comic-red)',
     description:
       'Stories designed to frighten, scare, or disgust by creating feelings of dread, terror, and psychological distress.',
-    popularElements: ['Ghosts', 'Monsters', 'Psychological', 'Gore', 'Supernatural'],
+    popularElements: [
+      'Ghosts',
+      'Monsters',
+      'Psychological',
+      'Gore',
+      'Supernatural',
+    ],
     famousWorks: ['The Shining', 'Dracula', 'House of Leaves'],
   },
   {
@@ -96,8 +129,18 @@ const genreData = [
     color: 'var(--comic-blue)',
     description:
       'Stories centered around solving a crime, uncovering secrets, or explaining unusual events, often featuring detectives or amateur sleuths.',
-    popularElements: ['Detective', 'Whodunit', 'Clues', 'Suspense', 'Plot Twist'],
-    famousWorks: ['Gone Girl', 'The Girl with the Dragon Tattoo', 'And Then There Were None'],
+    popularElements: [
+      'Detective',
+      'Whodunit',
+      'Clues',
+      'Suspense',
+      'Plot Twist',
+    ],
+    famousWorks: [
+      'Gone Girl',
+      'The Girl with the Dragon Tattoo',
+      'And Then There Were None',
+    ],
   },
   {
     name: 'Historical Fiction',
@@ -105,7 +148,13 @@ const genreData = [
     color: '#8B6914',
     description:
       'Stories set in the past that blend real historical events or settings with fictional elements and characters.',
-    popularElements: ['War', 'Romance', 'Revolution', 'Royalty', 'Cultural Change'],
+    popularElements: [
+      'War',
+      'Romance',
+      'Revolution',
+      'Royalty',
+      'Cultural Change',
+    ],
     famousWorks: ['All the Light We Cannot See', 'Wolf Hall', 'The Book Thief'],
   },
   {
@@ -114,8 +163,18 @@ const genreData = [
     color: 'var(--comic-orange)',
     description:
       'Stories focused on exciting journeys, quests, and expeditions, often featuring physical challenges and discoveries.',
-    popularElements: ['Quest', 'Travel', 'Treasure Hunt', 'Survival', 'Exploration'],
-    famousWorks: ['The Hobbit', 'Treasure Island', 'Journey to the Center of the Earth'],
+    popularElements: [
+      'Quest',
+      'Travel',
+      'Treasure Hunt',
+      'Survival',
+      'Exploration',
+    ],
+    famousWorks: [
+      'The Hobbit',
+      'Treasure Island',
+      'Journey to the Center of the Earth',
+    ],
   },
   {
     name: 'Young Adult',
@@ -123,7 +182,13 @@ const genreData = [
     color: '#FF69B4',
     description:
       'Stories targeting teenage readers, often dealing with coming-of-age issues, identity, relationships, and social challenges.',
-    popularElements: ['Coming of Age', 'First Love', 'Identity', 'Friendship', 'School'],
+    popularElements: [
+      'Coming of Age',
+      'First Love',
+      'Identity',
+      'Friendship',
+      'School',
+    ],
     famousWorks: ['The Hunger Games', 'The Fault in Our Stars', 'Six of Crows'],
   },
   {
@@ -133,7 +198,11 @@ const genreData = [
     description:
       'Stories that aim to amuse and entertain through humor, wit, satire, and comedic situations or characters.',
     popularElements: ['Satire', 'Parody', 'Sitcom', 'Dark Humor', 'Slapstick'],
-    famousWorks: ['Good Omens', "The Hitchhiker's Guide to the Galaxy", "Bridget Jones's Diary"],
+    famousWorks: [
+      'Good Omens',
+      "The Hitchhiker's Guide to the Galaxy",
+      "Bridget Jones's Diary",
+    ],
   },
   {
     name: 'Dystopian',
@@ -141,7 +210,13 @@ const genreData = [
     color: '#4A0E4E',
     description:
       'Stories set in imagined societies characterized by suffering, oppression, environmental disaster, or technological control.',
-    popularElements: ['Totalitarian Government', 'Rebellion', 'Surveillance', 'Environmental Collapse', 'Class Divide'],
+    popularElements: [
+      'Totalitarian Government',
+      'Rebellion',
+      'Surveillance',
+      'Environmental Collapse',
+      'Class Divide',
+    ],
     famousWorks: ['1984', "The Handmaid's Tale", 'Brave New World'],
   },
   {
@@ -150,8 +225,18 @@ const genreData = [
     color: '#DAA520',
     description:
       'Stories that blend historical settings with fantasy elements, often reimagining history with magic or supernatural elements.',
-    popularElements: ['Magic', 'Alternative History', 'Historical Figures', 'Mythological Elements', 'Secret Societies'],
-    famousWorks: ['Jonathan Strange & Mr Norrell', 'The Golem and the Jinni', 'Outlander'],
+    popularElements: [
+      'Magic',
+      'Alternative History',
+      'Historical Figures',
+      'Mythological Elements',
+      'Secret Societies',
+    ],
+    famousWorks: [
+      'Jonathan Strange & Mr Norrell',
+      'The Golem and the Jinni',
+      'Outlander',
+    ],
   },
   {
     name: 'Paranormal',
@@ -159,8 +244,18 @@ const genreData = [
     color: '#6B3FA0',
     description:
       'Stories featuring supernatural phenomena not explained by scientific understanding, often including ghosts, psychic abilities, or unexplained events.',
-    popularElements: ['Ghosts', 'Psychics', 'Hauntings', 'Supernatural Creatures', 'Spiritual Elements'],
-    famousWorks: ['The Shining', 'Mexican Gothic', 'The Haunting of Hill House'],
+    popularElements: [
+      'Ghosts',
+      'Psychics',
+      'Hauntings',
+      'Supernatural Creatures',
+      'Spiritual Elements',
+    ],
+    famousWorks: [
+      'The Shining',
+      'Mexican Gothic',
+      'The Haunting of Hill House',
+    ],
   },
 ];
 
@@ -168,46 +263,49 @@ const genreData = [
 const quizQuestions = [
   {
     id: 1,
-    question: "You find a mysterious door in your basement. What do you do?",
+    question: 'You find a mysterious door in your basement. What do you do?',
     icon: <Sparkles className="w-12 h-12 mx-auto text-blue-400" />,
     options: [
-      { text: "Analyze it with scanning equipment", genre: "Science Fiction" },
-      { text: "Cast a revealing spell on it", genre: "Fantasy" },
-      { text: "Open it carefully with a detective's eye", genre: "Mystery" },
-      { text: "Run — it's probably haunted", genre: "Horror" },
+      { text: 'Analyze it with scanning equipment', genre: 'Science Fiction' },
+      { text: 'Cast a revealing spell on it', genre: 'Fantasy' },
+      { text: "Open it carefully with a detective's eye", genre: 'Mystery' },
+      { text: "Run — it's probably haunted", genre: 'Horror' },
     ],
   },
   {
     id: 2,
-    question: "Your ideal Saturday looks like…",
+    question: 'Your ideal Saturday looks like…',
     icon: <Compass className="w-12 h-12 mx-auto text-amber-400" />,
     options: [
-      { text: "Hiking a mountain trail to the summit", genre: "Adventure" },
-      { text: "Binge-reading a love story under a blanket", genre: "Romance" },
-      { text: "Watching a stand-up comedy special", genre: "Comedy" },
-      { text: "Visiting a historical museum", genre: "Historical Fiction" },
+      { text: 'Hiking a mountain trail to the summit', genre: 'Adventure' },
+      { text: 'Binge-reading a love story under a blanket', genre: 'Romance' },
+      { text: 'Watching a stand-up comedy special', genre: 'Comedy' },
+      { text: 'Visiting a historical museum', genre: 'Historical Fiction' },
     ],
   },
   {
     id: 3,
-    question: "If you could have one superpower…",
+    question: 'If you could have one superpower…',
     icon: <Wand2 className="w-12 h-12 mx-auto text-purple-400" />,
     options: [
-      { text: "Teleportation across the universe", genre: "Science Fiction" },
-      { text: "Seeing glimpses of the future", genre: "Paranormal" },
-      { text: "Rewriting the past", genre: "Historical Fantasy" },
-      { text: "Making anyone laugh uncontrollably", genre: "Comedy" },
+      { text: 'Teleportation across the universe', genre: 'Science Fiction' },
+      { text: 'Seeing glimpses of the future', genre: 'Paranormal' },
+      { text: 'Rewriting the past', genre: 'Historical Fantasy' },
+      { text: 'Making anyone laugh uncontrollably', genre: 'Comedy' },
     ],
   },
   {
     id: 4,
-    question: "The world is ending. What caused it?",
+    question: 'The world is ending. What caused it?',
     icon: <Globe className="w-12 h-12 mx-auto text-emerald-400" />,
     options: [
-      { text: "A tyrannical government pushed too far", genre: "Dystopian" },
-      { text: "Ancient magic awakened", genre: "Fantasy" },
-      { text: "An AI singularity went wrong", genre: "Science Fiction" },
-      { text: "Nobody knows — it's eerie and unexplained", genre: "Paranormal" },
+      { text: 'A tyrannical government pushed too far', genre: 'Dystopian' },
+      { text: 'Ancient magic awakened', genre: 'Fantasy' },
+      { text: 'An AI singularity went wrong', genre: 'Science Fiction' },
+      {
+        text: "Nobody knows — it's eerie and unexplained",
+        genre: 'Paranormal',
+      },
     ],
   },
 ];
@@ -215,25 +313,37 @@ const quizQuestions = [
 // Genre combination data
 const combos = [
   {
-    icons: [<Rocket key="r" className="h-5 w-5 text-blue-500" />, <Heart key="h" className="h-5 w-5 text-red-500" />],
+    icons: [
+      <Rocket key="r" className="h-5 w-5 text-blue-500" />,
+      <Heart key="h" className="h-5 w-5 text-red-500" />,
+    ],
     name: 'Science Fiction Romance',
     desc: 'Love stories set against futuristic backdrops, exploring how tech affects human relationships.',
-    examples: 'The Time Traveler\'s Wife, Her, Passengers',
+    examples: "The Time Traveler's Wife, Her, Passengers",
   },
   {
-    icons: [<Wand2 key="w" className="h-5 w-5 text-purple-500" />, <Sparkles key="s" className="h-5 w-5 text-amber-500" />],
+    icons: [
+      <Wand2 key="w" className="h-5 w-5 text-purple-500" />,
+      <Sparkles key="s" className="h-5 w-5 text-amber-500" />,
+    ],
     name: 'Fantasy Mystery',
     desc: 'Detective stories in magical worlds, where solving crimes involves supernatural elements.',
     examples: 'Rivers of London, The Dresden Files',
   },
   {
-    icons: [<Globe key="g" className="h-5 w-5 text-red-700" />, <Baby key="b" className="h-5 w-5 text-pink-500" />],
+    icons: [
+      <Globe key="g" className="h-5 w-5 text-red-700" />,
+      <Baby key="b" className="h-5 w-5 text-pink-500" />,
+    ],
     name: 'Dystopian Young Adult',
     desc: 'Coming-of-age stories in oppressive societies where youth challenge corrupt systems.',
     examples: 'The Hunger Games, Divergent, The Maze Runner',
   },
   {
-    icons: [<Landmark key="l" className="h-5 w-5 text-amber-700" />, <Ghost key="gh" className="h-5 w-5 text-violet-500" />],
+    icons: [
+      <Landmark key="l" className="h-5 w-5 text-amber-700" />,
+      <Ghost key="gh" className="h-5 w-5 text-violet-500" />,
+    ],
     name: 'Historical Paranormal',
     desc: 'Supernatural elements woven into historical settings across different eras.',
     examples: 'The Historian, Lincoln in the Bardo',
@@ -256,7 +366,8 @@ export default function GenresPage() {
   };
 
   const quizResult = quizDone
-    ? Object.entries(quizScores).sort(([, a], [, b]) => b - a)[0]?.[0] || 'Fantasy'
+    ? Object.entries(quizScores).sort(([, a], [, b]) => b - a)[0]?.[0] ||
+      'Fantasy'
     : null;
 
   const resetQuiz = () => {
@@ -270,16 +381,19 @@ export default function GenresPage() {
       <div className="container mx-auto px-4 max-w-7xl">
         {/* ═══════════ HERO SECTION ═══════════ */}
         <div className="mb-20 text-center">
-          <div className="inline-block px-4 py-1.5 mb-6 text-xs font-black uppercase tracking-[0.3em] text-[var(--comic-purple)] border-2 border-[var(--comic-purple)] bg-[var(--comic-purple)]/10"
-            style={{ boxShadow: '3px 3px 0px 0px var(--shadow-color)' }}>
+          <div
+            className="inline-block px-4 py-1.5 mb-6 text-xs font-black uppercase tracking-[0.3em] text-[var(--comic-purple)] border-2 border-[var(--comic-purple)] bg-[var(--comic-purple)]/10"
+            style={{ boxShadow: '3px 3px 0px 0px var(--shadow-color)' }}
+          >
             12 Genres
           </div>
           <h1 className="comic-display text-5xl md:text-7xl text-foreground mb-6">
             Explore Story Genres
           </h1>
           <p className="text-base text-muted-foreground font-bold max-w-2xl mx-auto leading-relaxed">
-            Every great story starts with a genre. Discover 12 unique worlds of storytelling —
-            from the futuristic frontiers of Sci-Fi to the heart-pounding depths of Horror.
+            Every great story starts with a genre. Discover 12 unique worlds of
+            storytelling — from the futuristic frontiers of Sci-Fi to the
+            heart-pounding depths of Horror.
           </p>
         </div>
 
@@ -312,7 +426,10 @@ export default function GenresPage() {
                     >
                       {genre.icon}
                     </div>
-                    <h2 className="font-black text-xl uppercase text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.6)' }}>
+                    <h2
+                      className="font-black text-xl uppercase text-white"
+                      style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.6)' }}
+                    >
                       {genre.name}
                     </h2>
                   </div>
@@ -326,7 +443,9 @@ export default function GenresPage() {
 
                   {/* Popular Elements */}
                   <div className="mb-4">
-                    <span className="text-xs font-black uppercase tracking-wider text-foreground/60">Popular Elements</span>
+                    <span className="text-xs font-black uppercase tracking-wider text-foreground/60">
+                      Popular Elements
+                    </span>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {genre.popularElements.map((el) => (
                         <span
@@ -341,17 +460,26 @@ export default function GenresPage() {
 
                   {/* Expand toggle */}
                   <button
-                    onClick={() => setExpandedGenre(isExpanded ? null : genre.name)}
+                    onClick={() =>
+                      setExpandedGenre(isExpanded ? null : genre.name)
+                    }
                     className="flex items-center gap-1 text-xs font-black uppercase text-[var(--comic-purple)] hover:underline mt-2"
                     aria-expanded={isExpanded}
                     aria-controls={`${genre.name.toLowerCase().replace(/\s+/g, '-')}-works`}
                   >
                     {isExpanded ? 'Show Less' : 'Famous Works'}
-                    {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                    {isExpanded ? (
+                      <ChevronUp className="w-3 h-3" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3" />
+                    )}
                   </button>
 
                   {isExpanded && (
-                    <ul id={`${genre.name.toLowerCase().replace(/\s+/g, '-')}-works`} className="mt-3 space-y-1.5 text-sm text-muted-foreground border-t-2 border-foreground/10 pt-3">
+                    <ul
+                      id={`${genre.name.toLowerCase().replace(/\s+/g, '-')}-works`}
+                      className="mt-3 space-y-1.5 text-sm text-muted-foreground border-t-2 border-foreground/10 pt-3"
+                    >
                       {genre.famousWorks.map((work) => (
                         <li key={work} className="flex items-center gap-2">
                           <BookOpen className="w-3 h-3 text-[var(--comic-red)]" />
@@ -364,10 +492,16 @@ export default function GenresPage() {
 
                 {/* Create story button */}
                 <div className="px-5 pb-5">
-                  <Button asChild className="w-full bg-[var(--comic-red)] text-white border-2 border-foreground font-black uppercase rounded-none text-xs"
-                    style={{ boxShadow: '3px 3px 0px 0px var(--shadow-color)' }}>
-                    <Link href={`/create/ai-story?genre=${encodeURIComponent(genre.name.toLowerCase())}`}>
-                      Write a {genre.name} Story <ArrowRight className="ml-1 w-3 h-3" />
+                  <Button
+                    asChild
+                    className="w-full bg-[var(--comic-red)] text-white border-2 border-foreground font-black uppercase rounded-none text-xs"
+                    style={{ boxShadow: '3px 3px 0px 0px var(--shadow-color)' }}
+                  >
+                    <Link
+                      href={`/create/ai-story?genre=${encodeURIComponent(genre.name.toLowerCase())}`}
+                    >
+                      Write a {genre.name} Story{' '}
+                      <ArrowRight className="ml-1 w-3 h-3" />
                     </Link>
                   </Button>
                 </div>
@@ -379,15 +513,18 @@ export default function GenresPage() {
         {/* ═══════════ GENRE COMBINATIONS ═══════════ */}
         <div className="mb-24">
           <div className="text-center mb-12">
-            <div className="inline-block px-4 py-1.5 mb-4 text-xs font-black uppercase tracking-[0.3em] text-[var(--comic-orange)] border-2 border-[var(--comic-orange)] bg-[var(--comic-orange)]/10"
-              style={{ boxShadow: '3px 3px 0px 0px var(--shadow-color)' }}>
+            <div
+              className="inline-block px-4 py-1.5 mb-4 text-xs font-black uppercase tracking-[0.3em] text-[var(--comic-orange)] border-2 border-[var(--comic-orange)] bg-[var(--comic-orange)]/10"
+              style={{ boxShadow: '3px 3px 0px 0px var(--shadow-color)' }}
+            >
               Mix & Match
             </div>
             <h2 className="comic-display text-4xl md:text-5xl text-foreground mb-4">
               Genre Combinations
             </h2>
             <p className="text-base text-muted-foreground font-bold max-w-xl mx-auto">
-              The most innovative stories blend multiple genres into something new
+              The most innovative stories blend multiple genres into something
+              new
             </p>
           </div>
 
@@ -402,12 +539,20 @@ export default function GenresPage() {
                   {combo.icons[0]}
                   <span className="font-black text-foreground text-lg">+</span>
                   {combo.icons[1]}
-                  <h3 className="font-black text-base uppercase ml-1">{combo.name}</h3>
+                  <h3 className="font-black text-base uppercase ml-1">
+                    {combo.name}
+                  </h3>
                 </div>
-                <p className="text-sm text-muted-foreground font-bold mb-3">{combo.desc}</p>
+                <p className="text-sm text-muted-foreground font-bold mb-3">
+                  {combo.desc}
+                </p>
                 <p className="text-xs font-bold">
-                  <span className="text-[var(--comic-red)] font-black uppercase">Examples:</span>{' '}
-                  <span className="text-muted-foreground">{combo.examples}</span>
+                  <span className="text-[var(--comic-red)] font-black uppercase">
+                    Examples:
+                  </span>{' '}
+                  <span className="text-muted-foreground">
+                    {combo.examples}
+                  </span>
                 </p>
               </div>
             ))}
@@ -415,28 +560,37 @@ export default function GenresPage() {
         </div>
 
         {/* ═══════════ FINDING YOUR GENRE — Interactive Quiz ═══════════ */}
-        <div className="mb-24 border-4 border-foreground bg-card overflow-hidden"
-          style={{ boxShadow: '8px 8px 0px 0px var(--shadow-color)' }}>
-
+        <div
+          className="mb-24 border-4 border-foreground bg-card overflow-hidden"
+          style={{ boxShadow: '8px 8px 0px 0px var(--shadow-color)' }}
+        >
           {/* Header with doodle-like decoration */}
           <div className="relative bg-gradient-to-r from-[var(--comic-purple)] to-[var(--comic-cyan)] p-8 text-white overflow-hidden">
             {/* Decorative doodle circles */}
             <div className="absolute top-4 right-8 w-16 h-16 border-4 border-white/20 rounded-full" />
             <div className="absolute top-12 right-20 w-8 h-8 border-3 border-white/15 rounded-full" />
             <div className="absolute bottom-2 left-12 w-10 h-10 border-3 border-white/10 rounded-full" />
-            <div className="absolute top-2 left-1/3 text-4xl opacity-20"><Sparkles className="w-8 h-8"/></div>
-            <div className="absolute bottom-2 right-1/4 text-3xl opacity-[0.15]"><Rocket className="w-8 h-8"/></div>
+            <div className="absolute top-2 left-1/3 text-4xl opacity-20">
+              <Sparkles className="w-8 h-8" />
+            </div>
+            <div className="absolute bottom-2 right-1/4 text-3xl opacity-[0.15]">
+              <Rocket className="w-8 h-8" />
+            </div>
 
             <div className="relative z-10 text-center">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm text-xs font-black uppercase tracking-widest mb-3">
                 <Lightbulb className="w-3 h-3" />
                 Interactive Quiz
               </div>
-              <h2 className="comic-display text-3xl md:text-5xl mb-2" style={{ textShadow: '3px 3px 0px rgba(0,0,0,0.3)' }}>
+              <h2
+                className="comic-display text-3xl md:text-5xl mb-2"
+                style={{ textShadow: '3px 3px 0px rgba(0,0,0,0.3)' }}
+              >
                 Finding Your Genre
               </h2>
               <p className="text-white/80 font-bold max-w-lg mx-auto text-sm">
-                Answer 4 fun questions and discover which genre was made for you!
+                Answer 4 fun questions and discover which genre was made for
+                you!
               </p>
             </div>
           </div>
@@ -453,7 +607,9 @@ export default function GenresPage() {
                   <div className="flex-1 h-3 bg-muted border-2 border-foreground/20 overflow-hidden">
                     <div
                       className="h-full bg-[var(--comic-purple)] transition-all duration-500"
-                      style={{ width: `${((quizStep + 1) / quizQuestions.length) * 100}%` }}
+                      style={{
+                        width: `${((quizStep + 1) / quizQuestions.length) * 100}%`,
+                      }}
                     />
                   </div>
                 </div>
@@ -478,7 +634,9 @@ export default function GenresPage() {
                             key={i}
                             onClick={() => handleQuizAnswer(opt.genre)}
                             className="p-4 border-3 border-foreground bg-muted/50 text-left font-bold text-sm hover:bg-[var(--comic-purple)]/10 hover:-translate-y-1 hover:border-[var(--comic-purple)] transition-all duration-200 active:translate-y-0"
-                            style={{ boxShadow: '4px 4px 0px 0px var(--shadow-color)' }}
+                            style={{
+                              boxShadow: '4px 4px 0px 0px var(--shadow-color)',
+                            }}
                           >
                             <span className="text-[var(--comic-purple)] font-black mr-2">
                               {String.fromCharCode(65 + i)}.
@@ -501,7 +659,9 @@ export default function GenresPage() {
                 <div
                   className="inline-block px-6 py-3 text-xl font-black uppercase text-white mb-6 border-4 border-foreground"
                   style={{
-                    backgroundColor: genreData.find((g) => g.name === quizResult)?.color || 'var(--comic-purple)',
+                    backgroundColor:
+                      genreData.find((g) => g.name === quizResult)?.color ||
+                      'var(--comic-purple)',
                     boxShadow: '4px 4px 0px 0px var(--shadow-color)',
                   }}
                 >
@@ -516,8 +676,11 @@ export default function GenresPage() {
                     className="bg-[var(--comic-red)] text-white border-3 border-foreground font-black uppercase rounded-none"
                     style={{ boxShadow: '4px 4px 0px 0px var(--shadow-color)' }}
                   >
-                    <Link href={`/create/ai-story?genre=${encodeURIComponent((quizResult || '').toLowerCase())}`}>
-                      Write a {quizResult} Story <ArrowRight className="ml-1 w-4 h-4" />
+                    <Link
+                      href={`/create/ai-story?genre=${encodeURIComponent((quizResult || '').toLowerCase())}`}
+                    >
+                      Write a {quizResult} Story{' '}
+                      <ArrowRight className="ml-1 w-4 h-4" />
                     </Link>
                   </Button>
                   <Button
@@ -526,7 +689,8 @@ export default function GenresPage() {
                     className="border-3 border-foreground font-black uppercase rounded-none group flex items-center gap-2"
                     style={{ boxShadow: '4px 4px 0px 0px var(--shadow-color)' }}
                   >
-                    Retake Quiz <Compass className="w-4 h-4 group-hover:-rotate-180 transition-transform duration-500" />
+                    Retake Quiz{' '}
+                    <Compass className="w-4 h-4 group-hover:-rotate-180 transition-transform duration-500" />
                   </Button>
                 </div>
               </div>
@@ -537,8 +701,10 @@ export default function GenresPage() {
           <div className="border-t-4 border-foreground/10 bg-muted/30 px-8 py-5 flex items-start gap-3">
             <HelpCircle className="w-5 h-5 text-[var(--comic-purple)] flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground font-bold leading-relaxed">
-              <span className="text-foreground font-black">Pro tip:</span> Genres are guides, not rigid rules.
-              The most innovative stories transcend traditional boundaries — don't be afraid to mix and match!
+              <span className="text-foreground font-black">Pro tip:</span>{' '}
+              Genres are guides, not rigid rules. The most innovative stories
+              transcend traditional boundaries — don't be afraid to mix and
+              match!
             </p>
           </div>
         </div>

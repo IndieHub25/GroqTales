@@ -9,15 +9,20 @@ export interface IUserInteraction extends Document {
 }
 
 const UserInteractionSchema = new Schema<IUserInteraction>({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
+  },
   storyId: { type: Schema.Types.ObjectId, ref: 'Story', required: true },
   type: {
     type: String,
     enum: ['VIEW', 'LIKE', 'BOOKMARK', 'SHARE', 'TIME_SPENT'],
-    required: true
+    required: true,
   },
   value: { type: Number, default: 1 },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 UserInteractionSchema.index({ userId: 1, createdAt: -1 });

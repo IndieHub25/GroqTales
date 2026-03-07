@@ -8,10 +8,10 @@
   <img src="../../public/GroqTales.png" alt="GroqTales Logo" width="300" />
 </div>
 
-GroqTales uses a sophisticated prompt engineering system to generate high-quality, structured stories
-and optional comic panel breakdowns. The AI backend accepts **70+ configurable parameters** across
-9 categories and produces a single, valid JSON response ready for rendering, publishing, or minting
-as an NFT.
+GroqTales uses a sophisticated prompt engineering system to generate high-quality, structured
+stories and optional comic panel breakdowns. The AI backend accepts **70+ configurable parameters**
+across 9 categories and produces a single, valid JSON response ready for rendering, publishing, or
+minting as an NFT.
 
 This page documents the **full parameter specification**, **output JSON schema**, **content safety
 rules**, and **behavioral guidelines** that drive the story generation engine.
@@ -46,8 +46,10 @@ rules**, and **behavioral guidelines** that drive the story generation engine.
 The story generation pipeline follows this flow:
 
 1. **Frontend** collects user inputs across 9 accordion sections (70+ params).
-2. **Backend API** (`POST /api/groq` or `POST /api/v1/ai/generate`) validates inputs and constructs a structured prompt using `groqService`.
-3. **Groq AI** processes the prompt using specific models (e.g., `llama-3.3-70b-versatile` for stories, `llama-3.1-8b-instant` for fast tasks).
+2. **Backend API** (`POST /api/groq` or `POST /api/v1/ai/generate`) validates inputs and constructs
+   a structured prompt using `groqService`.
+3. **Groq AI** processes the prompt using specific models (e.g., `llama-3.3-70b-versatile` for
+   stories, `llama-3.1-8b-instant` for fast tasks).
 4. **Parser** validates the JSON schema, extracts chapters, characters, and comic panels.
 5. **Frontend** renders the story for preview, editing, publishing, or NFT minting.
 
@@ -65,109 +67,109 @@ CONTENT SAFETY > COHERENCE > USER PREFERENCES
 
 ### Core Parameters
 
-| Parameter           | Type   | Required | Example                                | Description                                           |
-| :------------------ | :----- | :------: | :------------------------------------- | :---------------------------------------------------- |
-| `title`             | string |    No    | `"The Last Signal"`                    | Story title. AI generates one if omitted.             |
-| `genre`             | string |   Yes    | `"Science Fiction"`                    | Primary genre.                                        |
-| `subgenre`          | string |    No    | `"Cyberpunk"`                          | Subgenre for more specificity.                        |
-| `target_format`     | enum   |   Yes    | `"story"`, `"comic"`, `"novel"`        | Output format context. Controls token budgets.        |
-| `word_count_target` | number |    No    | `2500`                                 | Target word count. Length translates to token limits. |
+| Parameter           | Type   | Required | Example                         | Description                                           |
+| :------------------ | :----- | :------: | :------------------------------ | :---------------------------------------------------- |
+| `title`             | string |    No    | `"The Last Signal"`             | Story title. AI generates one if omitted.             |
+| `genre`             | string |   Yes    | `"Science Fiction"`             | Primary genre.                                        |
+| `subgenre`          | string |    No    | `"Cyberpunk"`                   | Subgenre for more specificity.                        |
+| `target_format`     | enum   |   Yes    | `"story"`, `"comic"`, `"novel"` | Output format context. Controls token budgets.        |
+| `word_count_target` | number |    No    | `2500`                          | Target word count. Length translates to token limits. |
 
 ### Characters
 
-| Parameter                 | Type     | Required | Example                                                                                     | Description                                       |
-| :------------------------ | :------- | :------: | :------------------------------------------------------------------------------------------ | :------------------------------------------------ |
-| `main_characters`         | array    |    No    | `[{"name":"Aria","age":24,"role":"Protagonist","traits":["curious"],"background":"hacker"}]` | Structured character definitions.                 |
-| `character_count`         | number   |    No    | `4`                                                                                         | Approximate number of named characters.           |
-| `protagonist_archetype`   | string   |    No    | `"reluctant hero"`, `"antihero"`, `"chosen one"`                                            | Protagonist type.                                 |
-| `relationship_dynamics`   | string   |    No    | `"slow-burn friendship to romance"`                                                         | How characters relate and evolve.                 |
+| Parameter               | Type   | Required | Example                                                                                      | Description                             |
+| :---------------------- | :----- | :------: | :------------------------------------------------------------------------------------------- | :-------------------------------------- |
+| `main_characters`       | array  |    No    | `[{"name":"Aria","age":24,"role":"Protagonist","traits":["curious"],"background":"hacker"}]` | Structured character definitions.       |
+| `character_count`       | number |    No    | `4`                                                                                          | Approximate number of named characters. |
+| `protagonist_archetype` | string |    No    | `"reluctant hero"`, `"antihero"`, `"chosen one"`                                             | Protagonist type.                       |
+| `relationship_dynamics` | string |    No    | `"slow-burn friendship to romance"`                                                          | How characters relate and evolve.       |
 
 ### Plot & Structure
 
-| Parameter               | Type     | Required | Example                                      | Description                                      |
-| :---------------------- | :------- | :------: | :------------------------------------------- | :----------------------------------------------- |
-| `plot_structure`         | string   |    No    | `"three-act structure"`, `"hero's journey"`  | Narrative structure pattern.                     |
-| `central_conflict`      | string   |    No    | `"rebellion against oppressive regime"`      | Core dramatic tension.                           |
-| `pacing`                | string   |    No    | `"fast-paced and punchy"`                    | Story tempo.                                     |
-| `ending_type`           | string   |    No    | `"bittersweet"`, `"ambiguous"`, `"tragic"`   | How the story resolves.                          |
-| `plot_twists`           | array    |    No    | `["The mentor is the true villain"]`         | Required plot twists.                            |
-| `number_of_chapters`    | number   |    No    | `3`                                          | Chapter count (1 = continuous).                  |
-| `foreshadowing_level`   | string   |    No    | `"subtle"`, `"moderate"`, `"heavy"`          | Foreshadowing intensity.                         |
-| `symbolism_level`       | string   |    No    | `"minimal"`, `"rich with recurring symbols"` | Symbolic depth.                                  |
+| Parameter             | Type   | Required | Example                                      | Description                     |
+| :-------------------- | :----- | :------: | :------------------------------------------- | :------------------------------ |
+| `plot_structure`      | string |    No    | `"three-act structure"`, `"hero's journey"`  | Narrative structure pattern.    |
+| `central_conflict`    | string |    No    | `"rebellion against oppressive regime"`      | Core dramatic tension.          |
+| `pacing`              | string |    No    | `"fast-paced and punchy"`                    | Story tempo.                    |
+| `ending_type`         | string |    No    | `"bittersweet"`, `"ambiguous"`, `"tragic"`   | How the story resolves.         |
+| `plot_twists`         | array  |    No    | `["The mentor is the true villain"]`         | Required plot twists.           |
+| `number_of_chapters`  | number |    No    | `3`                                          | Chapter count (1 = continuous). |
+| `foreshadowing_level` | string |    No    | `"subtle"`, `"moderate"`, `"heavy"`          | Foreshadowing intensity.        |
+| `symbolism_level`     | string |    No    | `"minimal"`, `"rich with recurring symbols"` | Symbolic depth.                 |
 
 ### Setting & World
 
-| Parameter               | Type   | Required | Example                                       | Description                                     |
-| :---------------------- | :----- | :------: | :-------------------------------------------- | :---------------------------------------------- |
-| `time_period`           | string |    No    | `"near-future 2084"`                          | When the story takes place.                     |
-| `location`              | string |    No    | `"floating megacity above a toxic ocean"`     | Primary setting.                                |
-| `world_building_depth`  | string |    No    | `"deep, lore-rich world"`                     | Level of world detail.                          |
-| `atmosphere`            | string |    No    | `"noir"`, `"whimsical"`, `"bleak"`            | Emotional atmosphere.                           |
+| Parameter              | Type   | Required | Example                                   | Description                 |
+| :--------------------- | :----- | :------: | :---------------------------------------- | :-------------------------- |
+| `time_period`          | string |    No    | `"near-future 2084"`                      | When the story takes place. |
+| `location`             | string |    No    | `"floating megacity above a toxic ocean"` | Primary setting.            |
+| `world_building_depth` | string |    No    | `"deep, lore-rich world"`                 | Level of world detail.      |
+| `atmosphere`           | string |    No    | `"noir"`, `"whimsical"`, `"bleak"`        | Emotional atmosphere.       |
 
 ### Writing Style & Tone
 
-| Parameter               | Type   | Required | Example                                      | Description                                      |
-| :---------------------- | :----- | :------: | :------------------------------------------- | :----------------------------------------------- |
-| `narrative_voice`       | string |    No    | `"close third person"`, `"first person"`     | POV / narrative voice.                           |
-| `tone`                  | string |    No    | `"darkly humorous"`, `"tense and suspenseful"` | Overall tone.                                  |
-| `style`                 | string |    No    | `"cinematic and visual"`, `"poetic"`         | Writing style.                                   |
-| `reading_level`         | string |    No    | `"YA-friendly"`, `"literary and complex"`    | Target reading audience.                         |
-| `dialogue_percentage`   | string |    No    | `"50%"`                                      | Proportion of dialogue vs. narration.            |
-| `description_detail`    | string |    No    | `"rich, sensory-heavy"`                      | Environmental description level.                 |
+| Parameter             | Type   | Required | Example                                        | Description                           |
+| :-------------------- | :----- | :------: | :--------------------------------------------- | :------------------------------------ |
+| `narrative_voice`     | string |    No    | `"close third person"`, `"first person"`       | POV / narrative voice.                |
+| `tone`                | string |    No    | `"darkly humorous"`, `"tense and suspenseful"` | Overall tone.                         |
+| `style`               | string |    No    | `"cinematic and visual"`, `"poetic"`           | Writing style.                        |
+| `reading_level`       | string |    No    | `"YA-friendly"`, `"literary and complex"`      | Target reading audience.              |
+| `dialogue_percentage` | string |    No    | `"50%"`                                        | Proportion of dialogue vs. narration. |
+| `description_detail`  | string |    No    | `"rich, sensory-heavy"`                        | Environmental description level.      |
 
 ### Themes & Messages
 
-| Parameter                     | Type     | Required | Example                                      | Description                                |
-| :---------------------------- | :------- | :------: | :------------------------------------------- | :----------------------------------------- |
-| `primary_themes`              | array    |    No    | `["identity", "freedom", "found family"]`    | Core thematic elements.                    |
-| `secondary_themes`            | array    |    No    | `["loss", "sacrifice"]`                      | Supporting themes.                         |
-| `moral_complexity`            | string   |    No    | `"morally gray characters"`                  | Ethical complexity level.                  |
-| `social_commentary_level`     | string   |    No    | `"light subtext"`, `"explicit commentary"`   | Social commentary depth.                   |
+| Parameter                 | Type   | Required | Example                                    | Description               |
+| :------------------------ | :----- | :------: | :----------------------------------------- | :------------------------ |
+| `primary_themes`          | array  |    No    | `["identity", "freedom", "found family"]`  | Core thematic elements.   |
+| `secondary_themes`        | array  |    No    | `["loss", "sacrifice"]`                    | Supporting themes.        |
+| `moral_complexity`        | string |    No    | `"morally gray characters"`                | Ethical complexity level. |
+| `social_commentary_level` | string |    No    | `"light subtext"`, `"explicit commentary"` | Social commentary depth.  |
 
 ### Content Controls & Safety
 
-| Parameter                | Type     | Required | Example                                              | Description                                               |
-| :----------------------- | :------- | :------: | :--------------------------------------------------- | :-------------------------------------------------------- |
-| `violence_level`         | string   |    No    | `"none"`, `"mild"`, `"moderate"`, `"graphic"`        | Violence content level.                                   |
-| `romance_level`          | string   |    No    | `"subtle undertones"`, `"mature but fade-to-black"`  | Romance content level.                                    |
-| `language_level`         | string   |    No    | `"clean"`, `"mild profanity"`                        | Language content level.                                   |
-| `mature_content_flags`   | array    |    No    | `["no explicit sexual content"]`                     | Specific content restrictions.                            |
-| `forbidden_content`      | string   |   Yes    | `"no sexual content involving minors"`               | **Hard block** — AI must obey this unconditionally.       |
+| Parameter              | Type   | Required | Example                                             | Description                                         |
+| :--------------------- | :----- | :------: | :-------------------------------------------------- | :-------------------------------------------------- |
+| `violence_level`       | string |    No    | `"none"`, `"mild"`, `"moderate"`, `"graphic"`       | Violence content level.                             |
+| `romance_level`        | string |    No    | `"subtle undertones"`, `"mature but fade-to-black"` | Romance content level.                              |
+| `language_level`       | string |    No    | `"clean"`, `"mild profanity"`                       | Language content level.                             |
+| `mature_content_flags` | array  |    No    | `["no explicit sexual content"]`                    | Specific content restrictions.                      |
+| `forbidden_content`    | string |   Yes    | `"no sexual content involving minors"`              | **Hard block** — AI must obey this unconditionally. |
 
 ### Advanced Options
 
-| Parameter                | Type     | Required | Example                                           | Description                                      |
-| :----------------------- | :------- | :------: | :------------------------------------------------ | :----------------------------------------------- |
-| `multiple_pov`           | string   |    No    | `"2 POVs alternating per chapter"`                | Multi-perspective configuration.                 |
-| `narrative_experiments`  | string   |    No    | `"occasional in-world documents"`, `"chat logs"`  | Experimental narrative forms.                    |
-| `recurring_motifs`       | string   |    No    | `"mirrors and reflections"`                       | Symbolic motifs to weave in.                     |
+| Parameter               | Type   | Required | Example                                          | Description                      |
+| :---------------------- | :----- | :------: | :----------------------------------------------- | :------------------------------- |
+| `multiple_pov`          | string |    No    | `"2 POVs alternating per chapter"`               | Multi-perspective configuration. |
+| `narrative_experiments` | string |    No    | `"occasional in-world documents"`, `"chat logs"` | Experimental narrative forms.    |
+| `recurring_motifs`      | string |    No    | `"mirrors and reflections"`                      | Symbolic motifs to weave in.     |
 
 ### Inspiration & References
 
-| Parameter               | Type     | Required | Example                                           | Description                                      |
-| :---------------------- | :------- | :------: | :------------------------------------------------ | :----------------------------------------------- |
-| `similar_works`         | string   |    No    | `"Blade Runner meets The Handmaid's Tale"`        | Capture the *feel*, never copy.                  |
-| `tropes_to_include`     | array    |    No    | `["Found Family", "Redemption Arc"]`              | Tropes the AI should use.                        |
-| `tropes_to_avoid`       | array    |    No    | `["Deus Ex Machina", "Love Triangle"]`            | Tropes the AI must avoid.                        |
+| Parameter           | Type   | Required | Example                                    | Description                     |
+| :------------------ | :----- | :------: | :----------------------------------------- | :------------------------------ |
+| `similar_works`     | string |    No    | `"Blade Runner meets The Handmaid's Tale"` | Capture the _feel_, never copy. |
+| `tropes_to_include` | array  |    No    | `["Found Family", "Redemption Arc"]`       | Tropes the AI should use.       |
+| `tropes_to_avoid`   | array  |    No    | `["Deus Ex Machina", "Love Triangle"]`     | Tropes the AI must avoid.       |
 
 ### Comic / Panel Specific
 
 These parameters are used only when `target_format` includes `"comic"`:
 
-| Parameter                    | Type   | Required | Example                                      | Description                             |
-| :--------------------------- | :----- | :------: | :------------------------------------------- | :-------------------------------------- |
-| `comic_panel_count_target`   | number |    No    | `12`                                         | Target number of panels.                |
-| `panel_style_guidance`       | string |    No    | `"manga-like, dynamic angles"`               | Visual style direction for artist.      |
-| `panel_focus_preferences`    | string |    No    | `"focus on key emotional beats"`             | What panels should prioritize.          |
+| Parameter                  | Type   | Required | Example                          | Description                        |
+| :------------------------- | :----- | :------: | :------------------------------- | :--------------------------------- |
+| `comic_panel_count_target` | number |    No    | `12`                             | Target number of panels.           |
+| `panel_style_guidance`     | string |    No    | `"manga-like, dynamic angles"`   | Visual style direction for artist. |
+| `panel_focus_preferences`  | string |    No    | `"focus on key emotional beats"` | What panels should prioritize.     |
 
 ### Technical Parameters
 
-| Parameter              | Type   | Required | Example                  | Description                                            |
-| :--------------------- | :----- | :------: | :----------------------- | :----------------------------------------------------- |
-| `model`                | string |    No    | `"llama-3.3-70b-versatile"` | Overrides the default model. Default is Llama 3.3.     |
-| `creativity_level`     | string |    No    | `"low"`, `"medium"`, `"high"` | Maps to model temperature (0.3 to 1.1).                |
-| `coherence_priority`   | string |    No    | `"very high"`, `"medium"`| When in doubt, coherence over wildness.                |
-| `hard_constraints`     | array  |    No    | `["protagonist must survive"]` | Non-negotiable story rules.                      |
+| Parameter            | Type   | Required | Example                        | Description                                        |
+| :------------------- | :----- | :------: | :----------------------------- | :------------------------------------------------- |
+| `model`              | string |    No    | `"llama-3.3-70b-versatile"`    | Overrides the default model. Default is Llama 3.3. |
+| `creativity_level`   | string |    No    | `"low"`, `"medium"`, `"high"`  | Maps to model temperature (0.3 to 1.1).            |
+| `coherence_priority` | string |    No    | `"very high"`, `"medium"`      | When in doubt, coherence over wildness.            |
+| `hard_constraints`   | array  |    No    | `["protagonist must survive"]` | Non-negotiable story rules.                        |
 
 ---
 
@@ -217,9 +219,7 @@ The AI responds with a **single valid JSON object**. No markdown, no commentary 
         "time": "string",
         "visualDescription": "string (what the artist draws)",
         "charactersPresent": ["string"],
-        "dialogue": [
-          { "speaker": "string", "text": "string" }
-        ],
+        "dialogue": [{ "speaker": "string", "text": "string" }],
         "caption": "string (optional narration)",
         "emotionalBeat": "string (what the reader feels)"
       }
@@ -236,7 +236,8 @@ The AI responds with a **single valid JSON object**. No markdown, no commentary 
 ### Schema Notes
 
 - `comicScript.enabled` is `true` only when `target_format` includes `"comic"`.
-- `chapters` will have 1 entry if `number_of_chapters` is 1 (continuous story with logical sections).
+- `chapters` will have 1 entry if `number_of_chapters` is 1 (continuous story with logical
+  sections).
 - `nftMetadata.shortBlurb` **never spoils** the ending — it teases, not summarizes.
 - `contentWarnings` are auto-generated based on the story content, not the input parameters.
 

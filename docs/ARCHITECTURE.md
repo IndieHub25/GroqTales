@@ -28,41 +28,50 @@ extensibility.
 - **Frontend**: Next.js 14 with App Router, React 18, TypeScript
 - **Styling**: Tailwind CSS, shadcn/ui components
 - **Backend**: Next.js API Routes, Node.js runtime
-- **Database**: Supabase PostgreSQL (primary) with legacy MongoDB paths (NFT minting) — see [Data Layer — Transitional State](#data-layer--transitional-state)
+- **Database**: Supabase PostgreSQL (primary) with legacy MongoDB paths (NFT minting) — see
+  [Data Layer — Transitional State](#data-layer--transitional-state)
 - **Blockchain**: Monad SDK, Solidity Smart Contracts
 - **AI**: Groq API for story generation
 - **Deployment**: Cloudflare Pages with edge network optimization
 
-> [!WARNING]
-> **This document is transitional.** The data layer is mid-migration from MongoDB to Supabase. The sections below describe the *current* runtime reality. Once the MongoDB modules listed below are fully removed, this warning and the transitional section should be deleted.
+> [!WARNING] **This document is transitional.** The data layer is mid-migration from MongoDB to
+> Supabase. The sections below describe the _current_ runtime reality. Once the MongoDB modules
+> listed below are fully removed, this warning and the transitional section should be deleted.
 
 ### Data Layer — Transitional State
 
-| Layer | Database | Status |
-|---|---|---|
-| Express backend (`server/`) — all routes | Supabase PostgreSQL + RLS | ✅ Fully migrated |
-| Next.js frontend auth & data | Supabase Auth + PostgREST | ✅ Fully migrated |
-| NFT minting pipeline | MongoDB via Mongoose | ⚠️ **Still active** |
-| Seed script (`scripts/seed.js`) | MongoDB via Mongoose | ⚠️ Still active |
+| Layer                                    | Database                  | Status              |
+| ---------------------------------------- | ------------------------- | ------------------- |
+| Express backend (`server/`) — all routes | Supabase PostgreSQL + RLS | ✅ Fully migrated   |
+| Next.js frontend auth & data             | Supabase Auth + PostgREST | ✅ Fully migrated   |
+| NFT minting pipeline                     | MongoDB via Mongoose      | ⚠️ **Still active** |
+| Seed script (`scripts/seed.js`)          | MongoDB via Mongoose      | ⚠️ Still active     |
 
 #### MongoDB modules still in the codebase
 
-| Module | Runtime Status | Notes |
-|---|---|---|
-| `lib/dbConnect.ts` | **Live** — called by `lib/mint-service.ts`, `workers/mintWorker.ts` | Mongoose connection helper with mock mode for builds |
-| `lib/mongodb.ts` | **Live** — imported by `lib/db.ts` | Native `MongoClient` connection with retry logic |
-| `lib/db.ts` | **Dead code** — `connectMongoose()` and CRUD helpers are exported but never imported outside this file | Can be removed |
-| `lib/mongoose.ts` | **Dead code** — `connectDB()` exported but never called | Can be removed |
-| `models/StoryMint.ts` | **Live** — fully active Mongoose model for NFT mint tracking | Used by `lib/mint-service.ts` |
-| `models/User.ts` | **Stubbed** — export set to `null as any`, schema commented out | Safe to remove |
-| `models/UserInteraction.ts` | **Stubbed** — export set to `null as any`, schema commented out | Safe to remove |
-| `scripts/seed.js` | **Live** — uses `require('mongoose')` | Dev-only; can remain until MongoDB is removed |
+| Module                      | Runtime Status                                                                                         | Notes                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| `lib/dbConnect.ts`          | **Live** — called by `lib/mint-service.ts`, `workers/mintWorker.ts`                                    | Mongoose connection helper with mock mode for builds |
+| `lib/mongodb.ts`            | **Live** — imported by `lib/db.ts`                                                                     | Native `MongoClient` connection with retry logic     |
+| `lib/db.ts`                 | **Dead code** — `connectMongoose()` and CRUD helpers are exported but never imported outside this file | Can be removed                                       |
+| `lib/mongoose.ts`           | **Dead code** — `connectDB()` exported but never called                                                | Can be removed                                       |
+| `models/StoryMint.ts`       | **Live** — fully active Mongoose model for NFT mint tracking                                           | Used by `lib/mint-service.ts`                        |
+| `models/User.ts`            | **Stubbed** — export set to `null as any`, schema commented out                                        | Safe to remove                                       |
+| `models/UserInteraction.ts` | **Stubbed** — export set to `null as any`, schema commented out                                        | Safe to remove                                       |
+| `scripts/seed.js`           | **Live** — uses `require('mongoose')`                                                                  | Dev-only; can remain until MongoDB is removed        |
 
 #### Development guidance
 
-- **All new feature development must target Supabase PostgreSQL.** Do not add new Mongoose models or MongoDB queries.
-- **Onboarding**: To run the full application locally you need both a `MONGODB_URI` (for the minting pipeline) and Supabase credentials (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`). During builds the MongoDB mock mode activates automatically via `NEXT_PUBLIC_BUILD_MODE=true`.
-- **Cleanup plan**: Migrate `StoryMint` tracking to a Supabase `story_mints` table, then delete `lib/db.ts`, `lib/dbConnect.ts`, `lib/mongodb.ts`, `lib/mongoose.ts`, `models/User.ts`, `models/UserInteraction.ts`, `models/StoryMint.ts`, and remove `mongodb` / `mongoose` from `package.json`.
+- **All new feature development must target Supabase PostgreSQL.** Do not add new Mongoose models or
+  MongoDB queries.
+- **Onboarding**: To run the full application locally you need both a `MONGODB_URI` (for the minting
+  pipeline) and Supabase credentials (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+  `SUPABASE_SERVICE_ROLE_KEY`). During builds the MongoDB mock mode activates automatically via
+  `NEXT_PUBLIC_BUILD_MODE=true`.
+- **Cleanup plan**: Migrate `StoryMint` tracking to a Supabase `story_mints` table, then delete
+  `lib/db.ts`, `lib/dbConnect.ts`, `lib/mongodb.ts`, `lib/mongoose.ts`, `models/User.ts`,
+  `models/UserInteraction.ts`, `models/StoryMint.ts`, and remove `mongodb` / `mongoose` from
+  `package.json`.
 
 ## System Architecture
 

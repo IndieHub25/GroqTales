@@ -59,7 +59,7 @@ StoryMintSchema.index({ status: 1, createdAt: -1 });
 StoryMintSchema.index({ authorAddress: 1, status: 1 });
 
 // Ensure authorAddress and storyHash are normalized to lowercase on save
-StoryMintSchema.pre('save', function() {
+StoryMintSchema.pre('save', function () {
   if (this.authorAddress && typeof this.authorAddress === 'string') {
     this.authorAddress = this.authorAddress.toLowerCase();
   }
@@ -73,20 +73,35 @@ function normalizeUpdate(this: any) {
   if (!update) return;
 
   // Handle $set payloads for authorAddress
-  if (update.$set && update.$set.authorAddress && typeof update.$set.authorAddress === 'string') {
+  if (
+    update.$set &&
+    update.$set.authorAddress &&
+    typeof update.$set.authorAddress === 'string'
+  ) {
     update.$set.authorAddress = update.$set.authorAddress.toLowerCase();
   }
 
   // Handle $set payloads for storyHash
-  if (update.$set && update.$set.storyHash && typeof update.$set.storyHash === 'string') {
+  if (
+    update.$set &&
+    update.$set.storyHash &&
+    typeof update.$set.storyHash === 'string'
+  ) {
     update.$set.storyHash = update.$set.storyHash.toLowerCase();
   }
 
   // Handle $setOnInsert payloads (upsert paths)
-  if (update.$setOnInsert?.authorAddress && typeof update.$setOnInsert.authorAddress === 'string') {
-    update.$setOnInsert.authorAddress = update.$setOnInsert.authorAddress.toLowerCase();
+  if (
+    update.$setOnInsert?.authorAddress &&
+    typeof update.$setOnInsert.authorAddress === 'string'
+  ) {
+    update.$setOnInsert.authorAddress =
+      update.$setOnInsert.authorAddress.toLowerCase();
   }
-  if (update.$setOnInsert?.storyHash && typeof update.$setOnInsert.storyHash === 'string') {
+  if (
+    update.$setOnInsert?.storyHash &&
+    typeof update.$setOnInsert.storyHash === 'string'
+  ) {
     update.$setOnInsert.storyHash = update.$setOnInsert.storyHash.toLowerCase();
   }
 

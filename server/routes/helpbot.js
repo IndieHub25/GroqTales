@@ -61,18 +61,24 @@ const logger = require('../utils/logger');
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/chat', async (req, res) => {
-    try {
-        const workerUrl = process.env.CF_WORKER_URL || 'https://groqtales-backend-workers.mantejsingh.workers.dev';
+  try {
+    const workerUrl =
+      process.env.CF_WORKER_URL ||
+      'https://groqtales-backend-workers.mantejsingh.workers.dev';
 
-        const response = await axios.post(`${workerUrl}/api/helpbot/chat`, req.body, {
-            validateStatus: false
-        });
+    const response = await axios.post(
+      `${workerUrl}/api/helpbot/chat`,
+      req.body,
+      {
+        validateStatus: false,
+      }
+    );
 
-        res.status(response.status).json(response.data);
-    } catch (error) {
-        logger.error('Error proxying helpbot chat to Worker:', error.message);
-        res.status(500).json({ error: 'Failed to communicate with Helpbot' });
-    }
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    logger.error('Error proxying helpbot chat to Worker:', error.message);
+    res.status(500).json({ error: 'Failed to communicate with Helpbot' });
+  }
 });
 
 module.exports = router;

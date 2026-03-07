@@ -34,24 +34,22 @@ effect.
 
 The following `.spline` files are the **only** approved 3D models in this repository:
 
-| Model File             | Location                    | Used In                | Purpose                              |
-| ---------------------- | --------------------------- | ---------------------- | ------------------------------------ |
-| `storybook.spline`     | `public/storybook.spline`   | `app/page.tsx` (Hero)  | Full-page 3D hero background         |
-| `neon_sign.spline`     | `public/neon_sign.spline`   | Reserved / Experimental | Neon sign effect (future branding)   |
+| Model File         | Location                  | Used In                 | Purpose                            |
+| ------------------ | ------------------------- | ----------------------- | ---------------------------------- |
+| `storybook.spline` | `public/storybook.spline` | `app/page.tsx` (Hero)   | Full-page 3D hero background       |
+| `neon_sign.spline` | `public/neon_sign.spline` | Reserved / Experimental | Neon sign effect (future branding) |
 
-> [!CAUTION]
-> These model files are **binary assets** curated and approved by the maintainers. They contain
-> custom materials, lighting, camera angles, and color palettes (green + blue theme) that define the
-> GroqTales visual identity. **Replacing, re-exporting, or modifying them will break the site's
-> design language.**
+> [!CAUTION] These model files are **binary assets** curated and approved by the maintainers. They
+> contain custom materials, lighting, camera angles, and color palettes (green + blue theme) that
+> define the GroqTales visual identity. **Replacing, re-exporting, or modifying them will break the
+> site's design language.**
 
 ---
 
 ## ⚠️ Model Protection Policy
 
-> [!IMPORTANT]
-> **Do NOT replace, re-export, rename, resize, or delete any `.spline` model file** in a Pull
-> Request without **explicit written permission** from a project maintainer.
+> [!IMPORTANT] **Do NOT replace, re-export, rename, resize, or delete any `.spline` model file** in
+> a Pull Request without **explicit written permission** from a project maintainer.
 
 ### Rules
 
@@ -79,10 +77,10 @@ The following `.spline` files are the **only** approved 3D models in this reposi
 
 ## Package Stack
 
-| Package                      | Version   | Purpose                        |
-| ---------------------------- | --------- | ------------------------------ |
-| `@splinetool/react-spline`   | `^2.2.6`  | React wrapper for Spline scenes |
-| `@splinetool/runtime`        | `^1.9.27` | Core Spline rendering engine    |
+| Package                    | Version   | Purpose                         |
+| -------------------------- | --------- | ------------------------------- |
+| `@splinetool/react-spline` | `^2.2.6`  | React wrapper for Spline scenes |
+| `@splinetool/runtime`      | `^1.9.27` | Core Spline rendering engine    |
 
 Both were installed with `--legacy-peer-deps` due to React 18 peer dependency constraints. **Do not
 upgrade these packages** without verifying full compatibility with Next.js 14.1.0 and React 18.
@@ -111,27 +109,26 @@ Page paint (instant)
 
 ```tsx
 // app/page.tsx — Lines 23-27
-const Spline = dynamic(
-  () => import('@splinetool/react-spline').then((mod) => mod.default || mod),
-  { ssr: false, loading: () => null }
-);
+const Spline = dynamic(() => import('@splinetool/react-spline').then((mod) => mod.default || mod), {
+  ssr: false,
+  loading: () => null,
+});
 ```
 
 ```tsx
 // app/page.tsx — Lines 126-138
-{showSpline && (
-  <div
-    className="fixed inset-0 z-0 transition-opacity duration-1000"
-    style={{ opacity: splineReady ? 1 : 0 }}
-  >
-    <Suspense fallback={null}>
-      <Spline
-        scene="/storybook.spline"
-        onLoad={() => setSplineReady(true)}
-      />
-    </Suspense>
-  </div>
-)}
+{
+  showSpline && (
+    <div
+      className="fixed inset-0 z-0 transition-opacity duration-1000"
+      style={{ opacity: splineReady ? 1 : 0 }}
+    >
+      <Suspense fallback={null}>
+        <Spline scene="/storybook.spline" onLoad={() => setSplineReady(true)} />
+      </Suspense>
+    </div>
+  );
+}
 ```
 
 ### Key Points
@@ -192,7 +189,8 @@ Spline files are **large binary assets** (~2–10 MB). Follow these guidelines:
 Before submitting a PR that touches Spline-related code:
 
 1. **Dev server**: Run `npm run dev` and verify the hero section loads smoothly.
-2. **Production build**: Run `npm run build && npm start` to confirm Spline works in production mode.
+2. **Production build**: Run `npm run build && npm start` to confirm Spline works in production
+   mode.
 3. **Check load sequence**:
    - Page text should appear instantly
    - Gradient background should show first
@@ -207,32 +205,32 @@ Before submitting a PR that touches Spline-related code:
 
 ## Troubleshooting
 
-| Issue                              | Cause                                   | Fix                                               |
-| ---------------------------------- | --------------------------------------- | ------------------------------------------------- |
-| Blank hero section                 | Spline file missing from `public/`      | Ensure `storybook.spline` exists in `public/`     |
-| "document is not defined" error    | SSR attempting to load Spline           | Confirm `dynamic()` uses `{ ssr: false }`         |
-| Model colors look washed out       | CSS overlay with high opacity           | Remove or reduce gradient overlays                |
-| Very slow initial load             | Large `.spline` file                    | Expected — ensure fallback gradient is visible    |
-| Build fails with peer dep warning  | React version conflict                  | Install with `--legacy-peer-deps`                 |
-| Model doesn't appear after deploy  | Static asset not included in build      | Verify `public/` files are copied in `Dockerfile` |
+| Issue                             | Cause                              | Fix                                               |
+| --------------------------------- | ---------------------------------- | ------------------------------------------------- |
+| Blank hero section                | Spline file missing from `public/` | Ensure `storybook.spline` exists in `public/`     |
+| "document is not defined" error   | SSR attempting to load Spline      | Confirm `dynamic()` uses `{ ssr: false }`         |
+| Model colors look washed out      | CSS overlay with high opacity      | Remove or reduce gradient overlays                |
+| Very slow initial load            | Large `.spline` file               | Expected — ensure fallback gradient is visible    |
+| Build fails with peer dep warning | React version conflict             | Install with `--legacy-peer-deps`                 |
+| Model doesn't appear after deploy | Static asset not included in build | Verify `public/` files are copied in `Dockerfile` |
 
 ---
 
 ## FAQ
 
-**Q: Can I use a Spline URL instead of a local file?**
-A: We intentionally self-host `.spline` files in `public/` for reliability, offline dev, and to
-avoid rate limits from Spline's CDN. Do not switch to URL-based loading.
+**Q: Can I use a Spline URL instead of a local file?** A: We intentionally self-host `.spline` files
+in `public/` for reliability, offline dev, and to avoid rate limits from Spline's CDN. Do not switch
+to URL-based loading.
 
-**Q: Can I add Three.js or another 3D library?**
-A: No. We use Spline exclusively. Adding a second runtime would bloat the bundle significantly.
+**Q: Can I add Three.js or another 3D library?** A: No. We use Spline exclusively. Adding a second
+runtime would bloat the bundle significantly.
 
-**Q: How do I get the model file if I need to inspect it?**
-A: The `.spline` files are committed to the repo. You can open them in the
-[Spline Desktop App](https://spline.design/), but **do not re-export** them.
+**Q: How do I get the model file if I need to inspect it?** A: The `.spline` files are committed to
+the repo. You can open them in the [Spline Desktop App](https://spline.design/), but **do not
+re-export** them.
 
-**Q: Who do I contact about model changes?**
-A: Open a GitHub Issue with the `3d-models` or `spline` label and tag a maintainer.
+**Q: Who do I contact about model changes?** A: Open a GitHub Issue with the `3d-models` or `spline`
+label and tag a maintainer.
 
 ---
 
