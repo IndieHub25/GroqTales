@@ -546,94 +546,47 @@ export default function CreateStoryPage() {
     return () => window.clearInterval(autosaveInterval);
   }, [draftKey, persistDraft]);
 
-  // Save on blur-like lifecycle signals.
-  useEffect(() => {
-    if (!draftKey) {
-      return;
-    }
-
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        void persistDraft('blur', undefined, true);
-      }
-    };
-
-    const onBeforeUnload = () => {
-      void persistDraft('blur', undefined, true);
-    };
-
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    window.addEventListener('beforeunload', onBeforeUnload);
-
-    return () => {
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-      window.removeEventListener('beforeunload', onBeforeUnload);
-    };
-  }, [draftKey, persistDraft]);
-
-  const handleFieldBlur = () => {
+  const handleFieldBlur = useCallback(() => {
     void persistDraft('blur');
-  };
+  }, [persistDraft]);
 
   const handleRevertToVersion = async (versionId: string) => {
-    if (!draftKey) {
-      return;
-    }
-
-    const restored = restoreDraftVersion({
-      draftKey,
-      versionId,
-      maxVersions: MAX_DRAFT_VERSIONS,
-    });
-    if (!restored) {
-      toast({
-        title: 'Restore Failed',
-        description: 'Could not restore this version.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setStoryData((prev) => ({
-      ...prev,
-      title: restored.current.title,
-      description: restored.current.description,
-      genre: restored.current.genre,
-      content: restored.current.content,
-      coverImage: null,
-    }));
-    setDraftVersions(restored.versions);
-    setLastSavedAt(restored.updatedAt);
+    if (!draftKey) return;
 
     try {
       setIsSyncingDraft(true);
-      setDraftSyncError(null);
-      const controller = new AbortController();
-      const timeoutId = window.setTimeout(() => {
-        controller.abort();
-      }, DRAFT_SYNC_TIMEOUT_MS);
+      const restored = restoreDraftVersion({ draftKey, versionId, maxVersions: MAX_DRAFT_VERSIONS });
+      if (restored) {
+        setStoryData((prev) => ({
+          ...prev,
+          title: restored.current.title,
+          description: restored.current.description,
+          genre: restored.current.genre,
+          content: restored.current.content,
+        }));
+        setDraftVersions(restored.versions);
+        setLastSavedAt(restored.updatedAt);
+      }
 
-      const response = await (async () => {
-        try {
-          return await fetch(DRAFT_SYNC_ENDPOINT, {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            signal: controller.signal,
-            body: JSON.stringify({
-              draftKey,
-              versionId,
-              maxVersions: MAX_DRAFT_VERSIONS,
-            }),
-          });
-        } finally {
-          window.clearTimeout(timeoutId);
-        }
-      })();
+      const response = await fetch(DRAFT_SYNC_ENDPOINT, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          draftKey,
+          storyType: storyType || 'text',
+          storyFormat: storyFormat || 'free',
+          ownerWallet: account || null,
+          ownerRole: account ? 'wallet' : 'admin',
+          snapshot: restored?.current,
+          saveReason: 'restore',
+          maxVersions: MAX_DRAFT_VERSIONS,
+        }),
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to sync version restore');
+        throw new Error('Restore sync failed');
       }
 
       const payload = await response.json();
@@ -1015,9 +968,8 @@ export default function CreateStoryPage() {
                 <CardTitle>
                   Create Your{' '}
                   {storyType
-                    ? `${
-                        storyType.charAt(0).toUpperCase() + storyType.slice(1)
-                      } `
+                    ? `${storyType.charAt(0).toUpperCase() + storyType.slice(1)
+                    } `
                     : ''}
                   Story
                   {storyFormat === 'nft' && ' NFT'}
@@ -1138,7 +1090,7 @@ export default function CreateStoryPage() {
                   value={storyData.genre}
                   defaultValue={storyData.genre}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="genre">
                     <SelectValue placeholder="Select a genre" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1313,7 +1265,7 @@ export default function CreateStoryPage() {
                         2. A unique NFT will be created with your story metadata
                       </li>
                       <li>
-                        3. You'll be able to manage and sell your story NFT from
+                        3. You&apos;ll be able to manage and sell your story NFT from
                         your profile
                       </li>
                     </>
