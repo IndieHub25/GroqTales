@@ -81,25 +81,14 @@ world of creative writing, generative AI, and decentralized technology.
 - **AI-Driven Story & Comic Generation** Use Groq AI to generate stories or comic panel outlines by
   specifying title, genre, setting, characters, and themes. Both text and comic formats are
   supported.
-- **Extensive Story Customization (70+ Parameters)** Fine-tune every aspect of your story with
-  comprehensive customization across 9 categories:
-  - **Characters**: Name, count, traits, age, background, protagonist type
-  - **Plot & Structure**: Type, conflict, arc, pacing, ending, plot twists
-  - **Setting & World**: Time period, location, world-building depth, atmosphere
-  - **Writing Style & Tone**: Voice, tone, style, reading level, mood, dialogue percentage,
-    description detail
-  - **Themes & Messages**: Primary/secondary themes, moral complexity, social commentary
-  - **Content Controls**: Violence, romance, language levels, mature content warnings
-  - **Advanced Options**: Chapters, foreshadowing, symbolism, multiple POVs
-  - **Inspiration & References**: Similar works, inspired by, tropes to avoid/include
-  - **Technical Parameters**: AI creativity slider, model selection
+- **Professional Story Creation UI**: Redesigned creation for Text, Comic, and AI-generated stories with professional canvas-based interfaces to visualize story structure.
+- **Interactive Story Canvas**: A reusable SVG-based canvas supports drag-and-drop node positioning with grid snapping, zoom controls, and real-time info panel. It includes auto-saving to local storage.
+- **Extensive Story Customization (70+ Parameters)**: Fine-tune every aspect of your story with a powerful Parameter Management System. Includes 70+ parameters across 10 categories, intelligence-level presets, and an advanced UI with search and filtering.
+- **Guided Onboarding Tours**: Interactive guided tours for each creation mode to help new users get started quickly.
 - **NFT Minting on Monad Blockchain** Seamlessly mint your stories as NFTs on Monad (Testnet live,
   Mainnet coming soon). Each NFT proves authenticity, ownership, and collectibility.
 - **Community Gallery** Publish your stories publicly, browse the gallery, and interact with other
   creators. Stories can be shared freely or as NFTs.
-- **Progressive Disclosure UI** Clean, accordion-based interface with 9 collapsible sections. Keeps
-  simple tasks simple while offering advanced options when needed. Only prompt is
-  required—everything else is optional!
 - **Wallet Integration** Connect with MetaMask, WalletConnect, or Ledger for secure publishing and
   minting. Wallet is required for NFT actions.
 - **Real-Time Story Streaming** Watch your story unfold in real-time as Groq AI generates each
