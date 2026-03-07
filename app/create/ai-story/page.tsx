@@ -1,11 +1,10 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import {
   Sparkles,
   BookText,
   Zap,
-  Send,
   RotateCcw,
   Copy,
   Check,
@@ -21,6 +20,9 @@ import {
   Layers,
   Hash,
   AlignLeft,
+  GripVertical,
+  Settings2,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -31,31 +33,36 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 import { ParameterPanel } from '@/components/parameter-panel';
-import { StoryCanvas } from '@/components/story-canvas';
 import { GuidedTour, AI_STORY_TOUR_STEPS } from '@/components/guided-tour';
-import { useStoryCanvas } from '@/hooks/useStoryCanvas';
-import * as canvasUtils from '@/lib/canvas-utils';
 
 // Story Studio components
 import { PanelProgressTracker } from './components/panel-progress-tracker';
-import { GenreLockIndicator } from './components/genre-lock-indicator';
 import { StoryMemoryDisplay } from './components/story-memory-display';
-import { PanelCreationForm } from './components/panel-creation-form';
-import { StoryOutputDisplay } from './components/story-output-display';
 
 // Services & types
 import { PanelLifecycleManager } from '@/lib/services/panel-lifecycle-manager';
 import { StoryMemoryManager } from '@/lib/services/story-memory-manager';
 import { AIOrchestrationService } from '@/lib/services/ai-orchestration-service';
-import { lockGenres, canModifyGenres } from '@/lib/utils/genre-manager';
+import { lockGenres } from '@/lib/utils/genre-manager';
 import {
   StorySession,
   PanelData,
   PanelParameters,
-  StoryMemory,
 } from '@/lib/types/story-session';
+
+// ── Types ─────────────────────────────────────────────────────────
+
+type VedaChapter = {
+  id: string;
+  index: number;
+  title: string;
+  summary?: string;
+  content: string;
+  params?: any;
+};
 
 interface StoryPrompt {
   title: string;
@@ -69,6 +76,8 @@ const availableGenres = [
   'Fantasy', 'Sci-Fi', 'Mystery', 'Romance', 'Thriller',
   'Horror', 'Adventure', 'Comedy', 'Drama', 'Historical',
 ];
+
+// ── Main Component ────────────────────────────────────────────────
 
 export default function AIStoryGeneratorPage() {
   return (
@@ -90,11 +99,6 @@ function AIStoryContent() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
 
-  const { canvasState, setCanvasState } = useStoryCanvas({
-    storageKey: 'aiStoryCanvasState',
-    autoSave: true,
-  });
-
   // ── Services (stable refs) ──────────────────────────────────────
   const lifecycleRef = useRef(new PanelLifecycleManager());
   const memoryMgrRef = useRef(new StoryMemoryManager());
@@ -114,6 +118,11 @@ function AIStoryContent() {
   });
 
   // ── UI State ────────────────────────────────────────────────────
+  const [chapters, setChapters] = useState<VedaChapter[]>([
+    { id: 'chap-1', index: 1, title: 'Chapter 1', content: '' }
+  ]);
+  const [activeChapterId, setActiveChapterId] = useState<string>('chap-1');
+
   const [storyPrompt, setStoryPrompt] = useState<StoryPrompt>({
     title: session.title || '',
     mainCharacters: '',
@@ -121,22 +130,29 @@ function AIStoryContent() {
     setting: '',
     themes: '',
   });
-  const [selectedGenre, setSelectedGenre] = useState('Fantasy');
+  
+  const [selectedGenres, setSelectedGenres] = useState<string[]>(['Fantasy']);
   const [storyDescription, setStoryDescription] = useState('');
+  
   const [selectedParameters, setSelectedParameters] = useState<Set<string>>(new Set());
   const [parameterValues, setParameterValues] = useState<Record<string, unknown>>({});
+  const [isParamsExpanded, setIsParamsExpanded] = useState(false);
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [editorTab, setEditorTab] = useState<'chapter' | 'compiled'>('chapter');
-  const [currentChapterContent, setCurrentChapterContent] = useState('');
-  const [expandedParamCategories, setExpandedParamCategories] = useState<Set<string>>(
-    new Set(['Tone & Style', 'Plot Structure'])
-  );
-
-  const genre = searchParams.get('genre') || 'fantasy';
-  const currentPanelIndex = lifecycleRef.current.getNextPanelIndex(session.panels);
-  const effectiveCurrentPanel = currentPanelIndex === -1 ? session.panels.length : currentPanelIndex;
+  
+  // Initialize with URL param
+  useEffect(() => {
+    const genreParam = searchParams.get('genre');
+    if (genreParam) {
+      const formatted = genreParam.charAt(0).toUpperCase() + genreParam.slice(1);
+      if (availableGenres.includes(formatted)) {
+        setSelectedGenres([formatted]);
+      }
+    }
+  }, [searchParams]);
 
   // ── Load import from Shakti Spark ───────────────────────────────
   useEffect(() => {
@@ -144,32 +160,94 @@ function AIStoryContent() {
       const imported = localStorage.getItem('vedascript_import');
       if (imported) {
         const data = JSON.parse(imported);
-        if (data.content) setCurrentChapterContent(data.content);
-        if (data.genre) setSelectedGenre(data.genre);
+        if (data.content) {
+          setChapters(prev => prev.map(c => c.id === activeChapterId ? { ...c, content: data.content } : c));
+        }
+        if (data.genre) setSelectedGenres([data.genre]);
         if (data.prompt) setStoryPrompt(prev => ({ ...prev, plotOutline: data.prompt }));
         localStorage.removeItem('vedascript_import');
       }
     } catch { /* ignore */ }
   }, []);
 
-  // ── Persist session to localStorage ─────────────────────────────
-  useEffect(() => {
-    try {
-      localStorage.setItem('storyStudioSession', JSON.stringify(session));
-    } catch { /* quota exceeded, silently ignore */ }
-  }, [session]);
+  // ── Derived State ───────────────────────────────────────────────
+  const activeChapter = chapters.find(c => c.id === activeChapterId) || chapters[0];
+  const completedCount = lifecycleRef.current.getCompletePanelCount(session.panels);
+  
+  // Calculate total words across all chapters
+  const totalWordCount = chapters.reduce((acc, c) => acc + c.content.split(/\s+/).filter(Boolean).length, 0);
 
-  // ── Canvas sync — create chapter nodes ──────────────────────────
-  useEffect(() => {
-    if (canvasState.nodes.length === 0 && selectedParameters.size > 0) {
-      let newState = canvasUtils.createEmptyCanvasState();
-      const chapterNode = canvasUtils.createNode('chapter' as any, 'Chapter 1', 100, 100);
-      newState = canvasUtils.addNode(newState, chapterNode);
-      setCanvasState(newState);
-    }
-  }, [selectedParameters.size]); // eslint-disable-line react-hooks/exhaustive-deps
+  const compiledStory = chapters
+    .sort((a, b) => a.index - b.index)
+    .map((c) => `## ${c.title}\n\n${c.content}`)
+    .join('\n\n---\n\n');
 
   // ── Handlers ────────────────────────────────────────────────────
+
+  // Chapter Management
+  const handleAddChapter = () => {
+    const newIndex = chapters.length + 1;
+    const newChapter: VedaChapter = {
+      id: `chap-${Date.now()}`,
+      index: newIndex,
+      title: `Chapter ${newIndex}`,
+      content: ''
+    };
+    setChapters([...chapters, newChapter]);
+    setActiveChapterId(newChapter.id);
+    toast({ title: 'Chapter added', description: `Chapter ${newIndex} created` });
+  };
+
+  const handleDuplicateChapter = (chapterId: string) => {
+    const chapter = chapters.find(c => c.id === chapterId);
+    if (!chapter) return;
+    
+    const newChapter: VedaChapter = {
+      ...chapter,
+      id: `chap-${Date.now()}`,
+      index: chapters.length + 1,
+      title: `${chapter.title} (Copy)`,
+    };
+    setChapters([...chapters, newChapter]);
+    toast({ title: 'Chapter duplicated' });
+  };
+
+  const handleDeleteChapter = (chapterId: string) => {
+    if (chapters.length <= 1) return;
+    
+    const newChapters = chapters.filter(c => c.id !== chapterId)
+      .map((c, i) => ({ ...c, index: i + 1 })); // Re-index
+      
+    setChapters(newChapters);
+    if (activeChapterId === chapterId) {
+      setActiveChapterId(newChapters[0].id);
+    }
+    toast({ title: 'Chapter removed' });
+  };
+
+  const handleChapterReorder = (newOrder: VedaChapter[]) => {
+    const reindexed = newOrder.map((c, i) => ({ ...c, index: i + 1 }));
+    setChapters(reindexed);
+  };
+
+  const updateActiveChapter = (updates: Partial<VedaChapter>) => {
+    setChapters(prev => prev.map(c => c.id === activeChapterId ? { ...c, ...updates } : c));
+  };
+
+  // Genres
+  const toggleGenre = (genre: string) => {
+    if (selectedGenres.includes(genre)) {
+      setSelectedGenres(prev => prev.filter(g => g !== genre));
+    } else {
+      if (selectedGenres.length >= 2) {
+        toast({ title: 'Limit reached', description: 'You can choose up to 2 genres.', variant: 'destructive' });
+        return;
+      }
+      setSelectedGenres(prev => [...prev, genre]);
+    }
+  };
+
+  // Parameters
   const handleParameterChange = useCallback((id: string, value: unknown) => {
     setParameterValues((prev) => ({ ...prev, [id]: value }));
   }, []);
@@ -182,42 +260,13 @@ function AIStoryContent() {
     });
   }, []);
 
-  const handleGenreChange = useCallback((genres: string[]) => {
-    setSession((prev) => ({ ...prev, genres }));
-  }, []);
-
-  const handleAddChapter = useCallback(() => {
-    const count = canvasState.nodes.length;
-    const newNode = canvasUtils.createNode(
-      'chapter' as any,
-      `Chapter ${count + 1}`,
-      100,
-      100 + count * 120
-    );
-    const newState = canvasUtils.addNode(canvasState, newNode);
-    setCanvasState(newState);
-    toast({ title: 'Chapter added', description: `Chapter ${count + 1} created` });
-  }, [canvasState, setCanvasState, toast]);
-
-  const handleDeleteChapter = useCallback(() => {
-    if (canvasState.nodes.length <= 1) return;
-    const lastNode = canvasState.nodes[canvasState.nodes.length - 1];
-    if (!lastNode) return;
-    const newState = canvasUtils.deleteNode(canvasState, lastNode.id);
-    setCanvasState(newState);
-    toast({ title: 'Chapter removed' });
-  }, [canvasState, setCanvasState, toast]);
-
+  // Generation
   const handleGeneratePanel = useCallback(async () => {
-    const panelIdx = currentPanelIndex;
-    if (panelIdx === -1) {
-      toast({ title: 'Story Complete', description: 'All panels have been generated!' });
-      return;
-    }
+    const panelIdx = activeChapter.index;
 
     // Lock genres on Panel 1 completion
-    if (panelIdx === 1 && !session.genresLocked && session.genres.length > 0) {
-      const locked = lockGenres(session.genres);
+    if (panelIdx === 1 && !session.genresLocked && selectedGenres.length > 0) {
+      const locked = lockGenres(selectedGenres);
       setSession((prev) => ({ ...prev, genres: [...locked], genresLocked: true }));
     }
 
@@ -227,17 +276,23 @@ function AIStoryContent() {
     const panelParams = parameterValues as PanelParameters;
 
     try {
+      // Use existing service logic but adapt to new state
       const result = await orchestratorRef.current.generatePanel(
         panelIdx,
         panelParams,
         session.storyMemory,
-        session.genres,
+        selectedGenres,
         session.panels
       );
 
+      // Update chapter content
+      updateActiveChapter({ content: result.content });
+      setEditorTab('chapter');
+
+      // Update session/memory tracking (legacy support for services)
       const newPanel: PanelData = {
         panelIndex: panelIdx,
-        title: storyPrompt.title || `Chapter ${panelIdx}`,
+        title: activeChapter.title,
         parameters: panelParams,
         generatedContent: result.content,
         wordCount: result.wordCount,
@@ -258,20 +313,16 @@ function AIStoryContent() {
         ...prev,
         panels: [...prev.panels, newPanel],
         storyMemory: updatedMemory,
-        title: storyPrompt.title || prev.title,
         metadata: {
           ...prev.metadata,
           updatedAt: new Date(),
           totalWordCount: prev.metadata.totalWordCount + result.wordCount,
         },
-        status: panelIdx === 7 ? 'complete' : 'in-progress',
       }));
 
-      setCurrentChapterContent(result.content);
-      setEditorTab('chapter');
       toast({
-        title: `Chapter ${panelIdx} Generated!`,
-        description: `${result.wordCount} words in ${(result.generationTime / 1000).toFixed(1)}s`,
+        title: `Chapter Generated!`,
+        description: `${result.wordCount} words generated successfully.`,
       });
     } catch (error) {
       const errMsg = (error as Error).message || 'Generation failed';
@@ -280,44 +331,28 @@ function AIStoryContent() {
     } finally {
       setIsGenerating(false);
     }
-  }, [currentPanelIndex, session, storyPrompt.title, parameterValues, toast]);
+  }, [activeChapter, session, selectedGenres, parameterValues, toast]);
 
-  const handleCopyStory = useCallback(async () => {
-    const fullText = session.panels
-      .sort((a, b) => a.panelIndex - b.panelIndex)
-      .map((p) => `## Chapter ${p.panelIndex}: ${p.title}\n\n${p.generatedContent}`)
-      .join('\n\n---\n\n');
+  const handleCopyStory = async () => {
     try {
-      await navigator.clipboard.writeText(fullText || currentChapterContent);
+      await navigator.clipboard.writeText(compiledStory || activeChapter.content);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       toast({ title: 'Copied!', description: 'Story copied to clipboard' });
     } catch {
       toast({ title: 'Copy failed', variant: 'destructive' });
     }
-  }, [session.panels, currentChapterContent, toast]);
+  };
 
-  const handleReset = useCallback(() => {
-    setSession(createEmptySession());
-    setStoryPrompt({ title: '', mainCharacters: '', plotOutline: '', setting: '', themes: '' });
-    setSelectedParameters(new Set());
-    setParameterValues({});
-    setGenerationError(null);
-    setCurrentChapterContent('');
-    setCanvasState(canvasUtils.createEmptyCanvasState());
-    localStorage.removeItem('storyStudioSession');
-  }, [setCanvasState]);
-
-  const handleSaveDraft = useCallback(() => {
+  const handleSaveDraft = () => {
     try {
       localStorage.setItem(
         'aiStoryDraft',
         JSON.stringify({
           prompt: storyPrompt,
+          chapters,
           selectedParameters: Array.from(selectedParameters),
           parameterValues,
-          session,
-          currentChapterContent,
           savedAt: new Date().toISOString(),
         })
       );
@@ -325,22 +360,7 @@ function AIStoryContent() {
     } catch {
       toast({ title: 'Save failed', variant: 'destructive' });
     }
-  }, [storyPrompt, selectedParameters, parameterValues, session, currentChapterContent, toast]);
-
-  // ── Derived data ────────────────────────────────────────────────
-  const panelStatuses = Array.from({ length: 7 }, (_, i) => {
-    const panel = session.panels.find((p) => p.panelIndex === i + 1);
-    return panel ? panel.status : ('pending' as const);
-  });
-
-  const completedCount = lifecycleRef.current.getCompletePanelCount(session.panels);
-  const totalWordCount = session.metadata.totalWordCount + currentChapterContent.split(/\s+/).filter(Boolean).length;
-  const totalChapters = canvasState.nodes.length;
-
-  const compiledStory = session.panels
-    .sort((a, b) => a.panelIndex - b.panelIndex)
-    .map((p) => `## Chapter ${p.panelIndex}: ${p.title}\n\n${p.generatedContent}`)
-    .join('\n\n---\n\n');
+  };
 
   return (
     <motion.div
@@ -371,31 +391,14 @@ function AIStoryContent() {
                   <p className="text-xs text-white/40">Deep narrative control for AI-native stories.</p>
                 </div>
               </div>
-              <div className="hidden md:flex items-center gap-2 ml-4 px-3 py-1.5 rounded-lg bg-white/5 border border-white/[0.06]">
-                <FileText className="w-3.5 h-3.5 text-white/40" />
-                <span className="text-sm text-white/60 truncate max-w-[200px]">
-                  {storyPrompt.title || 'Untitled Story'}
-                </span>
-              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleSaveDraft}
-                className="bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10 rounded-lg"
-              >
+            <div className="flex items-center gap-2" data-tour="save-export">
+              <Button size="sm" variant="outline" onClick={handleSaveDraft} className="bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10 rounded-lg">
                 <Save className="w-4 h-4 mr-1.5" />
                 Save Draft
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleCopyStory}
-                disabled={completedCount === 0 && !currentChapterContent}
-                className="bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10 rounded-lg"
-              >
-                {copied ? <Check className="w-4 h-4 mr-1.5" /> : <Download className="w-4 h-4 mr-1.5" />}
+              <Button size="sm" variant="outline" onClick={handleCopyStory} className="bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10 rounded-lg">
+                <Download className="w-4 h-4 mr-1.5" />
                 Export
               </Button>
               <Link href="/create">
@@ -408,89 +411,79 @@ function AIStoryContent() {
           </div>
         </div>
 
-        {/* ═══ MAIN 3-COLUMN LAYOUT ═══ */}
+        {/* ═══ MAIN LAYOUT ═══ */}
         <div className="max-w-[1800px] mx-auto px-4 py-5">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-            {/* ── LEFT: Story Structure Canvas ── */}
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="lg:col-span-3"
-              data-tour="canvas"
-            >
-              <div className="sticky top-[72px] space-y-4">
-                <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl overflow-hidden">
-                  {/* Canvas Header */}
-                  <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <BookText className="w-4 h-4 text-blue-400" />
-                      <span className="font-semibold text-sm text-white/90">Story Structure</span>
-                    </div>
-                    <span className="text-xs text-white/30">{totalChapters} chapter{totalChapters !== 1 ? 's' : ''}</span>
-                  </div>
-
-                  {/* Canvas Body */}
-                  <div className="h-[420px]">
-                    {canvasState.nodes.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-full text-white/40 px-4">
-                        <BookText className="w-10 h-10 mb-3 opacity-20" />
-                        <p className="text-sm text-center">No chapters yet. Add your first chapter to begin.</p>
-                      </div>
-                    ) : (
-                      <StoryCanvas
-                        state={canvasState}
-                        onChange={setCanvasState}
-                        width={400}
-                        height={420}
-                        readOnly={false}
-                      />
-                    )}
-                  </div>
-
-                  {/* Canvas Controls */}
-                  <div className="px-4 py-3 border-t border-white/[0.06] flex gap-2">
-                    <button
-                      onClick={handleAddChapter}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium hover:bg-emerald-500/15 transition-all"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      Add Chapter
-                    </button>
-                    <button
-                      onClick={handleDeleteChapter}
-                      disabled={canvasState.nodes.length <= 1}
-                      className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm hover:bg-red-500/15 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Story Memory (below canvas) */}
-                <StoryMemoryDisplay
-                  memory={session.storyMemory}
-                  panelCount={completedCount}
-                />
-              </div>
-            </motion.div>
-
-            {/* ── MIDDLE: Story Details + Parameters ── */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="lg:col-span-4 space-y-5"
-              data-tour="parameters"
-            >
-              {/* Story Details */}
-              <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-white/[0.06]">
+            {/* ── LEFT: Story Structure & Details ── */}
+            <div className="lg:col-span-4 space-y-5 sticky top-[72px] h-[calc(100vh-100px)] overflow-y-auto no-scrollbar pointer-events-auto pb-8 pr-2" data-tour="canvas">
+              {/* Story Structure */}
+              <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl overflow-hidden shrink-0">
+                <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-amber-400" />
-                    <span className="font-semibold text-sm text-white/90">Story Details</span>
+                    <Layers className="w-4 h-4 text-blue-400" />
+                    <span className="font-semibold text-sm text-white/90">Story Structure</span>
                   </div>
+                  <Button variant="ghost" size="icon" onClick={handleAddChapter} className="h-6 w-6 hover:bg-white/10">
+                    <Plus className="w-4 h-4 text-emerald-400" />
+                  </Button>
+                </div>
+                
+                <div className="p-3 space-y-2 max-h-[60vh] overflow-y-auto">
+                  <Reorder.Group axis="y" values={chapters} onReorder={handleChapterReorder}>
+                    {chapters.map((chapter) => (
+                      <Reorder.Item key={chapter.id} value={chapter}>
+                        <div 
+                          onClick={() => setActiveChapterId(chapter.id)}
+                          className={`
+                            group relative p-3 rounded-xl border transition-all cursor-pointer select-none
+                            ${activeChapterId === chapter.id 
+                              ? 'bg-white/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
+                              : 'bg-white/5 border-white/5 hover:bg-white/[0.07] hover:border-white/10'}
+                          `}
+                        >
+                          <div className="flex items-center gap-3">
+                            <GripVertical className="w-4 h-4 text-white/20 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs font-medium text-emerald-400/80 uppercase tracking-wider">
+                                  Chapter {chapter.index}
+                                </span>
+                                {chapters.length > 1 && (
+                                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={(e) => { e.stopPropagation(); handleDuplicateChapter(chapter.id); }} className="p-1 hover:text-white text-white/40">
+                                      <Copy className="w-3 h-3" />
+                                    </button>
+                                    <button onClick={(e) => { e.stopPropagation(); handleDeleteChapter(chapter.id); }} className="p-1 hover:text-red-400 text-white/40">
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                              <input 
+                                value={chapter.title}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setChapters(prev => prev.map(c => c.id === chapter.id ? { ...c, title: val } : c));
+                                }}
+                                className="bg-transparent border-none p-0 text-sm font-semibold text-white/90 w-full focus:ring-0 placeholder:text-white/20"
+                                placeholder="Chapter Title"
+                                onClick={(e) => e.stopPropagation()} 
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </Reorder.Item>
+                    ))}
+                  </Reorder.Group>
+                </div>
+              </div>
+
+              {/* Story Details */}
+              <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl overflow-hidden shrink-0" data-tour="story-details">
+                <div className="px-5 py-4 border-b border-white/[0.06] flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-amber-400" />
+                  <span className="font-semibold text-sm text-white/90">Story Details</span>
                 </div>
                 <div className="p-5 space-y-4">
                   <div>
@@ -503,21 +496,29 @@ function AIStoryContent() {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs font-semibold text-white/60 mb-1.5 block">Genre</Label>
+                    <div className="flex justify-between items-center mb-1.5">
+                      <Label className="text-xs font-semibold text-white/60 block">Genres</Label>
+                      <span className="text-[10px] text-white/40">{selectedGenres.length}/2 selected</span>
+                    </div>
                     <div className="flex flex-wrap gap-1.5">
-                      {availableGenres.map((g) => (
-                        <button
-                          key={g}
-                          onClick={() => setSelectedGenre(g)}
-                          className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-all ${
-                            selectedGenre === g
-                              ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                              : 'bg-white/5 border-white/10 text-white/50 hover:text-white/80 hover:bg-white/10'
-                          }`}
-                        >
-                          {g}
-                        </button>
-                      ))}
+                      {availableGenres.map((g) => {
+                        const isSelected = selectedGenres.includes(g);
+                        return (
+                          <button
+                            key={g}
+                            onClick={() => toggleGenre(g)}
+                            className={`
+                              px-3 py-1 rounded-full text-xs font-medium border transition-all flex items-center gap-1.5
+                              ${isSelected
+                                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                                : 'bg-white/5 border-white/10 text-white/50 hover:text-white/80 hover:bg-white/10'}
+                            `}
+                          >
+                            {g}
+                            {isSelected && <X className="w-3 h-3 opacity-50" />}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                   <div>
@@ -529,216 +530,208 @@ function AIStoryContent() {
                       className="bg-white/5 border-white/10 text-white placeholder:text-white/25 rounded-lg resize-none h-16 text-sm"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-xs font-semibold text-white/60 mb-1.5 block">Characters</Label>
-                      <Textarea
-                        placeholder="Main characters..."
-                        value={storyPrompt.mainCharacters}
-                        onChange={(e) => setStoryPrompt({ ...storyPrompt, mainCharacters: e.target.value })}
-                        className="bg-white/5 border-white/10 text-white placeholder:text-white/25 rounded-lg resize-none h-14 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs font-semibold text-white/60 mb-1.5 block">Setting</Label>
-                      <Textarea
-                        placeholder="Where and when..."
-                        value={storyPrompt.setting}
-                        onChange={(e) => setStoryPrompt({ ...storyPrompt, setting: e.target.value })}
-                        className="bg-white/5 border-white/10 text-white placeholder:text-white/25 rounded-lg resize-none h-14 text-sm"
-                      />
-                    </div>
-                  </div>
                 </div>
               </div>
 
-              {/* VedaScript Parameters */}
-              <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-emerald-400" />
-                    <span className="font-semibold text-sm text-white/90">VedaScript Parameters</span>
-                  </div>
-                  <span className="text-xs text-white/30">{selectedParameters.size} active</span>
-                </div>
-                <div className="max-h-[500px] overflow-y-auto">
-                  <ParameterPanel
-                    onParameterChange={handleParameterChange}
-                    onParameterToggle={handleParameterToggle}
-                    selectedParameters={Array.from(selectedParameters)}
-                    defaultPreset="standard"
-                    compact={true}
-                    showStats={true}
-                  />
-                </div>
-                {/* Sticky Parameter Footer */}
-                <div className="px-5 py-3 border-t border-white/[0.06] flex gap-2 bg-black/40 backdrop-blur-md">
-                  <button
-                    onClick={() => {
-                      setSelectedParameters(new Set());
-                      setParameterValues({});
-                    }}
-                    className="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 text-white/50 text-sm hover:text-white/80 hover:bg-white/10 transition-all"
-                  >
-                    Reset to defaults
-                  </button>
-                  <button
-                    className="flex-1 py-2 rounded-lg bg-emerald-600/80 border border-emerald-500/30 text-white text-sm font-medium hover:bg-emerald-600 transition-all"
-                    onClick={() => toast({ title: 'Settings applied', description: `${selectedParameters.size} parameters active` })}
-                  >
-                    Apply settings
-                  </button>
-                </div>
-              </div>
-            </motion.div>
+            </div>
 
             {/* ── RIGHT: Story Content Editor ── */}
-            <motion.div
-              initial={{ x: 20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="lg:col-span-5 space-y-4"
-            >
-              <div className="sticky top-[72px]">
-                <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl overflow-hidden">
-                  {/* Editor Header with Tabs */}
-                  <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => setEditorTab('chapter')}
-                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                          editorTab === 'chapter'
-                            ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                            : 'text-white/50 hover:text-white/80'
-                        }`}
-                      >
-                        Current Chapter
-                      </button>
-                      <button
-                        onClick={() => setEditorTab('compiled')}
-                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                          editorTab === 'compiled'
-                            ? 'bg-blue-500/15 text-blue-300 border border-blue-500/30'
-                            : 'text-white/50 hover:text-white/80'
-                        }`}
-                      >
-                        Compiled Story ({completedCount})
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-white/30">
-                      <span className="flex items-center gap-1"><Hash className="w-3 h-3" />{totalWordCount} words</span>
-                      <span className="flex items-center gap-1"><Layers className="w-3 h-3" />{totalChapters} ch</span>
-                    </div>
-                  </div>
-
-                  {/* Editor Body */}
-                  <div className="min-h-[440px]">
-                    {editorTab === 'chapter' ? (
-                      <div className="p-5">
-                        <Textarea
-                          placeholder="Start writing your chapter here, or hit 'Generate with VedaScript' to create AI content..."
-                          value={currentChapterContent}
-                          onChange={(e) => setCurrentChapterContent(e.target.value)}
-                          className="w-full min-h-[360px] bg-transparent border-0 text-white/90 placeholder:text-white/20 resize-none focus:ring-0 focus-visible:ring-0 text-sm leading-relaxed p-0"
-                        />
-                      </div>
-                    ) : (
-                      <div className="p-5">
-                        {compiledStory ? (
-                          <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-white/80 leading-relaxed">
-                            {compiledStory}
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center h-[360px] text-white/30">
-                            <AlignLeft className="w-10 h-10 mb-3 opacity-20" />
-                            <p className="text-sm">No compiled content yet.</p>
-                            <p className="text-xs mt-1">Generate chapters to see your full story here.</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Editor Footer: Generate Button + Actions */}
-                  <div className="px-5 py-4 border-t border-white/[0.06] space-y-3">
-                    {/* Generation Error */}
-                    <AnimatePresence>
-                      {generationError && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
-                        >
-                          {generationError}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    {/* Primary Generate Button */}
-                    <motion.button
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={handleGeneratePanel}
-                      disabled={isGenerating}
-                      className={`
-                        w-full py-3 rounded-xl font-bold text-sm
-                        bg-gradient-to-r from-emerald-600 to-emerald-700
-                        hover:from-emerald-500 hover:to-emerald-600
-                        text-white shadow-lg shadow-emerald-500/15
-                        border border-emerald-400/15
-                        flex items-center justify-center gap-2
-                        transition-all duration-300
-                        disabled:opacity-40 disabled:cursor-not-allowed
-                        active:shadow-inner
-                      `}
+            <div className="lg:col-span-8 space-y-4 sticky top-[72px]" data-tour="editor">
+              <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl overflow-hidden">
+                {/* Editor Header */}
+                <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setEditorTab('chapter')}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                        editorTab === 'chapter'
+                          ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                          : 'text-white/50 hover:text-white/80'
+                      }`}
                     >
-                      {isGenerating ? (
-                        <>
-                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
-                            <Zap className="w-4 h-4" />
-                          </motion.div>
-                          Generating with VedaScript…
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4" />
-                          Generate with VedaScript
-                        </>
-                      )}
-                    </motion.button>
-
-                    {/* Secondary Actions */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleCopyStory}
-                        disabled={completedCount === 0 && !currentChapterContent}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 border border-white/10 text-white/50 text-sm hover:text-white/80 hover:bg-white/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                        {copied ? 'Copied' : 'Copy'}
-                      </button>
-                      <button
-                        onClick={handleReset}
-                        className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/5 border border-red-500/10 text-red-400/60 text-sm hover:text-red-400 hover:bg-red-500/10 transition-all"
-                      >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                        Reset
-                      </button>
-                    </div>
+                      Current Chapter
+                    </button>
+                    <button
+                      onClick={() => setEditorTab('compiled')}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                        editorTab === 'compiled'
+                          ? 'bg-blue-500/15 text-blue-300 border border-blue-500/30'
+                          : 'text-white/50 hover:text-white/80'
+                      }`}
+                    >
+                      Compiled Story
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-white/30">
+                    <span className="flex items-center gap-1"><Hash className="w-3 h-3" />{totalWordCount} words</span>
                   </div>
                 </div>
 
-                {/* Panel Progress */}
-                <div className="mt-4">
-                  <PanelProgressTracker
-                    completedPanels={completedCount}
-                    currentPanel={effectiveCurrentPanel}
-                    panelStatuses={panelStatuses}
-                  />
+                {/* Editor Body */}
+                <div className="min-h-[500px]">
+                  {editorTab === 'chapter' ? (
+                    <div className="p-5 h-full flex flex-col">
+                      <div className="mb-2 flex items-center justify-between text-xs text-white/40">
+                         <span>Editing: {activeChapter.title}</span>
+                         <span>{activeChapter.content.split(/\s+/).filter(Boolean).length} words</span>
+                      </div>
+                      <Textarea
+                        placeholder={`Write ${activeChapter.title} here...`}
+                        value={activeChapter.content}
+                        onChange={(e) => updateActiveChapter({ content: e.target.value })}
+                        className="flex-1 w-full min-h-[400px] bg-transparent border-0 text-white/90 placeholder:text-white/20 resize-none focus:ring-0 focus-visible:ring-0 text-sm leading-relaxed p-0 font-serif"
+                      />
+                    </div>
+                  ) : (
+                    <div className="p-5">
+                      {compiledStory.trim() ? (
+                        <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-white/80 leading-relaxed font-serif">
+                          {compiledStory}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-[400px] text-white/30">
+                          <AlignLeft className="w-10 h-10 mb-3 opacity-20" />
+                          <p className="text-sm">No content generated yet.</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Editor Footer */}
+                <div className="px-5 py-4 border-t border-white/[0.06] space-y-3">
+                  <AnimatePresence>
+                    {generationError && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+                      >
+                        {generationError}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <motion.button
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={handleGeneratePanel}
+                    disabled={isGenerating}
+                    data-tour="generate-btn"
+                    className={`
+                      w-full py-3 rounded-xl font-bold text-sm
+                      bg-gradient-to-r from-emerald-600 to-emerald-700
+                      hover:from-emerald-500 hover:to-emerald-600
+                      text-white shadow-lg shadow-emerald-500/15
+                      border border-emerald-400/15
+                      flex items-center justify-center gap-2
+                      transition-all duration-300
+                      disabled:opacity-40 disabled:cursor-not-allowed
+                    `}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+                          <Zap className="w-4 h-4" />
+                        </motion.div>
+                        Generating with VedaScript…
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4" />
+                        Generate with VedaScript
+                      </>
+                    )}
+                  </motion.button>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleCopyStory}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 border border-white/10 text-white/50 text-sm hover:text-white/80 hover:bg-white/10 transition-all"
+                    >
+                      {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copied ? 'Copied' : 'Copy'}
+                    </button>
+                    <button
+                      onClick={() => updateActiveChapter({ content: '' })}
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/5 border border-red-500/10 text-red-400/60 text-sm hover:text-red-400 hover:bg-red-500/10 transition-all"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      Reset
+                    </button>
+                  </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
+
+          </div>
+
+          {/* ── BOTTOM: Advanced VedaScript Parameters ── */}
+          <div className="mt-5" data-tour="parameters">
+            <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl overflow-hidden">
+              {/* Summary Bar */}
+              <div className="px-6 py-5 flex items-center justify-between bg-white/[0.02]">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
+                    <Settings2 className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-white/90">Advanced VedaScript Parameters <span className="text-white/30 font-normal text-sm ml-2">(Optional)</span></h3>
+                    <p className="text-sm text-white/40">{selectedParameters.size} active parameters modifying the AI behavior</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsParamsExpanded(!isParamsExpanded)}
+                  className="bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  {isParamsExpanded ? 'Hide Parameters' : 'Configure Parameters'}
+                  {isParamsExpanded ? <ChevronDown className="w-4 h-4 ml-2" /> : <ChevronRight className="w-4 h-4 ml-2" />}
+                </Button>
+              </div>
+
+              {/* Collapsible Panel */}
+              <AnimatePresence>
+                {isParamsExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="border-t border-white/[0.06]"
+                  >
+                    <div className="p-6">
+                      <ParameterPanel
+                        onParameterChange={handleParameterChange}
+                        onParameterToggle={handleParameterToggle}
+                        selectedParameters={Array.from(selectedParameters)}
+                        defaultPreset="standard"
+                        compact={false}
+                        showStats={true}
+                      />
+                    </div>
+                    <div className="px-6 py-4 border-t border-white/[0.06] flex justify-end gap-3 bg-black/40 backdrop-blur-md">
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setSelectedParameters(new Set());
+                          setParameterValues({});
+                        }}
+                        className="text-white/50 hover:text-white hover:bg-white/10"
+                      >
+                        Reset to Defaults
+                      </Button>
+                      <Button
+                        onClick={() => setIsParamsExpanded(false)}
+                        className="bg-purple-600 hover:bg-purple-500 text-white border-0"
+                      >
+                        Apply Settings
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>
@@ -746,7 +739,6 @@ function AIStoryContent() {
   );
 }
 
-// ── Helper ────────────────────────────────────────────────────────
 function createEmptySession(): StorySession {
   return {
     sessionId: typeof crypto !== 'undefined' ? crypto.randomUUID() : `s-${Date.now()}`,
@@ -756,13 +748,7 @@ function createEmptySession(): StorySession {
     genresLocked: false,
     storyMemory: {
       characters: [],
-      worldBuilding: {
-        setting: '',
-        timePeriod: '',
-        rules: [],
-        locations: [],
-        cultures: [],
-      },
+      worldBuilding: { setting: '', timePeriod: '', rules: [], locations: [], cultures: [] },
       majorEvents: [],
       unresolvedQuestions: [],
       establishedFacts: [],

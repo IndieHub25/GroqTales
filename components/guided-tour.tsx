@@ -123,6 +123,7 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
   if (!isActive || !enabled || steps.length === 0) return null;
 
   const step = steps[currentStep];
+  if (!step) return null;
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === steps.length - 1;
 
@@ -386,43 +387,64 @@ export const COMIC_TOUR_STEPS: TourStep[] = [
 export const AI_STORY_TOUR_STEPS: TourStep[] = [
   {
     id: 'welcome',
-    title: 'Welcome to AI Story Generator',
-    description: 'Generate unlimited stories with advanced AI. Customize everything with 70+ parameters to get exactly what you want.',
+    title: 'Welcome to VedaScript Engine',
+    description:
+      'This is your AI-native writing studio with 70+ tunable parameters for deep narrative control. Let\'s walk through the 3-column workspace.',
     position: 'bottom',
   },
   {
+    id: 'canvas',
+    title: 'Chapter Structure Canvas',
+    description:
+      'Your story\'s backbone. Each node is a chapter — add, delete, or rearrange them to plan your narrative flow before writing.',
+    target: '[data-tour="canvas"]',
+    position: 'right',
+    highlightPadding: 12,
+  },
+  {
+    id: 'story-details',
+    title: 'Story Details',
+    description:
+      'Set your title, genre, description, characters, and setting. These inform VedaScript\'s AI when generating content.',
+    target: '[data-tour="story-details"]',
+    position: 'bottom',
+    highlightPadding: 10,
+  },
+  {
     id: 'parameters',
-    title: 'Parameters Panel',
-    description: 'Use presets (Quick, Standard, Detailed, Epic) or manually enable parameters to control story generation. More parameters = more customization.',
+    title: 'VedaScript Parameters',
+    description:
+      'The heart of VedaScript — 70+ parameters across 10 categories. Use presets (Minimal, Standard, Advanced, Worldbuilder) for quick setup, or fine-tune each slider and selector individually.',
     target: '[data-tour="parameters"]',
     position: 'right',
+    highlightPadding: 10,
   },
   {
-    id: 'prompt',
-    title: 'Your Story Prompt',
-    description: 'Describe the story you want. Be specific about characters, plot, setting, or themes for better results.',
-    target: '[data-tour="prompt"]',
-    position: 'top',
-  },
-  {
-    id: 'canvas',
-    title: 'Story Structure Preview',
-    description: 'As you configure parameters, this canvas shows a preview of your story\'s structure and key beats.',
-    target: '[data-tour="canvas"]',
+    id: 'editor',
+    title: 'Story Content Editor',
+    description:
+      'Write and edit your chapters here. Switch between "Current Chapter" to write and "Compiled Story" to preview the full narrative.',
+    target: '[data-tour="editor"]',
     position: 'left',
+    highlightPadding: 10,
   },
   {
     id: 'generate',
-    title: 'Generate Your Story',
-    description: 'Click generate to create your story based on your prompt and parameters. You can regenerate anytime to try different variations.',
-    target: '[data-tour="generate-button"]',
+    title: 'Generate with VedaScript',
+    description:
+      'Hit this button to generate a chapter using your prompt, parameters, and story context. Each generation builds on your existing story memory.',
+    target: '[data-tour="generate-btn"]',
     position: 'top',
+    highlightPadding: 8,
   },
   {
-    id: 'preview',
-    title: 'Story Preview',
-    description: 'Review your generated story. Edit it if needed, then mint it as an NFT to own your creation.',
-    target: '[data-tour="preview"]',
-    position: 'left',
+    id: 'save-export',
+    title: 'Save & Export',
+    description:
+      'Save your draft anytime, or export the compiled story when you\'re done. Your progress is also saved locally so you can pick up where you left off.',
+    target: '[data-tour="save-export"]',
+    position: 'bottom',
+    highlightPadding: 8,
   },
 ];
+

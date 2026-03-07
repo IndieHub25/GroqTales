@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { PanelParameters, StoryMemory } from '@/lib/types/story-session';
 import {
   AVAILABLE_GENRES,
@@ -43,7 +43,13 @@ export const PanelCreationForm: React.FC<PanelCreationFormProps> = ({
   const [localGenres, setLocalGenres] = useState<string[]>(genres);
   const genreModifiable = useMemo(() => canModifyGenres(existingPanels), [existingPanels]);
 
+  // Synchronize localGenres state with genres prop changes
+  useEffect(() => {
+    setLocalGenres(genres);
+  }, [genres]);
+
   const handleGenreToggle = (genre: string) => {
+    if (isGenerating) return;
     if (!genreModifiable || genresLocked) return;
     setLocalGenres((prev) => {
       let next: string[];
@@ -138,7 +144,7 @@ export const PanelCreationForm: React.FC<PanelCreationFormProps> = ({
                 <button
                   key={genre}
                   onClick={() => handleGenreToggle(genre)}
-                  disabled={!genreModifiable}
+                  disabled={isGenerating || !genreModifiable}
                   style={{
                     padding: '5px 12px',
                     borderRadius: 20,
@@ -153,7 +159,7 @@ export const PanelCreationForm: React.FC<PanelCreationFormProps> = ({
                     color: selected
                       ? 'var(--color-primary, #818cf8)'
                       : 'var(--color-muted-foreground, #94a3b8)',
-                    cursor: genreModifiable ? 'pointer' : 'not-allowed',
+                    cursor: (isGenerating || !genreModifiable) ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s ease',
                   }}
                 >

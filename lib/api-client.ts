@@ -161,6 +161,76 @@ export async function processAI(request: AIProcessingRequest) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// Comic Generation  (Panelra Engine)
+// ─────────────────────────────────────────────────────────────────────────
+
+export async function generateComicFromSketches(formData: FormData) {
+    return withRetry(() =>
+        apiFetch('/api/v1/comics/generate-from-sketches', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: formData,
+        }),
+    );
+}
+
+export async function getUserComics(page = 1, limit = 20) {
+    return apiFetch(`/api/v1/comics?page=${page}&limit=${limit}&creator=me`, {
+        method: 'GET',
+        headers: authHeaders(),
+    });
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Dashboard Data  (User command center)
+// ─────────────────────────────────────────────────────────────────────────
+
+export async function getUserDrafts(page = 1, limit = 20) {
+    return apiFetch(`/api/v1/drafts?page=${page}&limit=${limit}`, {
+        method: 'GET',
+        headers: authHeaders(),
+    });
+}
+
+export async function getUserNFTs() {
+    return apiFetch('/api/v1/nft/user', {
+        method: 'GET',
+        headers: authHeaders(),
+    });
+}
+
+export async function getUserFeed(page = 1, limit = 20) {
+    return apiFetch(`/api/feed?page=${page}&limit=${limit}`, {
+        method: 'GET',
+        headers: authHeaders(),
+    });
+}
+
+export async function getUserSettings() {
+    return apiFetch('/api/v1/settings/profile', {
+        method: 'GET',
+        headers: authHeaders(),
+    });
+}
+
+export async function updateUserSettings(data: Record<string, unknown>) {
+    return withRetry(() =>
+        apiFetch('/api/v1/settings/profile', {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: JSON.stringify(data),
+        }),
+    );
+}
+
+export async function getUserProfile() {
+    return apiFetch('/api/v1/users/profile', {
+        method: 'GET',
+        headers: authHeaders(),
+    });
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // NFT Minting  (Requirements: 6.5, 8.6)
 // ─────────────────────────────────────────────────────────────────────────
 

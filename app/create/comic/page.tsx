@@ -1,8 +1,33 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { BookOpen, Plus, Save, RotateCcw, Sparkles } from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  BookOpen,
+  Plus,
+  Save,
+  RotateCcw,
+  Sparkles,
+  Upload,
+  X,
+  Image as ImageIcon,
+  User,
+  Users,
+  Layers,
+  Grid3X3,
+  Film,
+  Maximize2,
+  ChevronDown,
+  ChevronRight,
+  ArrowLeft,
+  Loader2,
+  RefreshCw,
+  Check,
+  Palette,
+  Type,
+  Settings2,
+  LayoutDashboard
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,414 +41,791 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
+import { generateComicFromSketches } from '@/lib/api-client';
 
-import { StoryCanvas } from '@/components/story-canvas';
-import { GuidedTour, COMIC_TOUR_STEPS } from '@/components/guided-tour';
-import { useStoryCanvas } from '@/hooks/useStoryCanvas';
-import * as canvasUtils from '@/lib/canvas-utils';
-import { CanvasState } from '@/types/canvas';
+// ─────────────────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────────────────
 
-interface ComicData {
-  title: string;
-  genre: string;
-  rating: string;
+interface CharacterSketch {
+  id: string;
+  name: string;
   description: string;
+  file: File | null;
+  previewUrl: string | null;
 }
 
-export default function CreateComicPage() {
-  const { canvasState, setCanvasState } = useStoryCanvas({
-    storageKey: 'comicCanvasState',
-    autoSave: true,
-  });
+interface GeneratedPanel {
+  panelIndex: number;
+  pageNumber: number;
+  panelNumber: number;
+  imageUrl: string | null;
+  caption: string;
+  dialogue: string;
+  characters: string[];
+  cameraDirection: string;
+  beat: string;
+}
 
-  const [comicData, setComicData] = useState<ComicData>({
-    title: '',
-    genre: 'fantasy',
-    rating: 'all-ages',
+interface GenerationResult {
+  comicId: string;
+  slug: string;
+  title: string;
+  panels: GeneratedPanel[];
+  totalPages: number;
+  panelsPerPage: number;
+  stylePreset: string;
+  summary: string;
+}
+
+type GenerationPhase =
+  | 'idle'
+  | 'analyzing'
+  | 'composing'
+  | 'rendering'
+  | 'finalizing'
+  | 'complete'
+  | 'error';
+
+// ─────────────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────────────
+
+const ART_STYLES = [
+  { value: 'manga', label: 'Manga', icon: '🇯🇵' },
+  { value: 'western', label: 'Western Comic', icon: '🦸' },
+  { value: 'minimalist', label: 'Minimalist', icon: '◻️' },
+  { value: 'noir', label: 'Noir', icon: '🌑' },
+  { value: 'watercolor', label: 'Watercolor', icon: '🎨' },
+  { value: 'pixel-art', label: 'Pixel Art', icon: '👾' },
+];
+
+const LAYOUT_STYLES = [
+  { value: 'grid', label: 'Classic Grid', icon: Grid3X3, desc: 'Uniform panel grid' },
+  { value: 'cinematic', label: 'Cinematic', icon: Film, desc: 'Wide panoramic panels' },
+  { value: 'hero-shots', label: 'Hero Shots', icon: Maximize2, desc: 'Full-page hero moments' },
+];
+
+const GENRES = [
+  'Fantasy', 'Sci-Fi', 'Comedy', 'Drama', 'Horror',
+  'Romance', 'Adventure', 'Mystery', 'Action', 'Slice of Life',
+];
+
+const BEAT_SLOTS = ['Intro', 'Conflict', 'Climax', 'Resolution'];
+
+const PHASE_MESSAGES: Record<GenerationPhase, string> = {
+  idle: '',
+  analyzing: 'Analyzing sketches & building character models…',
+  composing: 'Composing panel layouts & story beats…',
+  rendering: 'Rendering comic panels with AI…',
+  finalizing: 'Finalizing captions & dialogue…',
+  complete: 'Comic generated successfully!',
+  error: 'Generation failed. Please try again.',
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────────────────────────────────
+
+export default function PanelraEnginePage() {
+  // ── Character state ──────────────────────────────────────────
+  const [hero, setHero] = useState<CharacterSketch>({
+    id: 'hero',
+    name: '',
     description: '',
+    file: null,
+    previewUrl: null,
   });
 
-  const [selectedPanelId, setSelectedPanelId] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const [coStars, setCoStars] = useState<CharacterSketch[]>([]);
 
-  // Load draft on mount
-  useEffect(() => {
-    try {
-      const draft = localStorage.getItem('comicDraft');
-      if (draft) {
-        const parsed = JSON.parse(draft);
-        setComicData({
-          title: parsed.title,
-          genre: parsed.genre,
-          rating: parsed.rating,
-          description: parsed.description,
-        });
-      }
-    } catch (error) {
-      console.error('Failed to load draft:', error);
-    }
-  }, []);
+  // ── Story state ──────────────────────────────────────────────
+  const [title, setTitle] = useState('');
+  const [logline, setLogline] = useState('');
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [stylePreset, setStylePreset] = useState('manga');
 
-  // Add new panel to canvas
-  const handleAddPanel = () => {
-    const panelNumber = canvasState.nodes.filter(n => n.type === 'panel').length + 1;
-    const newPanel = canvasUtils.createNode(`panel-${Date.now()}`, 'panel', `Panel ${panelNumber}`);
-    const newState = canvasUtils.addNode(canvasState, newPanel);
-    setCanvasState(newState);
-    setSelectedPanelId(newPanel.id);
+  // ── Layout state ─────────────────────────────────────────────
+  const [totalPages, setTotalPages] = useState(4);
+  const [panelsPerPage, setPanelsPerPage] = useState(6);
+  const [layoutStyle, setLayoutStyle] = useState('grid');
+  const [beats, setBeats] = useState<string[]>(['', '', '', '']);
+
+  // ── UI state ─────────────────────────────────────────────────
+  const [expandedSections, setExpandedSections] = useState({
+    story: true,
+    layout: true,
+    beats: false,
+  });
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // Get selected panel data
-  const selectedPanel = canvasState.nodes.find(n => n.id === selectedPanelId);
+  // ── Generation state ─────────────────────────────────────────
+  const [phase, setPhase] = useState<GenerationPhase>('idle');
+  const [result, setResult] = useState<GenerationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Update selected panel metadata
-  const handleUpdatePanel = (field: string, value: any) => {
-    if (!selectedPanelId) return;
-    const updatedNode = {
-      ...selectedPanel!,
-      [field]: value,
-    };
-    const newState = canvasUtils.updateNode(canvasState, selectedPanelId, updatedNode);
-    setCanvasState(newState);
+  // ── Refs ──────────────────────────────────────────────────────
+  const heroInputRef = useRef<HTMLInputElement>(null);
+
+  // ── Handlers ─────────────────────────────────────────────────
+
+  const handleImageUpload = useCallback(
+    (
+      file: File,
+      setter: (update: (prev: CharacterSketch) => CharacterSketch) => void
+    ) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setter((prev) => ({
+          ...prev,
+          file,
+          previewUrl: e.target?.result as string,
+        }));
+      };
+      reader.readAsDataURL(file);
+    },
+    []
+  );
+
+  const handleHeroFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImageUpload(file, (fn) => setHero(fn(hero)));
   };
 
-  // Delete selected panel
-  const handleDeletePanel = () => {
-    if (!selectedPanelId) return;
-    const newState = canvasUtils.deleteNode(canvasState, selectedPanelId);
-    setCanvasState(newState);
-    setSelectedPanelId(null);
+  const addCoStar = () => {
+    setCoStars((prev) => [
+      ...prev,
+      {
+        id: `costar-${Date.now()}`,
+        name: '',
+        description: '',
+        file: null,
+        previewUrl: null,
+      },
+    ]);
   };
 
-  // Save draft
-  const handleSaveDraft = async () => {
-    setIsSaving(true);
-    try {
-      localStorage.setItem(
-        'comicDraft',
-        JSON.stringify({
-          ...comicData,
-          savedAt: new Date().toISOString(),
-        })
-      );
-      localStorage.setItem('comicCanvasState', JSON.stringify(canvasState));
-    } catch (error) {
-      console.error('Error saving draft:', error);
-    } finally {
-      setIsSaving(false);
-    }
+  const removeCoStar = (id: string) => {
+    setCoStars((prev) => prev.filter((c) => c.id !== id));
   };
 
-  // Reset form
-  const handleReset = () => {
-    setComicData({
-      title: '',
-      genre: 'fantasy',
-      rating: 'all-ages',
-      description: '',
+  const updateCoStar = (id: string, field: keyof CharacterSketch, value: any) => {
+    setCoStars((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
+    );
+  };
+
+  const toggleGenre = (genre: string) => {
+    setSelectedGenres((prev) => {
+      if (prev.includes(genre)) return prev.filter((g) => g !== genre);
+      if (prev.length >= 2) return prev;
+      return [...prev, genre];
     });
-    setCanvasState(canvasUtils.createEmptyCanvasState());
-    setSelectedPanelId(null);
-    localStorage.removeItem('comicDraft');
-    localStorage.removeItem('comicCanvasState');
   };
 
-  const panelCount = canvasState.nodes.filter(n => n.type === 'panel').length;
-  const estimatedPages = Math.ceil(panelCount / 6);
+  const updateBeat = (index: number, value: string) => {
+    setBeats((prev) => prev.map((b, i) => (i === index ? value : b)));
+  };
+
+  // ── Generate ─────────────────────────────────────────────────
+
+  const handleGenerate = async () => {
+    if (!title.trim() || !logline.trim()) {
+      setError('Please fill in the comic title and logline.');
+      return;
+    }
+
+    setError(null);
+    setResult(null);
+
+    // Simulate phased progress
+    const phases: GenerationPhase[] = ['analyzing', 'composing', 'rendering', 'finalizing'];
+
+    for (const p of phases) {
+      setPhase(p);
+      await new Promise((r) => setTimeout(r, 1200 + Math.random() * 800));
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('logline', logline);
+      formData.append('genres', JSON.stringify(selectedGenres));
+      formData.append('stylePreset', stylePreset);
+      formData.append(
+        'layoutConfig',
+        JSON.stringify({ pages: totalPages, panelsPerPage, layoutStyle })
+      );
+      formData.append('beatOutline', JSON.stringify(beats.filter(Boolean)));
+      formData.append('heroName', hero.name);
+      formData.append('heroDescription', hero.description);
+
+      if (hero.file) {
+        formData.append('heroSketch', hero.file);
+      }
+
+      const coStarNames = coStars.map((c) => c.name);
+      const coStarDescs = coStars.map((c) => c.description);
+      formData.append('coStarNames', JSON.stringify(coStarNames));
+      formData.append('coStarDescriptions', JSON.stringify(coStarDescs));
+
+      coStars.forEach((c) => {
+        if (c.file) formData.append('coStarSketches', c.file);
+      });
+
+      const res = await generateComicFromSketches(formData);
+
+      if (res.ok && (res.data as any)?.success) {
+        setResult((res.data as any).data);
+        setPhase('complete');
+      } else {
+        throw new Error((res.data as any)?.error || 'Generation failed');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong');
+      setPhase('error');
+    }
+  };
+
+  const handleReset = () => {
+    setHero({ id: 'hero', name: '', description: '', file: null, previewUrl: null });
+    setCoStars([]);
+    setTitle('');
+    setLogline('');
+    setSelectedGenres([]);
+    setStylePreset('manga');
+    setTotalPages(4);
+    setPanelsPerPage(6);
+    setLayoutStyle('grid');
+    setBeats(['', '', '', '']);
+    setPhase('idle');
+    setResult(null);
+    setError(null);
+  };
+
+  const isGenerating = !['idle', 'complete', 'error'].includes(phase);
+
+  // ── Render ───────────────────────────────────────────────────
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 dark:from-slate-950 dark:to-slate-900 py-8 px-4"
-    >
-      <GuidedTour steps={COMIC_TOUR_STEPS} tourId="comic-creation" enabled={true} autoStart={true} />
+    <div className="min-h-screen relative bg-black text-white font-sans overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(59,130,246,0.1),_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(168,85,247,0.08),_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(249,115,22,0.04),_transparent_60%)]" />
+      </div>
 
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <BookOpen className="w-8 h-8 text-orange-600 dark:text-orange-400" />
-            <h1 className="text-4xl font-bold">Create Comic</h1>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="relative z-10"
+      >
+        {/* ─── Sticky Top Bar ──────────────────────────────────── */}
+        <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/[0.06] px-4 py-3">
+          <div className="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link href="/create">
+                <button className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all text-sm">
+                  <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                  Forge
+                </button>
+              </Link>
+              <div className="w-px h-6 bg-white/10" />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                  <BookOpen className="w-4 h-4 text-blue-400" />
+                </div>
+                <div>
+                  <h1 className="text-sm font-bold text-white">Panelra Engine</h1>
+                  <p className="text-xs text-white/40">AI Comic Generation</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {title && (
+                <span className="text-xs text-white/30 mr-2 hidden sm:block">
+                  {title || 'Untitled Comic'}
+                </span>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleReset}
+                className="text-xs border-white/10 text-white/60 hover:text-white bg-white/5"
+              >
+                <RotateCcw className="w-3 h-3 mr-1.5" />
+                Reset
+              </Button>
+            </div>
           </div>
-          <p className="text-gray-600 dark:text-gray-400">
-            Design your comic panel-by-panel with our visual canvas builder
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Left Column: Metadata */}
-          <div className="lg:col-span-1">
+        {/* ─── Split-View Studio Layout ────────────────────────────── */}
+        <div className="max-w-[1800px] mx-auto px-4 py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            {/* ════════════════════════════════════════════════════
+               LEFT SIDEBAR — Configuration Hub (Span 4)
+               ════════════════════════════════════════════════════ */}
             <motion.div
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.1 }}
+              className="lg:col-span-4 space-y-4 sticky top-[80px] h-[calc(100vh-100px)] overflow-y-auto no-scrollbar pr-2 pb-10"
             >
-              <Card
-                data-tour="metadata"
-                className="sticky top-4 bg-white/5 border-white/10 backdrop-blur-sm mb-6"
-              >
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    Comic Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  {/* Title */}
-                  <div className="space-y-2">
-                    <Label htmlFor="title" className="text-sm font-semibold">
-                      Title
-                    </Label>
-                    <Input
-                      id="title"
-                      placeholder="Your Comic Title"
-                      value={comicData.title}
-                      onChange={(e) =>
-                        setComicData({ ...comicData, title: e.target.value })
-                      }
-                      className="text-sm"
-                    />
-                  </div>
+              {/* Header */}
+              <div className="flex items-center gap-2 px-1 mb-2">
+                <Settings2 className="w-4 h-4 text-emerald-400" />
+                <h2 className="text-sm font-semibold tracking-wider uppercase text-emerald-400/80">Configuration</h2>
+              </div>
 
-                  {/* Genre */}
-                  <div className="space-y-2">
-                    <Label htmlFor="genre" className="text-sm font-semibold">
-                      Genre
-                    </Label>
-                    <Select
-                      value={comicData.genre}
-                      onValueChange={(value) =>
-                        setComicData({ ...comicData, genre: value })
-                      }
+              {/* Accordion 1: Story Details */}
+              <Card className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl overflow-hidden shadow-lg">
+                <button 
+                  onClick={() => toggleSection('story')}
+                  className="w-full flex items-center justify-between p-4 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                >
+                  <div className="flex items-center gap-2 text-white/90">
+                    <Type className="w-4 h-4 text-amber-400" />
+                    <span className="text-sm font-medium">Story Basics</span>
+                  </div>
+                  {expandedSections.story ? <ChevronDown className="w-4 h-4 text-white/40" /> : <ChevronRight className="w-4 h-4 text-white/40" />}
+                </button>
+                <AnimatePresence>
+                  {expandedSections.story && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="border-t border-white/[0.06]"
                     >
-                      <SelectTrigger className="text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="fantasy">Fantasy</SelectItem>
-                        <SelectItem value="sci-fi">Sci-Fi</SelectItem>
-                        <SelectItem value="comedy">Comedy</SelectItem>
-                        <SelectItem value="drama">Drama</SelectItem>
-                        <SelectItem value="horror">Horror</SelectItem>
-                        <SelectItem value="romance">Romance</SelectItem>
-                        <SelectItem value="adventure">Adventure</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                      <CardContent className="p-4 space-y-4">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-white/50">Comic Title</Label>
+                          <Input
+                            placeholder="My Epic Comic"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="text-sm bg-white/5 border-white/10 placeholder:text-white/20"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-white/50">Logline / Premise</Label>
+                          <Textarea
+                            placeholder="A brief description of your comic's story…"
+                            value={logline}
+                            onChange={(e) => setLogline(e.target.value)}
+                            className="text-sm bg-white/5 border-white/10 placeholder:text-white/20 resize-none h-20"
+                          />
+                        </div>
 
-                  {/* Rating */}
-                  <div className="space-y-2">
-                    <Label htmlFor="rating" className="text-sm font-semibold">
-                      Content Rating
-                    </Label>
-                    <Select
-                      value={comicData.rating}
-                      onValueChange={(value) =>
-                        setComicData({ ...comicData, rating: value })
-                      }
+                        {/* Genre Pills */}
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-white/50">Genres (up to 2)</Label>
+                          <div className="flex flex-wrap gap-1.5">
+                            {GENRES.map((g) => (
+                              <button
+                                key={g}
+                                onClick={() => toggleGenre(g)}
+                                className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all ${
+                                  selectedGenres.includes(g)
+                                    ? 'bg-blue-500/20 border-blue-500/40 text-blue-300'
+                                    : 'bg-white/[0.03] border-white/10 text-white/40 hover:border-white/20 hover:text-white/60'
+                                }`}
+                              >
+                                {g}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Art Style */}
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-white/50">Art Style</Label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {ART_STYLES.map((s) => (
+                              <button
+                                key={s.value}
+                                onClick={() => setStylePreset(s.value)}
+                                className={`flex flex-col items-center gap-1 p-2 rounded-lg border text-[11px] transition-all ${
+                                  stylePreset === s.value
+                                    ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
+                                    : 'bg-white/[0.02] border-white/[0.06] text-white/40 hover:border-white/15'
+                                }`}
+                              >
+                                <span className="text-base">{s.icon}</span>
+                                <span>{s.label}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Card>
+
+              {/* Accordion 2: Layout Options */}
+              <Card className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl overflow-hidden shadow-lg">
+                <button 
+                  onClick={() => toggleSection('layout')}
+                  className="w-full flex items-center justify-between p-4 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                >
+                  <div className="flex items-center gap-2 text-white/90">
+                    <LayoutDashboard className="w-4 h-4 text-emerald-400" />
+                    <span className="text-sm font-medium">Layout Config</span>
+                  </div>
+                  {expandedSections.layout ? <ChevronDown className="w-4 h-4 text-white/40" /> : <ChevronRight className="w-4 h-4 text-white/40" />}
+                </button>
+                <AnimatePresence>
+                  {expandedSections.layout && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="border-t border-white/[0.06]"
                     >
-                      <SelectTrigger className="text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all-ages">All Ages</SelectItem>
-                        <SelectItem value="teen">Teen (13+)</SelectItem>
-                        <SelectItem value="mature">Mature (18+)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                      <CardContent className="p-4 space-y-4">
+                        {/* Pages / Panels */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <Label className="text-xs text-white/50">Pages</Label>
+                            <Select value={String(totalPages)} onValueChange={(v) => setTotalPages(Number(v))}>
+                              <SelectTrigger className="text-sm bg-white/5 border-white/10">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {[2, 4, 6, 8, 12].map((n) => (
+                                  <SelectItem key={n} value={String(n)}>{n} pages</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs text-white/50">Panels/Page</Label>
+                            <Select value={String(panelsPerPage)} onValueChange={(v) => setPanelsPerPage(Number(v))}>
+                              <SelectTrigger className="text-sm bg-white/5 border-white/10">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {[3, 4, 6, 8, 9].map((n) => (
+                                  <SelectItem key={n} value={String(n)}>{n} panels</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
 
-                  {/* Description */}
-                  <div className="space-y-2">
-                    <Label htmlFor="description" className="text-sm font-semibold">
-                      Description
-                    </Label>
-                    <Textarea
-                      id="description"
-                      placeholder="What's your comic about?"
-                      value={comicData.description}
-                      onChange={(e) =>
-                        setComicData({ ...comicData, description: e.target.value })
-                      }
-                      className="text-sm resize-none h-24 bg-white/5 border-white/10"
-                    />
-                  </div>
+                        {/* Total estimate */}
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                          <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-xs text-emerald-300/80">
+                            {totalPages * panelsPerPage} total panels across {totalPages} pages
+                          </span>
+                        </div>
 
-                  {/* Stats */}
-                  <div className="pt-4 border-t border-white/10 space-y-2">
-                    <div className="text-sm">
-                      <span className="font-semibold text-white">Panels:</span>
-                      <span className="text-white/70 ml-2">{panelCount}</span>
-                    </div>
-                    <div className="text-sm">
-                      <span className="font-semibold text-white">Est. Pages:</span>
-                      <span className="text-white/70 ml-2">{estimatedPages} (6/page)</span>
-                    </div>
+                        {/* Layout Style */}
+                        <div className="space-y-2">
+                          <Label className="text-xs text-white/50">Layout Style</Label>
+                          <div className="space-y-1.5">
+                            {LAYOUT_STYLES.map((l) => {
+                              const Icon = l.icon;
+                              return (
+                                <button
+                                  key={l.value}
+                                  onClick={() => setLayoutStyle(l.value)}
+                                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg border transition-all text-left ${
+                                    layoutStyle === l.value
+                                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200'
+                                      : 'bg-white/[0.02] border-white/[0.06] text-white/40 hover:border-white/15'
+                                  }`}
+                                >
+                                  <Icon className="w-4 h-4 flex-shrink-0" />
+                                  <div>
+                                    <p className="text-xs font-medium">{l.label}</p>
+                                    <p className="text-[10px] opacity-60">{l.desc}</p>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Card>
+
+              {/* Accordion 3: Beat Outline */}
+              <Card className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl overflow-hidden shadow-lg">
+                <button 
+                  onClick={() => toggleSection('beats')}
+                  className="w-full flex items-center justify-between p-4 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                >
+                  <div className="flex items-center gap-2 text-white/90">
+                    <Palette className="w-4 h-4 text-pink-400" />
+                    <span className="text-sm font-medium">Beat Outline</span>
+                    <span className="text-[10px] text-white/30 font-normal lowercase">(optional)</span>
                   </div>
+                  {expandedSections.beats ? <ChevronDown className="w-4 h-4 text-white/40" /> : <ChevronRight className="w-4 h-4 text-white/40" />}
+                </button>
+                <AnimatePresence>
+                  {expandedSections.beats && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="border-t border-white/[0.06]"
+                    >
+                      <CardContent className="p-4 space-y-3">
+                        {BEAT_SLOTS.map((label, i) => (
+                          <div key={label} className="flex items-start flex-col gap-1.5">
+                            <div className={`px-2 py-0.5 rounded flex items-center justify-center text-[10px] font-bold ${
+                              i === 0 ? 'bg-amber-500/15 text-amber-400' :
+                              i === 1 ? 'bg-orange-500/15 text-orange-400' :
+                              i === 2 ? 'bg-red-500/15 text-red-400' :
+                              'bg-blue-500/15 text-blue-400'
+                            }`}>
+                              {i + 1}. {label}
+                            </div>
+                            <Input
+                              placeholder={`Enter beat details…`}
+                              value={beats[i]}
+                              onChange={(e) => updateBeat(i, e.target.value)}
+                              className="text-xs h-8 bg-white/5 border-white/[0.06] placeholder:text-white/15"
+                            />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Card>
+
+            </motion.div>
+
+            {/* ════════════════════════════════════════════════════
+               MAIN STAGE — Sketches & Generation (Span 8)
+               ════════════════════════════════════════════════════ */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="lg:col-span-8 space-y-6 pb-20"
+            >
+              {/* Generate Button */}
+              <Card className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl">
+                <CardContent className="py-4">
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={isGenerating || !title.trim() || !logline.trim()}
+                    className="w-full py-6 text-base font-bold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-blue-500/20 disabled:opacity-40 disabled:shadow-none transition-all"
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-5 h-5 mr-2" />
+                    )}
+                    {isGenerating ? 'Generating…' : 'Generate Comic with Panelra Engine'}
+                  </Button>
+
+                  {/* Error display */}
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-3 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs"
+                    >
+                      {error}
+                    </motion.div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Progress States */}
+              <AnimatePresence>
+                {isGenerating && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                  >
+                    <Card className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl overflow-hidden">
+                      <CardContent className="py-6">
+                        <div className="space-y-4">
+                          {/* Progress bar */}
+                          <div className="h-1 rounded-full bg-white/5 overflow-hidden">
+                            <motion.div
+                              className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500"
+                              initial={{ width: '0%' }}
+                              animate={{
+                                width:
+                                  phase === 'analyzing' ? '25%' :
+                                  phase === 'composing' ? '50%' :
+                                  phase === 'rendering' ? '75%' :
+                                  phase === 'finalizing' ? '90%' : '100%',
+                              }}
+                              transition={{ duration: 0.8 }}
+                            />
+                          </div>
+
+                          {/* Phase steps */}
+                          <div className="space-y-2">
+                            {(['analyzing', 'composing', 'rendering', 'finalizing'] as GenerationPhase[]).map((p, i) => {
+                              const phaseIndex = ['analyzing', 'composing', 'rendering', 'finalizing'].indexOf(phase);
+                              const thisIndex = i;
+                              const isDone = thisIndex < phaseIndex;
+                              const isCurrent = p === phase;
+
+                              return (
+                                <div key={p} className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+                                  isCurrent ? 'bg-blue-500/10 border border-blue-500/20' :
+                                  isDone ? 'opacity-50' : 'opacity-20'
+                                }`}>
+                                  {isDone ? (
+                                    <Check className="w-4 h-4 text-emerald-400" />
+                                  ) : isCurrent ? (
+                                    <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+                                  ) : (
+                                    <div className="w-4 h-4 rounded-full border border-white/20" />
+                                  )}
+                                  <span className="text-xs text-white/70">
+                                    {PHASE_MESSAGES[p]}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Result — Panel Preview Grid */}
+              {result && phase === 'complete' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="space-y-4"
+                >
+                  {/* Summary */}
+                  <Card className="bg-emerald-500/5 border-emerald-500/20 backdrop-blur-xl">
+                    <CardContent className="py-3">
+                      <div className="flex items-center gap-2 text-emerald-300">
+                        <Check className="w-4 h-4" />
+                        <span className="text-sm font-medium">{result.summary}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Panel Grid by Page */}
+                  {Array.from({ length: result.totalPages }, (_, pageIdx) => {
+                    const pagePanels = result.panels.filter((p) => p.pageNumber === pageIdx + 1);
+                    return (
+                      <Card key={pageIdx} className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-xs flex items-center gap-2 text-white/60">
+                            <BookOpen className="w-3.5 h-3.5" />
+                            Page {pageIdx + 1}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className={`grid gap-2 ${
+                            result.panelsPerPage <= 4 ? 'grid-cols-2' :
+                            result.panelsPerPage <= 6 ? 'grid-cols-3' : 'grid-cols-4'
+                          }`}>
+                            {pagePanels.map((panel) => (
+                              <div
+                                key={panel.panelIndex}
+                                className="group relative rounded-lg border border-white/[0.06] bg-white/[0.02] overflow-hidden hover:border-blue-500/30 transition-all"
+                              >
+                                {/* Panel image placeholder */}
+                                <div className="aspect-[3/4] bg-gradient-to-br from-white/[0.04] to-white/[0.01] flex flex-col items-center justify-center p-2">
+                                  <ImageIcon className="w-8 h-8 text-white/10 mb-1" />
+                                  <span className="text-[9px] text-white/20 text-center">
+                                    {panel.cameraDirection}
+                                  </span>
+                                </div>
+
+                                {/* Caption */}
+                                <div className="p-2 border-t border-white/[0.04]">
+                                  <p className="text-[10px] text-white/50 line-clamp-2">{panel.caption}</p>
+                                  {panel.characters.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {panel.characters.map((c, ci) => (
+                                        <Badge key={ci} variant="outline" className="text-[8px] px-1 py-0 h-4 border-white/10 text-white/30">
+                                          {c}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Hover actions */}
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                                  <button className="p-1.5 rounded-md bg-white/10 hover:bg-white/20 transition-colors">
+                                    <RefreshCw className="w-3 h-3" />
+                                  </button>
+                                  <button className="p-1.5 rounded-md bg-white/10 hover:bg-white/20 transition-colors">
+                                    <Type className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
 
                   {/* Actions */}
-                  <div className="space-y-2 pt-4">
+                  <div className="flex gap-2">
                     <Button
-                      data-tour="save-button"
-                      onClick={handleSaveDraft}
-                      disabled={isSaving}
                       variant="outline"
-                      className="w-full"
-                      size="sm"
+                      onClick={() => setPhase('idle')}
+                      className="flex-1 border-white/10 text-white/60 bg-white/5 hover:text-white"
                     >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Regenerate
+                    </Button>
+                    <Button className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white border-0">
                       <Save className="w-4 h-4 mr-2" />
-                      Save Draft
-                    </Button>
-                    <Button
-                      onClick={handleReset}
-                      variant="outline"
-                      className="w-full text-red-500 hover:text-red-600"
-                      size="sm"
-                    >
-                      <RotateCcw className="w-4 h-4 mr-2" />
-                      Clear All
+                      Save Comic
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
+                </motion.div>
+              )}
 
-          {/* Right Columns: Canvas + Panel Editor */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Canvas Section */}
-            <motion.div
-              initial={{ x: 20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card
-                data-tour="canvas"
-                className="bg-white/5 border-white/10 h-[600px] flex flex-col"
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="flex items-center gap-2">
-                      <BookOpen className="w-5 h-5" />
-                      Comic Layout
-                    </CardTitle>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleAddPanel}
-                      className="text-orange-500 border-orange-500/30 hover:bg-orange-500/10"
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Add Panel
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-1 overflow-hidden">
-                  <StoryCanvas
-                    state={canvasState}
-                    onChange={setCanvasState}
-                    width="100%"
-                    height="100%"
-                    onNodeClick={(nodeId) => {
-                      if (canvasState.nodes.find(n => n.id === nodeId)?.type === 'panel') {
-                        setSelectedPanelId(nodeId);
-                      }
-                    }}
-                  />
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Panel Editor Section */}
-            {selectedPanel && (
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Card data-tour="panel-editor" className="bg-white/5 border-white/10">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-lg">
-                        {selectedPanel.label || 'Panel Editor'}
-                      </CardTitle>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={handleDeletePanel}
-                      >
-                        Delete Panel
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-5">
-                    {/* Scene Description */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold">Scene Description</Label>
-                      <Textarea
-                        placeholder="Describe what happens in this panel..."
-                        value={selectedPanel.description || ''}
-                        onChange={(e) =>
-                          handleUpdatePanel('description', e.target.value)
-                        }
-                        className="text-sm resize-none h-20 bg-white/5 border-white/10"
-                      />
-                    </div>
-
-                    {/* Dialogue */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold">Dialogue / Captions</Label>
-                      <Textarea
-                        placeholder="Character dialogue or narration..."
-                        value={selectedPanel.content || ''}
-                        onChange={(e) => handleUpdatePanel('content', e.target.value)}
-                        className="text-sm resize-none h-20 bg-white/5 border-white/10"
-                      />
-                    </div>
-
-                    {/* Camera Notes */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold">Camera Direction (Optional)</Label>
-                      <Textarea
-                        placeholder="e.g., Wide shot, close-up, action, reaction..."
-                        value={selectedPanel.metadata?.cameraNotes || ''}
-                        onChange={(e) =>
-                          handleUpdatePanel('metadata', {
-                            ...selectedPanel.metadata,
-                            cameraNotes: e.target.value,
-                          })
-                        }
-                        className="text-sm resize-none h-16 bg-white/5 border-white/10"
-                      />
+              {/* Empty State */}
+              {phase === 'idle' && !result && (
+                <Card className="bg-white/[0.02] border-white/[0.06] backdrop-blur-xl">
+                  <CardContent className="py-12">
+                    <div className="text-center">
+                      <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-4">
+                        <BookOpen className="w-8 h-8 text-blue-400/50" />
+                      </div>
+                      <p className="text-sm font-medium text-white/40 mb-1">Your comic will appear here</p>
+                      <p className="text-xs text-white/20">
+                        Fill in the setup, then hit Generate to create your AI comic
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
-            )}
-
-            {/* Empty State */}
-            {panelCount === 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-center py-16 text-white/50"
-              >
-                <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                <p className="text-lg font-medium mb-2">No panels yet</p>
-                <p className="text-sm mb-4">Create your first panel to get started</p>
-                <Button
-                  onClick={handleAddPanel}
-                  className="bg-orange-600 hover:bg-orange-700 text-white"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create First Panel
-                </Button>
-              </motion.div>
-            )}
+              )}
+            </motion.div>
           </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }

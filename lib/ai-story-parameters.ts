@@ -1078,8 +1078,8 @@ export function validateParameterValue(
   // Type-specific validation
   switch (param.type) {
     case 'slider':
-      if (typeof value !== 'number') {
-        return { valid: false, error: `${param.label} must be a number` };
+      if (!Number.isFinite(value)) {
+        return { valid: false, error: `${param.label} must be a finite number` };
       }
       if (param.constraints?.min !== undefined && value < param.constraints.min) {
         return { valid: false, error: `${param.label} must be at least ${param.constraints.min}` };
@@ -1132,6 +1132,18 @@ export function validateParameterValue(
       }
       break;
 
+    case 'textarea':
+      if (typeof value !== 'string') {
+        return { valid: false, error: `${param.label} must be a string` };
+      }
+      if (param.constraints?.maxLength && value.length > param.constraints.maxLength) {
+        return {
+          valid: false,
+          error: `${param.label} must be at most ${param.constraints.maxLength} characters`,
+        };
+      }
+      break;
+
     case 'toggle':
       if (typeof value !== 'boolean') {
         return { valid: false, error: `${param.label} must be true or false` };
@@ -1148,7 +1160,121 @@ export function validateParameterValue(
 export function getDefaultParameters(): Record<string, any> {
   const defaults: Record<string, any> = {};
   ALL_PARAMETERS.forEach((param) => {
-    defaults[param.key] = param.defaultValue;
+    const defaultValue = param.defaultValue;
+    // Deep clone non-primitive values (objects and arrays) to prevent mutation
+    if (typeof defaultValue === 'object' && defaultValue !== null) {
+      defaults[param.key] = structuredClone(defaultValue);
+    } else {
+      // Primitive values (numbers, strings, booleans, null, undefined) are returned by value
+      defaults[param.key] = defaultValue;
+    }
   });
   return defaults;
 }
+
+/**
+ * Compatibility aliases used by parameter-panel.tsx
+ */
+export type AIStoryParameter = ParameterMetadata & {
+  id: string;
+  name: string;
+  description: string;
+  value?: any;
+};
+
+/**
+ * AI_STORY_PARAMETERS — enriched list with id/name/description aliases
+ */
+export const AI_STORY_PARAMETERS: AIStoryParameter[] = ALL_PARAMETERS.map((p) => ({
+  ...p,
+  id: p.key,
+  name: p.label,
+  description: p.helpText,
+}));
+
+/**
+ * Preset definitions for quick parameter configuration
+ */
+export interface ParameterPreset {
+  name: string;
+  icon: string;
+  description: string;
+  enabledParameterIds: string[];
+}
+
+export const PARAMETER_PRESETS: Record<string, ParameterPreset> = {
+  minimal: {
+    name: 'Minimal',
+    icon: '✨',
+    description: 'Just the essentials — genre, tone, and length',
+    enabledParameterIds: [
+      'narrativeVoice', 'proseStyle', 'targetWordCount', 'pointOfView', 'pacingSpeed',
+    ],
+  },
+  standard: {
+    name: 'Standard',
+    icon: '📖',
+    description: 'Balanced set of character, plot, and tone controls',
+    enabledParameterIds: [
+      'characterCount', 'characterDepth', 'protagonistArchetype',
+      'plotComplexity', 'pacingSpeed', 'plotStructureType', 'conflictType',
+      'narrativeVoice', 'proseStyle', 'dialogueLevel',
+      'targetWordCount', 'pointOfView',
+      'themeDepth', 'emotionalDepth',
+    ],
+  },
+  advanced: {
+    name: 'Advanced',
+    icon: '⚙️',
+    description: 'Full control over all major story dimensions',
+    enabledParameterIds: [
+      'characterCount', 'characterDepth', 'protagonistArchetype', 'antagonistPresence',
+      'sideCharacterCount', 'characterDiversity', 'relationshipComplexity',
+      'characterMotivationClarity', 'characterVoiceDistinctness', 'characterFlaws', 'characterGrowth',
+      'plotComplexity', 'pacingSpeed', 'cliffhangerFrequency', 'plotStructureType',
+      'twistCount', 'conflictType', 'resolutionType', 'flashbackUsage', 'foreshadowingLevel',
+      'settingDetail', 'settingType', 'worldMagicSystem', 'technologyLevel',
+      'narrativeVoice', 'proseStyle', 'dialogueLevel', 'dialogueNaturalism',
+      'humorLevel', 'darknessLevel', 'sentimentTone',
+      'targetWordCount', 'readingLevel', 'pointOfView', 'verbTense',
+      'themeDepth', 'symbolismLevel', 'moralComplexity',
+      'sensoryDetail', 'actionDescription', 'emotionalDepth', 'tensionCurve',
+      'creativityLevel', 'coherenceStrictness', 'modelTemperature',
+    ],
+  },
+  worldbuilder: {
+    name: 'Worldbuilder',
+    icon: '🌍',
+    description: 'Deep worldbuilding with rich setting and lore',
+    enabledParameterIds: [
+      'settingDetail', 'settingType', 'worldMagicSystem', 'technologyLevel',
+      'worldHistoryDepth', 'politicsComplexity', 'economicSystem', 'culturalDiversity', 'atmosphere',
+      'characterDiversity', 'sensoryDetail', 'immersionLevel',
+      'plotComplexity', 'narrativeVoice', 'targetWordCount',
+    ],
+  },
+};
+
+/**
+ * Search parameters by name, description, or category
+ */
+export function searchParameters(query: string): AIStoryParameter[] {
+  const q = query.toLowerCase().trim();
+  if (!q) return AI_STORY_PARAMETERS;
+  return AI_STORY_PARAMETERS.filter(
+    (p) =>
+      p.name.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q) ||
+      p.id.toLowerCase().includes(q)
+  );
+}
+
+/**
+ * Apply a preset — returns the set of parameter IDs to enable
+ */
+export function applyPreset(presetKey: string): string[] {
+  const preset = PARAMETER_PRESETS[presetKey];
+  return preset ? preset.enabledParameterIds : [];
+}
+

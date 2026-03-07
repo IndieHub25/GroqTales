@@ -52,7 +52,7 @@ export const ParameterPanel: React.FC<ParameterPanelProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<ParameterCategory>>(
-    new Set(['character-development', 'plot-structure'])
+    new Set(['character', 'plot'] as ParameterCategory[])
   );
   const [activeTab, setActiveTab] = useState('categories');
 
@@ -181,8 +181,8 @@ export const ParameterPanel: React.FC<ParameterPanelProps> = ({
             </div>
           ) : (
             <div className={styles.categories}>
-              {(Object.keys(PARAMETER_CATEGORIES) as ParameterCategory[]).map(categoryKey => {
-                const category = PARAMETER_CATEGORIES[categoryKey];
+              {PARAMETER_CATEGORIES.map((category) => {
+                const categoryKey = category.key;
                 const params = AI_STORY_PARAMETERS.filter(p => p.category === categoryKey);
                 const isExpanded = expandedCategories.has(categoryKey);
 
@@ -192,7 +192,7 @@ export const ParameterPanel: React.FC<ParameterPanelProps> = ({
                       className={styles.categoryHeader}
                       onClick={() => toggleCategory(categoryKey)}
                     >
-                      <span className={styles.categoryIcon}>{category.icon}</span>
+                      <span className={styles.categoryIcon}>{category.icon || '📁'}</span>
                       <div className={styles.categoryInfo}>
                         <span className={styles.categoryName}>{category.label}</span>
                         <span className={styles.categoryCount}>
@@ -348,8 +348,8 @@ const ParameterRow: React.FC<ParameterRowProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {parameter.constraints.options.map(option => (
-                  <SelectItem key={option} value={option}>
-                    {option.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                  <SelectItem key={String(option.value)} value={String(option.value)}>
+                    {option.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -399,22 +399,23 @@ const ParameterRow: React.FC<ParameterRowProps> = ({
           {parameter.type === 'multiselect' && parameter.constraints?.options && (
             <div className={styles.multiselectControl}>
               {parameter.constraints.options.map(option => (
-                <div key={option} className={styles.multiselectItem}>
+                <div key={String(option.value)} className={styles.multiselectItem}>
                   <Checkbox
-                    id={`${parameter.id}-${option}`}
+                    id={`${parameter.id}-${String(option.value)}`}
                     defaultChecked={
-                      (parameter.value as string[])?.includes(option) ?? false
+                      (parameter.value as string[])?.includes(String(option.value)) ?? false
                     }
                     onCheckedChange={(checked) => {
                       const current = parameter.value as string[] || [];
+                      const optVal = String(option.value);
                       const updated = checked
-                        ? [...current, option]
-                        : current.filter(o => o !== option);
+                        ? [...current, optVal]
+                        : current.filter((o: string) => o !== optVal);
                       onChange(updated);
                     }}
                   />
-                  <label htmlFor={`${parameter.id}-${option}`}>
-                    {option.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                  <label htmlFor={`${parameter.id}-${String(option.value)}`}>
+                    {option.label}
                   </label>
                 </div>
               ))}

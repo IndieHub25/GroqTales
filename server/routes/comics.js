@@ -124,6 +124,198 @@ router.get('/', async (req, res) => {
 });
 
 // ============================================================================
+// AI COMIC GENERATION FROM SKETCHES
+// ============================================================================
+
+/**
+ * POST /api/v1/comics/generate-from-sketches
+ * Generate a comic using hero/co-star sketch uploads + metadata.
+ * Accepts multipart/form-data with image files and JSON fields.
+ */
+router.post(
+  '/generate-from-sketches',
+  authRequired,
+  upload.fields([
+    { name: 'heroSketch', maxCount: 1 },
+    { name: 'coStarSketches', maxCount: 10 },
+  ]),
+  async (req, res) => {
+    try {
+      const {
+        title,
+        logline,
+        genres,
+        stylePreset,
+        layoutConfig,
+        beatOutline,
+        heroName,
+        heroDescription,
+        coStarNames,
+        coStarDescriptions,
+      } = req.body;
+
+      // ── Validation ─────────────────────────────────────────────
+      if (!title || typeof title !== 'string' || title.trim().length < 1) {
+        return res.status(400).json({
+          success: false,
+          error: 'Title is required',
+        });
+      }
+
+      if (!logline || typeof logline !== 'string') {
+        return res.status(400).json({
+          success: false,
+          error: 'Logline / premise is required',
+        });
+      }
+
+      // Parse JSON fields that come as strings in multipart
+      let parsedGenres = [];
+      try {
+        parsedGenres = typeof genres === 'string' ? JSON.parse(genres) : (Array.isArray(genres) ? genres : [genres || 'fantasy']);
+      } catch {
+        parsedGenres = [genres || 'fantasy'];
+      }
+
+      let parsedLayout = {};
+      try {
+        parsedLayout = typeof layoutConfig === 'string' ? JSON.parse(layoutConfig) : (layoutConfig || {});
+      } catch {
+        parsedLayout = {};
+      }
+
+      let parsedBeats = [];
+      try {
+        parsedBeats = typeof beatOutline === 'string' ? JSON.parse(beatOutline) : (beatOutline || []);
+      } catch {
+        parsedBeats = [];
+      }
+
+      let parsedCoStarNames = [];
+      try {
+        parsedCoStarNames = typeof coStarNames === 'string' ? JSON.parse(coStarNames) : (Array.isArray(coStarNames) ? coStarNames : []);
+      } catch {
+        parsedCoStarNames = [];
+      }
+
+      let parsedCoStarDescriptions = [];
+      try {
+        parsedCoStarDescriptions = typeof coStarDescriptions === 'string' ? JSON.parse(coStarDescriptions) : (Array.isArray(coStarDescriptions) ? coStarDescriptions : []);
+      } catch {
+        parsedCoStarDescriptions = [];
+      }
+
+      const heroSketchFile = req.files?.heroSketch?.[0] || null;
+      const coStarFiles = req.files?.coStarSketches || [];
+
+      // ── Create comic record ────────────────────────────────────
+      const slug = sanitizeSlug(title);
+      const existingComic = await Comic.findOne({ slug });
+      const finalSlug = existingComic ? `${slug}-${Date.now()}` : slug;
+
+      const totalPages = parsedLayout.pages || 4;
+      const panelsPerPage = parsedLayout.panelsPerPage || 6;
+      const totalPanels = totalPages * panelsPerPage;
+
+      const comic = await Comic.create({
+        title: title.trim(),
+        slug: finalSlug,
+        description: logline.trim(),
+        genres: parsedGenres.slice(0, 2),
+        tags: [stylePreset || 'manga', 'ai-generated'],
+        language: 'en',
+        visibility: 'private',
+        readingDirection: 'ltr',
+        ageRating: 'everyone',
+        creator: req.user.id,
+        status: 'draft',
+        metadata: {
+          generationType: 'sketch-based',
+          stylePreset: stylePreset || 'manga',
+          layoutConfig: parsedLayout,
+          beatOutline: parsedBeats,
+          heroName: heroName || 'Hero',
+          heroDescription: heroDescription || '',
+          coStars: parsedCoStarNames.map((name, i) => ({
+            name,
+            description: parsedCoStarDescriptions[i] || '',
+          })),
+          hasHeroSketch: !!heroSketchFile,
+          coStarSketchCount: coStarFiles.length,
+        },
+      });
+
+      // ── Upload hero sketch as cover if provided ────────────────
+      if (heroSketchFile) {
+        try {
+          const cid = await uploadBufferToIPFS(
+            heroSketchFile.buffer,
+            heroSketchFile.originalname,
+            {
+              name: `${finalSlug}_hero_sketch`,
+              keyvalues: { comicId: comic._id.toString(), type: 'hero-sketch' },
+            }
+          );
+          comic.coverImage = { cid, gatewayURL: getGatewayURL(cid) };
+          await comic.save();
+        } catch (uploadErr) {
+          console.warn('Hero sketch upload to IPFS failed, continuing:', uploadErr.message);
+        }
+      }
+
+      // ── Generate mock panel data ───────────────────────────────
+      // In production, this would call the AI orchestrator with
+      // mode: 'comic-only' and pass sketch references.
+      const beatLabels = ['Intro', 'Conflict', 'Climax', 'Resolution'];
+      const panels = [];
+
+      for (let i = 0; i < Math.min(totalPanels, 24); i++) {
+        const pageNum = Math.floor(i / panelsPerPage) + 1;
+        const panelNum = (i % panelsPerPage) + 1;
+        const beatIndex = Math.min(
+          Math.floor(i / (totalPanels / 4)),
+          3
+        );
+        const beat = parsedBeats[beatIndex] || beatLabels[beatIndex];
+
+        panels.push({
+          panelIndex: i,
+          pageNumber: pageNum,
+          panelNumber: panelNum,
+          imageUrl: null, // Would be generated by AI
+          caption: `[${beatLabels[beatIndex]}] Panel ${panelNum} — ${typeof beat === 'string' ? beat : beat.description || ''}`.trim(),
+          dialogue: '',
+          characters: [heroName || 'Hero', ...(i % 3 === 0 && parsedCoStarNames.length > 0 ? [parsedCoStarNames[0]] : [])],
+          cameraDirection: ['wide shot', 'medium shot', 'close-up', 'action shot', 'reaction shot'][i % 5],
+          beat: beatLabels[beatIndex],
+        });
+      }
+
+      res.status(201).json({
+        success: true,
+        data: {
+          comicId: comic._id,
+          slug: comic.slug,
+          title: comic.title,
+          panels,
+          totalPages,
+          panelsPerPage,
+          stylePreset: stylePreset || 'manga',
+          summary: `Generated ${panels.length} panels across ${totalPages} pages for "${title}" in ${stylePreset || 'manga'} style.`,
+        },
+      });
+    } catch (error) {
+      console.error('Error generating comic from sketches:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate comic',
+        message: error.message,
+      });
+    }
+  }
+);
+
+// ============================================================================
 // SEARCH (must be before /:slug to avoid capture)
 // ============================================================================
 

@@ -64,27 +64,32 @@ sequenceDiagram
 
 ### Buying from Marketplace
 
+> **Note**: Current implementation is database-only. On-chain integration with smart contracts is planned for future releases.
+
 ```mermaid
 sequenceDiagram
     participant Buyer
     participant Backend
-    participant CraftToken
-    participant CraftsMarketplace
-    participant MonadStoryNFT
+    participant Database
 
     Buyer->>Backend: POST /api/v1/marketplace/buy
     Backend->>Backend: Validate listing, check balance
-    Backend->>CraftToken: approve(marketplace, price)
-    Backend->>CraftsMarketplace: buyItem(nftAddr, tokenId)
-    CraftsMarketplace->>CraftToken: transferFrom(buyer, marketplace, price)
-    CraftsMarketplace->>CraftToken: transfer(treasury, platformFee)
-    CraftsMarketplace->>CraftToken: transfer(creator, royalty)
-    CraftsMarketplace->>MonadStoryNFT: safeTransferFrom(seller, buyer, tokenId)
-    Backend->>Backend: Update listing status → sold
-    Backend-->>Buyer: { success, txHash }
+    Backend->>Database: UPDATE panels SET status='sold', buyer_id
+    Database-->>Backend: Update confirmation
+    Backend-->>Buyer: { success, message }
 ```
 
 ## Environment Variables
+
+⚠️ **SECURITY WARNING**: The following environment variables contain sensitive credentials:
+- `PLATFORM_SIGNER_KEY`: Private key for platform wallet - NEVER commit to version control
+- `GROQ_API_KEY`: API key for Groq service - rotate regularly
+
+**Production Recommendations**:
+- Use AWS KMS, Google Cloud KMS, or Azure Key Vault for key management
+- Consider Hardware Security Modules (HSM) for high-value keys
+- Implement key rotation policies
+- Use environment-specific secrets management (Vercel Secrets, Railway Variables, etc.)
 
 | Variable | Description | Example |
 |---|---|---|

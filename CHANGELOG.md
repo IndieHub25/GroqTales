@@ -7,13 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 1.3.105 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+Active full support: 1.4.0 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+
+## [1.4.0] - 2026-03-07
+
+### Added
+- **Panelra Engine — Sketch-Based Comic Generation** (`app/create/comic/page.tsx`) [REWRITE]: Complete 3-column studio layout for AI comic creation:
+  - **Left Panel — Character & Story Setup**: Hero sketch upload with drag-drop + preview, name/description fields. Dynamic co-star section (add/remove with image, name, traits). Story basics with title, logline, dual genre pills (up to 2 from 10 options), and art style selector (Manga, Western, Minimalist, Noir, Watercolor, Pixel Art).
+  - **Middle Panel — Layout & Structure**: Pages/panels-per-page selectors, layout style picker (Classic Grid, Cinematic, Hero Shots) with visual descriptions, beat outline with 4 slots (Intro/Conflict/Climax/Resolution).
+  - **Right Panel — AI Generation & Preview**: "Generate Comic with Panelra Engine" CTA, 4-phase animated progress (Analyzing → Composing → Rendering → Finalizing), panel preview grid organized by page with per-panel hover actions (regenerate, edit caption), Save Comic / Regenerate post-generation actions.
+- **Sketch Generation Endpoint** (`server/routes/comics.js`): New `POST /api/v1/comics/generate-from-sketches` endpoint accepting multipart form data with `heroSketch` + `coStarSketches` files plus JSON metadata (title, logline, genres, stylePreset, layoutConfig, beatOutline, character details). Creates comic record with `status: 'draft'`, uploads hero sketch to IPFS as cover, generates structured mock panel data with beat labels, camera directions, and character assignments.
+- **API Client Functions** (`lib/api-client.ts`): Added `generateComicFromSketches()`, `getUserComics()`, `getUserDrafts()`, `getUserNFTs()`, `getUserFeed()`, `getUserSettings()`, `updateUserSettings()`, `getUserProfile()` — all with auth headers and retry logic.
+- **User Dashboard — Full Overhaul** (`app/dashboard/page.tsx`) [REWRITE]: Replaced basic stats page with 5-tab command center:
+  - **Hero Welcome Block**: User avatar, personalized greeting, 4 stat cards (Stories, Comics, NFTs Minted, Drafts) with colored gradients and glass styling.
+  - **Stories Tab**: Published stories list (from `/api/v1/stories`) + Drafts section (from `/api/v1/drafts`) with status badges, time-ago, view counts, and chevron navigation.
+  - **Comics Tab**: Card grid (from `/api/v1/comics`) with cover thumbnails, hero name, genre badges, page count, and status indicators.
+  - **Collectibles Tab**: NFT card grid (from `/api/v1/nft/user`) with token images, linked content, token IDs, and mint status.
+  - **Feed Tab**: Activity stream (from `/api/feed`) with creator avatars, action descriptions, and timestamps.
+  - **Settings Tab**: Profile form (display name, bio), notification/privacy toggles, optimistic save with animated feedback.
+  - All tabs feature loading skeletons, empty states with CTAs, and error banners with retry buttons.
+
+### Changed
+- **Supported Version**: Bumped to `1.4.0`.
 
 ## [1.3.105] - 2026-03-07
 
 ### Added
 - **Shakti Spark Page** (`app/create/spark/page.tsx`) [NEW]: Dedicated short-story/idea-seed generator with prompt textarea, genre pill selector, mood pills (Epic/Dark/Whimsical/Tense/Hopeful/Mysterious), "Spark it" CTA, and glass output card. Actions: Save as Draft, Open in VedaScript Engine, Copy idea. Generates via `/api/groq` with `format: 'short'`.
-- **README VedaScript Parameter Documentation**: Added comprehensive "VedaScript Engine Parameters" section documenting all 71 UI parameters across 10 categories (Character Development, Plot Structure, Worldbuilding, Tone & Style, Technical, Thematic, Sensory & Immersion, Audience, Advanced, Special Effects) with key, label, type, default, and description.
+- **README VedaScript Parameter Documentation**: Added comprehensive "VedaScript Engine Parameters" section documenting all 71 UI parameters across 10 categories.
+- **Parameter Presets** (`lib/ai-story-parameters.ts`): Added `PARAMETER_PRESETS` (Minimal, Standard, Advanced, Worldbuilder), `AI_STORY_PARAMETERS`, `AIStoryParameter` type, `searchParameters()`, and `applyPreset()` exports.
+- **VedaScript Guided Tour Redesign** (`components/guided-tour.tsx`): Rewrote `AI_STORY_TOUR_STEPS` from 6 outdated steps to 7 steps matching the 3-column studio layout. Removed NFT minting references. Added `data-tour` attributes for all spotlight targets.
 
 ### Changed
 - **Forge Root Redesign** (`app/create/page.tsx`): Replaced tab-based engine selection with a 2×2 glassmorphism engine card grid. Each engine (VedaScript, Panelra, Mythloom, Shakti Spark) has distinct color, icon, subtitle, description, and CTA. Mythloom shows "Coming Soon". Cards feature hover scale, glow, and press animations via Framer Motion.
