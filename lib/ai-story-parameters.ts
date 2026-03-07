@@ -1163,7 +1163,7 @@ export function getDefaultParameters(): Record<string, any> {
     const defaultValue = param.defaultValue;
     // Deep clone non-primitive values (objects and arrays) to prevent mutation
     if (typeof defaultValue === 'object' && defaultValue !== null) {
-      defaults[param.key] = structuredClone(defaultValue);
+      defaults[param.key] = JSON.parse(JSON.stringify(defaultValue));
     } else {
       // Primitive values (numbers, strings, booleans, null, undefined) are returned by value
       defaults[param.key] = defaultValue;
