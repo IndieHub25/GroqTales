@@ -101,7 +101,7 @@ const appVersion = process.env.NEXT_PUBLIC_VERSION ?? '?.?.?';
 export const metadata: Metadata = {
   title: 'GroqTales - AI-Generated Story NFTs',
   description:
-    'Create, mint, and share AI-generated stories as NFTs on the Monad blockchain.',
+    'Create, mint, and share AI-generated stories as NFTs on the blockchain.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'https://groqtales.com'),
   icons: {
     icon: '/logo.png',
@@ -110,7 +110,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'GroqTales',
     description:
-      'AI-Powered Web3 Storytelling Platform | Create, share, and own AI-generated stories and comics as NFTs on the Monad blockchain',
+      'AI-Powered Web3 Storytelling Platform | Create, share, and own AI-generated stories and comics as NFTs on the blockchain',
     images: [{ url: 'https://www.groqtales.xyz/groq_tales_logo.png' }],
   },
 };

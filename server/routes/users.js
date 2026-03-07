@@ -226,28 +226,52 @@ router.get('/profile/username/:username', async (req, res) => {
   try {
     const { username } = req.params;
 
+    // Query Supabase for user profile by username
     // Intentionally exclude email, wallet, walletAddress for public responses
-    const user = await User.findOne({ username })
-      .select('username bio avatar badges firstName lastName socialLinks createdAt')
-      .lean();
+    const { data: user, error: userError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, username, bio, avatar_url, badges, first_name, last_name, social_twitter, social_website, created_at, verified')
+      .eq('username', username)
+      .single();
 
-    if (!user) {
+    if (userError || !user) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
 
-    const stories = await Story.find({ author: user._id, moderationStatus: 'approved' })
-      .sort({ createdAt: -1 })
-      .lean();
+    // Fetch approved stories for this user
+    const { data: stories, error: storiesError } = await supabaseAdmin
+      .from('stories')
+      .select('*')
+      .eq('author_id', user.id)
+      .eq('moderation_status', 'approved')
+      .order('created_at', { ascending: false });
+
+    const storyList = stories || [];
 
     return res.json({
       success: true,
       data: {
-        user,
-        stories,
+        user: {
+          id: user.id,
+          username: user.username,
+          display_name: user.display_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          bio: user.bio,
+          avatar: user.avatar_url,
+          badges: user.badges || [],
+          socialLinks: {
+            twitter: user.social_twitter,
+            website: user.social_website,
+          },
+          verified: user.verified,
+          createdAt: user.created_at,
+        },
+        stories: storyList,
         stats: {
-          storyCount: stories.length,
-          totalLikes: stories.reduce((sum, s) => sum + (s.stats?.likes || 0), 0),
-          totalViews: stories.reduce((sum, s) => sum + (s.stats?.views || 0), 0),
+          storyCount: storyList.length,
+          totalLikes: storyList.reduce((sum, s) => sum + (s.likes || 0), 0),
+          totalViews: storyList.reduce((sum, s) => sum + (s.views || 0), 0),
         },
       },
     });

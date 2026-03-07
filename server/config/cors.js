@@ -16,7 +16,10 @@ const allowedOrigins = [
   'https://groqtales-git-main-indie-hub25s-projects.vercel.app',
   'https://www.groqtales.xyz',
   'https://groqtales.xyz',
+  'https://www.comiccrafts.xyz',
+  'https://comiccrafts.xyz',
   'https://groqtales.pages.dev',
+  'https://drago.groqtales.pages.dev',
   'https://groqtales.netlify.app',
 ].filter(Boolean); // Remove undefined/null entries from env vars
 
@@ -32,8 +35,8 @@ function normalizeOrigin(origin) {
 
 /**
  * CORS origin callback for express-cors
- * Performs exact equality checks after normalization to prevent
- * security issues with startsWith matching (e.g., groqtales.xyz.evil.com)
+ * Uses proper URL parsing and hostname comparison to prevent spoofing attacks
+ * (e.g., groqtales.xyz.evil.com, fakevercel.app.attacker.com)
  * 
  * @param {string|undefined} origin - The origin header from the request
  * @param {function} callback - Express cors callback(err, allow)
@@ -42,30 +45,46 @@ function corsOriginCallback(origin, callback) {
   // Allow requests with no origin (Swagger UI, curl, server-to-server)
   if (!origin) return callback(null, true);
 
-  const normalizedIncomingOrigin = normalizeOrigin(origin);
+  try {
+    // Parse the origin URL to extract hostname
+    const originUrl = new URL(origin);
+    const hostname = originUrl.hostname;
 
-  // Check for exact match with allowed origins
-  const isAllowed = allowedOrigins.some(allowed => {
-    const normalizedAllowed = normalizeOrigin(allowed);
-    
-    // Exact match (after normalization)
-    if (normalizedIncomingOrigin === normalizedAllowed) return true;
-    
+    // Check for exact match with allowed origins
+    const isAllowed = allowedOrigins.some(allowed => {
+      const normalizedAllowed = normalizeOrigin(allowed);
+      const normalizedIncomingOrigin = normalizeOrigin(origin);
+
+      // Exact match (after normalization)
+      if (normalizedIncomingOrigin === normalizedAllowed) return true;
+
+      return false;
+    });
+
+    if (isAllowed) {
+      return callback(null, true);
+    }
+
     // Check for Vercel preview deployments (allow all *.vercel.app)
-    if (origin.includes('vercel.app')) return true;
-    
+    // Use proper hostname matching: exact match or subdomain
+    if (hostname === 'vercel.app' || hostname.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
     // Check for Cloudflare Pages preview deployments (allow all *.pages.dev)
-    if (origin.includes('pages.dev')) return true;
-    
-    return false;
-  });
+    // Use proper hostname matching: exact match or subdomain
+    if (hostname === 'pages.dev' || hostname.endsWith('.pages.dev')) {
+      return callback(null, true);
+    }
 
-  if (isAllowed) {
-    return callback(null, true);
+    // Origin not allowed
+    console.warn(`[CORS] Blocked origin: ${origin}`);
+    return callback(new Error('Not allowed by CORS'), false);
+  } catch (err) {
+    // Invalid origin URL
+    console.warn(`[CORS] Invalid origin URL: ${origin}`);
+    return callback(new Error('Invalid origin'), false);
   }
-
-  console.warn(`[CORS] Blocked origin: ${origin}`);
-  return callback(new Error('Not allowed by CORS'));
 }
 
 module.exports = {

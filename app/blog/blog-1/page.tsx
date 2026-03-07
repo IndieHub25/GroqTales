@@ -42,7 +42,7 @@ export default function BlogPage() {
           </div>
           
           <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight mb-8 leading-[1.1] text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/60 drop-shadow-sm font-display" style={{ fontFamily: 'var(--font-comic)' }}>
-            GroqTales: Building an AI‑Native Storytelling Engine on Monad
+            GroqTales: Building an AI‑Native Storytelling Engine on Blockchain
           </h1>
           
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-muted-foreground border-y border-white/10 py-6">
@@ -126,7 +126,7 @@ export default function BlogPage() {
             <li>You describe a story (or go full control-freak with an advanced "Pro Panel" of ~70 knobs).</li>
             <li>Groq models generate a structured screenplay-like narrative in seconds.</li>
             <li>We pair it with AI-generated visuals to feel like a comic / graphic novel.</li>
-            <li>You mint it as an NFT on Monad, with collaborators and royalty splits encoded in the CollabStory Protocol.</li>
+            <li>You mint it as an NFT on Blockchain, with collaborators and royalty splits encoded in the CollabStory Protocol.</li>
           </ul>
 
           <div className="flex flex-col sm:flex-row gap-4 my-10 p-6 rounded-2xl bg-white/5 border border-white/10 shadow-lg backdrop-blur-sm">
@@ -202,7 +202,7 @@ type ProParameters = {
             <li>Runs output checks before we accept the story.</li>
           </ol>
 
-          <h2>On‑chain: Monad + CollabStory Protocol</h2>
+          <h2>On‑chain + CollabStory Protocol</h2>
           <p>
             The second pillar: a story is an NFT, not a random JSON blob on some server. We're integrating Monad as the base chain for story minting. Design goals:
           </p>

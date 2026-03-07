@@ -8,7 +8,7 @@ import { ArrowRight, BookOpen } from 'lucide-react';
 const blogs = [
   {
     slug: 'blog-1',
-    title: 'GroqTales: Building an AI‑Native Storytelling Engine on Monad',
+    title: 'GroqTales: Building an AI‑Native Storytelling Engine on Blockchain',
     excerpt: 'Most NFT projects treated lore as marketing copy. What if the story was the first-class asset? And what if AI + on-chain rails made it fast to create, fair to share, and transparent to curate?',
     author: 'Mantej Singh',
     date: 'March 2, 2026',

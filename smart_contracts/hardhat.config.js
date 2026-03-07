@@ -14,7 +14,6 @@ const MONAD_MAINNET_RPC_URL =
 const PRIVATE_KEY = process.env.MINTER_PRIVATE_KEY || '0x';
 const MONADSCAN_API_KEY =
   process.env.MONADSCAN_API_KEY || 'Your monadscan API key';
-const MONADSCAN_API_KEY = process.env.MONADSCAN_API_KEY;
 
 module.exports = {
   defaultNetwork: 'hardhat',

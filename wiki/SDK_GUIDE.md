@@ -78,12 +78,16 @@ const stories = await sdk.stories.list({
 
 #### `sdk.ai.generate(options)`
 
-Generate content using various AI models.
+Generate content using AI models.
+
+**Model Architecture:**
+- **Groq**: Parameter parsing model
+- **Gemini (Chairman Model)**: Primary generation and analysis engine
 
 ```typescript
 const content = await sdk.ai.generate({
   prompt: 'Generate creative content...',
-  model: 'llama-3-70b',
+  model: 'gemini-1.5-flash', // Gemini is the Chairman Model for generation
   parameters: {
     temperature: 0.7,
     max_tokens: 1000,
@@ -93,7 +97,7 @@ const content = await sdk.ai.generate({
 
 #### `sdk.ai.analyze(content, type)`
 
-Analyze content with AI.
+Analyze content with Gemini (Chairman Model).
 
 ```typescript
 const analysis = await sdk.ai.analyze(

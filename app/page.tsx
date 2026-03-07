@@ -99,10 +99,10 @@ function useTypewriter(
 
 // Hero Typewriter texts
 const heroStories = [
-  "In the neon-lit depths of Neo-Tokyo, the last human...",
-  "The dragon soared above the crystalline peaks, its scales...",
-  "A strange signal emanated from the abyss of sector 7G...",
-  "Her sword glowed with the ancient power of the sun...",
+  "Draft with VedaScript Engine...",
+  "Visualize with Panelra Engine...",
+  "Blend with Mythloom Engine...",
+  "Spark ideas with Shakti Spark...",
 ];
 
 export default function Home() {
@@ -256,19 +256,19 @@ export default function Home() {
             </motion.div>
 
             <motion.h1 variants={fadeUp} className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[1.2] pb-4 mb-6">
-              Write your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 py-2 inline-block">legacy.</span><br />
-              Own your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 py-2 inline-block">universe.</span>
+              AI-native comics, stories, and collectibles on <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 py-2 inline-block">Blockchain.</span>
             </motion.h1>
 
-            {/* Story Typewriter Effect */}
-            <motion.div variants={fadeUp} className="min-h-[6rem] mb-10 max-w-2xl mx-auto flex items-center justify-center">
-              <p className="text-xl md:text-2xl text-white/60 font-medium font-mono leading-relaxed">
-                <span className="text-emerald-400 opacity-60 mr-2">{'>'}</span>
-                {typedString}
+            <motion.div variants={fadeUp} className="min-h-[4rem] mb-10 max-w-2xl mx-auto flex flex-col items-center justify-center">
+              <p className="text-xl md:text-2xl text-white/60 font-medium leading-relaxed text-center mb-4">
+                The cinematic platform where creators, collectors, and communities build immersive universes together.
+              </p>
+              <p className="text-emerald-400/80 font-mono text-sm tracking-wide">
+                {'>'} {typedString}
                 <motion.span
                   animate={{ opacity: [1, 0] }}
                   transition={{ repeat: Infinity, duration: 0.8 }}
-                  className="inline-block w-2 bg-white/80 ml-1 h-5 align-middle"
+                  className="inline-block w-2 bg-emerald-400/80 ml-1 h-4 align-middle"
                 />
               </p>
             </motion.div>
@@ -278,11 +278,13 @@ export default function Home() {
                 <Link href="/create">
                   <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-black/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
                   <span className="relative z-10 flex items-center">
-                    Start Creating <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    Enter Comicraft Forge <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </span>
                 </Link>
               </Button>
-              <UploadStoryTrigger variant="outline" className="h-16 px-10 rounded-full font-bold text-lg border-white/20 hover:bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.05)]" buttonText="Upload Existing Story" icon={false} />
+              <Button asChild variant="outline" className="h-16 px-10 rounded-full font-bold text-lg border-white/20 hover:bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+                <Link href="/genres">Discover Worlds</Link>
+              </Button>
             </motion.div>
           </motion.div>
         </div>
@@ -303,14 +305,14 @@ export default function Home() {
             <div className="flex flex-col md:flex-row items-end justify-between gap-8">
               <div className="max-w-2xl">
                 <motion.div variants={fadeUp} className="flex items-center gap-4 mb-4">
-                  <span className="text-emerald-400 font-mono text-xs tracking-widest uppercase">The Process</span>
+                  <span className="text-emerald-400 font-mono text-xs tracking-widest uppercase">The Engines</span>
                   <div className="h-px bg-white/10 flex-1 max-w-[100px]" />
                 </motion.div>
                 <motion.h2 variants={fadeUp} className="text-4xl md:text-5xl font-serif font-bold tracking-tight text-white mb-4">
-                  The Path to Creation
+                  Comicraft Forge
                 </motion.h2>
                 <motion.p variants={fadeUp} className="text-white/60 text-lg">
-                  Bring your stories to life with our streamlined, professional platform. No technical barriers—just your imagination paired with our collaborative tools.
+                  Choose your engine and bring your stories to life. From intelligent prose to rich comic panels, Comicraft Forge gives you the exact tools you need.
                 </motion.p>
               </div>
               <motion.div variants={fadeUp} className="flex-shrink-0">
@@ -338,9 +340,9 @@ export default function Home() {
                   <PenSquare className="w-8 h-8 text-indigo-400" />
                 </div>
                 <div>
-                  <h3 className="text-3xl font-serif font-bold text-white mb-4">Draft Your Manuscript</h3>
+                  <h3 className="text-3xl font-serif font-bold text-white mb-4">Draft with VedaScript Engine</h3>
                   <p className="text-lg text-white/50 max-w-lg leading-relaxed">
-                    Write freely in our professional Markdown editor or upload your existing documents directly. The canvas is yours to command with distraction-free tools.
+                    Our flagship AI story studio. Command deep narrative control, long-form storytelling, and advanced parameters to craft your next great saga.
                   </p>
                 </div>
               </div>
@@ -359,9 +361,9 @@ export default function Home() {
                   <BookOpen className="w-8 h-8 text-black" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-serif font-bold text-black mb-4">Generate & Refine</h3>
+                  <h3 className="text-2xl font-serif font-bold text-black mb-4">Visualize with Panelra Engine</h3>
                   <p className="text-base text-black/70 leading-relaxed">
-                    Transform your raw text into beautifully structured lore automatically. Let our suite handle the formatting logic while you focus on the creative narrative.
+                    Focus on panel-based visual storytelling, cinematic image generation, and dynamic comic layouts to turn your words into stunning graphic novels.
                   </p>
                 </div>
               </div>
@@ -381,9 +383,9 @@ export default function Home() {
                   <Shield className="w-6 h-6 text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-3">Blockchain Provenance</h3>
+                  <h3 className="text-xl font-bold text-white mb-3">Blend with Mythloom Engine</h3>
                   <p className="text-sm text-white/50 leading-relaxed">
-                    Secure your intellectual property automatically. Every completed manuscript is permanently anchored to the blockchain, ensuring your authorship is undeniable.
+                    The ultimate hybrid format. Seamlessly blend serialized prose and comic panels into cohesive, multimedia experiences that keep readers hooked.
                   </p>
                 </div>
               </div>
@@ -398,13 +400,13 @@ export default function Home() {
               className="md:col-span-12 lg:col-span-8 bg-zinc-950 border border-white/10 rounded-3xl p-8 relative overflow-hidden flex flex-col md:flex-row items-center gap-8"
             >
               <div className="flex-1 relative z-10">
-                <h3 className="text-2xl font-serif font-bold text-white mb-4">Publish to the World</h3>
+                <h3 className="text-2xl font-serif font-bold text-white mb-4">Spark with Shakti Spark</h3>
                 <p className="text-base text-white/50 leading-relaxed mb-6">
-                  Distribute your completed tales to our global marketplace instantly. Connect with readers, collectors, and fellow creators effortlessly.
+                  Need a jumping-off point? Use our lightweight, lightning-fast idea generator to spark concepts, design characters, and plant the seeds of your universe.
                 </p>
                 <Button variant="link" asChild className="text-emerald-400 p-0 h-auto hover:text-emerald-300 font-medium group">
-                  <Link href="/community" className="flex items-center">
-                    Explore Community <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  <Link href="/create" className="flex items-center">
+                    Go to Forge <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </Button>
               </div>
@@ -412,6 +414,48 @@ export default function Home() {
               <div className="w-full md:w-1/2 h-full min-h-[200px] rounded-2xl border border-white/10 bg-[url('https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center brightness-75 mix-blend-luminosity filter transition-all duration-700 hover:mix-blend-normal hover:brightness-100" />
             </motion.div>
 
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════
+          OWNERSHIP & PROVENANCE
+          ═══════════════════════════════════════ */}
+      <section className="relative py-24 bg-zinc-900 border-t border-white/5">
+        <div className="container mx-auto px-6 max-w-5xl">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-16">
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white">
+              Ownership & <span className="text-emerald-400">Provenance</span>
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-lg text-white/50 max-w-2xl mx-auto">
+              Built on Blockchain, Comicraft transforms your creative output into verifiable digital assets. Invisible infrastructure, undeniable ownership.
+            </motion.p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <motion.div variants={fadeUp} className="p-8 rounded-2xl bg-black/50 border border-white/10 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-indigo-500/10 rounded-full flex items-center justify-center mb-6">
+                <Compass className="w-6 h-6 text-indigo-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Storymint Gateway</h3>
+              <p className="text-white/50 text-sm">Turn your stories and comics into immortal collectibles. We handle the blockchain complexity so you can focus on creation.</p>
+            </motion.div>
+            
+            <motion.div variants={fadeUp} className="p-8 rounded-2xl bg-black/50 border border-white/10 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6">
+                <Wallet className="w-6 h-6 text-emerald-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Comicraft Bazaar</h3>
+              <p className="text-white/50 text-sm">Trade, collect, and monetize your digital assets. A vibrant marketplace empowering creators and rewarding true fans.</p>
+            </motion.div>
+            
+            <motion.div variants={fadeUp} className="p-8 rounded-2xl bg-black/50 border border-white/10 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-purple-500/10 rounded-full flex items-center justify-center mb-6">
+                <TrendingUp className="w-6 h-6 text-purple-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Reputation & Quests</h3>
+              <p className="text-white/50 text-sm">Build long-term reputation via Creator Rank and level up through Craft Quests, unlocking new perks and visibility.</p>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -430,13 +474,13 @@ export default function Home() {
           >
             <div>
               <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-bold tracking-tight mb-2 flex items-center gap-3">
-                <TrendingUp className="text-red-500 w-8 h-8" /> Trending Now
+                <TrendingUp className="text-red-500 w-8 h-8" /> Comicraft Bazaar
               </motion.h2>
-              <motion.p variants={fadeUp} className="text-white/50 text-lg">Collect the most viral lore.</motion.p>
+              <motion.p variants={fadeUp} className="text-white/50 text-lg">Collect the most viral lore and trade top assets.</motion.p>
             </div>
             <motion.div variants={fadeUp}>
               <Button asChild variant="outline" className="rounded-full border-white/10 hover:bg-white/10 text-white">
-                <Link href="/gallery">View Gallery <ArrowRight className="ml-2 w-4 h-4" /></Link>
+                <Link href="/marketplace">Visit Bazaar <ArrowRight className="ml-2 w-4 h-4" /></Link>
               </Button>
             </motion.div>
           </motion.div>
@@ -452,11 +496,11 @@ export default function Home() {
         <div className="container mx-auto px-6 mb-16 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-2">Discover <span className="text-purple-400">Worlds</span></h2>
-              <p className="text-white/50 text-lg max-w-xl">Step through the portal to experiences unknown.</p>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-2">Comicraft <span className="text-purple-400">Worlds</span></h2>
+              <p className="text-white/50 text-lg max-w-xl">Step through the portal to experiences and genres unknown. Journey through the Commons to discuss theories.</p>
             </div>
             <Button asChild variant="outline" className="rounded-full border-white/10 hover:bg-white/10 text-white w-fit">
-              <Link href="/genres">View All Genres <ArrowRight className="ml-2 w-4 h-4" /></Link>
+              <Link href="/genres">Explore Worlds <ArrowRight className="ml-2 w-4 h-4" /></Link>
             </Button>
           </div>
         </div>
@@ -499,10 +543,12 @@ export default function Home() {
             <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-4">
               <Button asChild className="h-16 px-10 rounded-full font-bold text-lg bg-emerald-500 hover:bg-emerald-400 text-black border border-emerald-400/50 shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all hover:scale-105 active:scale-95">
                 <Link href="/create">
-                  Start Your Story <ArrowRight className="ml-2 w-5 h-5" />
+                  Enter Forge <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
-              <UploadStoryTrigger variant="outline" className="h-16 px-10 rounded-full font-bold text-lg" buttonText="Upload Existing Story" icon={false} />
+              <Button asChild variant="outline" className="h-16 px-10 rounded-full font-bold text-lg border-white/20 hover:bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+                <Link href="/community">Join Commons</Link>
+              </Button>
             </motion.div>
           </motion.div>
         </div>

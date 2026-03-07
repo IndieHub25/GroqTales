@@ -82,7 +82,7 @@ export function Footer({ version }: { version?: string }) {
             <div className="space-y-6 flex flex-col items-start lg:col-span-2">
               <Link href="/" className="group inline-block">
                 <h2 className="text-4xl font-semibold tracking-tighter text-white">
-                  GroqTales
+                  Comicraft
                 </h2>
               </Link>
               <div className="text-left">
@@ -115,14 +115,15 @@ export function Footer({ version }: { version?: string }) {
               </h3>
               <ul className="space-y-4 pl-0 list-none">
                 {[
-                  { href: '/genres', label: 'Genres' },
-                  { href: '/community', label: 'Community' },
+                  { href: '/', label: 'Prime' },
+                  { href: '/genres', label: 'Worlds' },
+                  { href: '/create', label: 'Forge' },
+                  { href: '/marketplace', label: 'Bazaar' },
+                  { href: '/buy/CRAFTS', label: 'Buy CRAFTS' },
+                  { href: '/community', label: 'Commons' },
+                  { href: '/docs', label: 'Atlas' },
                   { href: '/community/creators', label: 'Top Creators' },
-                  { href: '/create', label: 'Create Story' },
                   { href: '#', label: 'Upload Story', isUpload: true },
-                  { href: '/gallery', label: 'Gallery' },
-                  { href: '/marketplace', label: 'Marketplace' },
-                  { href: '/blog', label: 'Blogs' },
                 ].map((link) => (
                   <li key={link.label}>
                     {link.isUpload ? (
@@ -201,7 +202,7 @@ export function Footer({ version }: { version?: string }) {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-sm font-medium">
             <div className="flex items-center gap-3">
               <p className="text-white/40">
-                &copy; {currentYear} GroqTales. All rights reserved.
+                &copy; {currentYear} Comicraft. All rights reserved.
               </p>
               {version && (
                 <>
