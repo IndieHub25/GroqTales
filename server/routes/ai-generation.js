@@ -9,7 +9,7 @@
 const express = require('express');
 const router = express.Router();
 const { orchestrateGeneration } = require('../services/ai-orchestrator');
-const { AIStoryConfigSchema } = require('../../lib/ai-config-schema.ts'); // Will be in lib folder on frontend, imported here
+
 const logger = require('../utils/logger');
 
 /**
