@@ -12,7 +12,7 @@ import {
 } from '@/lib/rbac';
 import { createClient } from '@/lib/supabase/client';
 
-const ROLE_OVERRIDE_KEY = 'groqtales_role_override';
+const ROLE_OVERRIDE_KEY = 'comicraft_role_override';
 
 interface UseUserRoleReturn {
   role: UserRole;

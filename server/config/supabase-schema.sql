@@ -56,16 +56,24 @@ CREATE TABLE IF NOT EXISTS stories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL CHECK (char_length(title) <= 100),
   content TEXT NOT NULL,
+  description TEXT DEFAULT '' CHECK (char_length(description) <= 500),
   genre TEXT NOT NULL CHECK (genre IN ('fantasy', 'sci-fi', 'mystery', 'adventure', 'horror', 'romance', 'other')),
   author_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   author_name TEXT,
+  cover_image_url TEXT,
+  moderation_status TEXT DEFAULT 'pending' CHECK (moderation_status IN ('pending', 'approved', 'rejected')),
+  moderation_notes TEXT,
+  moderation_reviewed_at TIMESTAMPTZ,
   views INTEGER DEFAULT 0,
   likes INTEGER DEFAULT 0,
+  comments_count INTEGER DEFAULT 0,
   is_minted BOOLEAN DEFAULT false,
   nft_token_id TEXT,
   file_url TEXT,
   is_verified BOOLEAN DEFAULT false,
   format_type TEXT,
+  story_type TEXT DEFAULT 'text' CHECK (story_type IN ('text', 'comic', 'ai-generated', 'hybrid')),
+  panel_breakdown JSONB,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -234,3 +242,26 @@ CREATE TRIGGER update_user_settings_updated_at BEFORE UPDATE ON user_settings
 
 CREATE TRIGGER update_drafts_updated_at BEFORE UPDATE ON drafts
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- --------------------------------------------------------
+-- 7. PERFORMANCE INDEXES
+-- --------------------------------------------------------
+
+-- Feed query optimization: stories filtered by moderation_status, ordered by created_at
+CREATE INDEX IF NOT EXISTS idx_stories_moderation_created 
+  ON stories (moderation_status DESC, created_at DESC);
+
+-- Genre-based queries
+CREATE INDEX IF NOT EXISTS idx_stories_genre_moderation_created 
+  ON stories (genre, moderation_status DESC, created_at DESC);
+
+-- Author lookup
+CREATE INDEX IF NOT EXISTS idx_stories_author_created 
+  ON stories (author_id, created_at DESC);
+
+-- Profile lookups by username/display_name
+CREATE INDEX IF NOT EXISTS idx_profiles_username 
+  ON profiles (username);
+
+CREATE INDEX IF NOT EXISTS idx_profiles_display_name 
+  ON profiles (display_name);

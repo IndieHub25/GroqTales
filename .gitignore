@@ -8,6 +8,9 @@ node_modules/
 
 # testing
 /coverage
+/_logs/
+/test_logs/
+/test-reports/
 
 # next.js
 /.next/
@@ -16,6 +19,7 @@ next-env.d.ts
 
 # production
 /build
+/dist/
 
 # misc
 .DS_Store
@@ -26,6 +30,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+lerna-debug.log*
 
 # local env files
 .env*.local
@@ -38,18 +43,42 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-# VS Code
+# IDE & Editor files
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+.idea/
+.idea
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.DS_Store
 
-# Temp files
+# Temp & Generated files
 .temp
 .tmp
 .cache/
 temp.md
 mgc.md
 .kiro/*
+*.orig
+*.bak
+*.swp
+*.swo
+*~
+.eslintcache
+.stylelintcache
+.parcel-cache/
+.turbo/
 
 # Large media files
 *.mp4
@@ -61,6 +90,19 @@ mgc.md
 *.mp3
 *.wav
 *.flac
+*.mov
+*.mpeg
+*.mpg
+*.m4v
+*.m4a
+*.aac
+*.ogg
+
+# XML and generated documentation files
+*.xml
+sitemap.xml
+/public/sitemap.xml
+/out/sitemap.xml
 
 # Font demo files
 another-danger-rohit/
@@ -76,14 +118,22 @@ another-danger-rohit.zip
 /public/worker-*.js
 /public/fallback-*.js
 
-# Logs
+# Logs & Reports
 logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+junit.xml
+test-results.xml
+coverage-report.html
 
 # Large datasets
 *.db
 *.sqlite
 *.sqlite3
+*.sql
 
 # OS generated files
 .DS_Store
@@ -95,6 +145,29 @@ ehthumbs.db
 Thumbs.db
 TODO.md
 .npm-cache
+
+# Platform-specific
+.AppleDouble
+.LSOverride
+.Icon
+*.swp
+*.swo
+*~
+.~*
+
+# Build & Cache directories
+/.turbo
+/.eslintcache
+/.stylelintcache
+.cache/
+.cache
+dist/
+build/
+out/
+
+# Package manager
+.pnpm-lock.yaml.backup
+.yarn.lock.backup
 
 # Prevent accidental nested dirs
 GroqTales/

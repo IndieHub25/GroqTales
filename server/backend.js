@@ -12,10 +12,9 @@ const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-const csrf = require('lusca').csrf;
 const { corsOriginCallback } = require('./config/cors');
-// MongoDB is no longer required — Supabase is the primary database
-// const mongoose = require('mongoose');
+// MongoDB is now required again for Vector Search
+const mongoose = require('mongoose');
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const path = require('path');
@@ -25,6 +24,7 @@ dotenv.config();
 
 const logger = require('./utils/logger');
 const requestIdMiddleware = require('./middleware/requestId');
+const correlationIdMiddleware = require('./middleware/correlation-id');
 const loggingMiddleware = require('./middleware/logging');
 const { connectDB, closeDB } = require('./config/db');
 const { checkSupabaseHealth, SUPABASE_URL } = require('./config/supabase');
@@ -65,37 +65,22 @@ const options = {
     },
     servers: [
       {
-        url:
-          process.env.PROD_URL ||
-          'https://groqtales-backend-api.onrender.com/api',
+        url: process.env.PROD_URL || 'https://groqtales-backend-api.onrender.com/api',
         description: 'Production',
       },
     ],
     tags: [
       { name: 'Health', description: 'Server & service health checks' },
-      {
-        name: 'Authentication',
-        description: 'User signup, login, token refresh, and logout',
-      },
+      { name: 'Authentication', description: 'User signup, login, token refresh, and logout' },
       { name: 'Stories', description: 'Story CRUD, search, and AI generation' },
       { name: 'AI', description: 'AI-powered content generation and analysis' },
       { name: 'Users', description: 'User profiles and account management' },
-      {
-        name: 'Feed',
-        description: 'Public story feed (proxied from Cloudflare D1)',
-      },
-      {
-        name: 'Helpbot',
-        description: 'MADHAVA AI help bot chat (proxied to CF Worker)',
-      },
-      {
-        name: 'Settings',
-        description: 'User settings: profile, notifications, privacy, wallet',
-      },
-      {
-        name: 'NFT',
-        description: 'NFT minting, marketplace, and royalty operations',
-      },
+      { name: 'Feed', description: 'Public story feed (proxied from Cloudflare D1)' },
+      { name: 'Helpbot', description: 'MADHAVA AI help bot chat (proxied to CF Worker)' },
+      { name: 'Settings', description: 'User settings: profile, notifications, privacy, wallet' },
+      { name: 'NFT', description: 'NFT minting, marketplace, and royalty operations' },
+      { name: 'Wallets', description: 'User wallet management, balances, and CRAFTS transfers' },
+      { name: 'Marketplace', description: 'NFT marketplace — list, buy, cancel, and browse listings in CRAFTS' },
       { name: 'Comics', description: 'Comic creation and management' },
       { name: 'SDK', description: 'External SDK integration endpoints' },
     ],
@@ -105,24 +90,15 @@ const options = {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description:
-            'Enter your JWT access token obtained from /api/v1/auth/login',
+          description: 'Enter your JWT access token obtained from /api/v1/auth/login',
         },
       },
       schemas: {
         Error: {
           type: 'object',
           properties: {
-            error: {
-              type: 'string',
-              description: 'Error message',
-              example: 'Something went wrong',
-            },
-            code: {
-              type: 'string',
-              description: 'Machine-readable error code',
-              example: 'VALIDATION_ERROR',
-            },
+            error: { type: 'string', description: 'Error message', example: 'Something went wrong' },
+            code: { type: 'string', description: 'Machine-readable error code', example: 'VALIDATION_ERROR' },
           },
         },
         Pagination: {
@@ -138,63 +114,22 @@ const options = {
           type: 'object',
           description: 'Real-time database connection diagnostics',
           properties: {
-            configured: {
-              type: 'boolean',
-              description: 'Whether MONGODB_URI environment variable is set',
-              example: true,
-            },
-            connected: {
-              type: 'boolean',
-              description: 'Whether a live connection to MongoDB is active',
-              example: true,
-            },
-            readyState: {
-              type: 'integer',
-              description:
-                '0=disconnected, 1=connected, 2=connecting, 3=disconnecting',
-              example: 1,
-            },
-            host: {
-              type: 'string',
-              description: 'MongoDB host (only shown when connected)',
-              example: 'cluster0-shard-00-00.mongodb.net',
-            },
-            note: {
-              type: 'string',
-              description: 'Human-readable explanation of current state',
-              example: 'MONGODB_URI not set — running in no-db mode',
-            },
+            configured: { type: 'boolean', description: 'Whether MONGODB_URI environment variable is set', example: true },
+            connected: { type: 'boolean', description: 'Whether a live connection to MongoDB is active', example: true },
+            readyState: { type: 'integer', description: '0=disconnected, 1=connected, 2=connecting, 3=disconnecting', example: 1 },
+            host: { type: 'string', description: 'MongoDB host (only shown when connected)', example: 'cluster0-shard-00-00.mongodb.net' },
+            note: { type: 'string', description: 'Human-readable explanation of current state', example: 'MONGODB_URI not set — running in no-db mode' },
           },
         },
         MemoryUsage: {
           type: 'object',
           description: 'Node.js process memory breakdown',
           properties: {
-            rss: {
-              type: 'string',
-              description: 'Resident Set Size — total memory allocated',
-              example: '54.2 MB',
-            },
-            heapUsed: {
-              type: 'string',
-              description: 'V8 heap memory actively in use',
-              example: '28.1 MB',
-            },
-            heapTotal: {
-              type: 'string',
-              description: 'Total V8 heap allocated',
-              example: '36.4 MB',
-            },
-            external: {
-              type: 'string',
-              description: 'Memory used by C++ objects bound to JS',
-              example: '2.3 MB',
-            },
-            arrayBuffers: {
-              type: 'string',
-              description: 'Memory for ArrayBuffers and SharedArrayBuffers',
-              example: '1.1 MB',
-            },
+            rss: { type: 'string', description: 'Resident Set Size — total memory allocated', example: '54.2 MB' },
+            heapUsed: { type: 'string', description: 'V8 heap memory actively in use', example: '28.1 MB' },
+            heapTotal: { type: 'string', description: 'Total V8 heap allocated', example: '36.4 MB' },
+            external: { type: 'string', description: 'Memory used by C++ objects bound to JS', example: '2.3 MB' },
+            arrayBuffers: { type: 'string', description: 'Memory for ArrayBuffers and SharedArrayBuffers', example: '1.1 MB' },
           },
         },
         ServiceStatuses: {
@@ -202,87 +137,30 @@ const options = {
           description: 'Availability status of each backend service',
           properties: {
             api: { type: 'string', enum: ['online'], example: 'online' },
-            database: {
-              type: 'string',
-              enum: ['online', 'offline', 'not configured'],
-              example: 'online',
-            },
-            helpbot: {
-              type: 'string',
-              enum: ['online', 'offline'],
-              example: 'online',
-            },
+            database: { type: 'string', enum: ['online', 'offline', 'not configured'], example: 'online' },
+            helpbot: { type: 'string', enum: ['online', 'offline'], example: 'online' },
           },
         },
         HealthResponse: {
           type: 'object',
           description: 'Comprehensive real-time server health diagnostics',
           properties: {
-            status: {
-              type: 'string',
-              enum: ['healthy', 'degraded'],
-              description: 'Overall health verdict',
-              example: 'healthy',
-            },
-            timestamp: {
-              type: 'string',
-              format: 'date-time',
-              description: 'ISO 8601 timestamp of this check',
-            },
-            version: {
-              type: 'string',
-              description: 'API version identifier',
-              example: 'v1',
-            },
-            environment: {
-              type: 'string',
-              description: 'Runtime environment',
-              example: 'production',
-            },
-            uptime: {
-              type: 'string',
-              description: 'Human-readable server uptime',
-              example: '2h 14m 33s',
-            },
-            pid: {
-              type: 'integer',
-              description: 'Process ID of the running server',
-              example: 12345,
-            },
-            hostname: {
-              type: 'string',
-              description: 'Machine hostname',
-              example: 'groqtales-api-01',
-            },
-            nodeVersion: {
-              type: 'string',
-              description: 'Node.js runtime version',
-              example: 'v20.18.0',
-            },
-            platform: {
-              type: 'string',
-              description: 'Operating system platform',
-              example: 'linux',
-            },
-            arch: {
-              type: 'string',
-              description: 'CPU architecture',
-              example: 'x64',
-            },
+            status: { type: 'string', enum: ['healthy', 'degraded'], description: 'Overall health verdict', example: 'healthy' },
+            timestamp: { type: 'string', format: 'date-time', description: 'ISO 8601 timestamp of this check' },
+            version: { type: 'string', description: 'API version identifier', example: 'v1' },
+            environment: { type: 'string', description: 'Runtime environment', example: 'production' },
+            uptime: { type: 'string', description: 'Human-readable server uptime', example: '2h 14m 33s' },
+            pid: { type: 'integer', description: 'Process ID of the running server', example: 12345 },
+            hostname: { type: 'string', description: 'Machine hostname', example: 'groqtales-api-01' },
+            nodeVersion: { type: 'string', description: 'Node.js runtime version', example: 'v20.18.0' },
+            platform: { type: 'string', description: 'Operating system platform', example: 'linux' },
+            arch: { type: 'string', description: 'CPU architecture', example: 'x64' },
             cpuUsage: {
               type: 'object',
               description: 'Cumulative CPU time consumed by the process',
               properties: {
-                user: {
-                  type: 'string',
-                  description: 'User CPU time',
-                  example: '1.24s',
-                },
-                system: {
-                  type: 'string',
-                  description: 'System CPU time',
-                  example: '0.31s',
-                },
+                user: { type: 'string', description: 'User CPU time', example: '1.24s' },
+                system: { type: 'string', description: 'System CPU time', example: '0.31s' },
               },
             },
             database: { $ref: '#/components/schemas/DatabaseStatus' },
@@ -292,16 +170,8 @@ const options = {
               type: 'object',
               description: 'Current API rate limiting configuration',
               properties: {
-                windowMs: {
-                  type: 'integer',
-                  description: 'Rate limit window in milliseconds',
-                  example: 900000,
-                },
-                maxRequestsPerWindow: {
-                  type: 'integer',
-                  description: 'Max requests allowed per window per IP',
-                  example: 100,
-                },
+                windowMs: { type: 'integer', description: 'Rate limit window in milliseconds', example: 900000 },
+                maxRequestsPerWindow: { type: 'integer', description: 'Max requests allowed per window per IP', example: 100 },
               },
             },
           },
@@ -310,42 +180,13 @@ const options = {
           type: 'object',
           description: 'MADHAVA AI helpbot availability and configuration',
           properties: {
-            status: {
-              type: 'string',
-              enum: ['healthy', 'down'],
-              description: 'Bot availability status',
-              example: 'healthy',
-            },
-            timestamp: {
-              type: 'string',
-              format: 'date-time',
-              description: 'ISO 8601 timestamp',
-            },
-            service: {
-              type: 'string',
-              description: 'Service name',
-              example: 'madhava-helpbot',
-            },
-            provider: {
-              type: 'string',
-              description: 'AI inference provider',
-              example: 'Groq',
-            },
-            model: {
-              type: 'string',
-              description: 'Configured AI model identifier',
-              example: 'llama-3.3-70b-versatile',
-            },
-            configuredEndpoint: {
-              type: 'boolean',
-              description: 'Whether the Cloudflare Worker URL is configured',
-              example: true,
-            },
-            responseTimeMs: {
-              type: 'integer',
-              description: 'Time taken to perform this health check (ms)',
-              example: 3,
-            },
+            status: { type: 'string', enum: ['healthy', 'down'], description: 'Bot availability status', example: 'healthy' },
+            timestamp: { type: 'string', format: 'date-time', description: 'ISO 8601 timestamp' },
+            service: { type: 'string', description: 'Service name', example: 'madhava-helpbot' },
+            provider: { type: 'string', description: 'AI inference provider', example: 'Groq' },
+            model: { type: 'string', description: 'Configured AI model identifier', example: 'llama-3.3-70b-versatile' },
+            configuredEndpoint: { type: 'boolean', description: 'Whether the Cloudflare Worker URL is configured', example: true },
+            responseTimeMs: { type: 'integer', description: 'Time taken to perform this health check (ms)', example: 3 },
           },
         },
         WelcomeResponse: {
@@ -353,15 +194,8 @@ const options = {
           description: 'API landing page — overview and navigation',
           properties: {
             name: { type: 'string', example: 'GroqTales Backend API' },
-            description: {
-              type: 'string',
-              example: 'AI-powered Web3 storytelling platform — REST API',
-            },
-            status: {
-              type: 'string',
-              enum: ['operational', 'degraded', 'maintenance'],
-              example: 'operational',
-            },
+            description: { type: 'string', example: 'AI-powered Web3 storytelling platform — REST API' },
+            status: { type: 'string', enum: ['operational', 'degraded', 'maintenance'], example: 'operational' },
             version: { type: 'string', example: 'v1' },
             timestamp: { type: 'string', format: 'date-time' },
             environment: { type: 'string', example: 'production' },
@@ -375,20 +209,14 @@ const options = {
               properties: {
                 documentation: { type: 'string', example: '/api/docs' },
                 health: { type: 'string', example: '/api/health' },
-                github: {
-                  type: 'string',
-                  example: 'https://github.com/IndieHub25/GroqTales',
-                },
+                github: { type: 'string', example: 'https://github.com/IndieHub25/GroqTales' },
               },
             },
             contact: {
               type: 'object',
               properties: {
                 name: { type: 'string', example: 'Indie Hub' },
-                url: {
-                  type: 'string',
-                  example: 'https://github.com/IndieHub25/GroqTales',
-                },
+                url: { type: 'string', example: 'https://github.com/IndieHub25/GroqTales' },
               },
             },
           },
@@ -457,11 +285,7 @@ app.use(
       'X-API-Key',
       'X-Request-ID',
     ],
-    exposedHeaders: [
-      'RateLimit-Limit',
-      'RateLimit-Remaining',
-      'RateLimit-Reset',
-    ],
+    exposedHeaders: ['RateLimit-Limit', 'RateLimit-Remaining', 'RateLimit-Reset'],
   })
 );
 
@@ -488,15 +312,22 @@ const formatMicroseconds = (us) => (us / 1e6).toFixed(2) + 's';
 // Health check endpoint — comprehensive real-time diagnostics
 app.get(['/api/health', '/api/health/db'], async (req, res) => {
   const supabaseConfigured = !!SUPABASE_URL;
-  const supabaseHealth = supabaseConfigured
-    ? await checkSupabaseHealth()
-    : { connected: false, note: 'Supabase not configured' };
+  const supabaseHealth = supabaseConfigured ? await checkSupabaseHealth() : { connected: false, note: 'Supabase not configured' };
   const mem = process.memoryUsage();
   const cpu = process.cpuUsage();
 
-  let status = 'healthy';
-  if (supabaseConfigured && !supabaseHealth.connected) {
+  // Check AI service availability
+  const groqConfigured = !!process.env.GROQ_API_KEY;
+  const geminiConfigured = !!process.env.GEMINI_API_KEY;
+
+  // Determine overall system status
+  let status = 'operational';
+  const criticalServicesDown = supabaseConfigured && !supabaseHealth.connected;
+  if (criticalServicesDown) {
     status = 'degraded';
+  }
+  if (!supabaseConfigured) {
+    status = 'degraded'; // Database is critical
   }
 
   res.json({
@@ -516,10 +347,24 @@ app.get(['/api/health', '/api/health/db'], async (req, res) => {
     },
     database: {
       type: 'Supabase PostgreSQL',
+      status: supabaseHealth.connected ? 'ok' : 'error',
       configured: supabaseConfigured,
       connected: supabaseHealth.connected,
+      latency_ms: supabaseHealth.latency_ms || null,
       ...(supabaseHealth.error ? { error: supabaseHealth.error } : {}),
       ...(supabaseHealth.note ? { note: supabaseHealth.note } : {}),
+    },
+    ai_services: {
+      groq: {
+        status: groqConfigured ? 'available' : 'not_configured',
+        configured: groqConfigured,
+        model: groqConfigured ? (process.env.GROQ_MODEL || 'llama-3.3-70b-versatile') : null,
+      },
+      gemini: {
+        status: geminiConfigured ? 'available' : 'not_configured',
+        configured: geminiConfigured,
+        model: geminiConfigured ? 'gemini-2.0-pro' : null,
+      },
     },
     memory: {
       rss: formatBytes(mem.rss),
@@ -530,12 +375,9 @@ app.get(['/api/health', '/api/health/db'], async (req, res) => {
     },
     services: {
       api: 'online',
-      database: supabaseHealth.connected
-        ? 'online'
-        : supabaseConfigured
-          ? 'offline'
-          : 'not configured',
-      helpbot: process.env.GROQ_API_KEY ? 'online' : 'offline',
+      database: supabaseHealth.connected ? 'online' : (supabaseConfigured ? 'offline' : 'not configured'),
+      ai_generation: groqConfigured || geminiConfigured ? 'online' : 'offline',
+      feed_gallery: supabaseHealth.connected ? 'online' : 'offline',
     },
     rateLimit: {
       windowMs: 15 * 60 * 1000,
@@ -580,6 +422,40 @@ app.get('/api/health/bot', (req, res) => {
 
 /**
  * @swagger
+ * /api/health/web3:
+ *   get:
+ *     tags:
+ *       - Health
+ *     summary: Web3 / blockchain connectivity check
+ *     description: |
+ *       Returns Monad testnet connectivity, chain ID, latest block number,
+ *       and platform signer status. Use this to verify Web3 infrastructure.
+ *     responses:
+ *       200:
+ *         description: Web3 health diagnostics.
+ */
+app.get('/api/health/web3', async (req, res) => {
+  try {
+    const { checkWeb3Health } = require('./services/web3Service');
+    const health = await checkWeb3Health();
+    res.json({
+      status: health.connected ? 'healthy' : (health.configured ? 'degraded' : 'not_configured'),
+      timestamp: new Date().toISOString(),
+      service: 'monad-testnet',
+      ...health,
+    });
+  } catch (error) {
+    res.json({
+      status: 'error',
+      timestamp: new Date().toISOString(),
+      service: 'monad-testnet',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @swagger
  * /:
  *   get:
  *     tags:
@@ -604,55 +480,26 @@ app.get('/', (req, res) => {
 
   res.json({
     name: 'GroqTales Backend API',
-    description:
-      'AI-powered Web3 storytelling platform — REST API serving authentication, story management, AI generation, NFT operations, and more.',
+    description: 'AI-powered Web3 storytelling platform — REST API serving authentication, story management, AI generation, NFT operations, and more.',
     status: serverStatus,
     version: process.env.API_VERSION || 'v1',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
     uptime: formatUptime(process.uptime()),
     endpoints: {
-      authentication: {
-        path: '/api/v1/auth',
-        description: 'User signup, login, token refresh, and logout',
-      },
-      stories: {
-        path: '/api/v1/stories',
-        description: 'Story CRUD, search, and AI generation',
-      },
-      comics: {
-        path: '/api/v1/comics',
-        description: 'Comic creation and management',
-      },
-      ai: {
-        path: '/api/v1/ai',
-        description: 'AI-powered content generation and analysis',
-      },
-      users: {
-        path: '/api/v1/users',
-        description: 'User profiles and account management',
-      },
-      nft: {
-        path: '/api/v1/nft',
-        description: 'NFT minting, marketplace, and royalty operations',
-      },
-      feed: {
-        path: '/api/feed',
-        description: 'Public story feed (from Supabase)',
-      },
-      helpbot: {
-        path: '/api/helpbot',
-        description: 'MADHAVA AI help bot chat',
-      },
-      settings: {
-        path: '/api/v1/settings',
-        description: 'User settings: profile, notifications, privacy, wallet',
-      },
+      authentication: { path: '/api/v1/auth', description: 'User signup, login, token refresh, and logout' },
+      stories: { path: '/api/v1/stories', description: 'Story CRUD, search, and AI generation' },
+      comics: { path: '/api/v1/comics', description: 'Comic creation and management' },
+      ai: { path: '/api/v1/ai', description: 'AI-powered content generation and analysis' },
+      users: { path: '/api/v1/users', description: 'User profiles and account management' },
+      nft: { path: '/api/v1/nft', description: 'NFT minting, marketplace, and royalty operations' },
+      wallets: { path: '/api/v1/wallets', description: 'User wallet management, balances, and CRAFTS transfers' },
+      marketplace: { path: '/api/v1/marketplace', description: 'NFT marketplace — browse, list, buy, cancel in CRAFTS' },
+      feed: { path: '/api/feed', description: 'Public story feed (from Supabase)' },
+      helpbot: { path: '/api/helpbot', description: 'MADHAVA AI help bot chat' },
+      settings: { path: '/api/v1/settings', description: 'User settings: profile, notifications, privacy, wallet' },
       drafts: { path: '/api/v1/drafts', description: 'Story draft management' },
-      sdk: {
-        path: '/sdk/v1',
-        description: 'External SDK integration endpoints',
-      },
+      sdk: { path: '/sdk/v1', description: 'External SDK integration endpoints' },
     },
     links: {
       documentation: '/api/docs',
@@ -669,6 +516,7 @@ app.get('/', (req, res) => {
   });
 });
 
+
 // Rate limiting - increased limits for production use
 const RATE_LIMIT_MAX = 1000; // Increased from 100 to 1000 requests per window
 const limiter = rateLimit({
@@ -677,9 +525,7 @@ const limiter = rateLimit({
   skip: (req) => {
     const path = req.originalUrl;
     // Never rate limit liveness/readiness probes or the root welcome page
-    return (
-      path === '/healthz' || path === '/' || path.startsWith('/api/health')
-    );
+    return path === '/healthz' || path === '/' || path.startsWith('/api/health');
   },
   message: {
     error: 'Too many requests from this IP, please try again later.',
@@ -690,16 +536,16 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Middleware
+app.use(correlationIdMiddleware); // Generate/track X-Request-ID for logging & tracing
 app.use(requestIdMiddleware);
 app.use(compression());
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
-app.use(csrf());
 
-// CSRF protection is enabled via lusca. The API primarily uses stateless JWT
-// tokens in the Authorization header, but cookies (if used by any handlers)
-// are protected against CSRF for defense-in-depth.
+// CSRF protection is not needed for stateless JWT-based REST API.
+// The API uses stateless JWT tokens in the Authorization header for authentication.
+// CSRF attacks require session cookies to work, so they don't apply here.
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Logging middleware (after request parsing)
@@ -750,24 +596,28 @@ app.use('/api/v1/auth', require('./routes/auth'));
 app.use('/api/v1/stories', require('./routes/stories'));
 app.use('/api/v1/comics', require('./routes/comics'));
 app.use('/api/v1/nft', require('./routes/nft'));
+app.use('/api/v1/wallets', require('./routes/wallets'));
+app.use('/api/v1/marketplace', require('./routes/marketplace'));
 app.use('/api/v1/users', require('./routes/users'));
 app.use('/api/v1/admin', require('./routes/admin'));
+app.use('/api/v1/ai', require('./routes/ai-generation'));
 app.use('/api/helpbot', require('./routes/helpbot'));
 app.use('/api/v1/helpbot', require('./routes/helpbot'));
 
 app.use('/api/feed', require('./routes/feed'));
 app.use('/api/feeds', require('./routes/notification-feed'));
 
+
 app.use('/api/groq', require('./routes/groq'));
 app.use('/api/v1/ai', require('./routes/ai'));
 app.use('/api/v1/drafts', require('./routes/drafts'));
-app.use(
-  '/api/v1/settings/notifications',
-  require('./routes/settings/notifications')
-);
+app.use('/api/v1/settings/notifications', require('./routes/settings/notifications'));
 app.use('/api/v1/settings/privacy', require('./routes/settings/privacy'));
 app.use('/api/v1/settings/wallet', require('./routes/settings/wallet'));
 app.use('/api/v1/settings/profile', require('./routes/settings/profile'));
+
+// Vector Search Routes
+app.use('/api/vector', require('./routes/vector-search'));
 
 // SDK Routes (for future SDK implementations)
 app.use('/sdk/v1', require('./routes/sdk'));
@@ -820,11 +670,12 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Start server — Supabase connects on-demand, no blocking init needed
+// MongoDB connects in the background
+connectDB().catch(err => console.error('Failed to connect to MongoDB on startup:', err.message));
+
 server = app.listen(PORT, () => {
   logger.info(`GroqTales Backend API server running on port ${PORT}`);
   logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  logger.info(
-    `Database: Supabase PostgreSQL${SUPABASE_URL ? ' (configured)' : ' (NOT configured)'}`
-  );
+  logger.info(`Database: Supabase PostgreSQL${SUPABASE_URL ? ' (configured)' : ' (NOT configured)'}`);
   logger.info(`Health check: http://localhost:${PORT}/api/health`);
 });

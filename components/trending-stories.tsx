@@ -152,7 +152,7 @@ export function TrendingStories() {
               No Stories Yet
             </h3>
             <p className="text-muted-foreground font-bold mb-6">
-              Be the first to create a story on GroqTales!
+              Be the first to create a story on Comicraft!
             </p>
             <Button
               asChild

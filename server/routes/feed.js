@@ -1,9 +1,12 @@
+/**
+ * Feed API Route — Supabase
+ * Serves the public story feed directly from Supabase PostgreSQL
+ */
+
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
+const { supabaseAdmin } = require('../config/supabase');
 const logger = require('../utils/logger');
-
-// Proxy requests to Cloudflare Worker
 
 /**
  * @swagger
@@ -12,7 +15,9 @@ const logger = require('../utils/logger');
  *     tags:
  *       - Feed
  *     summary: Get public story feed
- *     description: Retrieves a paginated feed of published stories, proxied from the Cloudflare D1 database via the CF Worker.
+ *     description: |
+ *       Retrieves a paginated feed of published stories directly from Supabase PostgreSQL.
+ *       Stories are ordered by creation date (newest first) and include author profile data.
  *     parameters:
  *       - in: query
  *         name: limit
@@ -26,6 +31,11 @@ const logger = require('../utils/logger');
  *           type: integer
  *           default: 1
  *         description: Page number for pagination.
+ *       - in: query
+ *         name: genre
+ *         schema:
+ *           type: string
+ *         description: Optional genre filter.
  *     responses:
  *       200:
  *         description: Feed retrieved successfully.
@@ -44,46 +54,131 @@ const logger = require('../utils/logger');
  *                       title:
  *                         type: string
  *                       genre:
- *                         type: array
- *                         items:
- *                           type: string
+ *                         type: string
  *                       author_name:
  *                         type: string
+ *                       author_avatar:
+ *                         type: string
+ *                       views:
+ *                         type: integer
+ *                       likes:
+ *                         type: integer
  *                       created_at:
  *                         type: string
  *                         format: date-time
- *       502:
- *         description: Failed to fetch feed from upstream Worker.
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *       500:
+ *         description: Failed to fetch feed.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/', async (req, res) => {
-  try {
-    const workerUrl =
-      process.env.CF_WORKER_URL ||
-      'https://groqtales-backend-workers.mantejsingh.workers.dev';
+    try {
+        if (!supabaseAdmin) {
+            return res.status(503).json({ error: 'Database not configured' });
+        }
 
-    // Parse query params to pass along
-    const limit = req.query.limit || 6;
-    const page = req.query.page || 1;
+        // Parse pagination and filter params
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 6));
+        const genre = req.query.genre ? String(req.query.genre).trim() : null;
+        const offset = (page - 1) * limit;
 
-    // Make request to CF Worker
-    const response = await axios.get(
-      `${workerUrl}/api/feed?limit=${limit}&page=${page}`,
-      {
-        validateStatus: false, // Allow any status code
-        timeout: 10000, // 10 second timeout
-      }
-    );
+        // Build query
+        let query = supabaseAdmin
+            .from('stories')
+            .select('id, title, description, genre, content, views, likes, created_at, author_id, cover_image_url', 
+                    { count: 'exact' });
 
-    res.status(response.status).json(response.data);
-  } catch (error) {
-    const errMsg = error.message || error.code || 'Unknown error';
-    logger.error(`Error fetching feed from Worker: ${errMsg}`);
-    res.status(502).json({ error: 'Failed to fetch feed', message: errMsg });
-  }
+        // Filter by genre if provided
+        if (genre) {
+            query = query.eq('genre', genre);
+        }
+
+        // Filter for published/approved stories only
+        query = query.eq('moderation_status', 'approved');
+
+        // Order by newest first
+        query = query.order('created_at', { ascending: false });
+
+        // Apply pagination
+        query = query.range(offset, offset + limit - 1);
+
+        const { data: stories, error: storiesError, count } = await query;
+
+        if (storiesError) {
+            logger.error('Feed query error:', storiesError);
+            return res.status(500).json({ error: 'Failed to fetch feed' });
+        }
+
+        // Fetch author profiles for each story
+        let formattedStories = [];
+        if (stories && stories.length > 0) {
+            const authorIds = [...new Set(stories.map(s => s.author_id))];
+            const { data: profiles, error: profilesError } = await supabaseAdmin
+                .from('profiles')
+                .select('id, username, display_name, avatar_url')
+                .in('id', authorIds);
+
+            if (!profilesError && profiles) {
+                const profileMap = Object.fromEntries(profiles.map(p => [p.id, p]));
+                formattedStories = stories.map(story => ({
+                    id: story.id,
+                    title: story.title,
+                    description: story.description,
+                    genre: story.genre,
+                    views: story.views || 0,
+                    likes: story.likes || 0,
+                    created_at: story.created_at,
+                    cover_image_url: story.cover_image_url,
+                    author_id: story.author_id,
+                    author_name: profileMap[story.author_id]?.display_name || 
+                                  profileMap[story.author_id]?.username || 
+                                  'Anonymous',
+                    author_avatar: profileMap[story.author_id]?.avatar_url || null,
+                }));
+            } else {
+                // Fallback if profile fetch fails
+                formattedStories = stories.map(story => ({
+                    id: story.id,
+                    title: story.title,
+                    description: story.description,
+                    genre: story.genre,
+                    views: story.views || 0,
+                    likes: story.likes || 0,
+                    created_at: story.created_at,
+                    cover_image_url: story.cover_image_url,
+                    author_id: story.author_id,
+                    author_name: 'Anonymous',
+                    author_avatar: null,
+                }));
+            }
+        }
+
+        return res.json({
+            stories: formattedStories,
+            pagination: {
+                page,
+                limit,
+                total: count || 0,
+                pages: Math.ceil((count || 0) / limit),
+            },
+        });
+    } catch (error) {
+        const errMsg = error.message || 'Unknown error';
+        logger.error(`Error fetching feed: ${errMsg}`);
+        res.status(500).json({ error: 'Failed to fetch feed', message: errMsg });
+    }
 });
 
 module.exports = router;

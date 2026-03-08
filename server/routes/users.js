@@ -94,20 +94,16 @@ router.get('/profile', authRequired, async (req, res) => {
         .upsert({
           id: req.user.id,
           email: req.user.email,
-          username:
-            req.user.email?.split('@')[0] || `user_${req.user.id.slice(0, 8)}`,
+          username: req.user.email?.split('@')[0] || `user_${req.user.id.slice(0, 8)}`,
           first_name: req.user.raw?.user_metadata?.firstName || 'Anonymous',
           last_name: req.user.raw?.user_metadata?.lastName || 'Creator',
-          display_name:
-            req.user.raw?.user_metadata?.name || 'Anonymous Creator',
+          display_name: req.user.raw?.user_metadata?.name || 'Anonymous Creator',
         })
         .select()
         .single();
 
       if (createError) {
-        return res
-          .status(500)
-          .json({ success: false, error: createError.message });
+        return res.status(500).json({ success: false, error: createError.message });
       }
 
       return res.json({
@@ -138,9 +134,7 @@ router.get('/profile', authRequired, async (req, res) => {
       success: true,
       data: {
         ...profile,
-        preferences: settings
-          ? formatPreferences(settings)
-          : getDefaultPreferences(),
+        preferences: settings ? formatPreferences(settings) : getDefaultPreferences(),
       },
       stories: storyList,
       stats: {
@@ -186,22 +180,14 @@ router.get('/profile/id/:id', async (req, res) => {
     const { id } = req.params;
 
     // Validate UUID format
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(id)) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: 'Invalid user ID format (must be UUID)',
-        });
+      return res.status(400).json({ success: false, error: 'Invalid user ID format (must be UUID)' });
     }
 
     const { data: user, error } = await supabaseAdmin
       .from('profiles')
-      .select(
-        'id, username, first_name, last_name, display_name, bio, avatar_url, wallet_address, badges, social_twitter, social_website, created_at'
-      )
+      .select('id, username, first_name, last_name, display_name, bio, avatar_url, wallet_address, badges, social_twitter, social_website, created_at')
       .eq('id', id)
       .single();
 
@@ -231,9 +217,7 @@ router.get('/profile/id/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('Profile by ID Route Error:', error);
-    return res
-      .status(500)
-      .json({ success: false, error: 'Internal Server Error' });
+    return res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 });
 
@@ -242,47 +226,58 @@ router.get('/profile/username/:username', async (req, res) => {
   try {
     const { username } = req.params;
 
+    // Query Supabase for user profile by username
     // Intentionally exclude email, wallet, walletAddress for public responses
-    const user = await User.findOne({ username })
-      .select(
-        'username bio avatar badges firstName lastName socialLinks createdAt'
-      )
-      .lean();
+    const { data: user, error: userError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, username, bio, avatar_url, badges, first_name, last_name, social_twitter, social_website, created_at, verified')
+      .eq('username', username)
+      .single();
 
-    if (!user) {
+    if (userError || !user) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
 
-    const stories = await Story.find({
-      author: user._id,
-      moderationStatus: 'approved',
-    })
-      .sort({ createdAt: -1 })
-      .lean();
+    // Fetch approved stories for this user
+    const { data: stories, error: storiesError } = await supabaseAdmin
+      .from('stories')
+      .select('*')
+      .eq('author_id', user.id)
+      .eq('moderation_status', 'approved')
+      .order('created_at', { ascending: false });
+
+    const storyList = stories || [];
 
     return res.json({
       success: true,
       data: {
-        user,
-        stories,
+        user: {
+          id: user.id,
+          username: user.username,
+          display_name: user.display_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          bio: user.bio,
+          avatar: user.avatar_url,
+          badges: user.badges || [],
+          socialLinks: {
+            twitter: user.social_twitter,
+            website: user.social_website,
+          },
+          verified: user.verified,
+          createdAt: user.created_at,
+        },
+        stories: storyList,
         stats: {
-          storyCount: stories.length,
-          totalLikes: stories.reduce(
-            (sum, s) => sum + (s.stats?.likes || 0),
-            0
-          ),
-          totalViews: stories.reduce(
-            (sum, s) => sum + (s.stats?.views || 0),
-            0
-          ),
+          storyCount: storyList.length,
+          totalLikes: storyList.reduce((sum, s) => sum + (s.likes || 0), 0),
+          totalViews: storyList.reduce((sum, s) => sum + (s.views || 0), 0),
         },
       },
     });
   } catch (error) {
     console.error('Profile by Username Route Error:', error);
-    return res
-      .status(500)
-      .json({ success: false, error: 'Internal Server Error' });
+    return res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 });
 
@@ -303,9 +298,7 @@ router.get('/top-creators', async (req, res) => {
     // We fetch profiles
     const { data: profiles, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select(
-        'id, username, first_name, last_name, display_name, bio, avatar_url, verified, badges, created_at'
-      )
+      .select('id, username, first_name, last_name, display_name, bio, avatar_url, verified, badges, created_at')
       .limit(50);
 
     if (profileError) throw profileError;
@@ -320,49 +313,33 @@ router.get('/top-creators', async (req, res) => {
     // Calculate aggregated stats per user
     const statsMap = {};
     if (stories) {
-      stories.forEach((story) => {
+      stories.forEach(story => {
         if (!statsMap[story.author_id]) {
           statsMap[story.author_id] = { stories: 0, likes: 0, views: 0 };
         }
         statsMap[story.author_id].stories += 1;
-        statsMap[story.author_id].likes += story.likes || 0;
-        statsMap[story.author_id].views += story.views || 0;
+        statsMap[story.author_id].likes += (story.likes || 0);
+        statsMap[story.author_id].views += (story.views || 0);
       });
     }
 
-    const formattedCreators = profiles.map((profile) => {
+    const formattedCreators = profiles.map(profile => {
       const stats = statsMap[profile.id] || { stories: 0, likes: 0, views: 0 };
       return {
         id: profile.id,
-        name:
-          profile.display_name ||
-          `${profile.first_name || ''} ${profile.last_name || ''}`.trim() ||
-          profile.username ||
-          'Anonymous',
+        name: profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.username || 'Anonymous',
         username: `@${profile.username}`,
-        avatar:
-          profile.avatar_url ||
-          `https://api.dicebear.com/7.x/personas/svg?seed=${profile.username}`,
+        avatar: profile.avatar_url || `https://api.dicebear.com/7.x/personas/svg?seed=${profile.username}`,
         bio: profile.bio || 'Storyteller at GroqTales',
         followers: Math.floor(Math.random() * 5000) + stats.likes, // Mocking followers partially as schema lacks it for now
         stories: stats.stories,
-        featured: stats.likes > 100, // simplistic condition
-        rating: Math.min(5.0, 4.0 + stats.likes / 200).toFixed(1),
+        featured: (stats.likes > 100), // simplistic condition
+        rating: Math.min(5.0, (4.0 + (stats.likes / 200))).toFixed(1),
         tags: ['Fiction', 'Adventure'], // mocked for now until genres array on profile
-        badge:
-          profile.badges && profile.badges.length > 0
-            ? profile.badges[0]
-            : stats.stories > 5
-              ? 'Pro'
-              : 'Creator',
+        badge: profile.badges && profile.badges.length > 0 ? profile.badges[0] : (stats.stories > 5 ? 'Pro' : 'Creator'),
         nfts: Math.floor(stats.stories / 2),
         joined: profile.created_at,
-        achievements:
-          stats.stories > 10
-            ? ['Rising Star', 'Volume Writer']
-            : stats.stories > 0
-              ? ['New Voice']
-              : [],
+        achievements: stats.stories > 10 ? ['Rising Star', 'Volume Writer'] : (stats.stories > 0 ? ['New Voice'] : []),
         totalLikes: stats.likes,
         verified: profile.verified || false,
       };
@@ -404,9 +381,7 @@ router.get('/profile/:walletAddress', async (req, res) => {
     const { walletAddress } = req.params;
 
     if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
-      return res
-        .status(400)
-        .json({ success: false, error: 'Invalid wallet address' });
+      return res.status(400).json({ success: false, error: 'Invalid wallet address' });
     }
 
     const addr = walletAddress.toLowerCase();
@@ -455,9 +430,7 @@ router.get('/profile/:walletAddress', async (req, res) => {
     });
   } catch (error) {
     console.error('Profile Route Error:', error);
-    return res
-      .status(500)
-      .json({ success: false, error: 'Internal Server Error' });
+    return res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 });
 
@@ -509,20 +482,17 @@ router.patch('/update', authRequired, async (req, res) => {
   try {
     const updates = req.body;
 
+
     if (updates.password || updates.role) {
-      return res
-        .status(400)
-        .json({ error: 'Cannot update password or role via this endpoint' });
+      return res.status(400).json({ error: 'Cannot update password or role via this endpoint' });
     }
 
     // Map request fields to database columns
     const dbUpdates = {};
-    if (updates.firstName !== undefined)
-      dbUpdates.first_name = updates.firstName;
+    if (updates.firstName !== undefined) dbUpdates.first_name = updates.firstName;
     if (updates.lastName !== undefined) dbUpdates.last_name = updates.lastName;
     if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
-    if (updates.walletAddress !== undefined)
-      dbUpdates.wallet_address = updates.walletAddress;
+    if (updates.walletAddress !== undefined) dbUpdates.wallet_address = updates.walletAddress;
     if (updates.email !== undefined) dbUpdates.email = updates.email;
     if (updates.bio !== undefined) dbUpdates.bio = updates.bio;
     if (updates.username !== undefined) dbUpdates.username = updates.username;
@@ -547,33 +517,24 @@ router.patch('/update', authRequired, async (req, res) => {
     }
 
     // Attempt to sync to Cloudflare D1
-    const workerUrl =
-      process.env.CF_WORKER_URL ||
-      'https://groqtales-backend-workers.mantejsingh.workers.dev';
+    const workerUrl = process.env.CF_WORKER_URL || 'https://groqtales-backend-workers.mantejsingh.workers.dev';
     const CF_SYNC_ENDPOINT = `${workerUrl}/api/profiles/${req.user.id}`;
     const token = req.headers.authorization?.split(' ')[1];
 
     try {
-      await axios.put(
-        CF_SYNC_ENDPOINT,
-        {
-          username: updatedProfile.username,
-          bio: updatedProfile.bio,
-          avatar_url: updatedProfile.avatar_url || null,
+      await axios.put(CF_SYNC_ENDPOINT, {
+        username: updatedProfile.username,
+        bio: updatedProfile.bio,
+        avatar_url: updatedProfile.avatar_url || null
+      }, {
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+          'Content-Type': 'application/json'
         },
-        {
-          headers: {
-            ...(token && { Authorization: `Bearer ${token}` }),
-            'Content-Type': 'application/json',
-          },
-          timeout: 5000,
-        }
-      );
+        timeout: 5000
+      });
     } catch (cfError) {
-      logger.error(
-        'Failed to sync profile to Cloudflare worker:',
-        cfError.message
-      );
+      logger.error('Failed to sync profile to Cloudflare worker:', cfError.message);
       // Non-blocking error
     }
 
@@ -610,21 +571,12 @@ function formatPreferences(settings) {
 function getDefaultPreferences() {
   return {
     notifications: {
-      comments: true,
-      likes: true,
-      follows: true,
-      email: false,
-      push: false,
-      sms: false,
-      marketing: false,
-      updates: false,
+      comments: true, likes: true, follows: true,
+      email: false, push: false, sms: false, marketing: false, updates: false,
     },
     privacy: {
-      profileVisible: true,
-      activityVisible: true,
-      storiesVisible: true,
-      showEmail: false,
-      showWallet: false,
+      profileVisible: true, activityVisible: true, storiesVisible: true,
+      showEmail: false, showWallet: false,
     },
   };
 }

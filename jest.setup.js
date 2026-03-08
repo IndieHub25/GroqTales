@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 // Jest setup file
 // This file runs after the test framework is initialized
 
