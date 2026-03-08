@@ -137,7 +137,7 @@ const SYSTEM_PROMPTS = {
 // Core API Call with Retry
 // ---------------------------------------------------------------------------
 
-async function callGroq({ model, systemPrompt, userPrompt, maxTokens, temperature, apiKey }) {
+async function callGroq({ model, systemPrompt, userPrompt, maxTokens, temperature, apiKey, responseFormat }) {
     const groqApiKey = apiKey || process.env.GROQ_API_KEY;
     if (!groqApiKey) {
         throw new Error('GROQ_API_KEY is not configured');
@@ -151,22 +151,29 @@ async function callGroq({ model, systemPrompt, userPrompt, maxTokens, temperatur
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 30000);
 
+            const requestBody = {
+                model: model || MODELS.PRIMARY,
+                messages: [
+                    { role: 'system', content: systemPrompt || SYSTEM_PROMPTS.general },
+                    { role: 'user', content: userPrompt },
+                ],
+                max_tokens: maxTokens || 1000,
+                temperature: temperature ?? 0.7,
+                top_p: 0.9,
+            };
+
+            // Add JSON response format if requested
+            if (responseFormat === 'json') {
+                requestBody.response_format = { type: 'json_object' };
+            }
+
             const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${groqApiKey}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    model: model || MODELS.PRIMARY,
-                    messages: [
-                        { role: 'system', content: systemPrompt || SYSTEM_PROMPTS.general },
-                        { role: 'user', content: userPrompt },
-                    ],
-                    max_tokens: maxTokens || 1000,
-                    temperature: temperature ?? 0.7,
-                    top_p: 0.9,
-                }),
+                body: JSON.stringify(requestBody),
                 signal: controller.signal,
             });
 

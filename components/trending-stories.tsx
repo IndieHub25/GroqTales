@@ -145,7 +145,7 @@ export function TrendingStories() {
               No Stories Yet
             </h3>
             <p className="text-muted-foreground font-bold mb-6">
-              Be the first to create a story on GroqTales!
+              Be the first to create a story on Comicraft!
             </p>
             <Button asChild className="bg-[var(--comic-red)] text-white border-4 border-foreground shadow-[4px_4px_0px_0px_var(--shadow-color)] font-black uppercase rounded-none">
               <Link href="/create/ai-story">
