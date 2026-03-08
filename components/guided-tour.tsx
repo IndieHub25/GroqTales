@@ -92,17 +92,33 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
               tooltipLeft = rect.left + rect.width / 2;
               break;
             case 'top':
-              tooltipTop = rect.top - tooltipOffset - 150; // Estimate tooltip height
+              tooltipTop = rect.top - tooltipOffset - 150;
               tooltipLeft = rect.left + rect.width / 2;
               break;
             case 'left':
               tooltipTop = rect.top + rect.height / 2;
-              tooltipLeft = rect.left - tooltipOffset - 200; // Estimate tooltip width
+              tooltipLeft = rect.left - tooltipOffset - 320;
               break;
             case 'right':
               tooltipTop = rect.top + rect.height / 2;
               tooltipLeft = rect.right + tooltipOffset;
               break;
+          }
+
+          // ── VIEWPORT CLAMPING — prevent tooltip from going off-screen ──
+          const tooltipWidth = 340;
+          const tooltipHeight = 200;
+          const margin = 20;
+
+          // Clamp horizontal
+          if (tooltipLeft < margin) tooltipLeft = margin;
+          if (tooltipLeft > window.innerWidth - tooltipWidth - margin) {
+            tooltipLeft = window.innerWidth - tooltipWidth - margin;
+          }
+          // Clamp vertical
+          if (tooltipTop < margin) tooltipTop = margin;
+          if (tooltipTop > window.innerHeight - tooltipHeight - margin) {
+            tooltipTop = window.innerHeight - tooltipHeight - margin;
           }
 
           setTooltipPos({ top: tooltipTop, left: tooltipLeft });
@@ -196,12 +212,11 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
 
       {/* Tooltip */}
       <div
-        className={`${styles.tooltip} ${
-          step.position === 'top' ? styles.tooltipPositionTop :
-          step.position === 'left' ? styles.tooltipPositionLeft :
-          step.position === 'right' ? styles.tooltipPositionRight :
-          styles.tooltipPositionBottom
-        }`}
+        className={`${styles.tooltip} ${step.position === 'top' ? styles.tooltipPositionTop :
+            step.position === 'left' ? styles.tooltipPositionLeft :
+              step.position === 'right' ? styles.tooltipPositionRight :
+                styles.tooltipPositionBottom
+          }`}
         style={{
           top: `${tooltipPos.top}px`,
           left: `${tooltipPos.left}px`,

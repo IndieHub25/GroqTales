@@ -48,7 +48,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
           >
             <Image
               src="/logo.png"
-              alt="GroqTales"
+              alt="Comicraft"
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
               className="object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
@@ -56,7 +56,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
             />
           </motion.div>
 
-          
+
           <p className="mt-8 text-sm font-bold tracking-[0.3em] uppercase text-white/80 animate-pulse font-comic z-10">
             Where AI Meets Imagination
           </p>

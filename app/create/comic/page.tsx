@@ -157,6 +157,7 @@ export default function PanelraEnginePage() {
     story: true,
     layout: true,
     beats: false,
+    characters: false,
   });
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -370,7 +371,7 @@ export default function PanelraEnginePage() {
         {/* ─── Split-View Studio Layout ────────────────────────────── */}
         <div className="max-w-[1800px] mx-auto px-4 py-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            
+
             {/* ════════════════════════════════════════════════════
                LEFT SIDEBAR — Configuration Hub (Span 4)
                ════════════════════════════════════════════════════ */}
@@ -388,7 +389,7 @@ export default function PanelraEnginePage() {
 
               {/* Accordion 1: Story Details */}
               <Card className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl overflow-hidden shadow-lg">
-                <button 
+                <button
                   onClick={() => toggleSection('story')}
                   className="w-full flex items-center justify-between p-4 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
                 >
@@ -434,11 +435,10 @@ export default function PanelraEnginePage() {
                               <button
                                 key={g}
                                 onClick={() => toggleGenre(g)}
-                                className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all ${
-                                  selectedGenres.includes(g)
-                                    ? 'bg-blue-500/20 border-blue-500/40 text-blue-300'
-                                    : 'bg-white/[0.03] border-white/10 text-white/40 hover:border-white/20 hover:text-white/60'
-                                }`}
+                                className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all ${selectedGenres.includes(g)
+                                  ? 'bg-blue-500/20 border-blue-500/40 text-blue-300'
+                                  : 'bg-white/[0.03] border-white/10 text-white/40 hover:border-white/20 hover:text-white/60'
+                                  }`}
                               >
                                 {g}
                               </button>
@@ -454,11 +454,10 @@ export default function PanelraEnginePage() {
                               <button
                                 key={s.value}
                                 onClick={() => setStylePreset(s.value)}
-                                className={`flex flex-col items-center gap-1 p-2 rounded-lg border text-[11px] transition-all ${
-                                  stylePreset === s.value
-                                    ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
-                                    : 'bg-white/[0.02] border-white/[0.06] text-white/40 hover:border-white/15'
-                                }`}
+                                className={`flex flex-col items-center gap-1 p-2 rounded-lg border text-[11px] transition-all ${stylePreset === s.value
+                                  ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
+                                  : 'bg-white/[0.02] border-white/[0.06] text-white/40 hover:border-white/15'
+                                  }`}
                               >
                                 <span className="text-base">{s.icon}</span>
                                 <span>{s.label}</span>
@@ -474,7 +473,7 @@ export default function PanelraEnginePage() {
 
               {/* Accordion 2: Layout Options */}
               <Card className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl overflow-hidden shadow-lg">
-                <button 
+                <button
                   onClick={() => toggleSection('layout')}
                   className="w-full flex items-center justify-between p-4 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
                 >
@@ -541,11 +540,10 @@ export default function PanelraEnginePage() {
                                 <button
                                   key={l.value}
                                   onClick={() => setLayoutStyle(l.value)}
-                                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg border transition-all text-left ${
-                                    layoutStyle === l.value
-                                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200'
-                                      : 'bg-white/[0.02] border-white/[0.06] text-white/40 hover:border-white/15'
-                                  }`}
+                                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg border transition-all text-left ${layoutStyle === l.value
+                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200'
+                                    : 'bg-white/[0.02] border-white/[0.06] text-white/40 hover:border-white/15'
+                                    }`}
                                 >
                                   <Icon className="w-4 h-4 flex-shrink-0" />
                                   <div>
@@ -565,7 +563,7 @@ export default function PanelraEnginePage() {
 
               {/* Accordion 3: Beat Outline */}
               <Card className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl overflow-hidden shadow-lg">
-                <button 
+                <button
                   onClick={() => toggleSection('beats')}
                   className="w-full flex items-center justify-between p-4 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
                 >
@@ -587,12 +585,11 @@ export default function PanelraEnginePage() {
                       <CardContent className="p-4 space-y-3">
                         {BEAT_SLOTS.map((label, i) => (
                           <div key={label} className="flex items-start flex-col gap-1.5">
-                            <div className={`px-2 py-0.5 rounded flex items-center justify-center text-[10px] font-bold ${
-                              i === 0 ? 'bg-amber-500/15 text-amber-400' :
+                            <div className={`px-2 py-0.5 rounded flex items-center justify-center text-[10px] font-bold ${i === 0 ? 'bg-amber-500/15 text-amber-400' :
                               i === 1 ? 'bg-orange-500/15 text-orange-400' :
-                              i === 2 ? 'bg-red-500/15 text-red-400' :
-                              'bg-blue-500/15 text-blue-400'
-                            }`}>
+                                i === 2 ? 'bg-red-500/15 text-red-400' :
+                                  'bg-blue-500/15 text-blue-400'
+                              }`}>
                               {i + 1}. {label}
                             </div>
                             <Input
@@ -603,6 +600,180 @@ export default function PanelraEnginePage() {
                             />
                           </div>
                         ))}
+                      </CardContent>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Card>
+
+              {/* Accordion 4: Character Sketches (Optional) */}
+              <Card className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl overflow-hidden shadow-lg">
+                <button
+                  onClick={() => toggleSection('characters')}
+                  className="w-full flex items-center justify-between p-4 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                >
+                  <div className="flex items-center gap-2 text-white/90">
+                    <User className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm font-medium">Hero & Co-Stars</span>
+                    <span className="text-[10px] text-white/30 font-normal lowercase">(optional)</span>
+                  </div>
+                  {expandedSections.characters ? <ChevronDown className="w-4 h-4 text-white/40" /> : <ChevronRight className="w-4 h-4 text-white/40" />}
+                </button>
+                <AnimatePresence>
+                  {expandedSections.characters && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="border-t border-white/[0.06]"
+                    >
+                      <CardContent className="p-4 space-y-5">
+                        {/* Hero Section */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-6 h-6 rounded-md bg-purple-500/15 flex items-center justify-center">
+                              <User className="w-3 h-3 text-purple-400" />
+                            </div>
+                            <Label className="text-xs font-semibold text-purple-300">Main Hero</Label>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Input
+                              placeholder="Hero name"
+                              value={hero.name}
+                              onChange={(e) => setHero(prev => ({ ...prev, name: e.target.value }))}
+                              className="text-sm bg-white/5 border-white/10 placeholder:text-white/20"
+                            />
+                            <Textarea
+                              placeholder="Brief description of the hero..."
+                              value={hero.description}
+                              onChange={(e) => setHero(prev => ({ ...prev, description: e.target.value }))}
+                              className="text-sm bg-white/5 border-white/10 placeholder:text-white/20 resize-none h-16"
+                            />
+                          </div>
+
+                          {/* Hero Sketch Upload */}
+                          <div className="space-y-1.5">
+                            <Label className="text-[11px] text-white/40">Character Sketch</Label>
+                            {hero.previewUrl ? (
+                              <div className="relative rounded-lg overflow-hidden border border-purple-500/20 bg-purple-500/5">
+                                <img src={hero.previewUrl} alt="Hero sketch" className="w-full h-32 object-contain" />
+                                <button
+                                  onClick={() => setHero(prev => ({ ...prev, file: null, previewUrl: null }))}
+                                  className="absolute top-2 right-2 p-1 rounded-md bg-black/60 hover:bg-black/80 transition-colors"
+                                >
+                                  <X className="w-3 h-3 text-white" />
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => heroInputRef.current?.click()}
+                                className="w-full flex flex-col items-center gap-2 py-6 rounded-lg border-2 border-dashed border-white/10 hover:border-purple-500/30 bg-white/[0.02] hover:bg-purple-500/5 transition-all"
+                              >
+                                <Upload className="w-5 h-5 text-white/20" />
+                                <span className="text-[11px] text-white/30">Upload hero sketch (optional)</span>
+                              </button>
+                            )}
+                            <input
+                              ref={heroInputRef}
+                              type="file"
+                              accept="image/*"
+                              onChange={handleHeroFileChange}
+                              className="hidden"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Separator */}
+                        <div className="border-t border-white/[0.06]" />
+
+                        {/* Co-Stars Section */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-md bg-blue-500/15 flex items-center justify-center">
+                                <Users className="w-3 h-3 text-blue-400" />
+                              </div>
+                              <Label className="text-xs font-semibold text-blue-300">Co-Stars</Label>
+                              {coStars.length > 0 && (
+                                <span className="text-[10px] text-white/30">({coStars.length})</span>
+                              )}
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={addCoStar}
+                              className="h-7 text-[11px] border-blue-500/20 text-blue-400 bg-blue-500/5 hover:bg-blue-500/10"
+                            >
+                              <Plus className="w-3 h-3 mr-1" />
+                              Add
+                            </Button>
+                          </div>
+
+                          {coStars.length === 0 && (
+                            <p className="text-[11px] text-white/25 text-center py-3">
+                              No co-stars added. Click &quot;Add&quot; to include supporting characters.
+                            </p>
+                          )}
+
+                          {coStars.map((cs) => (
+                            <div key={cs.id} className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] space-y-2">
+                              <div className="flex items-center justify-between">
+                                <Input
+                                  placeholder="Character name"
+                                  value={cs.name}
+                                  onChange={(e) => updateCoStar(cs.id, 'name', e.target.value)}
+                                  className="text-xs h-7 bg-transparent border-0 p-0 text-white/80 placeholder:text-white/20 font-medium focus-visible:ring-0"
+                                />
+                                <button
+                                  onClick={() => removeCoStar(cs.id)}
+                                  className="p-1 rounded hover:bg-red-500/10 transition-colors flex-shrink-0"
+                                >
+                                  <X className="w-3 h-3 text-red-400/60" />
+                                </button>
+                              </div>
+                              <Textarea
+                                placeholder="Brief description..."
+                                value={cs.description}
+                                onChange={(e) => updateCoStar(cs.id, 'description', e.target.value)}
+                                className="text-[11px] bg-white/[0.03] border-white/[0.06] placeholder:text-white/15 resize-none h-12"
+                              />
+                              {/* Co-star sketch upload */}
+                              {cs.previewUrl ? (
+                                <div className="relative rounded-md overflow-hidden border border-blue-500/20 bg-blue-500/5">
+                                  <img src={cs.previewUrl} alt={cs.name} className="w-full h-20 object-contain" />
+                                  <button
+                                    onClick={() => updateCoStar(cs.id, 'previewUrl', null)}
+                                    className="absolute top-1 right-1 p-0.5 rounded bg-black/60 hover:bg-black/80"
+                                  >
+                                    <X className="w-2.5 h-2.5 text-white" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <label className="flex items-center gap-2 py-2 px-3 rounded-md border border-dashed border-white/[0.08] hover:border-blue-500/20 bg-white/[0.01] hover:bg-blue-500/5 cursor-pointer transition-all">
+                                  <ImageIcon className="w-3 h-3 text-white/20" />
+                                  <span className="text-[10px] text-white/25">Add sketch</span>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        const reader = new FileReader();
+                                        reader.onload = (ev) => {
+                                          updateCoStar(cs.id, 'previewUrl', ev.target?.result as string);
+                                          updateCoStar(cs.id, 'file', file);
+                                        };
+                                        reader.readAsDataURL(file);
+                                      }
+                                    }}
+                                  />
+                                </label>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </CardContent>
                     </motion.div>
                   )}
@@ -668,9 +839,9 @@ export default function PanelraEnginePage() {
                               animate={{
                                 width:
                                   phase === 'analyzing' ? '25%' :
-                                  phase === 'composing' ? '50%' :
-                                  phase === 'rendering' ? '75%' :
-                                  phase === 'finalizing' ? '90%' : '100%',
+                                    phase === 'composing' ? '50%' :
+                                      phase === 'rendering' ? '75%' :
+                                        phase === 'finalizing' ? '90%' : '100%',
                               }}
                               transition={{ duration: 0.8 }}
                             />
@@ -685,10 +856,9 @@ export default function PanelraEnginePage() {
                               const isCurrent = p === phase;
 
                               return (
-                                <div key={p} className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
-                                  isCurrent ? 'bg-blue-500/10 border border-blue-500/20' :
+                                <div key={p} className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${isCurrent ? 'bg-blue-500/10 border border-blue-500/20' :
                                   isDone ? 'opacity-50' : 'opacity-20'
-                                }`}>
+                                  }`}>
                                   {isDone ? (
                                     <Check className="w-4 h-4 text-emerald-400" />
                                   ) : isCurrent ? (
@@ -740,10 +910,9 @@ export default function PanelraEnginePage() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className={`grid gap-2 ${
-                            result.panelsPerPage <= 4 ? 'grid-cols-2' :
+                          <div className={`grid gap-2 ${result.panelsPerPage <= 4 ? 'grid-cols-2' :
                             result.panelsPerPage <= 6 ? 'grid-cols-3' : 'grid-cols-4'
-                          }`}>
+                            }`}>
                             {pagePanels.map((panel) => (
                               <div
                                 key={panel.panelIndex}

@@ -37,6 +37,7 @@ import { Badge } from '@/components/ui/badge';
 
 import { ParameterPanel } from '@/components/parameter-panel';
 import { GuidedTour, AI_STORY_TOUR_STEPS } from '@/components/guided-tour';
+import { AI_STORY_PARAMETERS } from '@/lib/ai-story-parameters';
 
 // Story Studio components
 import { PanelProgressTracker } from './components/panel-progress-tracker';
@@ -61,6 +62,7 @@ type VedaChapter = {
   title: string;
   summary?: string;
   content: string;
+  chapterPrompt?: string;
   params?: any;
 };
 
@@ -130,10 +132,10 @@ function AIStoryContent() {
     setting: '',
     themes: '',
   });
-  
+
   const [selectedGenres, setSelectedGenres] = useState<string[]>(['Fantasy']);
   const [storyDescription, setStoryDescription] = useState('');
-  
+
   const [selectedParameters, setSelectedParameters] = useState<Set<string>>(new Set());
   const [parameterValues, setParameterValues] = useState<Record<string, unknown>>({});
   const [isParamsExpanded, setIsParamsExpanded] = useState(false);
@@ -142,7 +144,10 @@ function AIStoryContent() {
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [editorTab, setEditorTab] = useState<'chapter' | 'compiled'>('chapter');
-  
+
+  // Chapter locking: after chapter 1 is generated, genres and parameters are locked
+  const [isLocked, setIsLocked] = useState(false);
+
   // Initialize with URL param
   useEffect(() => {
     const genreParam = searchParams.get('genre');
@@ -154,9 +159,10 @@ function AIStoryContent() {
     }
   }, [searchParams]);
 
-  // ── Load import from Shakti Spark ───────────────────────────────
+  // ── Load import from Shakti Spark and Saved Drafts ──────────────
   useEffect(() => {
     try {
+      // First check for imports
       const imported = localStorage.getItem('vedascript_import');
       if (imported) {
         const data = JSON.parse(imported);
@@ -166,14 +172,37 @@ function AIStoryContent() {
         if (data.genre) setSelectedGenres([data.genre]);
         if (data.prompt) setStoryPrompt(prev => ({ ...prev, plotOutline: data.prompt }));
         localStorage.removeItem('vedascript_import');
+        return; // Prioritize import over draft
+      }
+
+      // Then check for saved draft
+      const draftStr = localStorage.getItem('aiStoryDraft');
+      if (draftStr) {
+        const draft = JSON.parse(draftStr);
+        if (draft.prompt) setStoryPrompt(draft.prompt);
+        if (draft.chapters && draft.chapters.length > 0) {
+          setChapters(draft.chapters);
+          setActiveChapterId(draft.chapters[draft.chapters.length - 1].id); // Go to latest chapter
+        }
+        if (draft.selectedParameters) setSelectedParameters(new Set(draft.selectedParameters));
+        if (draft.parameterValues) setParameterValues(draft.parameterValues);
+        if (draft.selectedGenres) setSelectedGenres(draft.selectedGenres);
+        if (draft.isLocked !== undefined) setIsLocked(draft.isLocked);
+
+        // Populate storyDescription from active chapter prompt if locked, else main prompt
+        if (draft.isLocked && draft.chapters && draft.chapters.length > 0) {
+          // Keep it empty to let user fill it for the next chapter
+        } else if (draft.prompt?.plotOutline) {
+          setStoryDescription(draft.prompt.plotOutline);
+        }
       }
     } catch { /* ignore */ }
   }, []);
 
   // ── Derived State ───────────────────────────────────────────────
-  const activeChapter = chapters.find(c => c.id === activeChapterId) || chapters[0];
+  const activeChapter = (chapters.find(c => c.id === activeChapterId) || chapters[0]) as VedaChapter;
   const completedCount = lifecycleRef.current.getCompletePanelCount(session.panels);
-  
+
   // Calculate total words across all chapters
   const totalWordCount = chapters.reduce((acc, c) => acc + c.content.split(/\s+/).filter(Boolean).length, 0);
 
@@ -201,7 +230,7 @@ function AIStoryContent() {
   const handleDuplicateChapter = (chapterId: string) => {
     const chapter = chapters.find(c => c.id === chapterId);
     if (!chapter) return;
-    
+
     const newChapter: VedaChapter = {
       ...chapter,
       id: `chap-${Date.now()}`,
@@ -214,10 +243,10 @@ function AIStoryContent() {
 
   const handleDeleteChapter = (chapterId: string) => {
     if (chapters.length <= 1) return;
-    
+
     const newChapters = chapters.filter(c => c.id !== chapterId)
       .map((c, i) => ({ ...c, index: i + 1 })); // Re-index
-      
+
     setChapters(newChapters);
     if (activeChapterId === chapterId) {
       setActiveChapterId(newChapters[0].id);
@@ -236,6 +265,10 @@ function AIStoryContent() {
 
   // Genres
   const toggleGenre = (genre: string) => {
+    if (isLocked) {
+      toast({ title: 'Genres Locked', description: 'Genres are locked after your first chapter is generated. All chapters use the same genre.', variant: 'destructive' });
+      return;
+    }
     if (selectedGenres.includes(genre)) {
       setSelectedGenres(prev => prev.filter(g => g !== genre));
     } else {
@@ -262,7 +295,7 @@ function AIStoryContent() {
 
   // Generation
   const handleGeneratePanel = useCallback(async () => {
-    const panelIdx = activeChapter.index;
+    const panelIdx = activeChapter?.index || 1;
 
     // Lock genres on Panel 1 completion
     if (panelIdx === 1 && !session.genresLocked && selectedGenres.length > 0) {
@@ -273,7 +306,55 @@ function AIStoryContent() {
     setIsGenerating(true);
     setGenerationError(null);
 
-    const panelParams = parameterValues as PanelParameters;
+    // ── Build enriched params that includes the user's story details ──
+    // Without these, the AI has no idea what story the user wants.
+    const userStoryContext: Record<string, unknown> = {
+      ...parameterValues,
+    };
+
+    // Build the premise from ALL user-supplied story details
+    const premiseParts: string[] = [];
+    if (storyPrompt.title) premiseParts.push(`Title: "${storyPrompt.title}"`);
+
+    // Pass the main story concept (from storyDescription) if not locked, OR if it's the first chapter
+    if (!isLocked && storyDescription) {
+      premiseParts.push(`Main Story Concept: ${storyDescription}`);
+    } else if (isLocked && activeChapter.chapterPrompt) {
+      premiseParts.push(`Current Chapter Prompt: ${activeChapter.chapterPrompt}`);
+    }
+
+    if (storyPrompt.plotOutline) premiseParts.push(`Plot outline: ${storyPrompt.plotOutline}`);
+    if (storyPrompt.mainCharacters) premiseParts.push(`Main characters: ${storyPrompt.mainCharacters}`);
+    if (storyPrompt.setting) premiseParts.push(`Setting: ${storyPrompt.setting}`);
+    if (storyPrompt.themes) premiseParts.push(`Themes: ${storyPrompt.themes}`);
+
+    if (premiseParts.length > 0) {
+      userStoryContext.customPremise = premiseParts.join('\n');
+    }
+
+    // Pass selected genres
+    userStoryContext.primaryGenre = selectedGenres[0] || 'Fantasy';
+    if (selectedGenres.length > 1) {
+      userStoryContext.secondaryGenres = selectedGenres.slice(1);
+    }
+
+    // Control chapter count = number of chapters the user has set up
+    userStoryContext.chapterCount = chapters.length;
+    userStoryContext.targetLength = chapters.length === 1 ? 'short' : chapters.length <= 3 ? 'medium' : 'long';
+
+    // Reasonable word count per chapter
+    const wordsPerChapter = 800;
+    userStoryContext.targetWordCount = wordsPerChapter; // We generate one chapter at a time
+
+    // Unique generation seed so every call produces different results
+    userStoryContext.generationSeed = Date.now();
+
+    // Pass temperature if set by user, otherwise default
+    if (!userStoryContext.modelTemperature) {
+      userStoryContext.modelTemperature = 0.85;
+    }
+
+    const panelParams = userStoryContext as PanelParameters;
 
     try {
       // Use existing service logic but adapt to new state
@@ -289,10 +370,12 @@ function AIStoryContent() {
       updateActiveChapter({ content: result.content });
       setEditorTab('chapter');
 
+      const currentTitle = activeChapter?.title || `Chapter ${panelIdx}`;
+
       // Update session/memory tracking (legacy support for services)
       const newPanel: PanelData = {
         panelIndex: panelIdx,
-        title: activeChapter.title,
+        title: currentTitle,
         parameters: panelParams,
         generatedContent: result.content,
         wordCount: result.wordCount,
@@ -320,9 +403,14 @@ function AIStoryContent() {
         },
       }));
 
+      // Lock genres and parameters after first successful generation
+      if (!isLocked) {
+        setIsLocked(true);
+      }
+
       toast({
         title: `Chapter Generated!`,
-        description: `${result.wordCount} words generated successfully.`,
+        description: `${result.wordCount} words generated successfully.${!isLocked ? ' Genres & parameters are now locked for consistency.' : ''}`,
       });
     } catch (error) {
       const errMsg = (error as Error).message || 'Generation failed';
@@ -353,6 +441,8 @@ function AIStoryContent() {
           chapters,
           selectedParameters: Array.from(selectedParameters),
           parameterValues,
+          selectedGenres,
+          isLocked,
           savedAt: new Date().toISOString(),
         })
       );
@@ -360,6 +450,25 @@ function AIStoryContent() {
     } catch {
       toast({ title: 'Save failed', variant: 'destructive' });
     }
+  };
+
+  const handleDownloadParameters = () => {
+    const paramData = AI_STORY_PARAMETERS.map(p => ({
+      id: p.id,
+      name: p.name,
+      category: p.category,
+      type: p.type,
+      description: p.description,
+      defaultValue: p.defaultValue,
+      constraints: p.constraints || null,
+    }));
+    const blob = new Blob([JSON.stringify(paramData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'comicraft-vedascript-parameters.json';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -397,6 +506,10 @@ function AIStoryContent() {
                 <Save className="w-4 h-4 mr-1.5" />
                 Save Draft
               </Button>
+              <Button size="sm" variant="outline" onClick={handleDownloadParameters} className="bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 rounded-lg">
+                <Download className="w-4 h-4 mr-1.5" />
+                Parameters
+              </Button>
               <Button size="sm" variant="outline" onClick={handleCopyStory} className="bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10 rounded-lg">
                 <Download className="w-4 h-4 mr-1.5" />
                 Export
@@ -428,17 +541,17 @@ function AIStoryContent() {
                     <Plus className="w-4 h-4 text-emerald-400" />
                   </Button>
                 </div>
-                
+
                 <div className="p-3 space-y-2 max-h-[60vh] overflow-y-auto">
                   <Reorder.Group axis="y" values={chapters} onReorder={handleChapterReorder}>
                     {chapters.map((chapter) => (
                       <Reorder.Item key={chapter.id} value={chapter}>
-                        <div 
+                        <div
                           onClick={() => setActiveChapterId(chapter.id)}
                           className={`
                             group relative p-3 rounded-xl border transition-all cursor-pointer select-none
-                            ${activeChapterId === chapter.id 
-                              ? 'bg-white/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
+                            ${activeChapterId === chapter.id
+                              ? 'bg-white/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
                               : 'bg-white/5 border-white/5 hover:bg-white/[0.07] hover:border-white/10'}
                           `}
                         >
@@ -460,7 +573,7 @@ function AIStoryContent() {
                                   </div>
                                 )}
                               </div>
-                              <input 
+                              <input
                                 value={chapter.title}
                                 onChange={(e) => {
                                   const val = e.target.value;
@@ -468,7 +581,7 @@ function AIStoryContent() {
                                 }}
                                 className="bg-transparent border-none p-0 text-sm font-semibold text-white/90 w-full focus:ring-0 placeholder:text-white/20"
                                 placeholder="Chapter Title"
-                                onClick={(e) => e.stopPropagation()} 
+                                onClick={(e) => e.stopPropagation()}
                               />
                             </div>
                           </div>
@@ -498,7 +611,15 @@ function AIStoryContent() {
                   <div>
                     <div className="flex justify-between items-center mb-1.5">
                       <Label className="text-xs font-semibold text-white/60 block">Genres</Label>
-                      <span className="text-[10px] text-white/40">{selectedGenres.length}/2 selected</span>
+                      <div className="flex items-center gap-2">
+                        {isLocked && (
+                          <span className="text-[10px] text-amber-400/70 flex items-center gap-1">
+                            <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+                            Locked
+                          </span>
+                        )}
+                        <span className="text-[10px] text-white/40">{selectedGenres.length}/2 selected</span>
+                      </div>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {availableGenres.map((g) => {
@@ -507,8 +628,10 @@ function AIStoryContent() {
                           <button
                             key={g}
                             onClick={() => toggleGenre(g)}
+                            disabled={isLocked}
                             className={`
                               px-3 py-1 rounded-full text-xs font-medium border transition-all flex items-center gap-1.5
+                              ${isLocked ? 'cursor-not-allowed opacity-60' : ''}
                               ${isSelected
                                 ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
                                 : 'bg-white/5 border-white/10 text-white/50 hover:text-white/80 hover:bg-white/10'}
@@ -522,13 +645,21 @@ function AIStoryContent() {
                     </div>
                   </div>
                   <div>
-                    <Label className="text-xs font-semibold text-white/60 mb-1.5 block">Description</Label>
+                    <Label className="text-xs font-semibold text-white/60 mb-1.5 block">
+                      {isLocked ? `Chapter ${activeChapter?.index || 1} Prompt` : 'Input Prompt for Story'}
+                    </Label>
                     <Textarea
-                      placeholder="A brief overview of your story..."
+                      placeholder={isLocked
+                        ? `Describe what should happen in ${activeChapter?.title || 'this chapter'}. The AI will use the same genre/parameters but generate chapter-specific content...`
+                        : 'Describe your story idea here — this is what the AI will write about. Be as detailed as you want: characters, plot, setting, themes...'
+                      }
                       value={storyDescription}
                       onChange={(e) => setStoryDescription(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/25 rounded-lg resize-none h-16 text-sm"
+                      className="bg-white/5 border-white/10 text-white placeholder:text-white/25 rounded-lg resize-none h-24 text-sm"
                     />
+                    {isLocked && (
+                      <p className="text-[10px] text-amber-400/50 mt-1">Each chapter can have a different prompt, but genres & parameters stay locked.</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -543,21 +674,19 @@ function AIStoryContent() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => setEditorTab('chapter')}
-                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                        editorTab === 'chapter'
-                          ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                          : 'text-white/50 hover:text-white/80'
-                      }`}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${editorTab === 'chapter'
+                        ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                        : 'text-white/50 hover:text-white/80'
+                        }`}
                     >
                       Current Chapter
                     </button>
                     <button
                       onClick={() => setEditorTab('compiled')}
-                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                        editorTab === 'compiled'
-                          ? 'bg-blue-500/15 text-blue-300 border border-blue-500/30'
-                          : 'text-white/50 hover:text-white/80'
-                      }`}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${editorTab === 'compiled'
+                        ? 'bg-blue-500/15 text-blue-300 border border-blue-500/30'
+                        : 'text-white/50 hover:text-white/80'
+                        }`}
                     >
                       Compiled Story
                     </button>
@@ -572,26 +701,41 @@ function AIStoryContent() {
                   {editorTab === 'chapter' ? (
                     <div className="p-5 h-full flex flex-col">
                       <div className="mb-2 flex items-center justify-between text-xs text-white/40">
-                         <span>Editing: {activeChapter.title}</span>
-                         <span>{activeChapter.content.split(/\s+/).filter(Boolean).length} words</span>
+                        <span>Editing: {activeChapter?.title || 'Chapter'}</span>
+                        <span>{activeChapter?.content?.split(/\s+/).filter(Boolean).length || 0} words</span>
                       </div>
                       <Textarea
-                        placeholder={`Write ${activeChapter.title} here...`}
-                        value={activeChapter.content}
+                        placeholder={`Write ${activeChapter?.title || 'Chapter'} here...`}
+                        value={activeChapter?.content || ''}
                         onChange={(e) => updateActiveChapter({ content: e.target.value })}
                         className="flex-1 w-full min-h-[400px] bg-transparent border-0 text-white/90 placeholder:text-white/20 resize-none focus:ring-0 focus-visible:ring-0 text-sm leading-relaxed p-0 font-serif"
                       />
                     </div>
                   ) : (
                     <div className="p-5">
-                      {compiledStory.trim() ? (
-                        <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-white/80 leading-relaxed font-serif">
-                          {compiledStory}
+                      {chapters.some(ch => ch.content.trim()) ? (
+                        <div className="prose prose-invert prose-sm max-w-none text-white/80 leading-relaxed font-serif space-y-8">
+                          {chapters.map((ch, idx) => (
+                            <div key={ch.id}>
+                              {idx > 0 && <hr className="border-white/10 my-6" />}
+                              <h2 className="text-lg font-bold text-white/90 mb-3 font-sans">
+                                Chapter {idx + 1}: {ch.title}
+                              </h2>
+                              {ch.content.trim() ? (
+                                <div className="whitespace-pre-wrap text-white/75 leading-[1.8]">
+                                  {ch.content}
+                                </div>
+                              ) : (
+                                <p className="text-white/30 italic text-sm">No content yet for this chapter.</p>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       ) : (
                         <div className="flex flex-col items-center justify-center h-[400px] text-white/30">
                           <AlignLeft className="w-10 h-10 mb-3 opacity-20" />
                           <p className="text-sm">No content generated yet.</p>
+                          <p className="text-xs mt-1 text-white/20">Generate chapters to see the compiled story preview</p>
                         </div>
                       )}
                     </div>
@@ -677,17 +821,26 @@ function AIStoryContent() {
                     <Settings2 className="w-5 h-5 text-purple-400" />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-white/90">Advanced VedaScript Parameters <span className="text-white/30 font-normal text-sm ml-2">(Optional)</span></h3>
+                    <h3 className="text-base font-semibold text-white/90">
+                      Advanced VedaScript Parameters
+                      <span className="text-white/30 font-normal text-sm ml-2">(Optional)</span>
+                      {isLocked && (
+                        <span className="text-amber-400/70 font-normal text-xs ml-2 inline-flex items-center gap-1">
+                          <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+                          Locked
+                        </span>
+                      )}
+                    </h3>
                     <p className="text-sm text-white/40">{selectedParameters.size} active parameters modifying the AI behavior</p>
                   </div>
                 </div>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsParamsExpanded(!isParamsExpanded)}
-                  className="bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10"
+                <Button
+                  variant="outline"
+                  onClick={() => isLocked ? toast({ title: 'Parameters Locked', description: 'Parameters are locked after first chapter generation for story consistency.', variant: 'destructive' }) : setIsParamsExpanded(!isParamsExpanded)}
+                  className={`bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10 ${isLocked ? 'opacity-60 cursor-not-allowed' : ''}`}
                 >
-                  {isParamsExpanded ? 'Hide Parameters' : 'Configure Parameters'}
-                  {isParamsExpanded ? <ChevronDown className="w-4 h-4 ml-2" /> : <ChevronRight className="w-4 h-4 ml-2" />}
+                  {isLocked ? 'Locked' : isParamsExpanded ? 'Hide Parameters' : 'Configure Parameters'}
+                  {!isLocked && (isParamsExpanded ? <ChevronDown className="w-4 h-4 ml-2" /> : <ChevronRight className="w-4 h-4 ml-2" />)}
                 </Button>
               </div>
 

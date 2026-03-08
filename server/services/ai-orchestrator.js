@@ -16,6 +16,7 @@
 
 const geminiService = require('./geminiService');
 const groqService = require('./groqService');
+const vectorService = require('./vectorService');
 
 let logger;
 try {
@@ -140,11 +141,12 @@ async function executeGroqTask(taskName, prompt, correlationId) {
     try {
         logger.debug(`[${correlationId}] Executing Groq task: ${taskName}`);
         const result = await groqService.callGroq({
-            model: 'llama3-8b-8192',
-            systemPrompt: 'You are a story structuring assistant. Keep responses concise and return only requested format.',
+            model: 'llama-3.3-70b-versatile',
+            systemPrompt: 'You are a story structuring assistant. Keep responses concise. Return your response as valid JSON.',
             userPrompt: prompt,
             maxTokens: 1000,
             temperature: 0.5,
+            responseFormat: 'json',
         });
         logger.debug(`[${correlationId}] Groq task ${taskName} completed`);
         return result;
@@ -161,124 +163,133 @@ async function executeGroqTask(taskName, prompt, correlationId) {
 function buildChairmanPrompt(userInput, config, groqContext = {}) {
     const sections = [];
 
-    // 1. Core Directive
-    sections.push(`# CHAIRMAN DIRECTIVE: STORY GENERATION`);
-    sections.push(`You are the primary AI architect overseeing this story generation.`);
-    sections.push(`Your decisions are final. You will generate complete, coherent output.`);
-    
-    // Include Groq context if available
-    if (groqContext.classification) {
-        sections.push(`\n[STRUCTURED INSIGHTS FROM TASK-SPECIFIC AI]`);
-        sections.push(`Story Classification: ${groqContext.classification}`);
-        sections.push(`Suggested Narrative Approach: ${groqContext.narrativeApproach}`);
-        sections.push(`Conventional Genre Elements to Include: ${groqContext.conventionalElements?.join(', ') || 'none'}`);
-        sections.push(`Recommended Unconventional Twists: ${groqContext.unconventionalTwists?.join(', ') || 'balance with convention'}`);
-    }
-    
-    if (groqContext.outline && groqContext.outline.length > 0) {
-        sections.push(`\n[STORY STRUCTURE OUTLINE (Pre-Generated)]`);
-        groqContext.outline.forEach(beat => {
-            sections.push(`- ${beat}`);
-        });
-    }
-    
+    // 1. Core Directive — PREMISE FIRST
+    sections.push(`# STORY GENERATION DIRECTIVE`);
+    sections.push(`You are a world-class fiction writer. Generate a complete, compelling story based on the user's concept below.`);
+    sections.push(`Write ONLY the story prose — no commentary, no meta-text, no authors notes.`);
+    sections.push(`Start immediately with the narrative.`);
     sections.push(``);
 
-    // 2. User Input & Requirements
-    sections.push(`## USER REQUEST`);
+    // 2. THE USER'S STORY CONCEPT — MOST IMPORTANT PART
+    sections.push(`## ⚡ USER'S STORY CONCEPT (THIS IS YOUR PRIMARY DIRECTIVE — FOLLOW IT CLOSELY)`);
     if (config.customPremise) {
-        sections.push(`Premise: ${config.customPremise}`);
+        sections.push(config.customPremise);
     }
-    if (userInput) {
-        sections.push(`Additional input: ${userInput}`);
+    if (userInput && userInput.trim()) {
+        sections.push(userInput);
     }
-    sections.push(``);
-
-    // 3. Configuration Summary
-    sections.push(`## GENERATION CONFIG`);
-    sections.push(`- Mode: ${config.mode} (${config.mode === 'story-only' ? 'prose only' : config.mode === 'story-comic' ? 'prose + comic panels' : 'comic panels only'})`);
-    sections.push(`- Genre: ${config.primaryGenre}${config.secondaryGenres?.length ? ` + ${config.secondaryGenres.join(', ')}` : ''}`);
-    sections.push(`- Length: ${config.targetLength} (${config.targetWordCount || '5000-15000'} words)`);
-    sections.push(`- POV: ${config.narrativePOV}, Tense: ${config.tense}`);
-    sections.push(`- Tones: ${Array.isArray(config.tone) ? config.tone.join(', ') : config.tone}`);
-    sections.push(`- Pacing: ${config.pacing}, Humor: ${config.humorLevel}`);
-    sections.push(``);
-
-    // 4. Character Guidance
-    sections.push(`## CHARACTERS`);
-    sections.push(`- Main Characters: ${config.mainCharacterCount || 1}`);
-    sections.push(`- Supporting: ${config.supportingCharacterCount || 5}`);
-    sections.push(`- Protagonist Type: ${config.protagonistArchetype}`);
-    sections.push(`- Antagonist: ${config.antagonistType}`);
-    sections.push(``);
-
-    // 5. Plot & Structure
-    sections.push(`## PLOT STRUCTURE`);
-    sections.push(`- Template: ${config.structureTemplate}`);
-    sections.push(`- Ending: ${config.endingStyle}`);
-    sections.push(`- Twist Intensity: ${config.twistIntensity}`);
-    sections.push(`- Themes: ${Array.isArray(config.themes) ? config.themes.join(', ') : config.themes}`);
-    sections.push(``);
-
-    // 6. Style & Voice
-    sections.push(`## STYLE REQUIREMENTS`);
-    sections.push(`- Prose Density: ${config.proseDensity}`);
-    sections.push(`- Dialogue:Description ratio: ${config.dialogueToDescriptionRatio}:${100 - config.dialogueToDescriptionRatio}`);
-    sections.push(`- Voice Flavors: ${Array.isArray(config.styleFlavorPresets) ? config.styleFlavorPresets.join(', ') : 'balanced'}`);
-    if (config.avoidRepetition) {
-        sections.push(`- Avoid repetitive phrases and constructions`);
+    if (!config.customPremise && !userInput) {
+        sections.push(`(No specific premise provided — generate an original story in the ${config.primaryGenre || 'fantasy'} genre)`);
     }
     sections.push(``);
 
-    // 7. Comic-Specific (if applicable)
-    if (config.mode.includes('comic')) {
-        sections.push(`## COMIC PANEL BREAKDOWN (for mode: ${config.mode})`);
-        sections.push(`- Panel Layout: ${config.panelLayoutStyle}`);
-        sections.push(`- Target Panels: ${config.comicPanelCount || 24}`);
-        sections.push(`- Visual Tone: ${config.visualTone}`);
-        sections.push(`- Action Density: ${config.actionDensity}/10`);
-        sections.push(`- Panel Shot Distribution:`);
-        sections.push(`  * Establishing: ${config.establishingShotPercent || 25}%`);
-        sections.push(`  * Medium: ${config.mediumShotPercent || 40}%`);
-        sections.push(`  * Close-up: ${config.closeUpPercent || 25}%`);
-        sections.push(`  * Reaction: ${config.reactionPanelPercent || 10}%`);
+    // 3. Include Groq context if available (pre-processed insights)
+    if (groqContext.classification) {
+        sections.push(`## PRE-ANALYZED INSIGHTS`);
+        sections.push(`Classification: ${groqContext.classification}`);
+        if (groqContext.narrativeApproach) sections.push(`Narrative approach: ${groqContext.narrativeApproach}`);
+        if (groqContext.conventionalElements?.length) sections.push(`Genre elements: ${groqContext.conventionalElements.join(', ')}`);
         sections.push(``);
     }
 
-    // 8. Output Specification
-    sections.push(`## OUTPUT SPECIFICATION`);
-    sections.push(`Format: ${config.outputFormat || 'markdown'}`);
-    if (config.mode === 'story-only') {
-        sections.push(`- Generate complete prose story with chapters`);
-        if (config.includeLogline) sections.push(`- Include: one-line logline at top`);
-        if (config.includeSynopsis) sections.push(`- Include: 2-3 paragraph synopsis`);
-        if (config.includeDetailedOutline) sections.push(`- Include: chapter-by-chapter outline`);
+    if (groqContext.outline && groqContext.outline.length > 0) {
+        sections.push(`## SUGGESTED OUTLINE`);
+        groqContext.outline.forEach(beat => sections.push(`- ${beat}`));
+        sections.push(``);
     }
-    if (config.mode.includes('comic')) {
-        sections.push(`- For comic panels: Generate as structured JSON array`);
-        sections.push(`  Each panel: {index, description, dialogue, cameraDirection, mood}`);
+
+    if (groqContext.vectorTwists && groqContext.vectorTwists.length > 0) {
+        sections.push(`## STORYLINE UNIQUENESS PROTOCOL (RAG VECTOR SEARCH)`);
+        sections.push(`We found highly similar stories already exist in our database. To ensure this new story stands out, you MUST subvert expectations and introduce UNIQUE twists.`);
+        sections.push(`Avoid these common tropes found in similar stories:`);
+        groqContext.vectorTwists.forEach((story, i) => {
+            sections.push(`- Similar Idea ${i + 1}: "${story.storyline.substring(0, 150)}..." -> DIVERGE FROM THIS`);
+        });
+        sections.push(`Inject a surprising twist or use an unconventional narrative approach so this story is completely unique.`);
+        sections.push(``);
+    }
+
+    // 4. LENGTH & STRUCTURE CONSTRAINTS (critical for chapter control)
+    sections.push(`## LENGTH & STRUCTURE REQUIREMENTS`);
+    const chapterCount = config.chapterCount || 1;
+    const wordCount = config.targetWordCount || 800;
+    sections.push(`- Generate EXACTLY ${chapterCount} chapter(s)`);
+    sections.push(`- Target word count: approximately ${wordCount} words total`);
+    sections.push(`- Length category: ${config.targetLength || 'short'}`);
+    if (chapterCount === 1) {
+        sections.push(`- Write as a single continuous narrative (no chapter headers)`);
+    } else {
+        sections.push(`- Format each chapter with: ## Chapter [N]: [Title]`);
     }
     sections.push(``);
 
-    // 9. Safety & Constraints
-    sections.push(`## SAFETY & CONSTRAINTS`);
-    sections.push(`- NSFW Level: ${config.nsfwToggle || 'standard'}`);
-    if (config.blockRealPeopleTrademarks) {
-        sections.push(`- Do NOT use real people or trademarked characters`);
-    }
-    sections.push(`- Horror Intensity Cap: ${config.horrorIntensityMax || 7}/10`);
-    sections.push(`- Violence Intensity: ${config.violenceIntensity || 5}/10`);
+    // 5. Genre & Tone
+    sections.push(`## GENRE & TONE`);
+    sections.push(`- Genre: ${config.primaryGenre || 'fantasy'}${config.secondaryGenres?.length ? ` + ${config.secondaryGenres.join(', ')}` : ''}`);
+    if (config.tone) sections.push(`- Tone: ${Array.isArray(config.tone) ? config.tone.join(', ') : config.tone}`);
+    if (config.pacing) sections.push(`- Pacing: ${config.pacing}`);
+    if (config.humorLevel) sections.push(`- Humor level: ${config.humorLevel}`);
     sections.push(``);
 
-    // 10. Final Instructions
-    sections.push(`## EXECUTION`);
-    sections.push(`1. Generate the ${config.mode === 'story-only' ? 'complete story' : config.mode === 'comic-only' ? 'comic panels' : 'story and comic panels'}`);
-    sections.push(`2. Ensure linguistic coherence and thematic consistency`);
-    sections.push(`3. Apply all safety filters and content restrictions`);
-    sections.push(`4. Format output according to specification above`);
-    sections.push(`5. Do NOT add meta-commentary or explanations — output only the story/panels`);
+    // 6. Characters (only if specified)
+    if (config.mainCharacterCount || config.protagonistArchetype || config.antagonistType) {
+        sections.push(`## CHARACTERS`);
+        if (config.mainCharacterCount) sections.push(`- Main characters: ${config.mainCharacterCount}`);
+        if (config.supportingCharacterCount) sections.push(`- Supporting: ${config.supportingCharacterCount}`);
+        if (config.protagonistArchetype) sections.push(`- Protagonist type: ${config.protagonistArchetype}`);
+        if (config.antagonistType) sections.push(`- Antagonist: ${config.antagonistType}`);
+        sections.push(``);
+    }
+
+    // 7. Plot structure (only if specified)
+    if (config.structureTemplate || config.endingStyle || config.twistIntensity || config.themes) {
+        sections.push(`## PLOT`);
+        if (config.structureTemplate) sections.push(`- Structure: ${config.structureTemplate}`);
+        if (config.endingStyle) sections.push(`- Ending: ${config.endingStyle}`);
+        if (config.twistIntensity) sections.push(`- Twist intensity: ${config.twistIntensity}`);
+        if (config.themes) sections.push(`- Themes: ${Array.isArray(config.themes) ? config.themes.join(', ') : config.themes}`);
+        sections.push(``);
+    }
+
+    // 8. Style (only if specified)
+    if (config.proseDensity || config.narrativePOV || config.tense) {
+        sections.push(`## STYLE`);
+        if (config.narrativePOV) sections.push(`- POV: ${config.narrativePOV}`);
+        if (config.tense) sections.push(`- Tense: ${config.tense}`);
+        if (config.proseDensity) sections.push(`- Prose density: ${config.proseDensity}`);
+        if (config.dialogueToDescriptionRatio) sections.push(`- Dialogue:Description ratio: ${config.dialogueToDescriptionRatio}:${100 - config.dialogueToDescriptionRatio}`);
+        sections.push(``);
+    }
+
+    // 9. Comic panels (if applicable)
+    if (config.mode && config.mode.includes('comic')) {
+        sections.push(`## COMIC PANEL BREAKDOWN`);
+        sections.push(`- Panel Layout: ${config.panelLayoutStyle || 'standard'}`);
+        sections.push(`- Target Panels: ${config.comicPanelCount || 24}`);
+        sections.push(`- Visual Tone: ${config.visualTone || 'dynamic'}`);
+        sections.push(``);
+    }
+
+    // 10. Safety (minimal, only if set)
+    if (config.nsfwToggle || config.blockRealPeopleTrademarks) {
+        sections.push(`## CONSTRAINTS`);
+        if (config.nsfwToggle) sections.push(`- Content level: ${config.nsfwToggle}`);
+        if (config.blockRealPeopleTrademarks) sections.push(`- No real people or trademarked characters`);
+        sections.push(``);
+    }
+
+    // 11. Final reminder
+    sections.push(`## IMPORTANT REMINDERS`);
+    sections.push(`1. Your story MUST be about the user's concept described above`);
+    sections.push(`2. Stay within ${wordCount} words (±20%)`);
+    sections.push(`3. Generate exactly ${chapterCount} chapter(s)`);
+    sections.push(`4. Write ONLY the story — no meta-commentary`);
+    sections.push(`5. Be creative and original — generate a UNIQUE story every time`);
+    if (config.generationSeed) {
+        sections.push(`[Generation Seed: ${config.generationSeed} — use this for creative variation]`);
+    }
     sections.push(``);
-    sections.push(`BEGIN GENERATION:`);
+    sections.push(`BEGIN WRITING:`);
 
     return sections.join('\n');
 }
@@ -305,10 +316,24 @@ async function orchestrateGeneration({
     correlationId = `gen-${Date.now()}`,
 } = {}) {
     const startTime = Date.now();
+
+    // CRITICAL: If userInput is empty but config has customPremise, use it
+    // This ensures the user's story concept ALWAYS reaches the prompt
+    if (!userInput && config.customPremise) {
+        userInput = config.customPremise;
+        logger.info(`[${correlationId}] Using customPremise as userInput (was empty)`);
+    }
+
     logger.info(`[${correlationId}] Starting story generation`, {
         mode: config.mode,
         genre: config.primaryGenre,
         streaming,
+        hasUserInput: !!userInput,
+        userInputLength: userInput?.length || 0,
+        hasCustomPremise: !!config.customPremise,
+        customPremiseLength: config.customPremise?.length || 0,
+        chapterCount: config.chapterCount,
+        targetWordCount: config.targetWordCount,
     });
 
     try {
@@ -332,10 +357,10 @@ async function orchestrateGeneration({
         let groqContext = {};
 
         if (useGroqTasks) {
-            logger.debug(`[${correlationId}] Starting parallel Groq pre-processing tasks`);
-            
-            // Execute Groq tasks in parallel: validation, classification, outline
-            const groqTasks = await Promise.all([
+            logger.debug(`[${correlationId}] Starting parallel Groq pre-processing tasks and Vector Search`);
+
+            // Execute Groq tasks in parallel: validation, classification, outline, AND Vector Search
+            const tasks = [
                 executeGroqTask(
                     'parameter-validation',
                     buildParameterValidationPrompt(config),
@@ -351,18 +376,29 @@ async function orchestrateGeneration({
                     buildOutlinePrompt(userInput || config.customPremise, config),
                     correlationId
                 ),
-            ].filter(Boolean)); // Filter out errors
+                // Vector search check
+                vectorService.checkStorylineExists(userInput || config.customPremise).catch(() => ({ exists: false, similarStories: [] }))
+            ];
+
+            const results = await Promise.all(tasks);
+            const [valResult, classResult, outResult, vectorResult] = results;
+
+            // Parse Vector Search results
+            if (vectorResult && vectorResult.exists && vectorResult.similarStories) {
+                groqContext.vectorTwists = vectorResult.similarStories;
+                logger.debug(`[${correlationId}] Vector Search found ${vectorResult.similarStories.length} similar stories. Uniqueness protocol activated.`);
+            }
 
             // Parse Groq results
-            if (groqTasks[0]?.content) {
+            if (valResult?.content) {
                 try {
-                    groqContext.validation = JSON.parse(groqTasks[0].content);
+                    groqContext.validation = JSON.parse(valResult.content);
                 } catch { /* JSON parse error, skip */ }
             }
 
-            if (groqTasks[1]?.content) {
+            if (classResult?.content) {
                 try {
-                    const classified = JSON.parse(groqTasks[1].content);
+                    const classified = JSON.parse(classResult.content);
                     groqContext.classification = classified.classification;
                     groqContext.narrativeApproach = classified.narrativeApproach;
                     groqContext.conventionalElements = classified.conventionalElements;
@@ -370,9 +406,9 @@ async function orchestrateGeneration({
                 } catch { /* JSON parse error, skip */ }
             }
 
-            if (groqTasks[2]?.content) {
+            if (outResult?.content) {
                 // Parse outline as text lines
-                groqContext.outline = groqTasks[2].content
+                groqContext.outline = outResult.content
                     .split('\n')
                     .filter(line => line.match(/^\d+\./))
                     .slice(0, 15); // Limit to 15 beats
@@ -382,41 +418,75 @@ async function orchestrateGeneration({
                 hasValidation: !!groqContext.validation,
                 hasClassification: !!groqContext.classification,
                 outlineBeats: groqContext.outline?.length || 0,
+                hasVectorTwists: !!groqContext.vectorTwists,
             });
         }
 
         // ─────────────────────────────────────────────────────────────
-        // PHASE 2B: GEMINI CHAIRMAN — Primary Generation
+        // PHASE 2B: PRIMARY GENERATION — Gemini Chairman or Groq Fallback
         // ─────────────────────────────────────────────────────────────
 
         const chairmanPrompt = buildChairmanPrompt(userInput, config, groqContext);
 
         let generatedContent;
+        const geminiConfigured = !!process.env.GEMINI_API_KEY;
 
-        if (streaming && onChunk) {
-            // Streaming generation
-            generatedContent = await geminiService.generateContent({
-                prompt: chairmanPrompt,
-                config,
-                stream: true,
-                onChunk: (chunk) => {
-                    onChunk({
-                        type: 'generation',
-                        model: 'gemini',
-                        chunk: chunk.text,
-                        done: chunk.done,
-                    });
-                },
-                correlationId,
-            });
+        if (geminiConfigured) {
+            // Use Gemini as chairman
+            if (streaming && onChunk) {
+                generatedContent = await geminiService.generateContent({
+                    prompt: chairmanPrompt,
+                    config,
+                    stream: true,
+                    onChunk: (chunk) => {
+                        onChunk({
+                            type: 'generation',
+                            model: 'gemini',
+                            chunk: chunk.text,
+                            done: chunk.done,
+                        });
+                    },
+                    correlationId,
+                });
+            } else {
+                generatedContent = await geminiService.generateContent({
+                    prompt: chairmanPrompt,
+                    config,
+                    stream: false,
+                    correlationId,
+                });
+            }
         } else {
-            // Batch generation
-            generatedContent = await geminiService.generateContent({
-                prompt: chairmanPrompt,
-                config,
-                stream: false,
-                correlationId,
+            // Fallback: use Groq as primary generator when Gemini is not configured
+            logger.info(`[${correlationId}] Gemini not configured, using Groq as primary generator`);
+
+            if (!process.env.GROQ_API_KEY) {
+                throw new Error('AI Generation failed: Neither GEMINI_API_KEY nor GROQ_API_KEY is configured on the server. Please add an API key to the .env file.');
+            }
+
+            // Use temperature from user params with random jitter for unique outputs
+            const baseTemp = config.modelTemperature || 0.8;
+            const jitter = (Math.random() - 0.5) * 0.15; // ±0.075 variation
+            const effectiveTemp = Math.max(0.1, Math.min(1.5, baseTemp + jitter));
+
+            const groqResult = await groqService.callGroq({
+                model: 'llama-3.3-70b-versatile',
+                systemPrompt: 'You are a world-class fiction writer. Generate complete, publication-quality stories. Output ONLY the story text — no commentary, no meta-text. Be creative and unique in every generation.',
+                userPrompt: chairmanPrompt,
+                maxTokens: config.targetWordCount ? Math.min(Math.ceil(config.targetWordCount * 1.5), 8000) : 4000,
+                temperature: effectiveTemp,
             });
+            generatedContent = groqResult.content;
+
+            if (streaming && onChunk) {
+                // Send the full result as a single chunk for streaming mode
+                onChunk({
+                    type: 'generation',
+                    model: 'groq-llama-3.3-70b',
+                    chunk: generatedContent,
+                    done: true,
+                });
+            }
         }
 
         logger.info(`[${correlationId}] Chairman generation complete`, {
@@ -436,7 +506,7 @@ async function orchestrateGeneration({
 
         if (useGroqTasks) {
             logger.debug(`[${correlationId}] Starting parallel Groq post-processing tasks`);
-            
+
             const postProcessTasks = [];
 
             // Task: Generate panel breakdown for comic mode
@@ -492,6 +562,19 @@ async function orchestrateGeneration({
                 targetLength: config.targetLength,
             },
         };
+
+        // ─────────────────────────────────────────────────────────────
+        // PHASE 6: RAG VECTOR DATABASE STORAGE
+        // ─────────────────────────────────────────────────────────────
+        // Store this new storyline for future uniqueness checks (fire and forget)
+        if (output && output.chapters && output.chapters.length > 0) {
+            const firstChapterPreview = output.chapters[0].content.substring(0, 1000);
+            const storylineToStore = config.customPremise || userInput || firstChapterPreview;
+            const themesToStore = config.themes ? (Array.isArray(config.themes) ? config.themes : [config.themes]) : [];
+
+            vectorService.storeStoryEmbedding(storylineToStore, config.primaryGenre || 'fantasy', themesToStore)
+                .catch(err => logger.warn(`[${correlationId}] Failed to store vector embedding: ${err.message}`));
+        }
 
         if (onChunk) {
             onChunk({
