@@ -76,9 +76,15 @@ export class AIOrchestrationService {
         }
 
         // 2. Build "Story So Far" context
-        const storySoFar = this.generateStorySoFar(previousPanels, storyMemory);
+        let storySoFar = this.generateStorySoFar(previousPanels, storyMemory);
 
-        // 3. Generate prose via Gemini
+        // CRITICAL: For first generation, storySoFar is empty.
+        // Use the customPremise from parameters so the user's concept reaches the AI.
+        if (!storySoFar && (parameters as Record<string, unknown>).customPremise) {
+            storySoFar = String((parameters as Record<string, unknown>).customPremise);
+        }
+
+        // 3. Generate prose via backend AI
         const proseResult = await this.geminiService.generateProse({
             parameters,
             storySoFar,

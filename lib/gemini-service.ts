@@ -39,29 +39,34 @@ export class GeminiService {
      * @throws Error when Gemini is unavailable (Requirement 5.7, 5.8)
      */
     async generateProse(request: GeminiProseRequest): Promise<GeminiProseResponse> {
-        if (!this.available) {
-            throw new GeminiUnavailableError(
-                'Gemini prose generation is currently unavailable. No fallback model will be used. Please try again later.'
-            );
-        }
-
         try {
             const { ok, status, data } = await apiFetch<{
+                success?: boolean;
+                data?: {
+                    rawContent?: string;
+                    chapters?: Array<{ title: string; content: string }>;
+                    wordCount?: number;
+                    metadata?: any;
+                };
                 content?: string;
                 story?: string;
                 tokensUsed?: number;
                 model?: string;
                 error?: string;
+                details?: string;
             }>('/api/v1/ai', {
                 method: 'POST',
                 headers: authHeaders(),
                 body: JSON.stringify({
                     action: 'generate',
-                    engine: 'gemini',
+                    engine: 'vedascript',
+                    streaming: false,
                     config: {
                         ...request.parameters,
                         genres: request.genres,
+                        primaryGenre: request.genres?.[0] || 'fantasy',
                         panelIndex: request.panelIndex,
+                        mode: 'story-only',
                     },
                     userInput: request.storySoFar,
                     storyMemory: request.storyMemory,
@@ -72,20 +77,32 @@ export class GeminiService {
                 if (status === 503 || (data.error && data.error.includes('unavailable'))) {
                     this.available = false;
                     throw new GeminiUnavailableError(
-                        'Gemini service is temporarily unavailable. Prose generation cannot proceed. Please try again later.'
+                        'AI service is temporarily unavailable. Please try again later.'
                     );
                 }
-                throw new Error(data.error || `Gemini generation failed with status ${status}`);
+                throw new Error(data.error || data.details || `Generation failed with status ${status}`);
+            }
+
+            // Handle both response formats: wrapped {success, data} and flat {content, story}
+            let content = '';
+            if (data.data) {
+                // Wrapped response from batch mode
+                content = data.data.rawContent
+                    || data.data.chapters?.map(c => c.content).join('\n\n')
+                    || '';
+            }
+            if (!content) {
+                content = data.content || data.story || '';
             }
 
             return {
-                content: data.content || data.story || '',
-                tokensUsed: data.tokensUsed || 0,
-                model: data.model || 'gemini',
+                content,
+                tokensUsed: data.tokensUsed || data.data?.wordCount || 0,
+                model: data.model || 'groq-vedascript',
             };
         } catch (error) {
             if (error instanceof GeminiUnavailableError) throw error;
-            throw new Error(`Gemini prose generation failed: ${(error as Error).message}`);
+            throw new Error(`AI prose generation failed: ${(error as Error).message}`);
         }
     }
 

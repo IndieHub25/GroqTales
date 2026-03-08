@@ -11,7 +11,7 @@ import {
     type RBACSession,
 } from '@/lib/rbac';
 
-const ROLE_OVERRIDE_KEY = 'groqtales_role_override';
+const ROLE_OVERRIDE_KEY = 'comicraft_role_override';
 
 interface UseUserRoleReturn {
     role: UserRole;

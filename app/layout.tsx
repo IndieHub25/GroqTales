@@ -69,10 +69,10 @@ if (
     // It does not need a default here — if it is missing the build itself is misconfigured.
     NEXT_PUBLIC_IMAGE_URL: cfPagesUrl
       ? `https://${cfPagesUrl}/images`
-      : 'https://groqtales.xyz/images',
+      : 'https://comicraft.xyz/images',
     NEXT_PUBLIC_SPLASH_IMAGE_URL: cfPagesUrl
       ? `https://${cfPagesUrl}/splash.jpg`
-      : 'https://groqtales.xyz/splash.jpg',
+      : 'https://comicraft.xyz/splash.jpg',
     NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR: '#1a1a2e',
   };
 
@@ -99,19 +99,19 @@ const quickBootScript = '';
 const appVersion = process.env.NEXT_PUBLIC_VERSION ?? '?.?.?';
 
 export const metadata: Metadata = {
-  title: 'GroqTales - AI-Generated Story NFTs',
+  title: 'Comicraft - AI-Powered Story & Comic Platform',
   description:
-    'Create, mint, and share AI-generated stories as NFTs on the blockchain.',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'https://groqtales.com'),
+    'Create, mint, and share AI-generated stories and comics on the blockchain.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'https://comicraft.xyz'),
   icons: {
     icon: '/logo.png',
     apple: '/logo.png',
   },
   openGraph: {
-    title: 'GroqTales',
+    title: 'Comicraft',
     description:
-      'AI-Powered Web3 Storytelling Platform | Create, share, and own AI-generated stories and comics as NFTs on the blockchain',
-    images: [{ url: 'https://www.groqtales.xyz/groq_tales_logo.png' }],
+      'AI-Powered Storytelling Platform | Create, share, and own AI-generated stories and comics',
+    images: [{ url: '/logo.png' }],
   },
 };
 
@@ -210,7 +210,7 @@ export default function RootLayout({
               forcedTheme="dark"
               enableSystem={false}
               disableTransitionOnChange={false}
-              storageKey="groqtales-theme"
+              storageKey="comicraft-theme"
             >
               <AnimatedLayout>
                 <ClientLayout>

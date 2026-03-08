@@ -338,7 +338,7 @@ export default function StoryCommentsDialog({
               onChange={(e) => setNewComment(e.target.value)}
               placeholder={
                 isAdmin
-                  ? 'Write a comment as GroqTales admin...'
+                  ? 'Write a comment as Comicraft admin...'
                   : 'Write a comment...'
               }
               className={`flex-1 ${isAdmin ? 'border-purple-200' : ''}`}

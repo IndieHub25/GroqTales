@@ -1,6 +1,6 @@
 {
-  "name": "GroqTales - AI-Generated Story NFTs",
-  "short_name": "GroqTales",
+  "name": "Comicraft - AI-Generated Story NFTs",
+  "short_name": "Comicraft",
   "description": "Create, mint, and share AI-generated stories as NFTs",
   "start_url": "/",
   "scope": "/",
@@ -8,7 +8,10 @@
   "orientation": "portrait-primary",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "categories": ["productivity", "games"],
+  "categories": [
+    "productivity",
+    "games"
+  ],
   "icons": [
     {
       "src": "/favicon-16x16.png",
@@ -23,13 +26,13 @@
       "purpose": "any"
     },
     {
-      "src": "/android-chrome-192x192.png",
+      "src": "/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/android-chrome-512x512.png",
+      "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
@@ -43,7 +46,7 @@
   ],
   "screenshots": [
     {
-      "src": "/android-chrome-192x192.png",
+      "src": "/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "form_factor": "narrow"

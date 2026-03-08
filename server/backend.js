@@ -13,8 +13,8 @@ const compression = require('compression');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const { corsOriginCallback } = require('./config/cors');
-// MongoDB is no longer required — Supabase is the primary database
-// const mongoose = require('mongoose');
+// MongoDB is now required again for Vector Search
+const mongoose = require('mongoose');
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const path = require('path');
@@ -616,6 +616,8 @@ app.use('/api/v1/settings/privacy', require('./routes/settings/privacy'));
 app.use('/api/v1/settings/wallet', require('./routes/settings/wallet'));
 app.use('/api/v1/settings/profile', require('./routes/settings/profile'));
 
+// Vector Search Routes
+app.use('/api/vector', require('./routes/vector-search'));
 
 // SDK Routes (for future SDK implementations)
 app.use('/sdk/v1', require('./routes/sdk'));
@@ -668,6 +670,9 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Start server — Supabase connects on-demand, no blocking init needed
+// MongoDB connects in the background
+connectDB().catch(err => console.error('Failed to connect to MongoDB on startup:', err.message));
+
 server = app.listen(PORT, () => {
   logger.info(`GroqTales Backend API server running on port ${PORT}`);
   logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
