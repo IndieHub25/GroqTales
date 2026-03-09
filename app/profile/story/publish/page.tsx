@@ -163,7 +163,17 @@ function PublishStoryContent() {
         setPublisherName(name || data.username || 'Creator');
       } catch {}
     }
+
     fetchProfile();
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'accessToken' && e.newValue) {
+        fetchProfile();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   // ── Load Story Data ──────────────────────────────────────────────

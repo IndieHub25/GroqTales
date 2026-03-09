@@ -8,6 +8,11 @@ const router = express.Router();
 const { supabaseAdmin } = require('../config/supabase');
 const logger = require('../utils/logger');
 const { refresh } = require('../middleware/auth');
+const crypto = require('crypto');
+const { verifyMessage } = require('ethers');
+
+// In-memory challenge nonce store for SIWE-like wallet login
+const nonceStore = new Map();
 
 /**
  * @swagger
@@ -293,6 +298,29 @@ router.post('/login', async (req, res) => {
  *       501:
  *         description: Use Supabase client for token refresh.
  */
+/**
+ * GET /api/v1/auth/nonce
+ * Returns a secure challenge nonce for wallet authentication.
+ */
+router.get('/nonce', (req, res) => {
+  const { address } = req.query;
+  if (!address || typeof address !== 'string') {
+    return res.status(400).json({ error: 'Wallet address is required' });
+  }
+
+  const normalizedAddress = address.toLowerCase().trim();
+  const nonce = crypto.randomBytes(32).toString('hex');
+  nonceStore.set(normalizedAddress, nonce);
+
+  setTimeout(() => {
+    if (nonceStore.get(normalizedAddress) === nonce) {
+      nonceStore.delete(normalizedAddress);
+    }
+  }, 5 * 60 * 1000); // 5 minutes expiration
+
+  return res.json({ nonce });
+});
+
 // ─── Wallet Login ────────────────────────────────────────────────────
 /**
  * POST /api/v1/auth/wallet-login
@@ -300,10 +328,13 @@ router.post('/login', async (req, res) => {
  */
 router.post('/wallet-login', async (req, res) => {
   try {
-    const { address } = req.body;
+    const { address, signature } = req.body;
 
     if (!address || typeof address !== 'string') {
       return res.status(400).json({ error: 'Wallet address is required' });
+    }
+    if (!signature || typeof signature !== 'string') {
+      return res.status(400).json({ error: 'Signature is required for verification' });
     }
 
     if (!supabaseAdmin) {
@@ -311,6 +342,28 @@ router.post('/wallet-login', async (req, res) => {
     }
 
     const normalizedAddress = address.toLowerCase().trim();
+
+    // Verify signature against nonce
+    const nonce = nonceStore.get(normalizedAddress);
+    if (!nonce) {
+      return res.status(401).json({ error: 'Invalid or expired nonce. Please request a new nonce.' });
+    }
+
+    const expectedMessage = `Sign this message to authenticate with Comicraft. Nonce: ${nonce}`;
+    let recoveredAddress;
+    try {
+      recoveredAddress = verifyMessage(expectedMessage, signature);
+    } catch (err) {
+      return res.status(401).json({ error: 'Invalid signature format' });
+    }
+
+    if (recoveredAddress.toLowerCase() !== normalizedAddress) {
+      return res.status(401).json({ error: 'Signature verification failed' });
+    }
+
+    // Clear used nonce
+    nonceStore.delete(normalizedAddress);
+
     const walletEmail = `${normalizedAddress}@wallet.comicraft.xyz`;
     // Use a deterministic password derived from the wallet address for Supabase Auth
     const walletPassword = `wallet_${normalizedAddress}_${process.env.JWT_SECRET || 'comicraft'}`;
@@ -373,16 +426,7 @@ router.post('/wallet-login', async (req, res) => {
 
     if (newSignInError || !newSignIn?.session) {
       logger.error('Wallet sign-in after creation failed:', newSignInError);
-      return res.json({
-        message: 'Wallet user created. Please try connecting again.',
-        data: {
-          user: {
-            id: createData.user.id,
-            walletAddress: normalizedAddress,
-            role: 'user',
-          },
-        },
-      });
+      return res.status(500).json({ error: 'Wallet user created, but session creation failed. Please try connecting again.' });
     }
 
     // Create profile entry
@@ -437,7 +481,7 @@ router.post('/login-username', async (req, res) => {
     }
 
     let loginEmail = identifier;
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+    const isEmail = typeof identifier === 'string' && identifier.length <= 254 && /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(identifier);
 
     if (!isEmail) {
       // Look up email from username via profiles table

@@ -10,20 +10,19 @@ const { provider } = require('./alchemyMainnetClient');
 const NFT_CONTRACT_ADDRESS = process.env.ETH_MAINNET_NFT_CONTRACT_ADDRESS;
 const SIGNER_PRIVATE_KEY = process.env.ETH_MAINNET_SIGNER_PRIVATE_KEY;
 
-// Minimal ABI for minting standard ERC721
-const MINIMAL_ERC721_ABI = [
-    "function safeMint(address to, string memory uri) public returns (uint256)",
-    // Generic fallback if mint signature varies, customize based on the actual contract
-    "function mint(address to, string memory uri) public returns (uint256)",
+// ABI for MonadStoryNFT contract
+const MONAD_STORY_NFT_ABI = [
+    "function mintStory(string storyHash, string metadataURI) payable"
 ];
 
 /**
  * Mints an NFT to the specified address on Ethereum mainnet.
  * @param {string} toAddress The recipient EVM address.
  * @param {string} tokenUri The IPFS URI or metadata URI.
+ * @param {Object} [options] Optional mint parameters such as mintPrice and storyHash.
  * @returns {Promise<{txHash: string, status: string}>}
  */
-const mintStoryNft = async (toAddress, tokenUri) => {
+const mintStoryNft = async (toAddress, tokenUri, options = {}) => {
     if (!provider) {
         throw new Error('Alchemy Mainnet Provider is not configured. Cannot mint.');
     }
@@ -36,31 +35,34 @@ const mintStoryNft = async (toAddress, tokenUri) => {
 
     try {
         const signer = new ethers.Wallet(SIGNER_PRIVATE_KEY, provider);
-        const contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, MINIMAL_ERC721_ABI, signer);
+        const contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, MONAD_STORY_NFT_ABI, signer);
 
         logger.info(`Minting ETH mainnet NFT to ${toAddress} with URI ${tokenUri}...`);
 
-        // We assume the contract has a `mint` or `safeMint` function.
-        // Replace `safeMint` with the actual contract function name.
+        // Documenting toAddress behavior: mintStory mints to msg.sender so the backend retains custody initially.
+        if (toAddress.toLowerCase() !== signer.address.toLowerCase()) {
+            logger.warn(`Note: mintStory mints to msg.sender (${signer.address}). Backend retains custody initially, not directly transferring to ${toAddress}.`);
+        }
 
-        // Estimate gas (optional but recommended for reliability)
-        const gasEstimate = await contract.mint.estimateGas(toAddress, tokenUri);
+        const storyHash = options.storyHash || ethers.id(tokenUri || Date.now().toString());
+        const mintPrice = options.mintPrice || 0n;
+
+        // Estimate gas
+        const gasEstimate = await contract.mintStory.estimateGas(storyHash, tokenUri, { value: mintPrice });
         // Add 20% buffer to gas estimate
         const gasLimit = (gasEstimate * 120n) / 100n;
 
         // Send transaction
-        const tx = await contract.mint(toAddress, tokenUri, { gasLimit });
+        const tx = await contract.mintStory(storyHash, tokenUri, { gasLimit, value: mintPrice });
 
         logger.info(`Mint tx submitted: ${tx.hash}. Waiting for confirmation...`);
 
         // Wait for 1 confirmation
-        const receipt = await tx.wait(1);
+        await tx.wait(1);
 
         return {
-            txHash: receipt.hash,
+            txHash: tx.hash,
             status: 'confirmed',
-            // The tokenId depends on the contract return/events, usually parsed from Transfer event
-            // If we need tokenId immediately, we must parse the receipt logs.
         };
 
     } catch (error) {

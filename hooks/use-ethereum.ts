@@ -5,6 +5,13 @@ import { useWeb3 } from '@/components/providers/web3-provider';
 import type { StoryMetadata, MintedNFT } from '@/lib/ethereum-service';
 import { ACTIVE_CHAIN, CHAIN_ID_HEX, isCorrectChain } from '@/lib/chain-config';
 
+const PLACEHOLDER_IPFS_CID = 'ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi';
+
+const isValidIpfsUri = (uri?: string | null): boolean => {
+    if (!uri) return false;
+    return uri.startsWith('ipfs://') || uri.startsWith('Qm') || uri.startsWith('bafy');
+};
+
 type EthereumNetworkInfo = {
     chainId: number;
     name: string;
@@ -98,6 +105,12 @@ export function useEthereum(): UseEthereumResult {
                     throw new Error(msg);
                 }
 
+                if (!isValidIpfsUri(metadata.coverImage)) {
+                    const msg = 'Valid IPFS cover image URI is required to mint. Must be a CID or ipfs:// URI.';
+                    setError(msg);
+                    throw new Error(msg);
+                }
+
                 const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
                 const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
@@ -110,7 +123,7 @@ export function useEthereum(): UseEthereumResult {
                     },
                     body: JSON.stringify({
                         toAddress: account,
-                        tokenUri: metadata.coverImage || 'ipfs://placeholder-token-uri',
+                        tokenUri: metadata.coverImage || PLACEHOLDER_IPFS_CID,
                     }),
                 });
 

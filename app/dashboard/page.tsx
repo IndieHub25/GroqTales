@@ -898,7 +898,7 @@ export default function DashboardPage() {
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
-                              <p className="text-2xl font-bold">{walletData.summary?.ethBalance || '0.00'} ETH</p>
+                              <p className="text-2xl font-bold">{walletData?.assets?.eth?.balanceRaw || '0.00'} ETH</p>
                             </CardContent>
                           </Card>
                           
@@ -910,7 +910,7 @@ export default function DashboardPage() {
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
-                              <p className="text-2xl font-bold">{walletData.summary?.nftCounts?.totalCount || 0}</p>
+                              <p className="text-2xl font-bold">{walletData?.meta?.totalNfts || 0}</p>
                             </CardContent>
                           </Card>
 
@@ -922,7 +922,7 @@ export default function DashboardPage() {
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
-                              <p className="text-2xl font-bold">{walletData.summary?.recentTransactions?.transfers?.length || 0}</p>
+                              <p className="text-2xl font-bold">0</p>
                             </CardContent>
                           </Card>
                         </div>
@@ -932,11 +932,11 @@ export default function DashboardPage() {
                             ERC-20 Tokens
                           </h3>
                           <div className="space-y-2">
-                            {walletData.portfolio?.tokens?.tokenBalances?.length > 0 ? (
-                               walletData.portfolio.tokens.tokenBalances.map((tb: any, i: number) => (
+                            {walletData?.assets?.tokens?.length > 0 ? (
+                               walletData.assets.tokens.map((tb: any, i: number) => (
                                  <div key={i} className="flex items-center justify-between px-4 py-3 rounded-xl border border-white/[0.06] bg-white/[0.02]">
-                                    <p className="text-sm text-white/80">{tb.contractAddress}</p>
-                                    <p className="text-sm text-white font-mono">{tb.tokenBalance}</p>
+                                    <p className="text-sm text-white/80">{tb.contractAddress || tb.address || 'Unknown Token'}</p>
+                                    <p className="text-sm text-white font-mono">{tb.balanceRaw || tb.tokenBalance || 0}</p>
                                  </div>
                                ))
                             ) : (

@@ -22,7 +22,7 @@ export function useUserRole() {
                     return;
                 }
 
-                const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
+                const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
                 const res = await fetch(`${baseUrl}/api/v1/auth/me`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -54,5 +54,20 @@ export function useUserRole() {
         return () => window.removeEventListener('storage', handleStorage);
     }, []);
 
-    return { role, loading, isAdmin: role === 'admin', isModerator: role === 'moderator' };
+    const [isOverridden, setIsOverridden] = useState(false);
+    const toggleViewMode = () => setIsOverridden(prev => !prev);
+
+    const isAdmin = role === 'admin';
+    const isModerator = role === 'moderator';
+    const isModOrAdmin = isAdmin || isModerator;
+
+    return {
+        role,
+        loading,
+        isAdmin,
+        isModerator,
+        isModOrAdmin,
+        isOverridden,
+        toggleViewMode
+    };
 }

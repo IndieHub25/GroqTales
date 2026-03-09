@@ -3,9 +3,12 @@
  * Routes authentication through the backend API instead of calling Supabase directly.
  */
 
-export async function loginWithUsernameOrEmail(identifier: string, password: string) {
+export async function loginWithUsernameOrEmail(
+    identifier: string,
+    password: string
+) {
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
         const res = await fetch(`${baseUrl}/api/v1/auth/login-username`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -18,16 +21,6 @@ export async function loginWithUsernameOrEmail(identifier: string, password: str
         }
 
         const data = await res.json();
-
-        // Store tokens for subsequent API calls
-        if (data.data?.tokens?.accessToken) {
-            if (typeof window !== 'undefined') {
-                localStorage.setItem('accessToken', data.data.tokens.accessToken);
-                if (data.data.tokens.refreshToken) {
-                    localStorage.setItem('refreshToken', data.data.tokens.refreshToken);
-                }
-            }
-        }
 
         return { success: true, data: data.data };
     } catch (err) {

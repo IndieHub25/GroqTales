@@ -28,15 +28,15 @@ async function runTests() {
 
         console.log(`\n2. Fetching ERC-20 Balances...`);
         const erc20 = await getErc20Balances(TEST_ADDRESS);
-        console.log(`Found \${erc20.length} standard token balances (limited output)`);
+        console.log(`Found ${erc20.tokenBalances?.length || 0} standard token balances (limited output)`);
 
         console.log(`\n3. Fetching NFTs...`);
         const nfts = await getNftsByOwner(TEST_ADDRESS);
-        console.log(`Found \${nfts.totalCount} total NFTs`);
+        console.log(`Found ${nfts.totalCount || nfts.ownedNfts?.length || 0} total NFTs`);
 
         console.log(`\n4. Fetching Recent Transactions...`);
         const txs = await getTransactions(TEST_ADDRESS, { maxCount: 2 });
-        console.log(`Fetched \${txs.transfers?.length || 0} recent transfers`);
+        console.log(`Fetched ${txs.outgoing?.length || 0} outgoing and ${txs.incoming?.length || 0} incoming recent transfers`);
 
         console.log('\n--- Testing NFT Mint Service ---');
         if (!process.env.ETH_MAINNET_SIGNER_PRIVATE_KEY) {

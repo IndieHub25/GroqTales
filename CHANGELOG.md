@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Active full support: 1.9.0 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
 
+## [1.9.1] - 2026-03-09
+
+### Fixed
+
+- **Security**: Fixed Polynomial regular expression denial of service (ReDoS) vulnerability in `server/routes/auth.js` by removing ambiguity from the email validation regex and limiting input length (CodeQL warning).
+- **Security**: Replaced predictable wallet credentials with standard SIWE (EIP-191) nonce-based signature verification in `server/routes/auth.js` for enhanced wallet login security.
+- **Frontend**: Fixed `use-user-role` and `use-ethereum` hooks to remove unsafe hardcoded API URL fallbacks, properly validating required API URL usage configurations or defaulting to same-origin.
+- **Frontend**: Formatted `app/actions/auth.ts` to satisfy Prettier rules and removed unsafe `localStorage` token persistence in favor of secure cookie-based auth.
+- **Frontend**: Fixed API data shapes in `app/dashboard/page.tsx` that were causing the dashboard metrics to incorrectly parse token and asset balances.
+- **Frontend**: Improved publisher profile timing issues in `app/profile/story/publish/page.tsx` to handle async session storage updates dynamically.
+- **Frontend**: Updated the NFT Mint Request payload in `components/nft-mint-modal.tsx` to include crucial collected form data (e.g., `nftName`, `feeAmount`, `supply`) matching the required backend shape.
+- **Backend API**: Fixed the Alchemy RPC methods in `server/services/alchemyMainnetClient.js` to use correct `getNFTsForOwner` method and required object parameters instead of raw JSON-RPC positional arguments.
+- **Backend API**: Fixed incorrect ABI method and transaction return parameters in `server/services/nftMintService.js` to safely call the custom `mintStory` function and handle Ethereum v6 properties.
+- **Backend API**: Addressed the HTTP 200 response on failed user creation loops in wallet auth by properly throwing 500 status codes.
+- **Smoke Tests**: Updated Alchemy tests script to properly read outputs of API calls (e.g. `nfts.totalCount`) ensuring correct validation logic.
+
 ## [1.9.0] - 2026-03-09
 
 ### Added

@@ -138,6 +138,12 @@ export function NftMintModal({
         body: JSON.stringify({
           toAddress: activeAccount,
           tokenUri: coverImageUrl || 'ipfs://placeholder-token-uri',
+          nftName,
+          nftDescription,
+          feeAmount,
+          feeCurrency,
+          supply,
+          royaltyPercentage,
         }),
       });
 

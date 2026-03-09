@@ -73,10 +73,10 @@ const getErc20Balances = async (address) => {
 const getNftsByOwner = async (address) => {
     validateAddress(address);
     try {
-        const data = await rpc('alchemy_getNfts', [address, { withMetadata: true }]);
+        const data = await rpc('getNFTsForOwner', [{ owner: address, withMetadata: true }]);
         return data;
     } catch (e) {
-        logger.error('Failed to get NFTs via Alchemy', e);
+        logger.error(`Failed to get NFTs via Alchemy: ${e.message}`, e);
         return { ownedNfts: [] };
     }
 };
