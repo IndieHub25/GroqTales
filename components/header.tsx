@@ -40,6 +40,7 @@ import { createClient } from '@/lib/supabase/client';
 import { CreateStoryDialog } from './create-story-dialog';
 import { ModeToggle } from './mode-toggle';
 import { UploadStoryTrigger } from './upload-story-trigger';
+import { ComiCraftLogo } from './comicraft-logo';
 
 // Type definitions for nav items
 type NavSubItem = {
@@ -117,6 +118,7 @@ export function Header() {
     { type: 'link', href: '/', label: 'Prime' },
     { type: 'link', href: '/genres', label: 'Worlds' },
     { type: 'link', href: '/create', label: 'Forge' },
+    { type: 'link', href: '/gallery', label: 'Gallery' },
     { type: 'link', href: '/marketplace', label: 'Bazaar' },
     { type: 'link', href: '/buy/CRAFTS', label: 'Get CRAFTS' },
     { type: 'link', href: '/community', label: 'Commons' },
@@ -147,26 +149,10 @@ export function Header() {
         <div className="flex items-center">
           <Link
             href="/"
-            aria-label="Comicraft Prime"
-            className="flex items-center space-x-2 mr-2 sm:mr-6 group relative"
+            aria-label="Comicraft home"
+            className="flex items-center mr-2 sm:mr-6 group relative rounded-xl px-1 py-0.5 hover:bg-white/[0.04] transition-all duration-200"
           >
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-              className="w-10 h-10 sm:w-11 sm:h-11 relative flex-shrink-0"
-            >
-              <Image
-                src="/logo.png"
-                alt="Comicraft Logo"
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                className="object-contain drop-shadow-lg"
-                priority
-              />
-            </motion.div>
-            <span className="hidden sm:block font-bold text-xl sm:text-2xl text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 tracking-tight">
-              COMICRAFT
-            </span>
+            <ComiCraftLogo variant="full" colorScheme="color" size={38} animate />
           </Link>
 
           <nav
@@ -284,15 +270,7 @@ export function Header() {
               >
                 <SheetHeader className="p-6 border-b border-white/10">
                   <SheetTitle className="text-white font-bold text-xl flex items-center gap-2">
-                    <div className="w-8 h-8 relative">
-                      <Image
-                        src="/logo.png"
-                        alt="Logo"
-                        fill
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        className="object-contain"
-                      />
-                    </div>
+                    <ComiCraftLogo variant="icon" colorScheme="color" size={32} animate={false} />
                     Comicraft
                   </SheetTitle>
                 </SheetHeader>

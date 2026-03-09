@@ -1,8 +1,9 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
+
+import { ComiCraftLogo } from '@/components/comicraft-logo';
 
 interface SplashScreenProps {
   onComplete?: () => void;
@@ -35,7 +36,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
           <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-transparent opacity-50" />
 
           <motion.div
-            className="relative w-32 h-32 md:w-48 md:h-48 z-10"
+            className="relative z-10 flex items-center justify-center"
             animate={{
               scale: [1, 1.05, 1],
               opacity: [1, 0.8, 1],
@@ -46,14 +47,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
               ease: 'easeInOut',
             }}
           >
-            <Image
-              src="/logo.png"
-              alt="Comicraft"
-              fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              className="object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
-              priority
-            />
+            <ComiCraftLogo variant="icon" colorScheme="color" size={96} animate={false} />
           </motion.div>
 
 

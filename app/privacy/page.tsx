@@ -124,7 +124,7 @@ export default function PrivacyPage() {
               secure.
             </p>
             <p className="mt-2">
-              Your blockchain transactions are publicly visible on the Monad
+              Your blockchain transactions are publicly visible on the Ethereum
               network, but we protect your private account information using
               industry-standard encryption.
             </p>

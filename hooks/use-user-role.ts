@@ -1,93 +1,73 @@
-'use client';
-
-import { useState, useEffect, useCallback, useMemo } from 'react';
-
-import {
-  type UserRole,
-  getPrimaryRole,
-  isAdmin as checkAdmin,
-  isModerator as checkMod,
-  isModOrAdmin as checkModOrAdmin,
-  type RBACSession,
-} from '@/lib/rbac';
-import { createClient } from '@/lib/supabase/client';
-
-const ROLE_OVERRIDE_KEY = 'comicraft_role_override';
-
-interface UseUserRoleReturn {
-  role: UserRole;
-  isAdmin: boolean;
-  isModerator: boolean;
-  isModOrAdmin: boolean;
-  loading: boolean;
-  /** True when the user has toggled to a different view */
-  isOverridden: boolean;
-  /** Toggle between actual role and 'user' view */
-  toggleViewMode: () => void;
-  /** Reset override back to actual role */
-  resetOverride: () => void;
-}
-
 /**
- * Hook that reads the current user's RBAC role from Supabase session.
- * Supports localStorage-based view switching so admins can see the UI as a regular user.
+ * User role hook — Backend API (BFF pattern)
+ * Fetches user role from the backend API instead of calling Supabase directly.
  */
-export function useUserRole(): UseUserRoleReturn {
-  const [session, setSession] = useState<RBACSession | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [override, setOverride] = useState<UserRole | null>(null);
-  const supabase = useMemo(() => createClient(), []);
 
-  useEffect(() => {
-    // Restore override from localStorage
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(ROLE_OVERRIDE_KEY);
-      if (saved === 'user') setOverride('user');
-    }
+import { useState, useEffect } from 'react';
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session as RBACSession | null);
-      setLoading(false);
-    });
+type UserRole = 'user' | 'admin' | 'moderator' | null;
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s as RBACSession | null);
-    });
+export function useUserRole() {
+    const [role, setRole] = useState<UserRole>(null);
+    const [loading, setLoading] = useState(true);
 
-    return () => subscription.unsubscribe();
-  }, [supabase.auth]);
+    useEffect(() => {
+        async function fetchRole() {
+            setLoading(true);
+            try {
+                const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+                if (!token) {
+                    setRole(null);
+                    setLoading(false);
+                    return;
+                }
 
-  const actualRole = getPrimaryRole(session);
-  const effectiveRole: UserRole = override ?? actualRole;
-  const isOverridden = override !== null && override !== actualRole;
+                const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+                const res = await fetch(`${baseUrl}/api/v1/auth/me`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
 
-  const toggleViewMode = useCallback(() => {
-    if (override) {
-      // Remove override → back to actual role
-      setOverride(null);
-      localStorage.removeItem(ROLE_OVERRIDE_KEY);
-    } else {
-      // Switch to user view
-      setOverride('user');
-      localStorage.setItem(ROLE_OVERRIDE_KEY, 'user');
-    }
-  }, [override]);
+                if (!res.ok) {
+                    setRole(null);
+                    setLoading(false);
+                    return;
+                }
 
-  const resetOverride = useCallback(() => {
-    setOverride(null);
-    localStorage.removeItem(ROLE_OVERRIDE_KEY);
-  }, []);
+                const data = await res.json();
+                setRole((data.role as UserRole) || 'user');
+            } catch {
+                setRole(null);
+            }
+            setLoading(false);
+        }
 
-  return {
-    role: effectiveRole,
-    isAdmin: effectiveRole === 'admin',
-    isModerator: effectiveRole === 'moderator',
-    isModOrAdmin: effectiveRole === 'admin' || effectiveRole === 'moderator',
-    loading,
-    isOverridden,
-    toggleViewMode,
-    resetOverride,
-  };
+        fetchRole();
+
+        // Listen for storage changes (e.g., login/logout in another tab)
+        const handleStorage = (e: StorageEvent) => {
+            if (e.key === 'accessToken') {
+                fetchRole();
+            }
+        };
+
+        window.addEventListener('storage', handleStorage);
+        return () => window.removeEventListener('storage', handleStorage);
+    }, []);
+
+    const [isOverridden, setIsOverridden] = useState(false);
+    const toggleViewMode = () => setIsOverridden(prev => !prev);
+
+    const isAdmin = role === 'admin';
+    const isModerator = role === 'moderator';
+    const isModOrAdmin = isAdmin || isModerator;
+
+    return {
+        role,
+        loading,
+        isAdmin,
+        isModerator,
+        isModOrAdmin,
+        isOverridden,
+        toggleViewMode
+    };
 }

@@ -241,7 +241,7 @@ export interface NFTMintRequest {
         panelCount: number;
         wordCount: number;
     };
-    chain?: string; // defaults to Monad Testnet
+    chain?: string; // defaults to Ethereum Mainnet
 }
 
 export async function mintNFT(request: NFTMintRequest) {

@@ -1,8 +1,8 @@
 /**
- * GroqTales Backend API Server
+ * COMICRAFT Backend API Server
  *
  * Express.js server for handling API requests, SDK endpoints,
- * and backend services for the GroqTales platform.
+ * and backend services for the COMICRAFT platform.
  */
 
 const express = require('express');
@@ -48,10 +48,10 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'GroqTales Backend API',
+      title: 'COMICRAFT Backend API',
       version: process.env.API_VERSION || '1.2.0',
       description:
-        'Complete REST API for the GroqTales AI-powered storytelling platform. ' +
+        'Complete REST API for the COMICRAFT AI-powered storytelling platform. ' +
         'Covers authentication, story management, AI generation, NFT operations, ' +
         'user profiles, helpbot chat, feed proxy, and settings management.',
       contact: {
@@ -83,6 +83,7 @@ const options = {
       { name: 'Marketplace', description: 'NFT marketplace — list, buy, cancel, and browse listings in CRAFTS' },
       { name: 'Comics', description: 'Comic creation and management' },
       { name: 'SDK', description: 'External SDK integration endpoints' },
+      { name: 'TTS', description: 'Text-to-speech narration via Sarvam AI Bulbul v3' },
     ],
     components: {
       securitySchemes: {
@@ -193,7 +194,7 @@ const options = {
           type: 'object',
           description: 'API landing page — overview and navigation',
           properties: {
-            name: { type: 'string', example: 'GroqTales Backend API' },
+            name: { type: 'string', example: 'COMICRAFT Backend API' },
             description: { type: 'string', example: 'AI-powered Web3 storytelling platform — REST API' },
             status: { type: 'string', enum: ['operational', 'degraded', 'maintenance'], example: 'operational' },
             version: { type: 'string', example: 'v1' },
@@ -243,7 +244,7 @@ const swaggerSetup = swaggerUi.setup(swaggerSpec, {
     .request-url { display: none !important; }
     .response-col_links { display: none !important; }
   `,
-  customSiteTitle: 'GroqTales API Documentation',
+  customSiteTitle: 'COMICRAFT API Documentation',
 });
 
 // JSON endpoint for the OpenAPI spec (must be before swagger UI middleware)
@@ -428,7 +429,7 @@ app.get('/api/health/bot', (req, res) => {
  *       - Health
  *     summary: Web3 / blockchain connectivity check
  *     description: |
- *       Returns Monad testnet connectivity, chain ID, latest block number,
+ *       Returns Ethereum mainnet connectivity, chain ID, latest block number,
  *       and platform signer status. Use this to verify Web3 infrastructure.
  *     responses:
  *       200:
@@ -441,14 +442,14 @@ app.get('/api/health/web3', async (req, res) => {
     res.json({
       status: health.connected ? 'healthy' : (health.configured ? 'degraded' : 'not_configured'),
       timestamp: new Date().toISOString(),
-      service: 'monad-testnet',
+      service: 'eth-mainnet',
       ...health,
     });
   } catch (error) {
     res.json({
       status: 'error',
       timestamp: new Date().toISOString(),
-      service: 'monad-testnet',
+      service: 'eth-mainnet',
       error: error.message,
     });
   }
@@ -479,7 +480,7 @@ app.get('/', (req, res) => {
   // Status is always operational when Supabase is configured
 
   res.json({
-    name: 'GroqTales Backend API',
+    name: 'COMICRAFT Backend API',
     description: 'AI-powered Web3 storytelling platform — REST API serving authentication, story management, AI generation, NFT operations, and more.',
     status: serverStatus,
     version: process.env.API_VERSION || 'v1',
@@ -595,7 +596,9 @@ app.use(loggingMiddleware);
 app.use('/api/v1/auth', require('./routes/auth'));
 app.use('/api/v1/stories', require('./routes/stories'));
 app.use('/api/v1/comics', require('./routes/comics'));
+app.use('/api/v1/nft/eth-mainnet', require('./routes/nft-eth-mainnet'));
 app.use('/api/v1/nft', require('./routes/nft'));
+app.use('/api/v1/eth-mainnet', require('./routes/eth-mainnet'));
 app.use('/api/v1/wallets', require('./routes/wallets'));
 app.use('/api/v1/marketplace', require('./routes/marketplace'));
 app.use('/api/v1/users', require('./routes/users'));
@@ -611,10 +614,43 @@ app.use('/api/feeds', require('./routes/notification-feed'));
 app.use('/api/groq', require('./routes/groq'));
 app.use('/api/v1/ai', require('./routes/ai'));
 app.use('/api/v1/drafts', require('./routes/drafts'));
+app.use('/api/v1/tts', require('./routes/tts'));
 app.use('/api/v1/settings/notifications', require('./routes/settings/notifications'));
 app.use('/api/v1/settings/privacy', require('./routes/settings/privacy'));
 app.use('/api/v1/settings/wallet', require('./routes/settings/wallet'));
 app.use('/api/v1/settings/profile', require('./routes/settings/profile'));
+
+// Dashboard endpoint — aggregated user metrics
+const { authRequired: dashAuthRequired } = require('./middleware/auth');
+const { supabaseAdmin: dashSupabase } = require('./config/supabase');
+
+app.get('/api/v1/dashboard', dashAuthRequired, async (req, res) => {
+  try {
+    if (!dashSupabase) {
+      return res.status(503).json({ error: 'Database not configured' });
+    }
+
+    const userId = req.user.id;
+
+    // Parallel queries for dashboard data
+    const [storiesResult, draftsResult, publishedResult, recentResult] = await Promise.all([
+      dashSupabase.from('stories').select('id', { count: 'exact', head: true }).eq('author_id', userId),
+      dashSupabase.from('drafts').select('draft_key', { count: 'exact', head: true }).eq('owner_id', userId),
+      dashSupabase.from('stories').select('id', { count: 'exact', head: true }).eq('author_id', userId).eq('status', 'published'),
+      dashSupabase.from('stories').select('id, title, genre, likes_count, views, cover_image, created_at, status, is_minted').eq('author_id', userId).order('created_at', { ascending: false }).limit(5),
+    ]);
+
+    return res.json({
+      totalStories: storiesResult.count || 0,
+      totalDrafts: draftsResult.count || 0,
+      totalPublished: publishedResult.count || 0,
+      recentStories: recentResult.data || [],
+    });
+  } catch (error) {
+    console.error('Dashboard error:', error);
+    return res.status(500).json({ error: 'Failed to load dashboard data' });
+  }
+});
 
 // Vector Search Routes
 app.use('/api/vector', require('./routes/vector-search'));
@@ -674,7 +710,7 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 connectDB().catch(err => console.error('Failed to connect to MongoDB on startup:', err.message));
 
 server = app.listen(PORT, () => {
-  logger.info(`GroqTales Backend API server running on port ${PORT}`);
+  logger.info(`COMICRAFT Backend API server running on port ${PORT}`);
   logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
   logger.info(`Database: Supabase PostgreSQL${SUPABASE_URL ? ' (configured)' : ' (NOT configured)'}`);
   logger.info(`Health check: http://localhost:${PORT}/api/health`);

@@ -842,7 +842,7 @@ export default function SettingsPage() {
                         </Button>
                       </div>
                       {/* <div className="flex gap-2 items-center text-sm text-muted-foreground">
-                        <Badge>Monad</Badge>
+                        <Badge>Ethereum</Badge>
                         <span>Connected Jan 15, 2023</span>
                       </div> */}
                     </div>

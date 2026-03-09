@@ -129,7 +129,7 @@ router.get('/', async (req, res) => {
         .from('stories')
         .select('id')
         .ilike('genre', `%${category}%`);
-      
+
       const storyIds = stories?.map((s) => s.id) || [];
 
       // If no stories found for category, return empty results early
@@ -826,6 +826,164 @@ router.patch('/update-price/:tokenId', authRequired, async (req, res) => {
       component: 'nft',
       tokenId: req.params.tokenId,
       userId: req.user?.id,
+    });
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// NFT Mint Request (Supabase-based review pipeline)
+// ═══════════════════════════════════════════════════════════════════
+
+const { supabaseAdmin } = require('../config/supabase');
+
+/**
+ * @swagger
+ * /api/v1/nft/mint-request:
+ *   post:
+ *     tags:
+ *       - NFT
+ *     summary: Submit an NFT mint request for admin review
+ *     description: Creates a pending mint request for a published story. Requires authentication. The request is queued for admin approval before marketplace listing.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - storyId
+ *               - nftName
+ *               - feeAmount
+ *             properties:
+ *               storyId:
+ *                 type: string
+ *               nftName:
+ *                 type: string
+ *               nftDescription:
+ *                 type: string
+ *               coverImageUrl:
+ *                 type: string
+ *               feeAmount:
+ *                 type: number
+ *               feeCurrency:
+ *                 type: string
+ *                 default: CRAFTS
+ *               supply:
+ *                 type: integer
+ *                 default: 1
+ *               royaltyPercentage:
+ *                 type: number
+ *                 default: 0
+ *               metadata:
+ *                 type: object
+ *     responses:
+ *       201:
+ *         description: Mint request submitted successfully.
+ *       400:
+ *         description: Validation error.
+ *       404:
+ *         description: Story not found or not published.
+ *       500:
+ *         description: Internal server error.
+ */
+router.post('/mint-request', authRequired, async (req, res) => {
+  try {
+    const {
+      storyId,
+      nftName,
+      nftDescription,
+      coverImageUrl,
+      feeAmount = 0,
+      feeCurrency = 'CRAFTS',
+      supply = 1,
+      royaltyPercentage = 0,
+      metadata = {},
+    } = req.body;
+
+    // Validate required fields
+    if (!storyId || !nftName) {
+      return res.status(400).json({ error: 'storyId and nftName are required' });
+    }
+    if (typeof feeAmount !== 'number' || feeAmount < 0) {
+      return res.status(400).json({ error: 'feeAmount must be a non-negative number' });
+    }
+    if (typeof royaltyPercentage !== 'number' || royaltyPercentage < 0 || royaltyPercentage > 50) {
+      return res.status(400).json({ error: 'royaltyPercentage must be between 0 and 50' });
+    }
+
+    const userId = req.user.id;
+
+    // Verify the story exists, is published, and belongs to this user
+    const { data: story, error: storyError } = await supabaseAdmin
+      .from('stories')
+      .select('id, title, author_id, status, cover_image')
+      .eq('id', storyId)
+      .single();
+
+    if (storyError || !story) {
+      return res.status(404).json({ error: 'Story not found' });
+    }
+    if (story.author_id !== userId) {
+      return res.status(403).json({ error: 'You can only mint your own stories' });
+    }
+    if (story.status && story.status !== 'published') {
+      return res.status(400).json({ error: 'Story must be published before minting' });
+    }
+
+    // Check for existing pending request for this story
+    const { data: existing } = await supabaseAdmin
+      .from('nft_mint_requests')
+      .select('id, status')
+      .eq('story_id', storyId)
+      .eq('author_id', userId)
+      .in('status', ['pending_review', 'approved'])
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      return res.status(400).json({
+        error: `A mint request for this story already exists (status: ${existing[0].status})`,
+        existingRequestId: existing[0].id,
+      });
+    }
+
+    // Insert the mint request
+    const { data: mintReq, error: insertError } = await supabaseAdmin
+      .from('nft_mint_requests')
+      .insert({
+        story_id: storyId,
+        author_id: userId,
+        nft_name: nftName.trim(),
+        nft_description: (nftDescription || '').trim(),
+        cover_image_url: coverImageUrl || story.cover_image || null,
+        fee_amount: feeAmount,
+        fee_currency: feeCurrency,
+        supply: Math.max(1, Math.round(supply)),
+        royalty_percentage: Math.min(50, Math.max(0, royaltyPercentage)),
+        metadata,
+        status: 'pending_review',
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      logger.error('Error inserting mint request', { error: insertError.message, userId, storyId });
+      return res.status(500).json({ error: 'Failed to create mint request' });
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: 'Mint request submitted for admin review',
+      mintRequest: mintReq,
+    });
+  } catch (error) {
+    logger.error('Error creating mint request', {
+      requestId: req.id,
+      component: 'nft-mint-request',
+      userId: req.user?.id,
+      error: error.message,
     });
     return res.status(500).json({ error: 'Internal server error' });
   }

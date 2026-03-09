@@ -188,7 +188,7 @@ router.get('/me', authRequired, async (req, res) => {
         let nativeBalance = '0';
 
         try {
-            if (process.env.CRAFTS_TOKEN_ADDRESS && process.env.MONAD_RPC_URL) {
+            if (process.env.CRAFTS_TOKEN_ADDRESS && process.env.ALCHEMY_ETH_MAINNET_HTTP_URL) {
                 const crafts = await getBalance(profile.wallet_address);
                 craftsBalance = crafts.balance;
                 nativeBalance = await getNativeBalance(profile.wallet_address);
@@ -263,7 +263,7 @@ router.get('/:userId/balance', async (req, res) => {
         let nativeBalance = '0';
 
         try {
-            if (process.env.CRAFTS_TOKEN_ADDRESS && process.env.MONAD_RPC_URL) {
+            if (process.env.CRAFTS_TOKEN_ADDRESS && process.env.ALCHEMY_ETH_MAINNET_HTTP_URL) {
                 const crafts = await getBalance(profile.wallet_address);
                 craftsBalance = crafts.balance;
                 nativeBalance = await getNativeBalance(profile.wallet_address);
@@ -350,7 +350,7 @@ router.post('/transfer', authRequired, async (req, res) => {
             return res.status(400).json({ error: 'Maximum transfer amount is 10,000 CRAFTS on testnet' });
         }
 
-        if (!process.env.CRAFTS_TOKEN_ADDRESS || !process.env.MONAD_RPC_URL) {
+        if (!process.env.CRAFTS_TOKEN_ADDRESS || !process.env.ALCHEMY_ETH_MAINNET_HTTP_URL) {
             return res.status(503).json({ error: 'Web3 services not configured' });
         }
 

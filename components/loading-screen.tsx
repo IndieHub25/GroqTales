@@ -1,10 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import React from 'react';
 
 import { ClientOnly } from '@/components/client-only';
+import { ComiCraftLogo } from '@/components/comicraft-logo';
 
 interface LoadingScreenProps {
   message?: string;
@@ -50,6 +50,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
         <div className={`relative ${currentSize.container}`}>
           {/* Central loading icon */}
           <div className="absolute inset-0 flex items-center justify-center">
+            
             {/* Outer spinning aura */}
             <motion.div
               animate={{ rotate: 360 }}
@@ -66,10 +67,10 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
               animate={{
                 scale: [1, 1.1, 1],
                 filter: [
-                  'drop-shadow(0 0 15px rgba(16,185,129,0.4))',
-                  'drop-shadow(0 0 40px rgba(16,185,129,0.9))',
-                  'drop-shadow(0 0 15px rgba(16,185,129,0.4))',
-                ],
+                  'drop-shadow(0 0 15px rgba(34,211,238,0.3))',
+                  'drop-shadow(0 0 40px rgba(34,211,238,0.8))',
+                  'drop-shadow(0 0 15px rgba(34,211,238,0.3))',
+                ]
               }}
               transition={{
                 duration: 2,
@@ -78,16 +79,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
               }}
               className="relative rounded-full p-6 flex items-center justify-center bg-black/60 backdrop-blur-xl border border-white/20 shadow-[0_0_30px_rgba(0,0,0,0.8)]"
             >
-              <div className="relative w-20 h-20 md:w-32 md:h-32">
-                <Image
-                  src="/logo.png"
-                  alt="Loading"
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-contain drop-shadow-[0_0_12px_rgba(255,255,255,1)]"
-                  priority
-                />
-              </div>
+              <ComiCraftLogo variant="icon" colorScheme="color" size={80} animate={false} />
             </motion.div>
           </div>
 

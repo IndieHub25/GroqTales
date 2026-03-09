@@ -1,34 +1,39 @@
 /**
  * Web3 Service — Core blockchain provider and transaction helpers
  *
- * Provides a reusable abstraction over ethers.js for Monad testnet via Alchemy RPC.
+ * Provides a reusable abstraction over ethers.js for Ethereum mainnet via Alchemy RPC.
  * All secrets come from environment variables — never hardcoded.
  */
 
 const { ethers } = require('ethers');
 const logger = require('../utils/logger');
 
+// Validate ETHEREUM_CHAIN_ID at startup
+const parsedChainId = parseInt(process.env.ETHEREUM_CHAIN_ID || '1', 10);
+if (!Number.isFinite(parsedChainId) || Number.isNaN(parsedChainId) || parsedChainId <= 0) {
+    throw new Error('Invalid ETHEREUM_CHAIN_ID environment variable: must be a positive integer');
+}
+const VALIDATED_CHAIN_ID = parsedChainId;
+
 // ── Lazy singletons ──────────────────────────────────────────────────────────
 let _provider = null;
 let _signer = null;
 
 /**
- * Get a JSON-RPC provider connected to Monad testnet.
+ * Get a JSON-RPC provider connected to Ethereum mainnet.
  * @returns {import('ethers').JsonRpcProvider}
  */
 function getProvider() {
     if (_provider) return _provider;
 
-    const rpcUrl = process.env.MONAD_RPC_URL;
+    const rpcUrl = process.env.ALCHEMY_ETH_MAINNET_HTTP_URL;
     if (!rpcUrl) {
-        throw new Error('MONAD_RPC_URL environment variable is not set');
+        throw new Error('ALCHEMY_ETH_MAINNET_HTTP_URL environment variable is not set');
     }
 
-    const chainId = parseInt(process.env.MONAD_CHAIN_ID || '10143', 10);
-
     _provider = new ethers.JsonRpcProvider(rpcUrl, {
-        name: 'monad-testnet',
-        chainId,
+        name: 'eth-mainnet',
+        chainId: VALIDATED_CHAIN_ID,
     });
 
     return _provider;
@@ -80,7 +85,7 @@ async function getBlockNumber() {
 }
 
 /**
- * Get native token (MON) balance for a wallet address.
+ * Get native token (ETH) balance for a wallet address.
  * @param {string} address
  * @returns {Promise<string>} Balance in ether units
  */
@@ -164,7 +169,7 @@ function mapWeb3Error(error) {
         return { message: 'RPC connection timed out', code: 'RPC_TIMEOUT', original: error };
     }
     if (msg.includes('could not detect network') || msg.includes('ECONNREFUSED')) {
-        return { message: 'Cannot connect to Monad RPC', code: 'RPC_UNREACHABLE', original: error };
+        return { message: 'Cannot connect to Ethereum RPC', code: 'RPC_UNREACHABLE', original: error };
     }
 
     return { message: `Web3 error: ${msg}`, code: 'WEB3_ERROR', original: error };
@@ -176,7 +181,7 @@ function mapWeb3Error(error) {
  */
 async function checkWeb3Health() {
     const result = {
-        configured: !!process.env.MONAD_RPC_URL,
+        configured: !!process.env.ALCHEMY_ETH_MAINNET_HTTP_URL,
         connected: false,
         chainId: null,
         blockNumber: null,
@@ -185,7 +190,7 @@ async function checkWeb3Health() {
     };
 
     if (!result.configured) {
-        result.error = 'MONAD_RPC_URL not configured';
+        result.error = 'ALCHEMY_ETH_MAINNET_HTTP_URL not configured';
         return result;
     }
 

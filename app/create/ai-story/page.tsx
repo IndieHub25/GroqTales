@@ -22,8 +22,12 @@ import {
   AlignLeft,
   GripVertical,
   Settings2,
-  X
+  X,
+  BookmarkCheck,
+  SendHorizonal,
+  Loader2
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
@@ -37,6 +41,7 @@ import { Badge } from '@/components/ui/badge';
 
 import { ParameterPanel } from '@/components/parameter-panel';
 import { GuidedTour, AI_STORY_TOUR_STEPS } from '@/components/guided-tour';
+import { ConnectAccountModal } from '@/components/connect-account-modal';
 import { AI_STORY_PARAMETERS } from '@/lib/ai-story-parameters';
 
 // Story Studio components
@@ -99,7 +104,19 @@ export default function AIStoryGeneratorPage() {
 
 function AIStoryContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { toast } = useToast();
+
+  // ── Auth state ──────────────────────────────────────────────────
+  const [authToken, setAuthToken] = React.useState<string | null>(null);
+  const [showConnectModal, setShowConnectModal] = React.useState(false);
+  const [isSavingDraft, setIsSavingDraft] = React.useState(false);
+  const [isFinishing, setIsFinishing] = React.useState(false);
+
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    setAuthToken(token);
+  }, []);
 
   // ── Services (stable refs) ──────────────────────────────────────
   const lifecycleRef = useRef(new PanelLifecycleManager());
@@ -432,7 +449,8 @@ function AIStoryContent() {
     }
   };
 
-  const handleSaveDraft = () => {
+  // Local draft save (always available)
+  const handleSaveLocalDraft = () => {
     try {
       localStorage.setItem(
         'aiStoryDraft',
@@ -446,10 +464,120 @@ function AIStoryContent() {
           savedAt: new Date().toISOString(),
         })
       );
-      toast({ title: 'Draft saved', description: 'Your work has been saved locally.' });
-    } catch {
-      toast({ title: 'Save failed', variant: 'destructive' });
+    } catch { /* ignore */ }
+  };
+
+  // Cloud draft save — requires auth
+  const handleSaveDraft = async () => {
+    if (!authToken) {
+      setShowConnectModal(true);
+      return;
     }
+    const hasContent = chapters.some(c => c.content.trim());
+    if (!hasContent && !storyPrompt.title) {
+      toast({ title: 'Nothing to save', description: 'Generate some content first.', variant: 'destructive' });
+      return;
+    }
+    setIsSavingDraft(true);
+    // Also save locally as backup
+    handleSaveLocalDraft();
+
+    const draftKey = `vedascript-${storyPrompt.title?.trim().replace(/\s+/g, '-').toLowerCase() || 'untitled'}-${typeof window !== 'undefined' ? (localStorage.getItem('draftKey') || `dk-${Date.now()}`) : `dk-${Date.now()}`}`;
+    if (typeof window !== 'undefined') localStorage.setItem('draftKey', draftKey);
+
+    const snapshot = {
+      title: storyPrompt.title || 'Untitled Story',
+      description: storyDescription,
+      genre: selectedGenres[0] || 'Fantasy',
+      // Pack all VedaScript data into content as JSON string
+      content: JSON.stringify({
+        chapters,
+        genres: selectedGenres,
+        parameters: parameterValues,
+        selectedParameters: Array.from(selectedParameters),
+        storyPrompt,
+        isLocked,
+      }),
+      version: 1,
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
+      const res = await fetch(`${baseUrl}/api/v1/drafts`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          draftKey,
+          storyType: 'vedascript',
+          storyFormat: 'chapter-based',
+          snapshot,
+          saveReason: 'manual',
+        }),
+      });
+      if (res.ok) {
+        toast({ title: '✓ Draft saved', description: 'Saved to your account.' });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        console.error('Draft save failed:', err);
+        toast({ title: 'Draft saved locally', description: 'Cloud save failed — saved locally as backup.' });
+      }
+    } catch (e) {
+      console.error('Draft save error:', e);
+      toast({ title: 'Draft saved locally', description: 'Network error — saved locally as backup.' });
+    } finally {
+      setIsSavingDraft(false);
+    }
+  };
+
+  const handleFinishStoryline = async () => {
+    if (!authToken) {
+      setShowConnectModal(true);
+      return;
+    }
+    const hasContent = chapters.some(c => c.content.trim());
+    if (!hasContent) {
+      toast({ title: 'No content yet', description: 'Generate at least one chapter before finishing.', variant: 'destructive' });
+      return;
+    }
+    setIsFinishing(true);
+    // Save draft first
+    const draftKey = typeof window !== 'undefined'
+      ? (localStorage.getItem('draftKey') || `vedascript-${Date.now()}`)
+      : `vedascript-${Date.now()}`;
+    if (typeof window !== 'undefined') localStorage.setItem('draftKey', draftKey);
+
+    const snapshot = {
+      title: storyPrompt.title || 'Untitled Story',
+      description: storyDescription,
+      genre: selectedGenres[0] || 'Fantasy',
+      content: JSON.stringify({
+        chapters,
+        genres: selectedGenres,
+        parameters: parameterValues,
+        selectedParameters: Array.from(selectedParameters),
+        storyPrompt,
+        isLocked,
+      }),
+      version: 1,
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
+      await fetch(`${baseUrl}/api/v1/drafts`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ draftKey, storyType: 'vedascript', storyFormat: 'chapter-based', snapshot, saveReason: 'finish' }),
+      });
+    } catch { /* continue even if cloud save fails */ }
+
+    handleSaveLocalDraft();
+    setIsFinishing(false);
+    router.push(`/profile/story/publish?draftKey=${encodeURIComponent(draftKey)}`);
   };
 
   const handleDownloadParameters = () => {
@@ -789,6 +917,64 @@ function AIStoryContent() {
                     )}
                   </motion.button>
 
+                  {/* ── Story Lifecycle Actions ── */}
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    {/* Save as Draft */}
+                    <motion.button
+                      whileHover={{ scale: 1.02, y: -1 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={handleSaveDraft}
+                      disabled={isSavingDraft || isGenerating}
+                      className="
+                        group relative flex items-center justify-center gap-2
+                        py-3 px-4 rounded-xl font-semibold text-sm
+                        bg-gradient-to-b from-white/[0.09] to-white/[0.04]
+                        border border-white/15
+                        text-white/80 hover:text-white
+                        shadow-[0_2px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.08)]
+                        hover:shadow-[0_4px_20px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.12)]
+                        hover:border-white/25
+                        transition-all duration-200
+                        disabled:opacity-40 disabled:cursor-not-allowed
+                      "
+                    >
+                      {isSavingDraft ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                      ) : (
+                        <BookmarkCheck className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                      )}
+                      {isSavingDraft ? 'Saving…' : 'Save as Draft'}
+                    </motion.button>
+
+                    {/* Finish Storyline */}
+                    <motion.button
+                      whileHover={{ scale: 1.02, y: -1 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={handleFinishStoryline}
+                      disabled={isFinishing || isGenerating}
+                      className="
+                        group relative flex items-center justify-center gap-2
+                        py-3 px-4 rounded-xl font-semibold text-sm
+                        bg-gradient-to-b from-blue-600/90 to-blue-700/80
+                        border border-blue-400/30
+                        text-white
+                        shadow-[0_2px_12px_rgba(59,130,246,0.25),inset_0_1px_0_rgba(255,255,255,0.12)]
+                        hover:shadow-[0_4px_20px_rgba(59,130,246,0.35),inset_0_1px_0_rgba(255,255,255,0.15)]
+                        hover:from-blue-500/90 hover:to-blue-600/80
+                        hover:border-blue-400/40
+                        transition-all duration-200
+                        disabled:opacity-40 disabled:cursor-not-allowed
+                      "
+                    >
+                      {isFinishing ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <SendHorizonal className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                      )}
+                      {isFinishing ? 'Saving…' : 'Finish Storyline'}
+                    </motion.button>
+                  </div>
+
                   <div className="flex gap-2">
                     <button
                       onClick={handleCopyStory}
@@ -888,6 +1074,13 @@ function AIStoryContent() {
           </div>
         </div>
       </div>
+
+      {/* ── Connect Account Modal ── */}
+      <ConnectAccountModal
+        isOpen={showConnectModal}
+        onClose={() => setShowConnectModal(false)}
+        message="Connect your Comicraft account to save drafts and publish your story."
+      />
     </motion.div>
   );
 }

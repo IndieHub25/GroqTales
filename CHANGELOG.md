@@ -7,9 +7,258 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 1.4.0 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+Active full support: 1.9.0 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+
+## [1.9.1] - 2026-03-09
+
+### Fixed
+
+- **Security**: Fixed Polynomial regular expression denial of service (ReDoS) vulnerability in `server/routes/auth.js` by removing ambiguity from the email validation regex and limiting input length (CodeQL warning).
+- **Security**: Replaced predictable wallet credentials with standard SIWE (EIP-191) nonce-based signature verification in `server/routes/auth.js` for enhanced wallet login security.
+- **Frontend**: Fixed `use-user-role` and `use-ethereum` hooks to remove unsafe hardcoded API URL fallbacks, properly validating required API URL usage configurations or defaulting to same-origin.
+- **Frontend**: Formatted `app/actions/auth.ts` to satisfy Prettier rules and removed unsafe `localStorage` token persistence in favor of secure cookie-based auth.
+- **Frontend**: Fixed API data shapes in `app/dashboard/page.tsx` that were causing the dashboard metrics to incorrectly parse token and asset balances.
+- **Frontend**: Improved publisher profile timing issues in `app/profile/story/publish/page.tsx` to handle async session storage updates dynamically.
+- **Frontend**: Updated the NFT Mint Request payload in `components/nft-mint-modal.tsx` to include crucial collected form data (e.g., `nftName`, `feeAmount`, `supply`) matching the required backend shape.
+- **Backend API**: Fixed the Alchemy RPC methods in `server/services/alchemyMainnetClient.js` to use correct `getNFTsForOwner` method and required object parameters instead of raw JSON-RPC positional arguments.
+- **Backend API**: Fixed incorrect ABI method and transaction return parameters in `server/services/nftMintService.js` to safely call the custom `mintStory` function and handle Ethereum v6 properties.
+- **Backend API**: Addressed the HTTP 200 response on failed user creation loops in wallet auth by properly throwing 500 status codes.
+- **Smoke Tests**: Updated Alchemy tests script to properly read outputs of API calls (e.g. `nfts.totalCount`) ensuring correct validation logic.
+
+## [1.9.0] - 2026-03-09
+
+### Added
+
+- **`POST /api/v1/auth/wallet-login`** (`server/routes/auth.js`): New endpoint for wallet-based authentication — auto-creates Supabase user on first connect, returns access + refresh tokens, and creates a profile entry.
+- **`POST /api/v1/auth/login-username`** (`server/routes/auth.js`): New endpoint that looks up email from username in profiles table, then authenticates via Supabase — enables login by username or email.
+- **`GET /api/v1/auth/me`** (`server/routes/auth.js`): Returns the current authenticated user's profile from Supabase, including display name, avatar, bio, role, and wallet address.
+- **`GET /api/v1/dashboard`** (`server/backend.js`): Aggregated dashboard endpoint returning total stories, drafts, published count, and 5 most recent stories for the authenticated user.
+- **`GET /api/v1/stories/:id`** (`server/routes/stories.js`): Alias route that fetches a single story by ID with author profile join and view count increment — enables BFF-consistent story fetching.
+
+### Changed
+
+- **Backend Hardening** (`server/routes/stories.js`, `server/routes/drafts.js`): Added `supabaseAdmin` null guards to **all** route handlers (8 story routes, 5 draft routes) to return `503 Database not configured` instead of crashing with unhandled null reference errors when `SUPABASE_SERVICE_ROLE_KEY` is missing in production.
+- **BFF Refactor — Story Detail** (`app/stories/[id]/client.tsx`): Replaced direct Supabase `.from('stories').select()` query with `fetch` to backend `GET /api/v1/stories/:id`. Removed `createClient` import.
+- **BFF Refactor — Community Feed** (`components/community-feed.tsx`): Replaced direct Supabase `.from('profiles')` call with `fetch` to `GET /api/v1/auth/me` using stored access token. Removed `createClient` import.
+- **BFF Refactor — Publish Page** (`app/profile/story/publish/page.tsx`): Replaced Supabase session/profile fetch with `GET /api/v1/auth/me` using localStorage token. Removed `createClient` import.
+- **BFF Refactor — Profile Form** (`components/settings/profile-form.tsx`): Removed all direct Supabase calls (`auth.updateUser`, `from('profiles').upsert`). Profile load/save now exclusively uses backend `GET/PATCH /api/v1/settings/profile`. Removed `createClient` import.
+- **BFF Refactor — Auth Actions** (`app/actions/auth.ts`): Replaced direct Supabase username lookup with backend `POST /api/v1/auth/login-username`. Stores tokens in localStorage.
+- **BFF Refactor — User Role Hook** (`hooks/use-user-role.ts`): Replaced Supabase `onAuthStateChange` listener with `GET /api/v1/auth/me` call using stored token. Listens for `storage` events to react to login/logout.
+- **Wallet Auth Flow** (`components/providers/web3-provider.tsx`): After `eth_requestAccounts`, now calls `POST /api/v1/auth/wallet-login`, stores returned tokens in localStorage, and dispatches `StorageEvent` for cross-component reactivity. Disconnect clears tokens. Replaced `credentials: "include"` with `Authorization: Bearer` header pattern.
+
+### Fixed
+
+- **Backend 500/503 Errors**: All story and draft routes now gracefully handle missing `supabaseAdmin` instead of crashing.
+- **"Authentication service not configured"**: Backend auth middleware already returned 503 for missing Supabase; now all downstream routes also guard against it.
+- **Wallet Connection Never Completing**: `web3-provider.tsx` now creates a full Supabase auth session via wallet-login, stores tokens, and sets `connecting` state properly.
+- **Profile Form Crashing**: Removed references to `sessionUser` state variable that was deleted during refactor.
+- **Frontend Supabase Violations**: Eliminated all remaining direct-to-Supabase calls from the frontend, enforcing the BFF architecture.
+
+### Security
+
+- All frontend authentication now uses `Authorization: Bearer <token>` headers with tokens stored in localStorage. No direct Supabase client interaction from the browser.
+- Wallet login uses deterministic password derived from wallet address + server JWT secret — never transmitted to client.
+
+## [1.8.3] - 2026-03-09
+
+### Fixed
+
+- **Accessibility**: Added programmatic focus trapping and Escape key management natively to `components/connect-account-modal.tsx` so keyboard users have a strict cycle scope when authenticating.
+- **Form State Sync**: Hardened component state invalidation in `components/nft-mint-modal.tsx`; changing between duplicate titles across different `storyId` variations now properly flushes the internal mint form buffers. Fixed broken ARIA descriptive bindings on sub-views.
+- **Data Selection Faults**: Stripped missing un-migrated schema columns (`description`, `cover_image`, `parameters`) from standard `maybeSingle` queries inside `app/stories/[id]/client.tsx` to stop PostgreSQL masking structural errors as soft 404s. Also wrapped `useEffect` hook state sets with strict unmount/ID-switch cancellation bounds to prevent asynchronous UI overwrites.
+- **Draft Sorting**: Fixed the `/api/v1/drafts/list` endpoint query internally requesting `updated_at` ordering when user intentions strictly dictate tracking the JSON snapshot buffer's synthetic `current_updated_at` timestamps instead.
+
+## [1.8.2] - 2026-03-09
+
+### Fixed
+
+- **API Keys**: Added validation in `scripts/Groqpe.py` to immediately exit if `GROQ_API_KEY` is not set, preventing cryptic type errors downstream.
+- **Seed Script**: Updated `scripts/seed_demo_story.py` and `scripts/seed-demo-story.js` to identify demo rows deterministically using `source='demo'` rather than fragile title-matching that could conflict with legitimate user generated content. Added robust HTTP response validation for insertions.
+- **Dependency Paths**: Fixed hard-coded nested module resolution in `scripts/seed-demo-story.js` replacing it with the standard package boundary `require('@supabase/supabase-js')`.
+- **Query Bounds & Error Masking**: Hardened `server/routes/drafts.js`; `limit` query parameters are strictly clamped, and internal Supabase errors are securely logged server-side rather than leaked to clients.
+- **WAV Buffer Concatenation**: Replaced native `Buffer.concat` with proper cross-chunk sample merging using the `wavefile` dependency in `server/services/bulbulService.js`, correcting multi-chunk audio corruption.
+- **Startup Configuration Validation**: Enforced strict validation of `ETHEREUM_CHAIN_ID` via integer parsing in `server/services/web3Service.js` and `lib/chain-config.ts` during service initialization to fail fast before any RPC bindings are established.
+
+## [1.8.1] - 2026-03-09
+
+### Fixed
+
+- **Profile Ownership Check** (`app/profile/[slug]/client.tsx`): Fixed profile ownership detection on public profile pages. The ownership comparison used `_id` but Supabase returns `id`, so the check never matched — meaning users couldn't see edit/owner actions on their own public profile page. Now compares using the `id` field from both self-profile and public-profile API responses.
+- **Story Cards Not Clickable** (`app/profile/[slug]/client.tsx`): Story cards on profile pages were static with no navigation links. Wrapped `StoryCard` in `<Link>` components pointing to `/stories/{id}` so users can click through to the full story detail page.
+- **Dashboard Blank on Expired Tokens** (`app/dashboard/page.tsx`): Dashboard silently failed when `getUserProfile()` returned 401 (expired token) — the user saw a blank loading state forever. Now detects 401/missing tokens and shows a clear "Session Expired" or "Not Logged In" error with sign-in redirect. Also added a general error state with retry for transient failures. Fixed `display_name` and `avatar_url` field mapping for Supabase profiles.
+- **Publish Cover Upload Error Silently Swallowed** (`app/profile/story/publish/page.tsx`): The cover image upload had an empty `catch {}` block. If Supabase Storage was down or upload failed, the story would publish without a cover — contradicting the mandatory cover requirement. Now surfaces the upload error and blocks publish until the cover uploads successfully.
+- **Public Profile Hides Freshly Published Stories** (`server/routes/users.js`): The public profile username endpoint filtered stories by `.eq('moderation_status', 'approved')`, but stories published via `publish-vedascript` don't set `moderation_status` (it defaults to NULL). Changed to `.or('moderation_status.eq.approved,moderation_status.is.null')` so freshly published stories appear on public profiles immediately.
+
+## [1.8.0] - 2026-03-09
+
+### Added
+
+- **Central Chain Configuration Module** (`lib/chain-config.ts`) [NEW]: Single source of truth for blockchain network settings. Exports `ACTIVE_CHAIN` (chainId, name, rpcUrl, wsUrl, explorerUrl, nativeCurrency), `CONTRACTS` (storyNFT, marketplace, craftsToken), and helpers (`getExplorerUrl`, `isCorrectChain`, `CHAIN_ID_HEX`). All values from environment variables — nothing hardcoded.
+- **Ethereum Service** (`lib/ethereum-service.ts`) [NEW]: Replacement for the deprecated Monad service. Provides `StoryMetadata`, `MintedNFT` types and blockchain interaction stubs for Ethereum mainnet via Alchemy.
+- **Ethereum Hook** (`hooks/use-ethereum.ts`) [NEW]: React hook (`useEthereum`) targeting Ethereum mainnet (chain ID 1). Handles network switching via `wallet_switchEthereumChain`, mint request submission through the admin pipeline, and wallet state management.
+- **ComiCraft Story NFT Contract** (`smart_contracts/contracts/ComiCraftStoryNFT.sol`) [NEW]: Renamed from `MonadStoryNFT`. ERC721URIStorage contract with name "Comicraft Story NFT" and symbol "CRAFT". Same functionality, new branding.
+
+### Changed
+
+- **COMICRAFT Logo** (`components/comicraft-logo.tsx`): Replaced inline SVG wordmark with `next/image` component loading the official `public/logo.png` asset. Ensures the full "COMICRAFT" text is visible at all viewport sizes (mobile 375px through desktop 1920px). Supports `mono-light`/`mono-dark` color schemes via CSS filter.
+- **Footer Branding** (`components/footer.tsx`): "Powered by **Monad** × **Groq AI**" → "Powered by **Ethereum** & **Alchemy** × **Groq AI**" with blue/indigo Ethereum gradient and amber/orange Alchemy gradient replacing the emerald Monad gradient. Glitch hover animation preserved.
+- **Blockchain Core** (`lib/blockchain.ts`): `MONAD_RPC_URL` → `ALCHEMY_ETH_MAINNET_HTTP_URL`. Provider connects to Ethereum mainnet with chain config from `chain-config.ts`. Error messages reference Ethereum mainnet.
+- **Gallery Bug Fix** (`app/gallery/page.tsx`): Removed an errant filter that was excluding `is_minted: true` stories from the public feed. Built-in blockchain stories now properly display.
+- **Admin Mint Sync** (`server/routes/admin.js`): Added logic to update a story's `is_minted` flag to `true` in Supabase whenever its NFT Mint Request is approved by an admin, ensuring the minted state is reflected platform-wide.
+- **Web3 Provider** (`components/providers/web3-provider.tsx`): Removed all commented-out `mintNFTOnMonad` references and the large disabled fallback context block. Added live network name resolution in `handleChainChanged` for Ethereum, Polygon, Base, Arbitrum, Optimism, and Sepolia.
+- **Constants** (`lib/constants.ts`): Removed `monad` entry from `BLOCKCHAIN_CONFIG.networks`. Updated `APP_CONFIG.name` to "Comicraft", URLs to `comicraft.xyz`. Updated `EXTERNAL_URLS` to Comicraft domains.
+- **Web3 Service** (`server/services/web3Service.js`): `MONAD_RPC_URL` → `ALCHEMY_ETH_MAINNET_HTTP_URL`, `MONAD_CHAIN_ID` → `ETHEREUM_CHAIN_ID` (default 1), network name `monad-testnet` → `eth-mainnet`. Health check updated accordingly.
+- **NFT Contract Service** (`server/services/nftContractService.js`): Comment references updated from "MonadStoryNFT" to "ComiCraftStoryNFT".
+- **Marketplace Routes** (`server/routes/marketplace.js`): `MONAD_RPC_URL` → `ALCHEMY_ETH_MAINNET_HTTP_URL`. Mint price unit `MON` → `ETH`. JSDoc header updated from "Monad testnet" to "Ethereum mainnet".
+- **Wallet Routes** (`server/routes/wallets.js`): All 3 `MONAD_RPC_URL` references → `ALCHEMY_ETH_MAINNET_HTTP_URL`.
+- **Backend Health** (`server/backend.js`): Web3 health endpoint service label `monad-testnet` → `eth-mainnet`. Swagger description updated.
+- **Hardhat Config** (`smart_contracts/hardhat.config.js`): Removed `monad_testnet` and `monad_mainnet` networks. Added `ethereum_mainnet` network using `ALCHEMY_ETH_MAINNET_HTTP_URL` with chain ID 1. Replaced `monadscan` with `etherscan` verification block.
+- **Helper Hardhat Config** (`smart_contracts/helper-hardhat-config.js`): Removed `monad_mainnet` (143) and `monad_testnet` (10143) entries. Added `ethereum_mainnet` (1).
+- **Environment Variables** (`.env.example`): Removed `MONAD_TEST_RPC_URL`, `MONAD_MAIN_RPC_URL`, `MONAD_RPC_URL`, `MONAD_CHAIN_ID`, `MONADSCAN_API_KEY`, `MINTER_PRIVATE_KEY`, `NODE_RPC_SETUP`, and Base network vars. Added `ALCHEMY_ETH_MAINNET_API_KEY`, `ALCHEMY_ETH_MAINNET_HTTP_URL`, `ALCHEMY_ETH_MAINNET_WS_URL`, `ETHEREUM_CHAIN_ID`, `ETHERSCAN_API_KEY`, `MINT_AUTHORITY_PRIVATE_KEY`.
+- **Footer Test** (`components/__tests__/footer.test.tsx`): Updated assertion from "Monad" to "Ethereum" and "Alchemy" to match new branding.
+
+### Deprecated
+
+- `lib/monad-service.ts` — Now re-exports from `lib/ethereum-service.ts`. Import `@/lib/ethereum-service` for new code.
+- `hooks/use-monad.ts` — Now re-exports from `hooks/use-ethereum.ts`. Import `@/hooks/use-ethereum` for new code.
+
+### Security
+
+- All Alchemy API keys, RPC URLs, private keys, and contract addresses are read exclusively from environment variables. No secrets are hardcoded in any file.
+- `MINT_AUTHORITY_PRIVATE_KEY` is server-side only (not prefixed with `NEXT_PUBLIC_`).
+
+### Technical Details
+
+- **Target Chain**: Ethereum Mainnet (Chain ID 1) via Alchemy JSON-RPC
+- **Contract Standard**: ERC-721 (ERC721URIStorage + Ownable + ReentrancyGuard)
+- **Contract Addresses**: Configured via `STORY_NFT_CONTRACT_ADDRESS`, `CRAFTS_MARKETPLACE_ADDRESS`, `CRAFTS_TOKEN_ADDRESS` env vars. Must be deployed separately to Ethereum mainnet.
+- **Backward Compatibility**: `monad-service.ts` and `use-monad.ts` re-export from their Ethereum counterparts so existing imports continue to work.
+
+## [1.7.0] - 2026-03-09
+
+### Added
+
+- **NFT Mint Request Pipeline** [NEW]: Full end-to-end post-publish NFT minting flow with admin review.
+  - `nft_mint_requests` Supabase table with status tracking (`pending_review`, `approved`, `rejected`).
+  - `POST /api/v1/nft/mint-request`: Auth-required endpoint to submit a mint request for a published story.
+  - `GET /api/v1/admin/mint-requests`: Admin-only endpoint to list all requests with story/author data.
+  - `POST /api/v1/admin/mint-requests/:id/approve` and `/reject`: Admin actions with rejection reason support.
+- **NFT Mint Modal** (`components/nft-mint-modal.tsx`) [NEW]: 3-step post-publish modal.
+  - Step 1: Benefits & credibility messaging (configurable copy).
+  - Step 2: NFT configuration form (name, description, fee, currency, supply, royalty %).
+  - Step 3: Success confirmation.
+- **Admin Mint Review Dashboard** (`app/admin/mint-requests/page.tsx`) [NEW]: Admin page for managing mint requests.
+  - Status filtering, expandable cards with full metadata, approve/reject actions.
+- **Auto-Tag Suggestions**: Publish page now auto-suggests up to 12 tags from genres, themes, setting, and plot keywords.
+
+### Changed
+
+- **Publish Story Page** (`app/profile/story/publish/page.tsx`): Complete overhaul.
+  - Cover image is now **mandatory** (validated before publish).
+  - Story title is **editable** on the publish screen.
+  - "Ready to publish?" summary now shows **Author** (publisher name from profile).
+  - Cover status shows "Required" (red) instead of "None (optional)".
+  - Post-publish success screen now includes "Mint as NFT" CTA opening the mint modal.
+
+## [1.6.0] - 2026-03-09
+
+### Added
+
+- **Sarvam AI Bulbul v3 TTS Service** (`server/services/bulbulService.js`) [NEW]: Full wrapper around the Sarvam AI REST API for high-quality Indian-accented text-to-speech.
+  - Default model: `bulbul:v3`, default speaker: `Shubh`, default language: `en-IN`.
+  - 39 speaker voices: Shubh, Priya, Simran, Rahul, Kavya, Amit, and many more.
+  - 11 language codes: `en-IN`, `hi-IN`, `bn-IN`, `ta-IN`, `te-IN`, `gu-IN`, `kn-IN`, `ml-IN`, `mr-IN`, `pa-IN`, `od-IN`.
+  - Automatic text chunking for inputs >2500 chars; chunks concatenated into one audio buffer.
+  - `pace` (0.5x–2.0x), `sampleRate` (up to 48kHz via REST) configurable per request.
+  - All credentials via `SARVAM_API_KEY` env var; **no key ever reaches the client bundle**.
+- **TTS REST Endpoints** (`server/routes/tts.js`) [NEW]: Mounted at `/api/v1/tts`.
+  - `POST /api/v1/tts/generate` (auth-required): Generates narration, uploads WAV to Supabase Storage `tts-audio` bucket, upserts record in `story_audio` table. Returns cached URL if audio already exists for same story/chapter/speaker/language params. Graceful error codes: `TTS_NOT_CONFIGURED`, `TTS_TIMEOUT`, `TTS_API_ERROR`.
+  - `GET /api/v1/tts/audio`: Public endpoint to fetch existing audio metadata for a story chapter (no re-generation).
+  - `GET /api/v1/tts/speakers`: Returns all valid Bulbul v3 speakers and language codes.
+  - Full Swagger/OpenAPI annotations added. TTS tag added to API docs.
+- **`story_audio` Supabase Table** [NEW]: Stores audio metadata keyed by `(story_id, chapter_index, speaker, language_code)`. Unique constraint prevents duplicates. Fields: `audio_url`, `pace`, `sample_rate`, `duration_seconds`, timestamps.
+- **`useTTS` Hook** (`hooks/use-tts.ts`) [NEW]: React hook managing full TTS player state: fetches existing audio on mount, syncs HTML Audio element, exposes `play()`, `pause()`, `seek()`, `setSpeed()`, `setSpeaker()`, `setLanguage()`, `generateAudio()`. No secrets on client.
+- **`BookView` Component** (`components/book-view.tsx`) [NEW]: Kindle/audiobook-style story reading experience.
+  - Glassmorphic dark book surface with subtle page glow, serif typography, and 60vh scrollable content.
+  - Chapter tab navigation for multi-chapter stories.
+  - **TTS Audio Bar** docked below the book: animated waveform, play/pause, seek bar (with mm:ss display), speaker dropdown (39 voices), language dropdown, speed selector (0.5x–2x), "Generate Audio Narration" button with loading state.
+  - Compact variant (`compact={true}`) for marketplace cards: mini play/pause button with waveform.
+  - `TTSAudioBar` exported for standalone use.
+- **Comicraft Logo System** (`components/comicraft-logo.tsx`) [NEW]: Fully responsive SVG-based logo component replacing the generic text logo.
+  - Features an interlocking hexagonal 'C' icon symbolizing storytelling frames, blockchain nodes, and AI geometry.
+  - Supports `full`, `icon`, and `mark` variants with `color`, `mono-light`, and `mono-dark` schemes.
+  - Includes Framer Motion micro-interactions (fade-in, hover scale).
+  - Integrated into navbar (`header.tsx`), footer (`footer.tsx`), landing page hero (`app/page.tsx`), splash screen (`splash-screen.tsx`), and loading screen (`loading-screen.tsx`).
+- **Demo Story: "Chains of Trust: The Birth of Blockchain"** [SEEDED]: 3-chapter cinematic origin story of blockchain technology, inserted into Supabase `stories` table.
+  - **Chapter 1 — The Broken Ledger**: Satoshi's 2008 world, the double-spend problem, the whitepaper.
+  - **Chapter 2 — The Genesis Block**: The first Bitcoin block, Hal Finney's "Running bitcoin", blockchain mechanics explained.
+  - **Chapter 3 — The Fever, The Skeptics, and The Believers**: 2011 fervor, Vitalik Buterin, Ethereum, the power of math-based trust.
+  - Cover image, genre "Technology", `author_name: 'Comicraft'`, `parameters` with default TTS settings.
+- **`scripts/seed-demo-story.js`** [NEW]: Idempotent Node.js seed script for the demo story (upserts on re-run).
+- **`SARVAM_API_KEY`** added to `.env.example` with comment linking to Sarvam dashboard.
+
+### Changed
+
+- **Story Detail Page** (`app/stories/[id]/page.tsx` + new `client.tsx`): Replaced static mock-data approach with a dynamic client-side Supabase fetch. Parses JSON chapter arrays or plain-text content. Renders `BookView` with full audio controls. Cover image hero with gradient. Back-nav to Marketplace.
+- **Marketplace Page** (`app/marketplace/page.tsx`): Enhanced story cards with:
+  - "Audio" badge (headphones icon) on cards that have pre-generated narration.
+  - `MiniAudioPreview` inline player for lazy audio preview on interaction.
+  - Fetches `story_audio` table alongside stories to show audio availability without extra round-trips.
+  - Animated card entry (Framer Motion), hover lift, "Read & Listen" CTA.
+- **Backend** (`server/backend.js`): Added TTS route mount and `TTS` Swagger tag.
+
+### Security
+
+- `SARVAM_API_KEY` is read server-side only (`process.env.SARVAM_API_KEY`). It is **never** included in the Next.js client bundle (not prefixed with `NEXT_PUBLIC_`).
+- TTS endpoint returns `503 TTS_NOT_CONFIGURED` if the key is absent, rather than crashing.
+- All audio files are stored in Supabase Storage; clients receive only a public URL.
+
+### Technical Details
+
+- Audio format: WAV (base64 decoded from Bulbul v3 response), uploaded to Supabase Storage with `upsert: true`.
+- Storage path convention: `tts-audio/stories/{storyId}/chapters/{chapterIndex}/bulbul-v3-{speaker}-{lang}.wav`.
+- Cache key: `(story_id, chapter_index, speaker, language_code)` — callers can force-regenerate via `forceRegenerate: true`.
+- `useTTS` re-fetches existing audio metadata when speaker or language changes, clearing stale state first.
+
+## [1.5.0] - 2026-03-09
+
+
+### Added
+
+- **ConnectAccountModal** (`components/connect-account-modal.tsx`) [NEW]: Reusable auth gate modal with emerald accent, Login / Connect + Create Account + Cancel actions, and backdrop blur. Used to prompt unauthenticated users before story lifecycle actions.
+- **"Save as Draft" button** (`app/create/ai-story/page.tsx`): Glassy two-tone button below the Generate CTA. Authenticated: calls `PUT /api/v1/drafts` with all VedaScript data (chapters, genres, parameters) packed as JSON snapshot; also saves local backup. Unauthenticated: opens ConnectAccountModal.
+- **"Finish Storyline" button** (`app/create/ai-story/page.tsx`): Blue gradient button that cloud-saves the current draft, then navigates to `/profile/story/publish?draftKey=…`. Unauthenticated: opens ConnectAccountModal.
+- **Publish Page** (`app/profile/story/publish/page.tsx`) [NEW]: Full-screen publish flow at `/profile/story/publish`:
+  - Left panel: cinematic scrollable story preview (title, genres as chips, chapters formatted with serif body text).
+  - Right panel: optional drag-and-drop cover image upload (PNG/JPG/WEBP, max 5 MB), tag chips input (max 12 tags), publish-readiness summary card.
+  - "Publish Story" primary button → `POST /api/v1/stories/publish-vedascript`.
+  - "Back to Editing" returns to VedaScript Engine with `?restore=1`.
+  - Success state with confetti-style confirmation and "View Profile" / "View Story" actions.
+  - Graceful error and "no draft found" states.
+- **`POST /api/v1/stories/publish-vedascript`** (`server/routes/stories.js`): Auth-required endpoint that accepts title, genres, chapters, parameters, tags, and cover image URL. Builds compiled content, inserts to Supabase `stories` table with `status='published'`, `source='vedascript'`. Includes fallback minimal insert if extended columns don't exist on table yet.
+- **`POST /api/v1/stories/upload-cover`** (`server/routes/stories.js`): Auth-required cover image upload endpoint. Validates type (PNG/JPG/WEBP) and size (≤5 MB), uploads to Supabase Storage `covers` bucket, returns public URL.
+- **`GET /api/v1/stories/mine`** (`server/routes/stories.js`): Auth-required endpoint returning all stories for the current user ordered by `created_at` desc. Supports `?status=draft|published` and `?limit`/`?offset` pagination.
+- **`GET /api/v1/drafts/list`** (`server/routes/drafts.js`): Auth-required endpoint returning all drafts for the current user (summary fields only: draftKey, title, genre, version, timestamps). Supports `?storyType` filter.
+- **"Drafts" tab on Profile** (`app/profile/[slug]/client.tsx`): Owner-only tab listing VedaScript drafts fetched from `/api/v1/drafts/list`. Shows title, genre chip, version, and last-saved date. Each card links to `/create/ai-story?draftKey=…`.
+
+### Changed
+
+- **Profile Client Field Mapping** (`app/profile/[slug]/client.tsx`): Fixed critical mismatch between Supabase PostgreSQL field names (`id`, `first_name`, `last_name`, `avatar_url`, `wallet_address`, `created_at`) and frontend expectations. Both the self-profile (`slug === 'me'`) and public-profile code paths now normalize field names, story stats, and moderation status on load.
+- **Profile Client UserProfile Interface**: Extended to accept both `id`/`_id`, `firstName`/`first_name`, `lastName`/`last_name`, `avatar`/`avatar_url`, `walletAddress`/`wallet_address`, `createdAt`/`created_at`. Story items extended similarly.
+- **Backend API branding** (`server/backend.js`): Updated Swagger/OpenAPI `title`, `description`, `customSiteTitle`, landing page name, and startup log from `GroqTales` to `COMICRAFT`.
+
+### Fixed
+
+- **Profile dashboard 404/5xx**: Root cause was profile type field mismatch (`_id` vs Supabase's `id`). Resolved by normalizing in both profile fetch branches without changing backend response shape.
+
+### Technical Details
+
+- Draft key format: `vedascript-{slugified-title}-{stored-key}` persisted to `localStorage('draftKey')` so VedaScript and Publish pages share state.
+- Draft snapshot uses `content` field as JSON-encoded VedaScript state (chapters, genres, parameters, storyPrompt). The drafts API's `content` field is `100 000` char max — sufficient for typical stories.
+- Publish endpoint: resilient to `42703` (unknown column) errors via a minimal-insert fallback, allowing deployment before Supabase schema columns are added.
 
 ## [1.4.0] - 2026-03-07
+
 
 ### Added
 - **Web3 CRAFTS Purchase Page** (`app/buy/CRAFTS/page.tsx`): Built a premium token purchase marketplace interface bridging Fiat constraints into Web3 interactions.

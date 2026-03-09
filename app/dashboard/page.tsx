@@ -42,7 +42,8 @@ import {
   getUserSettings,
   updateUserSettings,
 } from '@/lib/api-client';
-import { apiFetch, authHeaders } from '@/lib/api-client';
+import { apiFetch, authHeaders, API_BASE_URL } from '@/lib/api-client';
+import { useWallet } from '@/hooks/use-wallet';
 
 // ─────────────────────────────────────────────────────────────────────────
 // Types
@@ -108,7 +109,7 @@ interface FeedItem {
   content?: string;
 }
 
-type Tab = 'stories' | 'comics' | 'collectibles' | 'feed' | 'settings';
+type Tab = 'stories' | 'comics' | 'collectibles' | 'feed' | 'wallet' | 'settings';
 
 // ─────────────────────────────────────────────────────────────────────────
 // Tab config
@@ -119,6 +120,7 @@ const TABS: { id: Tab; label: string; icon: any }[] = [
   { id: 'comics', label: 'Comics', icon: ImageIcon },
   { id: 'collectibles', label: 'Collectibles', icon: Gem },
   { id: 'feed', label: 'Feed', icon: Activity },
+  { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -189,10 +191,13 @@ export default function DashboardPage() {
   const [stories, setStories] = useState<StoryItem[]>([]);
   const [drafts, setDrafts] = useState<StoryItem[]>([]);
   const [comics, setComics] = useState<ComicItem[]>([]);
-  const [nfts, setNFTs] = useState<NFTItem[]>([]);
+  const [nfts, setNFTs] = useState<any[]>([]);
   const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [walletData, setWalletData] = useState<any>(null);
   const [tabLoading, setTabLoading] = useState(false);
   const [tabError, setTabError] = useState<string | null>(null);
+
+  const { address } = useWallet();
 
   // Settings
   const [settingsForm, setSettingsForm] = useState<{
@@ -209,19 +214,36 @@ export default function DashboardPage() {
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
 
+  const [profileError, setProfileError] = useState<string | null>(null);
+
   // ── Load Profile ──────────────────────────────────────────────
 
   useEffect(() => {
     (async () => {
       setProfileLoading(true);
+      setProfileError(null);
       try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+        if (!token) {
+          setProfileError('not_authenticated');
+          setProfileLoading(false);
+          return;
+        }
         const res = await getUserProfile();
-        if (res.ok && (res.data as any)?.success !== false) {
+        if (!res.ok) {
+          if (res.status === 401) {
+            setProfileError('session_expired');
+            setProfileLoading(false);
+            return;
+          }
+          throw new Error('Failed to load profile');
+        }
+        if ((res.data as any)?.success !== false) {
           const d = (res.data as any)?.data || (res.data as any)?.user || res.data;
           setProfile({
-            displayName: d.displayName || d.username || 'Creator',
+            displayName: d.displayName || d.display_name || d.username || 'Creator',
             email: d.email || '',
-            avatar: d.avatar || d.profileImage || null,
+            avatar: d.avatar || d.avatar_url || d.profileImage || null,
             bio: d.bio || '',
             stats: {
               stories: d.stats?.stories || d.storyCount || 0,
@@ -234,7 +256,7 @@ export default function DashboardPage() {
             },
           });
           setSettingsForm({
-            displayName: d.displayName || d.username || '',
+            displayName: d.displayName || d.display_name || d.username || '',
             bio: d.bio || '',
             notifications: d.notifications !== false,
             publicProfile: d.publicProfile !== false,
@@ -242,6 +264,7 @@ export default function DashboardPage() {
         }
       } catch (err) {
         console.error('Failed to load profile:', err);
+        setProfileError('load_failed');
       } finally {
         setProfileLoading(false);
       }
@@ -280,10 +303,23 @@ export default function DashboardPage() {
           break;
         }
         case 'collectibles': {
-          const res = await getUserNFTs();
-          if (res.ok) {
-            const d = (res.data as any)?.data || (res.data as any)?.nfts || [];
-            setNFTs(Array.isArray(d) ? d : []);
+          if (address) {
+            // Use the new Alchemy backend endpoint for NFT fetching
+            const res = await apiFetch(`/api/v1/eth-mainnet/wallets/${address}/nfts`, {
+              method: 'GET',
+              headers: authHeaders(),
+            });
+            if (res.ok) {
+              const d = (res.data as any)?.data || (res.data as any)?.nfts || (res.data as any)?.ownedNfts || [];
+              setNFTs(Array.isArray(d) ? d : []);
+            }
+          } else {
+            // Fallback back to standard offchain DB
+            const res = await getUserNFTs();
+            if (res.ok) {
+              const d = (res.data as any)?.data || (res.data as any)?.nfts || [];
+              setNFTs(Array.isArray(d) ? d : []);
+            }
           }
           break;
         }
@@ -292,6 +328,20 @@ export default function DashboardPage() {
           if (res.ok) {
             const d = (res.data as any)?.data || (res.data as any)?.feed || (res.data as any)?.items || [];
             setFeed(Array.isArray(d) ? d : []);
+          }
+          break;
+        }
+        case 'wallet': {
+          if (address) {
+            const res = await apiFetch(`/api/v1/eth-mainnet/wallets/${address}/portfolio`, {
+              method: 'GET',
+              headers: authHeaders(),
+            });
+            if (res.ok) {
+              setWalletData((res.data as any)?.data || res.data);
+            }
+          } else {
+            setTabError('Wallet not connected. Connect your wallet to view portfolio.');
           }
           break;
         }
@@ -308,7 +358,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadTabData(activeTab);
-  }, [activeTab, loadTabData]);
+  }, [activeTab, address, loadTabData]);
 
   // ── Save Settings ─────────────────────────────────────────────
 
@@ -354,6 +404,53 @@ export default function DashboardPage() {
         transition={{ duration: 0.4 }}
         className="relative z-10 max-w-[1200px] mx-auto px-4 py-6"
       >
+        {/* ════════════════════════════════════════════════════════
+           PROFILE ERROR STATE
+           ════════════════════════════════════════════════════════ */}
+        {profileError && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mb-4">
+              <AlertCircle className="w-8 h-8 text-red-400" />
+            </div>
+            <h2 className="text-lg font-bold text-white mb-2">
+              {profileError === 'session_expired'
+                ? 'Session Expired'
+                : profileError === 'not_authenticated'
+                  ? 'Not Logged In'
+                  : 'Failed to Load Dashboard'}
+            </h2>
+            <p className="text-sm text-white/40 mb-6 max-w-sm">
+              {profileError === 'session_expired'
+                ? 'Your session has expired. Please sign in again to access your dashboard.'
+                : profileError === 'not_authenticated'
+                  ? 'You need to be logged in to access your dashboard.'
+                  : 'Something went wrong loading your profile. Please try again.'}
+            </p>
+            <div className="flex gap-3">
+              {(profileError === 'session_expired' || profileError === 'not_authenticated') ? (
+                <Link href="/sign-in">
+                  <Button className="bg-blue-600 hover:bg-blue-500 text-white">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign In
+                  </Button>
+                </Link>
+              ) : (
+                <Button onClick={() => window.location.reload()} variant="outline" className="border-white/10 text-white/70 hover:text-white">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Retry
+                </Button>
+              )}
+              <Link href="/">
+                <Button variant="ghost" className="text-white/40 hover:text-white">
+                  Back to Home
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {!profileError && (
+        <>
         {/* ════════════════════════════════════════════════════════
            HERO WELCOME BLOCK
            ════════════════════════════════════════════════════════ */}
@@ -683,16 +780,19 @@ export default function DashboardPage() {
                       />
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {nfts.map((nft) => (
+                        {nfts.map((nft, i) => {
+                          const name = nft.name || nft.title || nft.contract?.name || `NFT ${i}`;
+                          const image = nft.imageUrl || nft.image?.cachedUrl || nft.image?.originalUrl;
+                          return (
                           <Card
-                            key={nft._id}
+                            key={nft._id || nft.tokenId || i}
                             className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl overflow-hidden group hover:border-amber-500/20 transition-all"
                           >
                             <div className="aspect-square bg-gradient-to-br from-amber-500/10 to-purple-500/5 flex items-center justify-center overflow-hidden">
-                              {nft.imageUrl ? (
+                              {image ? (
                                 <img
-                                  src={nft.imageUrl}
-                                  alt={nft.name}
+                                  src={image}
+                                  alt={name}
                                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                 />
                               ) : (
@@ -700,20 +800,20 @@ export default function DashboardPage() {
                               )}
                             </div>
                             <CardContent className="p-3">
-                              <p className="text-sm font-medium text-white/80 mb-1 truncate">{nft.name}</p>
+                              <p className="text-sm font-medium text-white/80 mb-1 truncate">{name}</p>
                               <div className="flex items-center justify-between text-[11px] text-white/30">
                                 <span>
-                                  {nft.linkedContent?.type || 'NFT'}: {nft.linkedContent?.title || '–'}
+                                  {nft.linkedContent?.type || nft.tokenType || 'NFT'}: {nft.linkedContent?.title || '–'}
                                 </span>
                                 <Badge
                                   variant="outline"
                                   className={`text-[9px] ${
-                                    nft.status === 'minted'
+                                    (nft.status === 'minted' || nft.tokenId)
                                       ? 'border-emerald-500/30 text-emerald-400'
                                       : 'border-white/10 text-white/30'
                                   }`}
                                 >
-                                  {nft.status}
+                                  {nft.status || 'Owned'}
                                 </Badge>
                               </div>
                               {nft.tokenId && (
@@ -723,7 +823,7 @@ export default function DashboardPage() {
                               )}
                             </CardContent>
                           </Card>
-                        ))}
+                        )})}
                       </div>
                     )}
                   </>
@@ -767,6 +867,83 @@ export default function DashboardPage() {
                             </div>
                           </div>
                         ))}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* ──────── WALLET PORTFOLIO TAB ──────── */}
+                {activeTab === 'wallet' && (
+                  <>
+                    {!address ? (
+                      <EmptyState
+                        icon={Wallet}
+                        title="Wallet not connected"
+                        subtitle="Please connect your Wallet in the UI to view your web3 portfolio."
+                      />
+                    ) : !walletData ? (
+                       <EmptyState
+                        icon={Loader2}
+                        title="Loading Portfolio..."
+                        subtitle=""
+                      />
+                    ) : (
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <Card className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center gap-2 text-white/90">
+                                <Wallet className="w-4 h-4 text-emerald-400" />
+                                Ethereum Balance
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-2xl font-bold">{walletData?.assets?.eth?.balanceRaw || '0.00'} ETH</p>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center gap-2 text-white/90">
+                                <Gem className="w-4 h-4 text-amber-400" />
+                                Total NFTs
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-2xl font-bold">{walletData?.meta?.totalNfts || 0}</p>
+                            </CardContent>
+                          </Card>
+
+                          <Card className="bg-white/[0.03] border-white/[0.08] backdrop-blur-xl">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center gap-2 text-white/90">
+                                <Activity className="w-4 h-4 text-purple-400" />
+                                Recent Transactions
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-2xl font-bold">0</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">
+                            ERC-20 Tokens
+                          </h3>
+                          <div className="space-y-2">
+                            {walletData?.assets?.tokens?.length > 0 ? (
+                               walletData.assets.tokens.map((tb: any, i: number) => (
+                                 <div key={i} className="flex items-center justify-between px-4 py-3 rounded-xl border border-white/[0.06] bg-white/[0.02]">
+                                    <p className="text-sm text-white/80">{tb.contractAddress || tb.address || 'Unknown Token'}</p>
+                                    <p className="text-sm text-white font-mono">{tb.balanceRaw || tb.tokenBalance || 0}</p>
+                                 </div>
+                               ))
+                            ) : (
+                              <p className="text-sm text-white/30 text-center py-4">No tokens found.</p>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     )}
                   </>
@@ -874,6 +1051,8 @@ export default function DashboardPage() {
             )}
           </motion.div>
         </AnimatePresence>
+        </>
+        )}
       </motion.div>
     </div>
   );

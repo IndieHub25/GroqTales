@@ -89,7 +89,7 @@ export default function TermsPage() {
 
               <h3 className="text-lg font-semibold">2.3 Wallet Integration</h3>
               <p>
-                The Platform integrates with Monad blockchain wallets. You are
+                The Platform integrates with Ethereum blockchain wallets. You are
                 responsible for all activities conducted through your connected
                 wallet and for maintaining its security.
               </p>
@@ -114,7 +114,7 @@ export default function TermsPage() {
               <h3 className="text-lg font-semibold">3.2 NFT Ownership</h3>
               <p>
                 Purchasing a story NFT grants you ownership of the token on the
-                Monad blockchain. This ownership is subject to the terms of the
+                Ethereum blockchain. This ownership is subject to the terms of the
                 smart contract and does not necessarily confer copyright or
                 other intellectual property rights.
               </p>
@@ -139,7 +139,7 @@ export default function TermsPage() {
                 transactions and are non-refundable unless required by law.
               </p>
               <p>
-                Transaction fees on the Monad blockchain (gas fees) are separate
+                Transaction fees on the Ethereum blockchain (gas fees) are separate
                 from Platform fees and are determined by network conditions.
               </p>
             </CardContent>

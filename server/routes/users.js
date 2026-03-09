@@ -238,12 +238,12 @@ router.get('/profile/username/:username', async (req, res) => {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
 
-    // Fetch approved stories for this user
+    // Fetch stories for this user (approved or no moderation status set)
     const { data: stories, error: storiesError } = await supabaseAdmin
       .from('stories')
       .select('*')
       .eq('author_id', user.id)
-      .eq('moderation_status', 'approved')
+      .or('moderation_status.eq.approved,moderation_status.is.null')
       .order('created_at', { ascending: false });
 
     const storyList = stories || [];

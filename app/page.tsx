@@ -23,6 +23,7 @@ import { useWeb3 } from '@/components/providers/web3-provider';
 import { TrendingStories } from '@/components/trending-stories';
 import { Button } from '@/components/ui/button';
 import { UploadStoryTrigger } from '@/components/upload-story-trigger';
+import { ComiCraftLogo } from '@/components/comicraft-logo';
 import { cn } from '@/lib/utils';
 
 // --- Typewriter Hook ---
@@ -247,6 +248,10 @@ export default function Home() {
 
           {/* Centered Text & CTA */}
           <motion.div variants={stagger} initial="hidden" animate="visible" className="text-center mt-20 md:mt-0 flex flex-col items-center">
+            <motion.div variants={fadeUp} className="mb-10 drop-shadow-[0_0_30px_rgba(34,211,238,0.2)]">
+              <ComiCraftLogo variant="full" colorScheme="color" size={68} animate={false} />
+            </motion.div>
+            
             <motion.div variants={fadeUp} className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-8 backdrop-blur-md">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>

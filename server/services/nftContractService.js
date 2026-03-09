@@ -1,5 +1,5 @@
 /**
- * NFT Contract Service — On-chain interactions with MonadStoryNFT
+ * NFT Contract Service — On-chain interactions with ComiCraftStoryNFT
  *
  * Handles minting, ownership queries, and metadata URI lookups.
  * Uses the platform signer for write operations.
@@ -9,7 +9,7 @@ const { ethers } = require('ethers');
 const { getProvider, getSigner, mapWeb3Error } = require('./web3Service');
 const logger = require('../utils/logger');
 
-// Minimal ABI for MonadStoryNFT — only functions we call from the backend
+// Minimal ABI for ComiCraftStoryNFT — only functions we call from the backend
 const STORY_NFT_ABI = [
     'function mintStory(string memory storyHash, string memory metadataURI) payable returns (uint256)',
     'function burnStory(uint256 tokenId) returns (bool)',

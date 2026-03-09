@@ -2,11 +2,8 @@ const networkConfig = {
   31337: {
     name: 'hardhat',
   },
-  143: {
-    name: 'monad_mainnet',
-  },
-  10143: {
-    name: 'monad_testnet',
+  1: {
+    name: 'ethereum_mainnet',
   },
 };
 const developmentChains = ['hardhat', 'localhost'];

@@ -2,11 +2,11 @@
  * Application metadata
  */
 export const APP_CONFIG = {
-  name: 'GroqTales',
+  name: 'Comicraft',
   description: 'AI-Powered Web3 Storytelling Platform',
-  version: '1.0.0',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'https://groqtales.com',
-  supportEmail: 'support@groqtales.com',
+  version: '1.8.0',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'https://comicraft.xyz',
+  supportEmail: 'support@comicraft.xyz',
 } as const;
 
 /**
@@ -34,15 +34,8 @@ export const BLOCKCHAIN_CONFIG = {
       chainId: 1,
       name: 'Ethereum Mainnet',
       symbol: 'ETH',
-      rpcUrl: process.env.NEXT_PUBLIC_ETH_RPC_URL || '',
+      rpcUrl: process.env.ALCHEMY_ETH_MAINNET_HTTP_URL || process.env.NEXT_PUBLIC_ETH_RPC_URL || '',
       explorerUrl: 'https://etherscan.io',
-    },
-    monad: {
-      chainId: 41414,
-      name: 'Monad Testnet',
-      symbol: 'MON',
-      rpcUrl: process.env.NEXT_PUBLIC_MONAD_RPC_URL || '',
-      explorerUrl: 'https://explorer.monad.xyz',
     },
   },
   contracts: {
@@ -158,11 +151,11 @@ export const FEATURE_FLAGS = {
  * External service URLs
  */
 export const EXTERNAL_URLS = {
-  documentation: 'https://docs.groqtales.com',
-  github: 'https://github.com/groqtales/groqtales',
-  discord: 'https://discord.gg/groqtales',
-  twitter: 'https://twitter.com/groqtales',
-  medium: 'https://medium.com/@groqtales',
+  documentation: 'https://docs.comicraft.xyz',
+  github: 'https://github.com/IndieHub25/GroqTales',
+  discord: 'https://discord.gg/comicraft',
+  twitter: 'https://twitter.com/comicraft',
+  medium: 'https://medium.com/@comicraft',
 } as const;
 
 /**

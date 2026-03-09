@@ -2,7 +2,7 @@
  * Marketplace Routes — /api/v1/marketplace
  *
  * Browse, list, buy, cancel NFTs using CRAFTS tokens.
- * Integrates with the CraftsMarketplace contract on Monad testnet.
+ * Integrates with the CraftsMarketplace contract on Ethereum mainnet.
  */
 
 const router = require('express').Router();
@@ -178,7 +178,7 @@ router.get('/pricing', async (req, res) => {
 
         let onChainFee = null;
         try {
-            if (process.env.CRAFTS_MARKETPLACE_ADDRESS && process.env.MONAD_RPC_URL) {
+            if (process.env.CRAFTS_MARKETPLACE_ADDRESS && process.env.ALCHEMY_ETH_MAINNET_HTTP_URL) {
                 const contract = getMarketplaceContract(false);
                 const feeBps = await contract.platformFeeBps();
                 onChainFee = Number(feeBps) / 100;
@@ -199,9 +199,9 @@ router.get('/pricing', async (req, res) => {
                     maxPercent: 50,
                 },
                 mintPrice: {
-                    description: 'Cost to mint a story NFT (native MON)',
+                    description: 'Cost to mint a story NFT (native ETH)',
                     value: '0.001',
-                    unit: 'MON',
+                    unit: 'ETH',
                 },
             },
         });

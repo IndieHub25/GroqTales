@@ -119,9 +119,10 @@ describe('Footer', () => {
     expect(screen.getByText('Online')).toBeInTheDocument();
   });
 
-  it('shows "Powered by Monad × Groq AI"', () => {
+  it('shows "Powered by Ethereum & Alchemy × Groq AI"', () => {
     render(<Footer />);
-    expect(screen.getByText('Monad')).toBeInTheDocument();
-    expect(screen.getByText('Groq AI')).toBeInTheDocument();
+    expect(screen.getAllByText('Ethereum')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Alchemy')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Groq AI')[0]).toBeInTheDocument();
   });
 });

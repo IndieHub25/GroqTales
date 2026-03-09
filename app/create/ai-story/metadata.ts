@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'AI Story Generator | GroqTales',
   description:
-    'Generate unique stories with Groq AI and mint them as NFTs on the Monad blockchain',
+    'Generate unique stories with Groq AI and mint them as NFTs on the Ethereum blockchain',
   openGraph: {
     title: 'AI Story Generator | GroqTales',
     description:
