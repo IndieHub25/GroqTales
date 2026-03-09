@@ -57,7 +57,7 @@ export default function StoryClient({ id }: { id: string }) {
       setLoading(true);
       const { data, error } = await supabase
         .from('stories')
-        .select('id, title, genre, author_name, views, likes, content')
+        .select('id, title, genre, author_name, views, likes, content, cover_image, description, parameters')
         .eq('id', id)
         .maybeSingle();
 

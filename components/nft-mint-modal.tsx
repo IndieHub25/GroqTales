@@ -150,18 +150,17 @@ export function NftMintModal({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
     <AnimatePresence>
-      <motion.div
-        key="mint-modal-overlay"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-        onClick={onClose}
-      >
+      {isOpen && (
+        <motion.div
+          key="mint-modal-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={onClose}
+        >
         <motion.div
           key="mint-modal"
           role="dialog"
@@ -239,6 +238,7 @@ export function NftMintModal({
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setStep('benefits')}
+                  aria-label="Back to benefits"
                   className="p-1.5 rounded-lg bg-white/5 text-white/50 hover:text-white transition-all"
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -256,8 +256,9 @@ export function NftMintModal({
 
               {/* NFT Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-white/50 uppercase tracking-wider">NFT Name</label>
+                <label htmlFor="nftName" className="text-xs font-semibold text-white/50 uppercase tracking-wider">NFT Name</label>
                 <input
+                  id="nftName"
                   value={nftName}
                   onChange={(e) => setNftName(e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-cyan-500/40 transition-all"
@@ -267,8 +268,9 @@ export function NftMintModal({
 
               {/* NFT Description */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-white/50 uppercase tracking-wider">Short Description</label>
+                <label htmlFor="nftDescription" className="text-xs font-semibold text-white/50 uppercase tracking-wider">Short Description</label>
                 <textarea
+                  id="nftDescription"
                   value={nftDescription}
                   onChange={(e) => setNftDescription(e.target.value)}
                   rows={3}
@@ -282,8 +284,9 @@ export function NftMintModal({
               {/* Price & Currency */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-white/50 uppercase tracking-wider">Minting Fee</label>
+                  <label htmlFor="feeAmount" className="text-xs font-semibold text-white/50 uppercase tracking-wider">Minting Fee</label>
                   <input
+                    id="feeAmount"
                     type="number"
                     min={0}
                     step={0.01}
@@ -293,8 +296,9 @@ export function NftMintModal({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-white/50 uppercase tracking-wider">Currency</label>
+                  <label htmlFor="feeCurrency" className="text-xs font-semibold text-white/50 uppercase tracking-wider">Currency</label>
                   <select
+                    id="feeCurrency"
                     value={feeCurrency}
                     onChange={(e) => setFeeCurrency(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500/40 transition-all appearance-none"
@@ -308,8 +312,9 @@ export function NftMintModal({
               {/* Supply & Royalty */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-white/50 uppercase tracking-wider">Supply</label>
+                  <label htmlFor="supply" className="text-xs font-semibold text-white/50 uppercase tracking-wider">Supply</label>
                   <input
+                    id="supply"
                     type="number"
                     min={1}
                     max={10000}
@@ -319,8 +324,9 @@ export function NftMintModal({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-white/50 uppercase tracking-wider">Royalty %</label>
+                  <label htmlFor="royaltyPercentage" className="text-xs font-semibold text-white/50 uppercase tracking-wider">Royalty %</label>
                   <input
+                    id="royaltyPercentage"
                     type="number"
                     min={0}
                     max={50}
@@ -379,6 +385,7 @@ export function NftMintModal({
           )}
         </motion.div>
       </motion.div>
+      )}
     </AnimatePresence>
   );
 }
