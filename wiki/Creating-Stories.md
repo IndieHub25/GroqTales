@@ -100,8 +100,8 @@ This allows you to fine-tune every aspect of the AI's output. Here's a summary o
   dynamics between characters.
 
 - **Plot & Structure**: Choose a plot structure (three-act, hero's journey, non-linear), define the
-  central conflict, set pacing, ending type, and specify plot twists the AI must incorporate. Control
-  foreshadowing and symbolism levels.
+  central conflict, set pacing, ending type, and specify plot twists the AI must incorporate.
+  Control foreshadowing and symbolism levels.
 
 - **Setting & World**: Define the time period, location, world-building depth, and atmospheric tone
   to ground your story in a vivid environment.

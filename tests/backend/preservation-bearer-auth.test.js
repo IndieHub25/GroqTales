@@ -1,12 +1,12 @@
 /**
  * Preservation Test - Bearer Token Authentication
- * 
+ *
  * **IMPORTANT**: This test should PASS on UNFIXED code.
  * It establishes baseline behavior that must be preserved after the fix.
- * 
+ *
  * This test validates Preservation Requirement 3.4:
  * - 3.4: Authorization header with Bearer token must continue to authenticate successfully
- * 
+ *
  * **Validates: Requirement 3.4**
  */
 
@@ -21,24 +21,24 @@ jest.mock('../../server/services/groqService', () => ({
       return {
         success: true,
         message: 'Connected to Groq API successfully',
-        apiKey: apiKey.substring(0, 10) + '...'
+        apiKey: apiKey.substring(0, 10) + '...',
       };
     }
     return {
       success: false,
-      message: 'Invalid API key'
+      message: 'Invalid API key',
     };
   }),
   generate: jest.fn(async (params) => ({
     content: 'Generated story',
     model: 'llama-3.3-70b-versatile',
-    tokensUsed: { prompt: 50, completion: 100, total: 150 }
+    tokensUsed: { prompt: 50, completion: 100, total: 150 },
   })),
   MODELS: {
-    PRIMARY: 'llama-3.3-70b-versatile'
+    PRIMARY: 'llama-3.3-70b-versatile',
   },
   MODEL_DISPLAY_NAMES: {},
-  TOKEN_BUDGETS: {}
+  TOKEN_BUDGETS: {},
 }));
 
 const groqService = require('../../server/services/groqService');
@@ -62,7 +62,9 @@ describe('Preservation: Bearer Token Authentication', () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.message).toContain('Connected');
-      expect(groqService.testConnection).toHaveBeenCalledWith('gsk_test123xyz456abc');
+      expect(groqService.testConnection).toHaveBeenCalledWith(
+        'gsk_test123xyz456abc'
+      );
     });
 
     test('should extract Bearer token correctly from Authorization header', async () => {
@@ -71,14 +73,16 @@ describe('Preservation: Bearer Token Authentication', () => {
         .set('Authorization', 'Bearer gsk_validkey123');
 
       expect(response.status).toBe(200);
-      expect(groqService.testConnection).toHaveBeenCalledWith('gsk_validkey123');
+      expect(groqService.testConnection).toHaveBeenCalledWith(
+        'gsk_validkey123'
+      );
     });
 
     test('should handle Bearer token with different formats', async () => {
       const testCases = [
         'Bearer gsk_short',
         'Bearer gsk_with_underscores_and_numbers_123',
-        'Bearer gsk_VeryLongKeyWithMixedCaseAndNumbers123456789'
+        'Bearer gsk_VeryLongKeyWithMixedCaseAndNumbers123456789',
       ];
 
       for (const authHeader of testCases) {
@@ -98,7 +102,7 @@ describe('Preservation: Bearer Token Authentication', () => {
         .set('Authorization', 'Bearer gsk_test123')
         .send({
           action: 'generate',
-          prompt: 'Test story'
+          prompt: 'Test story',
         });
 
       expect(response.status).toBe(200);
@@ -110,7 +114,7 @@ describe('Preservation: Bearer Token Authentication', () => {
     test('should handle Bearer token with extra spaces', async () => {
       const response = await request(app)
         .get('/api/groq/models?action=test')
-        .set('Authorization', 'Bearer  gsk_test123');  // Extra space
+        .set('Authorization', 'Bearer  gsk_test123'); // Extra space
 
       // The current implementation uses slice(7) which would include the extra space
       // This test documents the current behavior
@@ -129,7 +133,7 @@ describe('Preservation: Bearer Token Authentication', () => {
     test('should handle Authorization header without Bearer prefix', async () => {
       const response = await request(app)
         .get('/api/groq/models?action=test')
-        .set('Authorization', 'gsk_test123');  // No Bearer prefix
+        .set('Authorization', 'gsk_test123'); // No Bearer prefix
 
       // Current behavior: testConnection is called with undefined or the raw value
       expect(response.status).toBe(200);
@@ -144,7 +148,7 @@ describe('Preservation: Bearer Token Authentication', () => {
         .send({
           action: 'generate',
           prompt: 'Test',
-          apiKey: 'gsk_body_key'
+          apiKey: 'gsk_body_key',
         });
 
       expect(response.status).toBe(200);
@@ -153,8 +157,7 @@ describe('Preservation: Bearer Token Authentication', () => {
     });
 
     test('should work without any authentication for models endpoint', async () => {
-      const response = await request(app)
-        .get('/api/groq/models');
+      const response = await request(app).get('/api/groq/models');
 
       expect(response.status).toBe(200);
       expect(response.body.models).toBeDefined();
@@ -163,8 +166,7 @@ describe('Preservation: Bearer Token Authentication', () => {
     });
 
     test('should handle missing Authorization header gracefully', async () => {
-      const response = await request(app)
-        .get('/api/groq/models?action=test');
+      const response = await request(app).get('/api/groq/models?action=test');
 
       // Without Authorization header, testConnection is called with undefined or query param
       expect(response.status).toBe(200);
@@ -178,7 +180,7 @@ describe('Preservation: Bearer Token Authentication', () => {
         'gsk_ABC123',
         'gsk_abc_123_def',
         'gsk_123456789',
-        'gsk_MixedCase123'
+        'gsk_MixedCase123',
       ];
 
       for (const token of validTokens) {

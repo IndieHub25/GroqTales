@@ -22,14 +22,14 @@ export class FPSMonitor {
       const now = performance.now();
       const delta = now - this.lastTime;
       const currentFPS = 1000 / delta;
-      
+
       this.fps.push(currentFPS);
       this.lastTime = now;
 
       // Calculate average every 60 frames
       if (this.fps.length >= 60) {
         const avgFPS = this.fps.reduce((a, b) => a + b, 0) / this.fps.length;
-        
+
         if (this.callback) {
           this.callback(avgFPS);
         }
@@ -101,7 +101,10 @@ export class AnimationPerformanceObserver {
   getReport() {
     return {
       longTasks: this.longTasks.length,
-      totalDuration: this.longTasks.reduce((sum, task) => sum + task.duration, 0),
+      totalDuration: this.longTasks.reduce(
+        (sum, task) => sum + task.duration,
+        0
+      ),
       tasks: this.longTasks,
     };
   }
@@ -123,12 +126,15 @@ export class LayoutShiftDetector {
     try {
       this.observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          if (entry.entryType === 'layout-shift' && !(entry as any).hadRecentInput) {
+          if (
+            entry.entryType === 'layout-shift' &&
+            !(entry as any).hadRecentInput
+          ) {
             this.clsScore += (entry as any).value;
-            
+
             if ((entry as any).value > 0.1) {
               console.warn(
-                `📏 Significant layout shift detected: ${((entry as any).value).toFixed(4)}`
+                `📏 Significant layout shift detected: ${(entry as any).value.toFixed(4)}`
               );
             }
           }
@@ -179,7 +185,7 @@ export class JankDetector {
       // Frame took longer than 16.67ms (60fps threshold)
       if (delta > 16.67) {
         this.jankCount++;
-        
+
         // Log severe jank (> 33ms = dropped frame)
         if (delta > 33) {
           console.warn(`🎯 Severe jank: ${delta.toFixed(2)}ms (dropped frame)`);
@@ -290,7 +296,9 @@ export class PerformanceMonitor {
 /**
  * React Hook for Performance Monitoring
  */
-export function usePerformanceMonitoring(enabled: boolean = process.env.NODE_ENV === 'development') {
+export function usePerformanceMonitoring(
+  enabled: boolean = process.env.NODE_ENV === 'development'
+) {
   if (typeof window === 'undefined') return;
 
   const monitor = new PerformanceMonitor();
@@ -318,13 +326,16 @@ export function usePerformanceMonitoring(enabled: boolean = process.env.NODE_ENV
 export function estimateLighthouseScore(): number {
   if (typeof window === 'undefined') return 0;
 
-  const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-  
+  const navigation = performance.getEntriesByType(
+    'navigation'
+  )[0] as PerformanceNavigationTiming;
+
   if (!navigation) return 0;
 
   // Calculate key metrics
   const fcp = navigation.responseStart - navigation.fetchStart;
-  const lcp = performance.getEntriesByType('largest-contentful-paint')[0]?.startTime || 0;
+  const lcp =
+    performance.getEntriesByType('largest-contentful-paint')[0]?.startTime || 0;
   const tti = navigation.domInteractive - navigation.fetchStart;
 
   // Rough scoring (simplified)
@@ -332,10 +343,10 @@ export function estimateLighthouseScore(): number {
 
   if (fcp > 1800) score -= 10;
   if (fcp > 3000) score -= 15;
-  
+
   if (lcp > 2500) score -= 15;
   if (lcp > 4000) score -= 20;
-  
+
   if (tti > 3800) score -= 10;
   if (tti > 7300) score -= 15;
 

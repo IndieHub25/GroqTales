@@ -1,7 +1,7 @@
 /**
  * Optimized Framer Motion Animation Variants
  * Centralized animation configurations with performance optimizations
- * 
+ *
  * Performance optimizations applied:
  * - GPU acceleration via transform3d
  * - Reduced motion support
@@ -264,24 +264,26 @@ export const logAnimationPerformance = (animationName: string) => {
   if (process.env.NODE_ENV === 'development') {
     const fps = [];
     let lastTime = performance.now();
-    
+
     const measureFPS = () => {
       const now = performance.now();
       const delta = now - lastTime;
       fps.push(1000 / delta);
       lastTime = now;
-      
+
       if (fps.length > 60) {
         const avgFPS = fps.reduce((a, b) => a + b, 0) / fps.length;
         if (avgFPS < 55) {
-          console.warn(`⚠️ ${animationName} running at ${avgFPS.toFixed(1)} FPS`);
+          console.warn(
+            `⚠️ ${animationName} running at ${avgFPS.toFixed(1)} FPS`
+          );
         }
         fps.length = 0;
       }
-      
+
       requestAnimationFrame(measureFPS);
     };
-    
+
     measureFPS();
   }
 };

@@ -104,7 +104,8 @@ world of creative writing, generative AI, and decentralized technology.
 
 - **Frontend:** Next.js, React, TailwindCSS, shadcn/ui
 - **Backend:** Node.js, Express.js API (Render), Cloudflare Workers
-- **AI:** Groq API (story generation with 70+ configurable parameters), Unsplash API (optional visuals)
+- **AI:** Groq API (story generation with 70+ configurable parameters), Unsplash API (optional
+  visuals)
 - **Blockchain:** Monad SDK, Solidity Smart Contracts
 - **Database:** Supabase (PostgreSQL) with Row Level Security
 - **Hosting:** Cloudflare Pages (frontend), Render (backend API)
@@ -135,10 +136,13 @@ Base API URL (Production): `https://groqtales-backend-api.onrender.com`
 
 ### Health Checks
 
-For continuous uptime monitoring (e.g., UptimeRobot, Render Health Checks, Datadog), always point to the dedicated, robust liveness probe:
+For continuous uptime monitoring (e.g., UptimeRobot, Render Health Checks, Datadog), always point to
+the dedicated, robust liveness probe:
 
-- **Liveness Probe**: `GET /healthz` — Returns an instant `200 OK` bypassing all middleware, rate limiters, and external database latency. Use this for raw "is the server running?" checks.
-- **Deep Diagnostics**: `GET /api/health` — Returns extremely detailed server diagnostics including Supabase connectivity, process memory usage, and uptime. (Subject to rate limits).
+- **Liveness Probe**: `GET /healthz` — Returns an instant `200 OK` bypassing all middleware, rate
+  limiters, and external database latency. Use this for raw "is the server running?" checks.
+- **Deep Diagnostics**: `GET /api/health` — Returns extremely detailed server diagnostics including
+  Supabase connectivity, process memory usage, and uptime. (Subject to rate limits).
 
 ---
 
@@ -149,16 +153,16 @@ To run this project locally, you must set up your environment variables. Create 
 
 ### `.env.local` Setup
 
-| Variable                            | Requirement  | Description                                                          |
-| :---------------------------------- | :----------: | :------------------------------------------------------------------- |
-| `GROQ_API_KEY`                      | **Required** | Powers the AI story generation engine via Groq LPU.                  |
-| `NEXT_PUBLIC_SUPABASE_URL`          | **Required** | Your Supabase project URL for database and authentication.           |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`     | **Required** | Supabase anonymous/public API key for client-side access.            |
-| `MONAD_RPC_URL`                     | **Required** | The RPC endpoint for interacting with the Monad Testnet.             |
-| `NEXT_PUBLIC_API_URL`               | **Required** | Backend API URL (e.g., `https://groqtales-backend-api.onrender.com`).|
-| `NEXT_PUBLIC_UNSPLASH_API_KEY`          |  _Optional_  | API key used for fetching high-quality cover images for stories.     |
-| `NEXT_PUBLIC_CONTRACT_ADDR`         | **Required** | The smart contract address for the deployed NFT collection.          |
-| `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | **Required** | WalletConnect project ID for wallet integration.                 |
+| Variable                                | Requirement  | Description                                                           |
+| :-------------------------------------- | :----------: | :-------------------------------------------------------------------- |
+| `GROQ_API_KEY`                          | **Required** | Powers the AI story generation engine via Groq LPU.                   |
+| `NEXT_PUBLIC_SUPABASE_URL`              | **Required** | Your Supabase project URL for database and authentication.            |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`         | **Required** | Supabase anonymous/public API key for client-side access.             |
+| `MONAD_RPC_URL`                         | **Required** | The RPC endpoint for interacting with the Monad Testnet.              |
+| `NEXT_PUBLIC_API_URL`                   | **Required** | Backend API URL (e.g., `https://groqtales-backend-api.onrender.com`). |
+| `NEXT_PUBLIC_UNSPLASH_API_KEY`          |  _Optional_  | API key used for fetching high-quality cover images for stories.      |
+| `NEXT_PUBLIC_CONTRACT_ADDR`             | **Required** | The smart contract address for the deployed NFT collection.           |
+| `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | **Required** | WalletConnect project ID for wallet integration.                      |
 
 ### 🔑 How to get these keys:
 
@@ -184,11 +188,11 @@ services in one command.
 
 ### Services
 
-| Service   | Image                                   | Port(s)        | Purpose                              |
-| --------- | --------------------------------------- | -------------- | ------------------------------------ |
-| `server`  | Built from `Dockerfile` (Node 22)       | `3000`, `3001` | Next.js frontend + Express backend   |
+| Service  | Image                             | Port(s)        | Purpose                            |
+| -------- | --------------------------------- | -------------- | ---------------------------------- |
+| `server` | Built from `Dockerfile` (Node 22) | `3000`, `3001` | Next.js frontend + Express backend |
 
-| `anvil`   | `ghcr.io/foundry-rs/foundry:v1.0.0`    | `8545`         | Local Ethereum-compatible dev chain   |
+| `anvil` | `ghcr.io/foundry-rs/foundry:v1.0.0` | `8545` | Local Ethereum-compatible dev chain |
 
 ### Quick Start
 
@@ -227,16 +231,15 @@ docker push myregistry.com/groqtales
 Docker Compose sets these automatically. Override them in a `.env` file or in
 `docker-compose.override.yml`:
 
-| Variable                  | Default (Docker)                    |
-| ------------------------- | ----------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL` | `http://supabase:54321`             |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `your-anon-key`                |
-| `NEXT_PUBLIC_RPC_URL`     | `http://anvil:8545`                 |
-| `NODE_ENV`                | `development`                       |
+| Variable                        | Default (Docker)        |
+| ------------------------------- | ----------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | `http://supabase:54321` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `your-anon-key`         |
+| `NEXT_PUBLIC_RPC_URL`           | `http://anvil:8545`     |
+| `NODE_ENV`                      | `development`           |
 
-> [!TIP]
-> For production, set `NODE_ENV=production` and add your `GROQ_API_KEY`, `MONAD_RPC_URL`, and other
-> secrets via environment variables — never bake them into the image.
+> [!TIP] For production, set `NODE_ENV=production` and add your `GROQ_API_KEY`, `MONAD_RPC_URL`, and
+> other secrets via environment variables — never bake them into the image.
 
 ### References
 
@@ -372,49 +375,44 @@ GroqTales/
 
 ### 🏠 Landing Page
 
-   Displays the GroqTales homepage introducing AI-powered storytelling with options to create, mint, and share stories as NFTs.
+Displays the GroqTales homepage introducing AI-powered storytelling with options to create, mint,
+and share stories as NFTs.
 
 <img width="1911" height="920" alt="Screenshot 2026-01-29 182943" src="https://github.com/user-attachments/assets/822cf8a2-4202-4616-9adb-0ea54971c713" />
 
-
 ### ❓ Why GroqTales
- 
-  Highlights the core features of GroqTales including AI generation, blockchain ownership, and creator community.
 
+Highlights the core features of GroqTales including AI generation, blockchain ownership, and creator
+community.
 
 <img width="1892" height="824" alt="Screenshot 2026-01-29 183000" src="https://github.com/user-attachments/assets/481d54f5-e0f0-44f4-a980-9a735ea34a67" />
 
-
 ### 🎭 Story Genres
 
-  Presents available storytelling genres such as Science Fiction, Fantasy, and Romance with key themes and elements.
-
+Presents available storytelling genres such as Science Fiction, Fantasy, and Romance with key themes
+and elements.
 
 <img width="1910" height="915" alt="Screenshot 2026-01-29 183112" src="https://github.com/user-attachments/assets/07c009f2-603c-48c6-a975-74e3430a434c" />
 
-
 ### 👥 Community Feed
 
-  Showcases the community feed where creators share stories, interact, and discover trending content.
-
+Showcases the community feed where creators share stories, interact, and discover trending content.
 
 <img width="1911" height="920" alt="Screenshot 2026-01-29 183127" src="https://github.com/user-attachments/assets/0b4e3e2e-58e9-45d9-9a6b-4da57df97df8" />
 
-
 ### 🛒 NFT Marketplace
 
-  Illustrates the NFT marketplace for browsing and uploading comic and text-based story NFTs.
+Illustrates the NFT marketplace for browsing and uploading comic and text-based story NFTs.
 
 <img width="1913" height="915" alt="Screenshot 2026-01-29 183149" src="https://github.com/user-attachments/assets/a6b4ad86-896d-46b6-a854-31eed5bd0631" />
-
 
 ---
 
 ## 🤝 Contributing
 
-📌 New contributors: Please read our [CONTRIBUTING.md](CONTRIBUTING.md) to understand issue labels, templates, and workflows.
-GroqTales is community-powered! We welcome all contributions—whether you're a developer, designer, writer, or blockchain enthusiast.
-
+📌 New contributors: Please read our [CONTRIBUTING.md](CONTRIBUTING.md) to understand issue labels,
+templates, and workflows. GroqTales is community-powered! We welcome all contributions—whether
+you're a developer, designer, writer, or blockchain enthusiast.
 
 **How You Can Help:**
 
@@ -476,8 +474,11 @@ Thanks to these amazing people for making GroqTales better!
 
 - **Architecture Overview:** [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Comprehensive system design
   and technical architecture
-- **AI Prompt Engineering:** [Wiki/AI-Prompt-Engineering](https://github.com/IndieHub25/GroqTales/wiki/AI-Prompt-Engineering) - AI system prompt parameter reference
-- **Pipelines & Automation:** [PIPELINES.md](docs/PIPELINES.md) - Comprehensive guide for the Cloudflare AI ML rankings, SEO RAG loops, and Admin queues
+- **AI Prompt Engineering:**
+  [Wiki/AI-Prompt-Engineering](https://github.com/IndieHub25/GroqTales/wiki/AI-Prompt-Engineering) -
+  AI system prompt parameter reference
+- **Pipelines & Automation:** [PIPELINES.md](docs/PIPELINES.md) - Comprehensive guide for the
+  Cloudflare AI ML rankings, SEO RAG loops, and Admin queues
 - **Spline 3D Guide:** [SPLINE_GUIDE.md](docs/SPLINE_GUIDE.md) - Essential guide for 3D model
   contributions and protection policy
 - **Project Wiki:** [GitHub Wiki](https://github.com/IndieHub25/GroqTales/wiki) - Detailed guides

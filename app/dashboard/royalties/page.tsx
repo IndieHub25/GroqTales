@@ -1,17 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
 import { ArrowLeft, Wallet } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
 
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EarningsOverview } from '@/components/royalty/earnings-overview';
 import { RevenueChart } from '@/components/royalty/revenue-chart';
-import { TransactionHistory } from '@/components/royalty/transaction-history';
 import { RoyaltyConfigForm } from '@/components/royalty/royalty-config-form';
-import { useWallet } from '@/hooks/use-wallet';
+import { TransactionHistory } from '@/components/royalty/transaction-history';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCreatorTransactions } from '@/hooks/use-royalties';
+import { useWallet } from '@/hooks/use-wallet';
 
 export default function RoyaltiesDashboardPage() {
   const { address, connect } = useWallet();

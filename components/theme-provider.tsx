@@ -1,8 +1,7 @@
 'use client';
 
-import { ThemeProvider as NextThemesProvider } from 'next-themes';
+import { ThemeProvider as NextThemesProvider, useTheme } from 'next-themes';
 import { type ThemeProviderProps } from 'next-themes/dist/types';
-import { useTheme } from 'next-themes';
 import * as React from 'react';
 
 function SystemThemeClassSync() {
@@ -38,7 +37,7 @@ function SystemThemeClassSync() {
         mediaQuery.addEventListener('change', onMediaChange);
       } else if (
         typeof (mediaQuery as unknown as MediaQueryList).addListener ===
-          'function'
+        'function'
       ) {
         (mediaQuery as unknown as MediaQueryList).addListener(onMediaChange);
       }
@@ -57,7 +56,7 @@ function SystemThemeClassSync() {
           mediaQuery.removeEventListener('change', onMediaChange);
         } else if (
           typeof (mediaQuery as unknown as MediaQueryList).removeListener ===
-            'function'
+          'function'
         ) {
           (mediaQuery as unknown as MediaQueryList).removeListener(
             onMediaChange

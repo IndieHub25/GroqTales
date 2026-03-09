@@ -3,9 +3,9 @@
 import { Github, Cookie, Shield, Settings, Info } from 'lucide-react';
 import Link from 'next/link';
 
+import LegalHeader from '@/components/LegalHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import LegalHeader from '@/components/LegalHeader';
 
 // Floating GitHub button component
 import { FloatingGithub } from '../terms/page';

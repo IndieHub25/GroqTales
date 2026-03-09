@@ -8,10 +8,6 @@ export const dynamicParams = true;
 
 import ProfilePageClient from './client';
 
-export default function ProfilePage({
-    params,
-}: {
-    params: { slug: string };
-}) {
-    return <ProfilePageClient slug={params.slug} />;
+export default function ProfilePage({ params }: { params: { slug: string } }) {
+  return <ProfilePageClient slug={params.slug} />;
 }

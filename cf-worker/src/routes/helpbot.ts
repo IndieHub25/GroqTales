@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
 
 type Bindings = {
-    DB: D1Database;
-    KV: KVNamespace;
-    AI: Ai;
+  DB: D1Database;
+  KV: KVNamespace;
+  AI: Ai;
 };
 
 const helpbot = new Hono<{ Bindings: Bindings }>();
@@ -141,49 +141,58 @@ Website: https://groqtales.xyz | GitHub: https://github.com/IndieHub25/GroqTales
 
 // ── Chat endpoint ───────────────────────────────────────────────────
 helpbot.post('/chat', async (c) => {
-    try {
-        const body = await c.req.json();
-        const userMessage = body?.message;
-        const history: Array<{ role: string; content: string }> = body?.history ?? [];
+  try {
+    const body = await c.req.json();
+    const userMessage = body?.message;
+    const history: Array<{ role: string; content: string }> =
+      body?.history ?? [];
 
-        if (!userMessage || typeof userMessage !== 'string' || userMessage.trim().length === 0) {
-            return c.json({ error: 'A non-empty "message" field is required.' }, 400);
-        }
-
-        if (userMessage.length > 2000) {
-            return c.json({ error: 'Message too long. Max 2000 characters.' }, 400);
-        }
-
-        // Build the messages array for the model
-        const messages: Array<{ role: string; content: string }> = [
-            { role: 'system', content: SYSTEM_PROMPT },
-        ];
-
-        // Append conversation history (limit to last 10 turns to stay within context window)
-        const recentHistory = history.slice(-10);
-        for (const msg of recentHistory) {
-            if (msg.role === 'user' || msg.role === 'assistant') {
-                messages.push({ role: msg.role, content: msg.content });
-            }
-        }
-
-        // Append the current user message
-        messages.push({ role: 'user', content: userMessage });
-
-        // Call Cloudflare Workers AI
-        const response = await c.env.AI.run(
-            '@cf/fblgit/una-cybertron-7b-v2-bf16' as any,
-            { messages } as any
-        );
-
-        const reply = (response as any)?.response
-            ?? 'I apologize, but I was unable to generate a response. Please try again or reach out on our Discord for help.';
-
-        return c.json({ reply });
-    } catch (error) {
-        console.error('MADHAVA HelpBot error:', error);
-        return c.json({ error: 'Something went wrong. Please try again later.' }, 500);
+    if (
+      !userMessage ||
+      typeof userMessage !== 'string' ||
+      userMessage.trim().length === 0
+    ) {
+      return c.json({ error: 'A non-empty "message" field is required.' }, 400);
     }
+
+    if (userMessage.length > 2000) {
+      return c.json({ error: 'Message too long. Max 2000 characters.' }, 400);
+    }
+
+    // Build the messages array for the model
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: SYSTEM_PROMPT },
+    ];
+
+    // Append conversation history (limit to last 10 turns to stay within context window)
+    const recentHistory = history.slice(-10);
+    for (const msg of recentHistory) {
+      if (msg.role === 'user' || msg.role === 'assistant') {
+        messages.push({ role: msg.role, content: msg.content });
+      }
+    }
+
+    // Append the current user message
+    messages.push({ role: 'user', content: userMessage });
+
+    // Call Cloudflare Workers AI
+    const response = await c.env.AI.run(
+      '@cf/fblgit/una-cybertron-7b-v2-bf16' as any,
+      { messages } as any
+    );
+
+    const reply =
+      (response as any)?.response ??
+      'I apologize, but I was unable to generate a response. Please try again or reach out on our Discord for help.';
+
+    return c.json({ reply });
+  } catch (error) {
+    console.error('MADHAVA HelpBot error:', error);
+    return c.json(
+      { error: 'Something went wrong. Please try again later.' },
+      500
+    );
+  }
 });
 
 export default helpbot;

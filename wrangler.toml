@@ -50,8 +50,9 @@ compatibility_flags = ["nodejs_compat"]
 #   NEXT_PUBLIC_SUPABASE_ANON_KEY         = <secret>
 #   JWT_SECRET                            = <secret>
 #   NEXTAUTH_SECRET                       = <secret>
-#   MONAD_TEST_RPC_URL                    = <secret>
-#   MINTER_PRIVATE_KEY                    = <secret>   ← NEVER expose; set as secret
+#   ALCHEMY_ETH_MAINNET_HTTP_URL          = <secret>   ← Ethereum RPC via Alchemy
+#   MINT_AUTHORITY_PRIVATE_KEY            = <secret>   ← NEVER expose; set as secret
+#   NEXT_PUBLIC_CONTRACT_ADDR             = <deployed-contract-address>
 
 # ── Local dev (wrangler pages dev) ───────────────────────────
 [vars]
@@ -60,7 +61,7 @@ NEXT_PUBLIC_BUILD_MODE = "false"
 
 # ── Preview environment ──────────────────────────────────────
 [env.preview]
-name = "groqtales-preview"
+name = "groqtales"
 
 [env.preview.vars]
 NODE_ENV = "production"

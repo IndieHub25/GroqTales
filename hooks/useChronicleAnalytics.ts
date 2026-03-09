@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+
 import { StoryStats } from '../types/analytics';
 import { calculateStoryInsights } from '../utils/analyticsEngine';
 
@@ -17,14 +18,14 @@ export const useChronicleAnalytics = (userData: any[]) => {
   useEffect(() => {
     setLoading(true);
     const parsedData = JSON.parse(memoizedData);
-    
+
     if (parsedData && parsedData.length > 0) {
       const results = calculateStoryInsights(parsedData);
       setInsights(results);
     } else {
       setInsights(null);
     }
-    
+
     setLoading(false);
   }, [memoizedData]);
 

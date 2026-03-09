@@ -46,13 +46,12 @@ jobs:
         # Lower threshold temporarily because this PR focuses on dev environment setup,
         # not frontend performance optimizations. Performance tuning will be handled separately.
         run: |
+          npx -y serve@latest out -l 3000 &
+          sleep 5
           lhci autorun \
-            --collect.startServerCommand="npx next start -p 3000" \
-            --collect.startServerReadyPattern="Ready" \
-            --collect.startServerReadyTimeout=30000 \
-            --collect.numberOfRuns=3 \
             --collect.url="http://localhost:3000/" \
             --collect.url="http://localhost:3000/nft-gallery" \
+            --collect.numberOfRuns=3 \
             --collect.settings.chromeFlags="--no-sandbox --disable-dev-shm-usage --headless" \
             --assert.assertions.categories:performance="error" \
             --assert.assertions.categories:performance.minScore=0.5 \

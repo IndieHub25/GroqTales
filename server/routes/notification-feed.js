@@ -59,39 +59,46 @@ const { authRequired } = require('../middleware/auth');
  *         description: Failed to fetch notifications from upstream.
  */
 router.get('/notifications/me', authRequired, async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?.sub;
+    const unread = req.query.unread || 50;
+    const limit = req.query.limit || 30;
+
+    const workerUrl =
+      process.env.CF_WORKER_URL ||
+      'https://groqtales-backend-workers.mantejsingh.workers.dev';
+    const token = req.headers.authorization?.split(' ')[1];
+
     try {
-        const userId = req.user?.id || req.user?.sub;
-        const unread = req.query.unread || 50;
-        const limit = req.query.limit || 30;
-
-        const workerUrl = process.env.CF_WORKER_URL || 'https://groqtales-backend-workers.mantejsingh.workers.dev';
-        const token = req.headers.authorization?.split(' ')[1];
-
-        try {
-            const response = await axios.get(
-                `${workerUrl}/api/feeds/notifications/${userId}?unread=${unread}&limit=${limit}`,
-                {
-                    headers: {
-                        ...(token && { Authorization: `Bearer ${token}` }),
-                    },
-                    validateStatus: false,
-                    timeout: 10000,
-                }
-            );
-
-            if (response.status === 200) {
-                return res.json(response.data);
-            }
-        } catch (cfErr) {
-            logger.warn('CF Worker notification fetch failed, falling back to empty:', cfErr.message);
+      const response = await axios.get(
+        `${workerUrl}/api/feeds/notifications/${userId}?unread=${unread}&limit=${limit}`,
+        {
+          headers: {
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+          validateStatus: false,
+          timeout: 10000,
         }
+      );
 
-        // Fallback: return empty data if CF Worker is unavailable
-        return res.json({ data: [] });
-    } catch (error) {
-        logger.error('Error fetching notifications:', error.message);
-        res.status(502).json({ error: 'Failed to fetch notifications', message: error.message });
+      if (response.status === 200) {
+        return res.json(response.data);
+      }
+    } catch (cfErr) {
+      logger.warn(
+        'CF Worker notification fetch failed, falling back to empty:',
+        cfErr.message
+      );
     }
+
+    // Fallback: return empty data if CF Worker is unavailable
+    return res.json({ data: [] });
+  } catch (error) {
+    logger.error('Error fetching notifications:', error.message);
+    res
+      .status(502)
+      .json({ error: 'Failed to fetch notifications', message: error.message });
+  }
 });
 
 /**
@@ -116,33 +123,37 @@ router.get('/notifications/me', authRequired, async (req, res) => {
  *         description: Unauthorized.
  */
 router.post('/notifications/:id/read', authRequired, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const workerUrl = process.env.CF_WORKER_URL || 'https://groqtales-backend-workers.mantejsingh.workers.dev';
-        const token = req.headers.authorization?.split(' ')[1];
+  try {
+    const { id } = req.params;
+    const workerUrl =
+      process.env.CF_WORKER_URL ||
+      'https://groqtales-backend-workers.mantejsingh.workers.dev';
+    const token = req.headers.authorization?.split(' ')[1];
 
-        try {
-            const response = await axios.post(
-                `${workerUrl}/api/feeds/notifications/${id}/read`,
-                {},
-                {
-                    headers: {
-                        ...(token && { Authorization: `Bearer ${token}` }),
-                        'Content-Type': 'application/json',
-                    },
-                    validateStatus: false,
-                    timeout: 10000,
-                }
-            );
-            return res.status(response.status).json(response.data || { success: true });
-        } catch (cfErr) {
-            logger.warn('CF Worker mark-read failed:', cfErr.message);
-            return res.json({ success: true }); // Graceful fallback
+    try {
+      const response = await axios.post(
+        `${workerUrl}/api/feeds/notifications/${id}/read`,
+        {},
+        {
+          headers: {
+            ...(token && { Authorization: `Bearer ${token}` }),
+            'Content-Type': 'application/json',
+          },
+          validateStatus: false,
+          timeout: 10000,
         }
-    } catch (error) {
-        logger.error('Error marking notification read:', error.message);
-        res.status(500).json({ error: 'Failed to mark notification as read' });
+      );
+      return res
+        .status(response.status)
+        .json(response.data || { success: true });
+    } catch (cfErr) {
+      logger.warn('CF Worker mark-read failed:', cfErr.message);
+      return res.json({ success: true }); // Graceful fallback
     }
+  } catch (error) {
+    logger.error('Error marking notification read:', error.message);
+    res.status(500).json({ error: 'Failed to mark notification as read' });
+  }
 });
 
 /**
@@ -161,33 +172,37 @@ router.post('/notifications/:id/read', authRequired, async (req, res) => {
  *         description: Unauthorized.
  */
 router.post('/notifications/mark-all-read', authRequired, async (req, res) => {
-    try {
-        const userId = req.user?.id || req.user?.sub;
-        const workerUrl = process.env.CF_WORKER_URL || 'https://groqtales-backend-workers.mantejsingh.workers.dev';
-        const token = req.headers.authorization?.split(' ')[1];
+  try {
+    const userId = req.user?.id || req.user?.sub;
+    const workerUrl =
+      process.env.CF_WORKER_URL ||
+      'https://groqtales-backend-workers.mantejsingh.workers.dev';
+    const token = req.headers.authorization?.split(' ')[1];
 
-        try {
-            const response = await axios.post(
-                `${workerUrl}/api/feeds/notifications/mark-all-read`,
-                { userId },
-                {
-                    headers: {
-                        ...(token && { Authorization: `Bearer ${token}` }),
-                        'Content-Type': 'application/json',
-                    },
-                    validateStatus: false,
-                    timeout: 10000,
-                }
-            );
-            return res.status(response.status).json(response.data || { success: true });
-        } catch (cfErr) {
-            logger.warn('CF Worker mark-all-read failed:', cfErr.message);
-            return res.json({ success: true }); // Graceful fallback
+    try {
+      const response = await axios.post(
+        `${workerUrl}/api/feeds/notifications/mark-all-read`,
+        { userId },
+        {
+          headers: {
+            ...(token && { Authorization: `Bearer ${token}` }),
+            'Content-Type': 'application/json',
+          },
+          validateStatus: false,
+          timeout: 10000,
         }
-    } catch (error) {
-        logger.error('Error marking all notifications read:', error.message);
-        res.status(500).json({ error: 'Failed to mark all notifications as read' });
+      );
+      return res
+        .status(response.status)
+        .json(response.data || { success: true });
+    } catch (cfErr) {
+      logger.warn('CF Worker mark-all-read failed:', cfErr.message);
+      return res.json({ success: true }); // Graceful fallback
     }
+  } catch (error) {
+    logger.error('Error marking all notifications read:', error.message);
+    res.status(500).json({ error: 'Failed to mark all notifications as read' });
+  }
 });
 
 module.exports = router;

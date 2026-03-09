@@ -18,6 +18,7 @@ import React, { useState, useCallback } from 'react';
 import { useWeb3 } from '@/components/providers/web3-provider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +26,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { truncateAddress } from '@/lib/utils';
 
@@ -77,7 +77,11 @@ export default function WalletConnect() {
       10: 'https://optimistic.etherscan.io',
     };
     const explorerUrl = explorerUrls[chainId] || 'https://etherscan.io';
-    const newWindow = window.open(`${explorerUrl}/address/${account}`, '_blank', 'noopener,noreferrer');
+    const newWindow = window.open(
+      `${explorerUrl}/address/${account}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
     if (newWindow) newWindow.opener = null;
   }, [account, chainId]);
 
@@ -93,7 +97,7 @@ export default function WalletConnect() {
       title: 'WalletConnect Initialization',
       description: 'Opening mobile QR scan modal...',
     });
-    console.log("Initiating WalletConnect mobile flow...");
+    console.log('Initiating WalletConnect mobile flow...');
     // await initiateWalletConnectFlow()
   };
 
@@ -125,20 +129,28 @@ export default function WalletConnect() {
               <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-50 pointer-events-none" />
               <div className="flex justify-between items-center relative z-20">
                 <div>
-                  <h2 className="text-xl font-medium tracking-tight mb-1">Connect Wallet</h2>
-                  <p className="text-sm text-white/50">Select what app to use to connect.</p>
+                  <h2 className="text-xl font-medium tracking-tight mb-1">
+                    Connect Wallet
+                  </h2>
+                  <p className="text-sm text-white/50">
+                    Select what app to use to connect.
+                  </p>
                 </div>
               </div>
             </div>
 
             <div className="p-6 space-y-3 relative z-10 bg-white/[0.02]">
-              <button 
+              <button
                 onClick={handleMetaMaskConnect}
                 className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-[#F6851B]/20 flex items-center justify-center border border-[#F6851B]/30">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask" className="w-6 h-6" />
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"
+                      alt="MetaMask"
+                      className="w-6 h-6"
+                    />
                   </div>
                   <div className="text-left">
                     <h3 className="font-semibold text-white">MetaMask</h3>
@@ -150,7 +162,7 @@ export default function WalletConnect() {
                 </div>
               </button>
 
-              <button 
+              <button
                 disabled
                 aria-disabled="true"
                 title="Coming Soon"
@@ -158,7 +170,11 @@ export default function WalletConnect() {
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
-                    <img src="https://explorer-api.walletconnect.com/w3m/v1/getWalletImage/7a33d7f1-3d12-4b5c-f3ee-5cd83cb1b500?projectId=c98dbfa8da03b44b8296a86c6a7e0da3" alt="WalletConnect" className="w-6 h-6 rounded-md" />
+                    <img
+                      src="https://explorer-api.walletconnect.com/w3m/v1/getWalletImage/7a33d7f1-3d12-4b5c-f3ee-5cd83cb1b500?projectId=c98dbfa8da03b44b8296a86c6a7e0da3"
+                      alt="WalletConnect"
+                      className="w-6 h-6 rounded-md"
+                    />
                   </div>
                   <div className="text-left">
                     <h3 className="font-semibold text-white">WalletConnect</h3>
@@ -173,7 +189,10 @@ export default function WalletConnect() {
 
             <div className="p-4 bg-white/5 border-t border-white/5 flex items-center justify-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <p className="text-[11px] text-white/40 font-medium">We never store your private keys. Transactions happen securely in your wallet.</p>
+              <p className="text-[11px] text-white/40 font-medium">
+                We never store your private keys. Transactions happen securely
+                in your wallet.
+              </p>
             </div>
           </DialogContent>
         </Dialog>
@@ -193,7 +212,7 @@ export default function WalletConnect() {
           <ChevronDown className="h-4 w-4 opacity-50 ml-1" />
         </Button>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuContent
         align="end"
         className="w-64 p-2 bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl text-white"
@@ -201,11 +220,18 @@ export default function WalletConnect() {
       >
         <div className="p-3 mb-2 rounded-xl bg-white/5 border border-white/5 flex items-center gap-3">
           <Avatar className="h-10 w-10 border border-white/20">
-            <AvatarImage src={`https://api.dicebear.com/7.x/identicon/svg?seed=${account}`} alt="Avatar" />
-            <AvatarFallback className="bg-white/10 text-white text-xs">{account?.slice(2, 4).toUpperCase()}</AvatarFallback>
+            <AvatarImage
+              src={`https://api.dicebear.com/7.x/identicon/svg?seed=${account}`}
+              alt="Avatar"
+            />
+            <AvatarFallback className="bg-white/10 text-white text-xs">
+              {account?.slice(2, 4).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
           <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-semibold truncate text-white">{ensName || truncateAddress(account)}</span>
+            <span className="text-sm font-semibold truncate text-white">
+              {ensName || truncateAddress(account)}
+            </span>
             <span className="text-xs text-white/50 bg-white/5 px-2 py-0.5 rounded-full w-fit mt-1 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               {networkName || 'Ethereum'}
@@ -216,7 +242,8 @@ export default function WalletConnect() {
         <div className="p-3 mb-2 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20">
           <div className="text-xs text-white/50 mb-1">Balance</div>
           <div className="text-xl font-medium tracking-tight flex items-baseline gap-1">
-            {balance} <span className="text-xs font-semibold text-blue-400">ETH</span>
+            {balance}{' '}
+            <span className="text-xs font-semibold text-blue-400">ETH</span>
           </div>
         </div>
 

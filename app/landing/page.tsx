@@ -22,14 +22,12 @@ import { LoadingAnimation } from '@/components/loading-animation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 
-
 export default function LandingPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [account, setAccount] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
-
 
   useEffect(() => {
     // Simulate loading
@@ -63,7 +61,6 @@ export default function LandingPage() {
           variant: 'destructive',
         });
       }
-
     } catch (error) {
       console.error('Error connecting to MetaMask', error);
       toast({
@@ -72,7 +69,6 @@ export default function LandingPage() {
         variant: 'destructive',
       });
     } finally {
-
       setIsConnecting(false);
     }
   };
@@ -231,10 +227,9 @@ export default function LandingPage() {
               </div>
               <h4 className="text-lg font-semibold mb-2">AI-Powered Writing</h4>
               <p className="text-sm text-muted-foreground">
-                Get creative suggestions and overcome writer&apos;s block with AI
-                assistance.
+                Get creative suggestions and overcome writer&apos;s block with
+                AI assistance.
               </p>
-
             </div>
 
             <div className="bg-card border border-border p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">

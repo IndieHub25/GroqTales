@@ -48,12 +48,14 @@ jobs:
           NEXT_PUBLIC_SPLASH_IMAGE_URL: 'https://groqtales.xyz/splash.jpg'
           NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR: '#1a1a2e'
 
+      - name: Install Wrangler
+        run: npm install -g wrangler@3.99.0
+
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy out --project-name=groqtales --branch=main
+        run: wrangler pages deploy --project-name=groqtales --branch=main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-preview:
     if: github.ref_name != 'main'
@@ -61,11 +63,18 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: preview
-      url: https://groqtales-preview.pages.dev
+      url: ${{ steps.deploy.outputs.url }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Compute branch slug
+        id: slug
+        run: |
+          SLUG=$(echo "${{ github.ref_name }}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-//;s/-$//')
+          echo "value=$SLUG" >> $GITHUB_OUTPUT
+          echo "preview_url=https://${SLUG}.groqtales.pages.dev" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
@@ -83,7 +92,7 @@ jobs:
         run: npm run cf-build
         env:
           NEXT_PUBLIC_BUILD_MODE: 'true'
-          NEXT_PUBLIC_URL: 'https://groqtales-preview.pages.dev'
+          NEXT_PUBLIC_URL: ${{ steps.slug.outputs.preview_url }}
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -93,9 +102,14 @@ jobs:
           NEXT_PUBLIC_SPLASH_IMAGE_URL: 'https://groqtales.xyz/splash.jpg'
           NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR: '#1a1a2e'
 
+      - name: Install Wrangler
+        run: npm install -g wrangler@3.99.0
+
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy out --project-name=groqtales --branch=${{ github.ref_name }}
+        id: deploy
+        run: |
+          wrangler pages deploy --project-name=groqtales --branch="${{ github.ref_name }}"
+          echo "url=${{ steps.slug.outputs.preview_url }}" >> $GITHUB_OUTPUT
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

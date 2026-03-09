@@ -77,9 +77,11 @@ router.get('/', async (req, res) => {
 
     // Sanitize query filters to prevent NoSQL injection
     const allowedStatuses = ['draft', 'published', 'archived'];
-    if (status && allowedStatuses.includes(String(status))) query.status = String(status);
+    if (status && allowedStatuses.includes(String(status)))
+      query.status = String(status);
     const allowedVisibility = ['public', 'private', 'unlisted'];
-    if (visibility && allowedVisibility.includes(String(visibility))) query.visibility = String(visibility);
+    if (visibility && allowedVisibility.includes(String(visibility)))
+      query.visibility = String(visibility);
     if (creator) query.creator = String(creator);
     if (genre) query.genres = String(genre);
     if (tag) query.tags = String(tag);
@@ -90,12 +92,23 @@ router.get('/', async (req, res) => {
     }
 
     // Validate sort to prevent injection
-    const allowedSortFields = ['createdAt', '-createdAt', 'title', '-title', 'views', '-views', 'updatedAt', '-updatedAt'];
-    const safeSort = allowedSortFields.includes(String(sort)) ? String(sort) : '-createdAt';
+    const allowedSortFields = [
+      'createdAt',
+      '-createdAt',
+      'title',
+      '-title',
+      'views',
+      '-views',
+      'updatedAt',
+      '-updatedAt',
+    ];
+    const safeSort = allowedSortFields.includes(String(sort))
+      ? String(sort)
+      : '-createdAt';
 
     const comics = await Comic.find(query)
       .limit(Math.min(parseInt(limit) || 10, 100))
-      .skip(((parseInt(page) || 1) - 1) * (Math.min(parseInt(limit) || 10, 100)))
+      .skip(((parseInt(page) || 1) - 1) * Math.min(parseInt(limit) || 10, 100))
       .sort(safeSort)
       .populate('creator', 'firstName lastName email')
       .lean()
@@ -523,7 +536,16 @@ router.patch('/:id', authRequired, async (req, res) => {
       });
     }
     // Only allow safe fields to be updated (prevent overwriting creator, slug, etc.)
-    const allowedUpdates = ['title', 'description', 'genres', 'tags', 'language', 'visibility', 'readingDirection', 'ageRating'];
+    const allowedUpdates = [
+      'title',
+      'description',
+      'genres',
+      'tags',
+      'language',
+      'visibility',
+      'readingDirection',
+      'ageRating',
+    ];
     for (const key of allowedUpdates) {
       if (updates[key] !== undefined) {
         comic[key] = updates[key];

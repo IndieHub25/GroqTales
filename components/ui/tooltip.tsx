@@ -26,18 +26,33 @@ const Tooltip = ({
   return <>{children}</>;
 };
 
-interface TooltipTriggerProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface TooltipTriggerProps extends React.HTMLAttributes<HTMLSpanElement> {
   asChild?: boolean;
 }
-const TooltipTrigger = React.forwardRef<HTMLButtonElement, TooltipTriggerProps>(
-  ({ className, asChild = false, ...props }, ref) => {
+const TooltipTrigger = React.forwardRef<HTMLSpanElement, TooltipTriggerProps>(
+  ({ className, asChild = false, children, ...props }, ref) => {
+    // When asChild is true, render children directly to avoid button nesting issues
+    if (asChild && React.isValidElement(children)) {
+      return React.cloneElement(children as React.ReactElement, {
+        ref,
+        className: cn(
+          (children as React.ReactElement).props?.className,
+          className
+        ),
+        ...props,
+      });
+    }
     return (
-      <button
+      <span
         ref={ref}
-        className={cn('inline-flex items-center justify-center', className)}
+        className={cn(
+          'inline-flex items-center justify-center cursor-pointer',
+          className
+        )}
         {...props}
-      />
+      >
+        {children}
+      </span>
     );
   }
 );
@@ -45,9 +60,10 @@ TooltipTrigger.displayName = 'TooltipTrigger';
 
 interface TooltipContentProps extends React.HTMLAttributes<HTMLDivElement> {
   sideOffset?: number;
+  side?: 'top' | 'right' | 'bottom' | 'left';
 }
 const TooltipContent = React.forwardRef<HTMLDivElement, TooltipContentProps>(
-  ({ className, sideOffset = 4, ...props }, ref) => {
+  ({ className, sideOffset = 4, side = 'top', ...props }, ref) => {
     return (
       <div
         ref={ref}

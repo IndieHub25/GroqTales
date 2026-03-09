@@ -160,7 +160,10 @@ function FAQContent() {
               <Users className="w-4 h-4" />
               Community
             </TabsTrigger>
-            <TabsTrigger value="troubleshooting" className="flex items-center gap-2">
+            <TabsTrigger
+              value="troubleshooting"
+              className="flex items-center gap-2"
+            >
               <Shield className="w-4 h-4" />
               Troubleshooting
             </TabsTrigger>
@@ -433,25 +436,32 @@ function FAQContent() {
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full">
-
-                  <AccordionItem value="wallet-not-connecting" id="wallet-not-connecting">
+                  <AccordionItem
+                    value="wallet-not-connecting"
+                    id="wallet-not-connecting"
+                  >
                     <AccordionTrigger>
                       What should I do if my wallet doesn’t connect?
                     </AccordionTrigger>
                     <AccordionContent>
                       Ensure your wallet extension is installed and unlocked.
-                      Confirm you are on a supported network and refresh the page.
-                      If the issue persists, clear browser cache or try another browser.
+                      Confirm you are on a supported network and refresh the
+                      page. If the issue persists, clear browser cache or try
+                      another browser.
                     </AccordionContent>
                   </AccordionItem>
 
-                  <AccordionItem value="transaction-pending" id="transaction-pending">
+                  <AccordionItem
+                    value="transaction-pending"
+                    id="transaction-pending"
+                  >
                     <AccordionTrigger>
                       Why is my transaction pending?
                     </AccordionTrigger>
                     <AccordionContent>
-                      Transactions may remain pending due to network congestion or low gas fees.
-                      You can speed up the transaction from your wallet interface or wait for confirmation.
+                      Transactions may remain pending due to network congestion
+                      or low gas fees. You can speed up the transaction from
+                      your wallet interface or wait for confirmation.
                     </AccordionContent>
                   </AccordionItem>
 
@@ -460,17 +470,21 @@ function FAQContent() {
                       What if my NFT minting fails?
                     </AccordionTrigger>
                     <AccordionContent>
-                      Minting may fail due to insufficient balance or incorrect network.
-                      Ensure you have enough funds for gas and are connected to the correct network.
+                      Minting may fail due to insufficient balance or incorrect
+                      network. Ensure you have enough funds for gas and are
+                      connected to the correct network.
                     </AccordionContent>
                   </AccordionItem>
-                  <AccordionItem value="profile-not-loading" id="profile-not-loading">
+                  <AccordionItem
+                    value="profile-not-loading"
+                    id="profile-not-loading"
+                  >
                     <AccordionTrigger>
                       Why is my profile not loading?
                     </AccordionTrigger>
                     <AccordionContent>
-                      This can occur due to temporary backend issues.
-                      Try refreshing the page or reconnecting your wallet.
+                      This can occur due to temporary backend issues. Try
+                      refreshing the page or reconnecting your wallet.
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -493,7 +507,11 @@ function FAQContent() {
               { value: 'stories', icon: BookOpen, label: 'Stories' },
               { value: 'creators', icon: PenSquare, label: 'Creators' },
               { value: 'community', icon: Users, label: 'Community' },
-              { value: 'troubleshooting', icon: Shield, label: 'Troubleshooting' },
+              {
+                value: 'troubleshooting',
+                icon: Shield,
+                label: 'Troubleshooting',
+              },
             ].map(({ value, icon: Icon, label }) => (
               <button
                 key={value}

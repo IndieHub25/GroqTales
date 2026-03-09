@@ -56,7 +56,7 @@ app.get('/', (req, res) => {
     message: 'Welcome to the GroqTales SDK Service',
     status: 'online',
     version: process.env.SDK_VERSION || 'v1.0.0',
-    health: '/sdk/health'
+    health: '/sdk/health',
   });
 });
 

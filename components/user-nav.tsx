@@ -1,18 +1,26 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { Wallet, User, Settings, LogOut, BookOpen, Bell, Shield, Eye, EyeOff } from 'lucide-react';
+import {
+  Wallet,
+  User,
+  Settings,
+  LogOut,
+  BookOpen,
+  Bell,
+  Shield,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 import Link from 'next/link';
-import React from 'react';
-import { fetchNotifications } from '@/lib/feeds-client';
+import React, { useEffect, useState } from 'react';
 
 // Simple deterministic hash to avoid sending raw PII or identifiers to third parties
 const generateSeed = (input?: string) => {
-  if (!input) return "default";
+  if (!input) return 'default';
   let hash = 0;
   for (let i = 0; i < input.length; i++) {
     const char = input.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash |= 0;
   }
   return Math.abs(hash).toString(16);
@@ -31,10 +39,10 @@ import {
   DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/components/ui/use-toast';
-import { truncateAddress } from '@/lib/utils';
-import { createClient } from '@/lib/supabase/client';
 import { useUserRole } from '@/hooks/use-user-role';
 import { roleBadgeStyles } from '@/lib/rbac';
+import { createClient } from '@/lib/supabase/client';
+import { truncateAddress } from '@/lib/utils';
 
 export function UserNav() {
   const { account, connectWallet, disconnectWallet } = useWeb3();
@@ -42,14 +50,27 @@ export function UserNav() {
   const [dbUser, setDbUser] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
   const supabase = React.useMemo(() => createClient(), []);
-  const { role, isAdmin, isModerator, isModOrAdmin, isOverridden, toggleViewMode } = useUserRole();
+  const {
+    role,
+    isAdmin,
+    isModerator,
+    isModOrAdmin,
+    isOverridden,
+    toggleViewMode,
+  } = useUserRole();
 
   useEffect(() => {
     // Check Supabase session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
-        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url, id: session.user.id });
+        setDbUser({
+          username:
+            session.user.user_metadata?.username ||
+            session.user.email?.split('@')[0],
+          avatar: session.user.user_metadata?.avatar_url,
+          id: session.user.id,
+        });
       }
     });
 
@@ -58,7 +79,13 @@ export function UserNav() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session?.user) {
-        setDbUser({ username: session.user.user_metadata?.username || session.user.email?.split('@')[0], avatar: session.user.user_metadata?.avatar_url, id: session.user.id });
+        setDbUser({
+          username:
+            session.user.user_metadata?.username ||
+            session.user.email?.split('@')[0],
+          avatar: session.user.user_metadata?.avatar_url,
+          id: session.user.id,
+        });
       } else if (!account) {
         setDbUser(null);
       }
@@ -69,61 +96,22 @@ export function UserNav() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (account || session) {
+      if (account) {
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
-          let fetchUrl = `${baseUrl}/api/v1/users/profile/${account}`;
-          const headers: Record<string, string> = {};
-
-          if (session) {
-            const token = session.access_token;
-            if (token) {
-              headers['Authorization'] = `Bearer ${token}`;
-            }
-            fetchUrl = `${baseUrl}/api/v1/users/profile`;
-          }
-
-          const res = await fetch(fetchUrl, { headers });
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || ''}/api/v1/users/profile/${account}`
+          );
           if (res.ok) {
             const data = await res.json();
-            setDbUser(data.data?.user || data.data || data.user || data);
+            setDbUser(data.user);
           }
         } catch (err) {
-          console.error("Failed to fetch nav user data", err);
+          console.error('Failed to fetch nav user data', err);
         }
       }
     };
-    if (account || session) fetchUserData();
-
-    // Listen for global profile updates (e.g. from settings page)
-    const handleProfileUpdate = () => fetchUserData();
-    window.addEventListener('profileUpdated', handleProfileUpdate);
-
-    return () => {
-      window.removeEventListener('profileUpdated', handleProfileUpdate);
-    };
-  }, [account, session]);
-
-  // Notification badge count — poll every 20s
-  const [unreadCount, setUnreadCount] = useState(0);
-  const notifIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const loadUnreadCount = useCallback(async () => {
-    try {
-      const notifs = await fetchNotifications(true, 50);
-      setUnreadCount(notifs.filter(n => !n.read).length);
-    } catch { /* ignore */ }
-  }, []);
-
-  useEffect(() => {
-    if (account || session) {
-      loadUnreadCount();
-      notifIntervalRef.current = setInterval(loadUnreadCount, 20_000);
-    }
-    return () => {
-      if (notifIntervalRef.current) clearInterval(notifIntervalRef.current);
-    };
-  }, [account, session, loadUnreadCount]);
+    if (account) fetchUserData();
+  }, [account]);
 
   const handleLogout = async () => {
     if (account) await disconnectWallet();
@@ -147,10 +135,22 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" aria-label="User menu" className="relative h-8 w-8 rounded-full">
+        <Button
+          variant="ghost"
+          aria-label="User menu"
+          className="relative h-8 w-8 rounded-full"
+        >
           <Avatar className="h-8 w-8">
-            <AvatarImage src={dbUser?.avatar || `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(generateSeed(dbUser?.id || account || session?.user?.id))}`} alt="User Avatar" />
-            <AvatarFallback>{dbUser?.username?.slice(0, 2).toUpperCase() || "U"}</AvatarFallback>
+            <AvatarImage
+              src={
+                dbUser?.avatar ||
+                `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(generateSeed(dbUser?.id || account || session?.user?.id))}`
+              }
+              alt="User Avatar"
+            />
+            <AvatarFallback>
+              {dbUser?.username?.slice(0, 2).toUpperCase() || 'U'}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -161,7 +161,9 @@ export function UserNav() {
         <DropdownMenuLabel className="bg-emerald-500/10 text-emerald-400 border-b border-white/10 py-3 font-semibold uppercase tracking-wider text-xs flex items-center justify-between">
           <span>User Controls</span>
           {role !== 'user' && (
-            <span className={`text-[9px] px-1.5 py-0.5 rounded border ${roleBadgeStyles[role].className}`}>
+            <span
+              className={`text-[9px] px-1.5 py-0.5 rounded border ${roleBadgeStyles[role].className}`}
+            >
               {roleBadgeStyles[role].label}
             </span>
           )}
@@ -238,11 +240,6 @@ export function UserNav() {
               <Link href="/notifications" className="flex items-center w-full">
                 <Bell className="mr-2 h-4 w-4" />
                 <span>Notifications</span>
-                {unreadCount > 0 && (
-                  <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold rounded-full bg-violet-500 text-white">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
-                )}
               </Link>
             </DropdownMenuItem>
 
@@ -263,7 +260,10 @@ export function UserNav() {
                 asChild
                 className="cursor-pointer focus:bg-amber-500/10 focus:text-amber-400 rounded-none transition-all uppercase py-2 text-amber-400"
               >
-                <Link href="/admin/moderation" className="flex items-center w-full">
+                <Link
+                  href="/admin/moderation"
+                  className="flex items-center w-full"
+                >
                   <Shield className="mr-2 h-4 w-4" />
                   <span>Moderation</span>
                 </Link>
@@ -276,9 +276,15 @@ export function UserNav() {
                 className="cursor-pointer focus:bg-blue-500/10 focus:text-blue-400 rounded-none transition-all uppercase py-2 text-blue-400"
               >
                 {isOverridden ? (
-                  <><Eye className="mr-2 h-4 w-4" /><span>Switch to Admin View</span></>
+                  <>
+                    <Eye className="mr-2 h-4 w-4" />
+                    <span>Switch to Admin View</span>
+                  </>
                 ) : (
-                  <><EyeOff className="mr-2 h-4 w-4" /><span>Switch to User View</span></>
+                  <>
+                    <EyeOff className="mr-2 h-4 w-4" />
+                    <span>Switch to User View</span>
+                  </>
                 )}
               </DropdownMenuItem>
             )}
@@ -309,7 +315,11 @@ export function UserNav() {
                 Security Info
               </p>
               <div className="text-[10px] text-white/40 leading-snug">
-                Last Login: {session?.user?.last_sign_in_at ? new Date(session.user.last_sign_in_at).toLocaleString() : 'Active Wallet Session'} <br />
+                Last Login:{' '}
+                {session?.user?.last_sign_in_at
+                  ? new Date(session.user.last_sign_in_at).toLocaleString()
+                  : 'Active Wallet Session'}{' '}
+                <br />
                 Access: {account ? 'On-Chain Web3' : 'Off-Chain Auth'}
               </div>
             </div>
