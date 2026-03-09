@@ -13,7 +13,7 @@
  */
 
 const path = require('path');
-const { createClient } = require(path.resolve(__dirname, '../server/node_modules/@supabase/supabase-js'));
+const { createClient } = require('@supabase/supabase-js');
 
 // Load env from root .env.local
 require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
@@ -181,7 +181,7 @@ async function seed() {
     const { data: existing } = await supabase
         .from('stories')
         .select('id, title')
-        .eq('title', DEMO_STORY.title)
+        .eq('source', 'demo')
         .maybeSingle();
 
     if (existing) {

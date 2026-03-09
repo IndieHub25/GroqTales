@@ -33,7 +33,7 @@ services:
       - key: CORS_ORIGIN
         value: https://groqtales.xyz
       - key: API_VERSION
-        value: v2
+        value: v1
 
   # SDK Service (for future SDK implementations)
   - type: web

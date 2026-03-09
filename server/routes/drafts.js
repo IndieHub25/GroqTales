@@ -444,12 +444,16 @@ router.get('/list', authRequired, async (req, res) => {
   try {
     const { limit = 20, storyType } = req.query;
 
+    let safeLimit = parseInt(String(limit), 10);
+    if (Number.isNaN(safeLimit) || safeLimit < 1) safeLimit = 20;
+    if (safeLimit > 100) safeLimit = 100;
+
     let query = supabaseAdmin
       .from('drafts')
       .select('draft_key, story_type, story_format, current_title, current_genre, current_version, current_updated_at, created_at, updated_at')
       .eq('owner_id', req.user.id)
       .order('updated_at', { ascending: false })
-      .limit(Number(limit));
+      .limit(safeLimit);
 
     if (storyType && typeof storyType === 'string') {
       query = query.eq('story_type', storyType);
@@ -458,7 +462,8 @@ router.get('/list', authRequired, async (req, res) => {
     const { data: drafts, error } = await query;
 
     if (error) {
-      return res.status(500).json({ error: error.message });
+      console.error('Failed to list drafts (DB error):', { error, query: req.query, userId: req.user.id });
+      return res.status(500).json({ error: 'Failed to fetch drafts' });
     }
 
     return res.json({

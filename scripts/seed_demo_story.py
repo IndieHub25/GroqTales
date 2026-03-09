@@ -117,6 +117,7 @@ STORY = {
     "title": "Chains of Trust: The Birth of Blockchain",
     "content": json.dumps(CHAPTERS),
     "genre": "Technology",
+    "source": "demo",
     "author_id": "cc0f24ea-31c0-484c-a404-d77ad5d9eac0",
     "author_name": "Comicraft",
     "description": "A cinematic origin story of blockchain — the idea that changed money, trust, and institutions. Follow anonymous coders, late-night arguments, and the radical belief that strangers could trust each other without a middleman.",
@@ -145,20 +146,27 @@ def supabase_request(method, path, body=None, params=None):
 def seed():
     print('[seed] Checking for existing demo story...')
     status, data = supabase_request('GET', 'stories', params={
-        'title': f'eq.{STORY["title"]}',
+        'source': 'eq.demo',
         'select': 'id,title',
         'limit': '1',
     })
+
+    if status not in (200, 201):
+        print(f'[seed] ❌ Lookup failed HTTP {status}: {data}')
+        return
 
     if status == 200 and data:
         story_id = data[0]['id']
         print(f'[seed] Story already exists, updating... id={story_id}')
         patch = {**STORY}
         del patch['author_id']  # don't change ownership
-        status, _ = supabase_request('PATCH', 'stories', body=patch, params={
+        patch_status, patch_result = supabase_request('PATCH', 'stories', body=patch, params={
             'id': f'eq.{story_id}',
         })
-        print(f'[seed] Updated — HTTP {status}')
+        if patch_status not in (200, 204):
+            print(f'[seed] ❌ Update failed HTTP {patch_status}: {patch_result}')
+            return
+        print(f'[seed] Updated — HTTP {patch_status}')
     else:
         print('[seed] Inserting new demo story...')
         status, result = supabase_request('POST', 'stories', body=STORY)

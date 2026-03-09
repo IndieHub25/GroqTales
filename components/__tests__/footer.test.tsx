@@ -111,8 +111,8 @@ describe('Footer', () => {
 
   it('shows "Powered by Ethereum & Alchemy × Groq AI"', () => {
     render(<Footer />);
-    expect(screen.getByText('Ethereum')).toBeInTheDocument();
-    expect(screen.getByText('Alchemy')).toBeInTheDocument();
-    expect(screen.getByText('Groq AI')).toBeInTheDocument();
+    expect(screen.getAllByText('Ethereum')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Alchemy')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Groq AI')[0]).toBeInTheDocument();
   });
 });

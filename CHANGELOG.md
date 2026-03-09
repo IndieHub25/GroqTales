@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Active full support: 1.4.0 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
 
+## [1.8.2] - 2026-03-09
+
+### Fixed
+
+- **API Keys**: Added validation in `scripts/Groqpe.py` to immediately exit if `GROQ_API_KEY` is not set, preventing cryptic type errors downstream.
+- **Seed Script**: Updated `scripts/seed_demo_story.py` and `scripts/seed-demo-story.js` to identify demo rows deterministically using `source='demo'` rather than fragile title-matching that could conflict with legitimate user generated content. Added robust HTTP response validation for insertions.
+- **Dependency Paths**: Fixed hard-coded nested module resolution in `scripts/seed-demo-story.js` replacing it with the standard package boundary `require('@supabase/supabase-js')`.
+- **Query Bounds & Error Masking**: Hardened `server/routes/drafts.js`; `limit` query parameters are strictly clamped, and internal Supabase errors are securely logged server-side rather than leaked to clients.
+- **WAV Buffer Concatenation**: Replaced native `Buffer.concat` with proper cross-chunk sample merging using the `wavefile` dependency in `server/services/bulbulService.js`, correcting multi-chunk audio corruption.
+- **Startup Configuration Validation**: Enforced strict validation of `ETHEREUM_CHAIN_ID` via integer parsing in `server/services/web3Service.js` and `lib/chain-config.ts` during service initialization to fail fast before any RPC bindings are established.
+
 ## [1.8.1] - 2026-03-09
 
 ### Fixed

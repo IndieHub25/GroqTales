@@ -397,7 +397,7 @@ export default function DocsPage() {
               index={2}
               emoji="💰"
               question="What are the fees?"
-              answer="Story generation is completely free — no limits! When minting NFTs, you pay only the Ethereum network gas fees, which are typically very low (fractions of a cent). We take a 5% commission only on secondary NFT sales."
+              answer="Story generation is completely free — no limits! When minting NFTs, you pay Ethereum network gas fees, which vary with network conditions and will be shown before confirmation. We take a 5% commission only on secondary NFT sales."
             />
             <FaqItem
               index={3}
@@ -415,7 +415,7 @@ export default function DocsPage() {
               index={5}
               emoji="🌐"
               question="Do I need crypto experience?"
-              answer="Not at all! You can start creating stories without any crypto. When you're ready to mint, our wallet setup guide walks you through everything step-by-step. The Ethereum blockchain makes the process fast and affordable."
+              answer="Not at all! You can start creating stories without any crypto. When you're ready to mint, our wallet setup guide walks you through everything step-by-step. The minting transaction pays network gas fees which may vary and are displayed prior to confirmation."
             />
           </div>
         </section>

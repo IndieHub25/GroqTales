@@ -2,7 +2,8 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, LogIn, UserCircle2, Shield } from 'lucide-react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 interface ConnectAccountModalProps {
   isOpen: boolean;
@@ -17,6 +18,21 @@ export function ConnectAccountModal({
   message = 'You need to connect your account to use this feature.',
   actionLabel = 'Login / Connect',
 }: ConnectAccountModalProps) {
+  const router = useRouter();
+
+  // Escape key handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -35,6 +51,10 @@ export function ConnectAccountModal({
           {/* Modal */}
           <motion.div
             key="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+            aria-describedby="modal-desc"
             initial={{ opacity: 0, scale: 0.92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -54,7 +74,8 @@ export function ConnectAccountModal({
                   {/* Close */}
                   <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                    aria-label="Close"
+                    className="absolute top-4 right-4 p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -71,47 +92,51 @@ export function ConnectAccountModal({
 
                   {/* Text */}
                   <div className="text-center mb-6">
-                    <h2 className="text-xl font-bold text-white mb-2 tracking-tight">
+                    <h2 id="modal-title" className="text-xl font-bold text-white mb-2 tracking-tight">
                       Connect Your Account
                     </h2>
-                    <p className="text-sm text-white/50 leading-relaxed">
+                    <p id="modal-desc" className="text-sm text-white/50 leading-relaxed">
                       {message}
                     </p>
                   </div>
 
                   {/* Actions */}
                   <div className="flex flex-col gap-3">
-                    <Link href="/sign-in" onClick={onClose}>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full py-3 px-5 rounded-xl font-semibold text-sm
-                          bg-gradient-to-r from-emerald-600 to-emerald-700
-                          hover:from-emerald-500 hover:to-emerald-600
-                          text-white shadow-lg shadow-emerald-500/20
-                          border border-emerald-400/20
-                          flex items-center justify-center gap-2.5
-                          transition-all duration-200"
-                      >
-                        <LogIn className="w-4 h-4" />
-                        {actionLabel}
-                      </motion.button>
-                    </Link>
+                    <motion.button
+                      onClick={() => {
+                        onClose();
+                        router.push('/sign-in');
+                      }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full py-3 px-5 rounded-xl font-semibold text-sm
+                        bg-gradient-to-r from-emerald-600 to-emerald-700
+                        hover:from-emerald-500 hover:to-emerald-600
+                        text-white shadow-lg shadow-emerald-500/20
+                        border border-emerald-400/20
+                        flex items-center justify-center gap-2.5
+                        transition-all duration-200"
+                    >
+                      <LogIn className="w-4 h-4" />
+                      {actionLabel}
+                    </motion.button>
 
-                    <Link href="/sign-up" onClick={onClose}>
-                      <motion.button
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full py-2.5 px-5 rounded-xl font-medium text-sm
-                          bg-white/[0.04] border border-white/[0.08]
-                          text-white/60 hover:text-white hover:bg-white/[0.08]
-                          flex items-center justify-center gap-2.5
-                          transition-all duration-200"
-                      >
-                        <UserCircle2 className="w-4 h-4" />
-                        Create Account
-                      </motion.button>
-                    </Link>
+                    <motion.button
+                      onClick={() => {
+                        onClose();
+                        router.push('/sign-up');
+                      }}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full py-2.5 px-5 rounded-xl font-medium text-sm
+                        bg-white/[0.04] border border-white/[0.08]
+                        text-white/60 hover:text-white hover:bg-white/[0.08]
+                        flex items-center justify-center gap-2.5
+                        transition-all duration-200"
+                    >
+                      <UserCircle2 className="w-4 h-4" />
+                      Create Account
+                    </motion.button>
 
                     <button
                       onClick={onClose}

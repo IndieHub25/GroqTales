@@ -100,6 +100,57 @@ function chunkText(text, maxChars = MAX_CHARS_PER_REQUEST) {
     return chunks.filter(Boolean);
 }
 
+/**
+ * Helper: concatenate multiple WAV buffers into a single valid WAV
+ */
+function concatenateWavBuffers(audioBuffers) {
+    if (!audioBuffers || audioBuffers.length === 0) return Buffer.alloc(0);
+    if (audioBuffers.length === 1) return audioBuffers[0];
+
+    const { WaveFile } = require('wavefile');
+    let formatInfo = null;
+    let combinedSamples = [];
+
+    for (const buf of audioBuffers) {
+        const wav = new WaveFile(buf);
+        if (!formatInfo) {
+            formatInfo = {
+                numChannels: wav.fmt.numChannels,
+                sampleRate: wav.fmt.sampleRate,
+                bitDepth: wav.bitDepth,
+            };
+        }
+        combinedSamples.push(wav.getSamples(false));
+    }
+
+    let finalSamples;
+    if (formatInfo.numChannels === 1) {
+        const totalLen = combinedSamples.reduce((acc, curr) => acc + curr.length, 0);
+        finalSamples = [new Float64Array(totalLen)];
+        let offset = 0;
+        for (const s of combinedSamples) {
+            finalSamples[0].set(s, offset);
+            offset += s.length;
+        }
+    } else {
+        finalSamples = [];
+        for (let c = 0; c < formatInfo.numChannels; c++) {
+            const totalLen = combinedSamples.reduce((acc, curr) => acc + curr[c].length, 0);
+            const channelSamples = new Float64Array(totalLen);
+            let offset = 0;
+            for (const s of combinedSamples) {
+                channelSamples.set(s[c], offset);
+                offset += s[c].length;
+            }
+            finalSamples.push(channelSamples);
+        }
+    }
+
+    const outputWav = new WaveFile();
+    outputWav.fromScratch(formatInfo.numChannels, formatInfo.sampleRate, formatInfo.bitDepth, finalSamples);
+    return Buffer.from(outputWav.toBuffer());
+}
+
 // ---------------------------------------------------------------------------
 // Core TTS function
 // ---------------------------------------------------------------------------
@@ -156,7 +207,7 @@ async function generateSpeech({
     );
 
     // Concatenate all WAV buffers
-    const combined = Buffer.concat(audioBuffers);
+    const combined = concatenateWavBuffers(audioBuffers);
     return { audioBuffer: combined, mimeType: 'audio/wav' };
 }
 

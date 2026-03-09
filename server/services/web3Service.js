@@ -8,6 +8,13 @@
 const { ethers } = require('ethers');
 const logger = require('../utils/logger');
 
+// Validate ETHEREUM_CHAIN_ID at startup
+const parsedChainId = parseInt(process.env.ETHEREUM_CHAIN_ID || '1', 10);
+if (!Number.isFinite(parsedChainId) || Number.isNaN(parsedChainId) || parsedChainId <= 0) {
+    throw new Error('Invalid ETHEREUM_CHAIN_ID environment variable: must be a positive integer');
+}
+const VALIDATED_CHAIN_ID = parsedChainId;
+
 // ── Lazy singletons ──────────────────────────────────────────────────────────
 let _provider = null;
 let _signer = null;
@@ -24,11 +31,9 @@ function getProvider() {
         throw new Error('ALCHEMY_ETH_MAINNET_HTTP_URL environment variable is not set');
     }
 
-    const chainId = parseInt(process.env.ETHEREUM_CHAIN_ID || '1', 10);
-
     _provider = new ethers.JsonRpcProvider(rpcUrl, {
         name: 'eth-mainnet',
-        chainId,
+        chainId: VALIDATED_CHAIN_ID,
     });
 
     return _provider;

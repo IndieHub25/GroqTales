@@ -118,6 +118,12 @@ export function useTTS(storyId: string, chapterIndex = 0, defaultSpeaker = 'Shub
         audio.addEventListener('error', onError);
 
         return () => {
+            audio.pause();
+            audio.currentTime = 0;
+            audio.src = '';
+            if (audioRef.current === audio) {
+                audioRef.current = null;
+            }
             audio.removeEventListener('timeupdate', onTimeUpdate);
             audio.removeEventListener('durationchange', onDurationChange);
             audio.removeEventListener('ended', onEnded);
@@ -149,14 +155,24 @@ export function useTTS(storyId: string, chapterIndex = 0, defaultSpeaker = 'Shub
     }, []);
 
     const setSpeaker = useCallback((speaker: string) => {
-        pause();
-        setState(prev => ({ ...prev, speaker, audioUrl: null }));
-    }, [pause]);
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            audioRef.current.src = '';
+            audioRef.current = null;
+        }
+        setState(prev => ({ ...prev, speaker, audioUrl: null, isPlaying: false }));
+    }, []);
 
     const setLanguage = useCallback((languageCode: string) => {
-        pause();
-        setState(prev => ({ ...prev, languageCode, audioUrl: null }));
-    }, [pause]);
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            audioRef.current.src = '';
+            audioRef.current = null;
+        }
+        setState(prev => ({ ...prev, languageCode, audioUrl: null, isPlaying: false }));
+    }, []);
 
     const generateAudio = useCallback(async (text: string, token?: string) => {
         if (!text || !storyId) return;

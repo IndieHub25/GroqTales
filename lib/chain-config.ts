@@ -22,6 +22,12 @@ export interface ChainConfig {
     };
 }
 
+const parsedChainId = parseInt(process.env.ETHEREUM_CHAIN_ID || '1', 10);
+if (!Number.isFinite(parsedChainId) || Number.isNaN(parsedChainId) || parsedChainId <= 0) {
+    throw new Error('Invalid ETHEREUM_CHAIN_ID environment variable: must be a positive integer');
+}
+const VALIDATED_CHAIN_ID = parsedChainId;
+
 /**
  * The active chain configuration.
  * Reads from environment variables at runtime:
@@ -30,7 +36,7 @@ export interface ChainConfig {
  *   - ETHEREUM_CHAIN_ID             → Chain ID (default: 1)
  */
 export const ACTIVE_CHAIN: ChainConfig = {
-    chainId: parseInt(process.env.ETHEREUM_CHAIN_ID || '1', 10),
+    chainId: VALIDATED_CHAIN_ID,
     name: 'Ethereum Mainnet',
     rpcUrl: process.env.ALCHEMY_ETH_MAINNET_HTTP_URL || '',
     wsUrl: process.env.ALCHEMY_ETH_MAINNET_WS_URL || '',

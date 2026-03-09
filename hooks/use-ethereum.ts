@@ -92,6 +92,12 @@ export function useEthereum(): UseEthereumResult {
                     }
                 }
 
+                if (!metadata.id) {
+                    const msg = 'Story ID missing from metadata. Cannot mint.';
+                    setError(msg);
+                    throw new Error(msg);
+                }
+
                 const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
 
                 // Submit mint request through the admin pipeline
@@ -99,7 +105,7 @@ export function useEthereum(): UseEthereumResult {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        storyId: metadata.title, // Using title as story identifier
+                        storyId: metadata.id, // Using stable unique ID instead of title
                         nftName: metadata.title,
                         nftDescription: metadata.description || metadata.excerpt || '',
                         coverImageUrl: metadata.coverImage || null,

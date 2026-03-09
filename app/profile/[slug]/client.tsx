@@ -685,12 +685,9 @@ export default function ProfilePageClient({ slug }: { slug: string }) {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {stories.map((story) => (
                                         <div key={story._id || story.id} className="relative">
-                                            <Link
-                                                href={`/stories/${story._id}`}
-                                                className="block"
-                                            >
+                                            <div className="block">
                                                 <StoryCard story={story} showStatus={isOwner} />
-                                            </Link>
+                                            </div>
                                             {/* Mint NFT button for approved stories that haven't been minted */}
                                             {isOwner && story.moderationStatus === 'approved' && !story.isMinted && (
                                                 <Button

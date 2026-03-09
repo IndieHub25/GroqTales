@@ -20,6 +20,10 @@ from groq import Groq
 # Set your API key - use the one from environment or the default one
 API_KEY = os.environ.get("GROQ_API_KEY")
 
+if not API_KEY:
+    import sys
+    sys.exit("Error: GROQ_API_KEY environment variable is not set or empty.")
+
 # Initialize the Groq client
 client = Groq(api_key=API_KEY)
 

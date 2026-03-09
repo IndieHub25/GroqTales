@@ -75,6 +75,33 @@ export function NftMintModal({
   const [royaltyPercentage, setRoyaltyPercentage] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Reset state when modal opens or story changes
+  React.useEffect(() => {
+    if (isOpen) {
+      setStep('benefits');
+      setNftName(storyTitle);
+      setNftDescription(storyDescription ? storyDescription.slice(0, 200) : '');
+      setFeeAmount(0);
+      setFeeCurrency('CRAFTS');
+      setSupply(1);
+      setRoyaltyPercentage(5);
+      setIsSubmitting(false);
+    }
+  }, [isOpen, storyTitle, storyDescription]);
+
+  // Escape key handler
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const handleSubmit = async () => {
     if (!nftName.trim()) {
       toast({ title: 'Name required', description: 'NFT name cannot be empty.', variant: 'destructive' });
@@ -137,17 +164,23 @@ export function NftMintModal({
       >
         <motion.div
           key="mint-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="mint-modal-title"
+          aria-describedby="mint-modal-desc"
           initial={{ opacity: 0, y: 30, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 30, scale: 0.96 }}
           transition={{ type: 'spring', damping: 26, stiffness: 300 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-zinc-950 border border-white/10 shadow-2xl shadow-black/50"
+          className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-zinc-950 border border-white/10 shadow-2xl shadow-black/50 focus:outline-none"
+          tabIndex={-1}
         >
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-1.5 rounded-lg bg-white/5 text-white/50 hover:text-white hover:bg-white/10 transition-all z-10"
+            aria-label="Close modal"
+            className="absolute top-4 right-4 p-1.5 rounded-lg bg-white/5 text-white/50 hover:text-white hover:bg-white/10 transition-all z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
           >
             <X className="w-4 h-4" />
           </button>
@@ -159,8 +192,8 @@ export function NftMintModal({
                 <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 border border-cyan-500/20 flex items-center justify-center">
                   <Sparkles className="w-7 h-7 text-cyan-400" />
                 </div>
-                <h2 className="text-xl font-bold text-white tracking-tight">Mint your story as an NFT?</h2>
-                <p className="text-sm text-white/50 max-w-sm mx-auto">
+                <h2 id="mint-modal-title" className="text-xl font-bold text-white tracking-tight">Mint your story as an NFT?</h2>
+                <p id="mint-modal-desc" className="text-sm text-white/50 max-w-sm mx-auto">
                   Your story is now live in the Gallery! You can optionally mint it as a verifiable digital collectible.
                 </p>
               </div>

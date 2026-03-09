@@ -7,6 +7,7 @@
 
 // Story metadata interface for NFT minting
 export interface StoryMetadata {
+    id?: string;
     title: string;
     content: string;
     genre: string;
