@@ -310,32 +310,121 @@ const formatUptime = (seconds) => {
 // Helper: format microseconds to seconds string
 const formatMicroseconds = (us) => (us / 1e6).toFixed(2) + 's';
 
+// Helper: mask a secret/address — show first 6 + last 4 chars, rest as dots
+const maskSecret = (val, prefixLen = 6, suffixLen = 4) => {
+  if (!val || val.length <= prefixLen + suffixLen) return '***';
+  return val.slice(0, prefixLen) + '...' + val.slice(-suffixLen);
+};
+
+// Helper: mask contract address (keep "0x" + first 4 + last 4 hex chars)
+const maskAddress = (addr) => {
+  if (!addr || addr === '0x...' || addr.length < 10) return null;
+  return addr.slice(0, 6) + '...' + addr.slice(-4);
+};
+
 // Health check endpoint — comprehensive real-time diagnostics
 app.get(['/api/health', '/api/health/db'], async (req, res) => {
-  // supabaseAdmin is non-null when env vars are present
+  const { allowedOrigins } = require('./config/cors');
   const { supabaseAdmin: _supabaseAdminCheck } = require('./config/supabase');
+
+  // ── Run all async probes in parallel ──────────────────────────────────
   const supabaseConfigured = !!SUPABASE_URL;
-  const supabaseHealth = supabaseConfigured
-    ? await checkSupabaseHealth()
-    : { connected: false, latency_ms: null, note: 'Supabase env vars not set — add NEXT_PUBLIC_SUPABASE_URL & SUPABASE_SERVICE_ROLE_KEY to Render dashboard' };
+
+  const [supabaseResult, web3Result] = await Promise.allSettled([
+    supabaseConfigured
+      ? checkSupabaseHealth()
+      : Promise.resolve({ connected: false, latency_ms: null, note: 'Supabase env vars not set' }),
+    (async () => {
+      try {
+        const { checkWeb3Health } = require('./services/web3Service');
+        return await checkWeb3Health();
+      } catch (e) {
+        return { configured: false, connected: false, error: e.message };
+      }
+    })(),
+  ]);
+
+  const supabaseHealth = supabaseResult.status === 'fulfilled'
+    ? supabaseResult.value
+    : { connected: false, error: supabaseResult.reason?.message };
+
+  const web3Health = web3Result.status === 'fulfilled'
+    ? web3Result.value
+    : { configured: false, connected: false, error: web3Result.reason?.message };
+
   const mem = process.memoryUsage();
   const cpu = process.cpuUsage();
 
-  // Check AI service availability
-  const groqConfigured = !!process.env.GROQ_API_KEY;
-  const geminiConfigured = !!process.env.GEMINI_API_KEY;
+  // ── Env var presence checks (no values leaked) ────────────────────────
+  const groqConfigured      = !!process.env.GROQ_API_KEY;
+  const geminiConfigured    = !!process.env.GEMINI_API_KEY;
+  const openaiConfigured    = !!process.env.OPENAI_API_KEY || !!process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+  const sarvamConfigured    = !!process.env.SARVAM_API_KEY;
 
-  // Determine overall system status:
-  // - 'operational' = Supabase configured and reachable
-  // - 'degraded'    = Supabase configured but live ping failed, OR not configured at all
+  const supabaseAnonKeySet       = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseServiceRoleSet   = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrlSet           = !!process.env.NEXT_PUBLIC_SUPABASE_URL || !!process.env.SUPABASE_URL;
+
+  const googleClientIdSet     = !!process.env.GOOGLE_CLIENT_ID;
+  const googleClientSecretSet = !!process.env.GOOGLE_CLIENT_SECRET;
+  const googleCallbackUrl     = process.env.GOOGLE_CALLBACK_URL || null;
+
+  const jwtSecretSet          = !!process.env.JWT_SECRET;
+  const jwtRefreshSecretSet   = !!process.env.JWT_REFRESH_SECRET;
+  const nextauthSecretSet     = !!process.env.NEXTAUTH_SECRET;
+  const nextauthUrlSet        = !!process.env.NEXTAUTH_URL;
+
+  const walletConnectSet      = !!process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID;
+  const coinbaseProjectIdSet  = !!process.env.NEXT_PUBLIC_COINBASE_PROJECT_ID;
+  const platformSignerSet     = !!process.env.PLATFORM_SIGNER_KEY || !!process.env.MINT_AUTHORITY_PRIVATE_KEY;
+
+  const alchemyApiKeySet      = !!process.env.ALCHEMY_ETH_MAINNET_API_KEY;
+  const alchemyRpcUrlSet      = !!process.env.ALCHEMY_ETH_MAINNET_HTTP_URL || !!process.env.ALCHEMY_ETH_MAINNET_RPC_URL;
+  const alchemyWsUrlSet       = !!process.env.ALCHEMY_ETH_MAINNET_WS_URL;
+  const etherscanKeySet       = !!process.env.ETHERSCAN_API_KEY;
+
+  const storyNftAddress       = process.env.STORY_NFT_CONTRACT_ADDRESS || process.env.ETH_MAINNET_NFT_CONTRACT_ADDRESS;
+  const marketplaceAddress    = process.env.CRAFTS_MARKETPLACE_ADDRESS;
+  const craftsTokenAddress    = process.env.CRAFTS_TOKEN_ADDRESS;
+
+  const redisConfigured       = !!process.env.REDIS_URL;
+  const pinataConfigured      = !!process.env.PINATA_JWT || (!!process.env.NEXT_PUBLIC_PINATA_API_KEY);
+  const infuraIpfsConfigured  = !!process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_ID;
+  const storachaConfigured    = !!process.env.NEXT_PUBLIC_STORACHA_KEY;
+
+  const cfWorkerConfigured    = !!process.env.CF_WORKER_URL;
+  const unsplashConfigured    = !!process.env.NEXT_PUBLIC_UNSPLASH_API_KEY;
+  const smtpConfigured        = !!process.env.SMTP_HOST && !!process.env.SMTP_USER;
+  const sendgridConfigured    = !!process.env.SENDGRID_API_KEY;
+  const gaConfigured          = !!process.env.NEXT_PUBLIC_GA_ID;
+  const mixpanelConfigured    = !!process.env.NEXT_PUBLIC_MIXPANEL_ID;
+  const twitterConfigured     = !!process.env.TWITTER_API_KEY;
+  const discordConfigured     = !!process.env.DISCORD_BOT_TOKEN;
+
+  // ── Overall status ────────────────────────────────────────────────────
   let status = 'operational';
   if (!supabaseConfigured || !supabaseHealth.connected) {
     status = 'degraded';
+  } else if (!groqConfigured && !geminiConfigured) {
+    status = 'partial';
   }
 
-  // feed_gallery is online whenever the client is initialised (env vars present)
-  // so it doesn't require an additional async ping on every health request.
-  const feedGalleryStatus = supabaseConfigured ? (supabaseHealth.connected ? 'online' : 'degraded') : 'offline';
+  const feedGalleryStatus = supabaseConfigured
+    ? (supabaseHealth.connected ? 'online' : 'degraded')
+    : 'offline';
+
+  const blockchainStatus = web3Health.connected
+    ? 'connected'
+    : (web3Health.configured ? 'degraded' : 'not_configured');
+
+  // ── Signer address (safe to show — public) ────────────────────────────
+  let signerAddress = null;
+  try {
+    if (platformSignerSet && web3Health.connected) {
+      const { getSigner } = require('./services/web3Service');
+      signerAddress = getSigner().address;
+    }
+  } catch (_) { /* ignore */ }
 
   res.json({
     status,
@@ -352,6 +441,15 @@ app.get(['/api/health', '/api/health/db'], async (req, res) => {
       user: formatMicroseconds(cpu.user),
       system: formatMicroseconds(cpu.system),
     },
+
+    // ── CORS ───────────────────────────────────────────────────────────
+    cors: {
+      allowed_origins: allowedOrigins,
+      dynamic_wildcards: ['*.vercel.app', '*.pages.dev'],
+      total_allowed: allowedOrigins.length,
+    },
+
+    // ── Database ───────────────────────────────────────────────────────
     database: {
       type: 'Supabase PostgreSQL',
       status: supabaseHealth.connected ? 'ok' : 'error',
@@ -361,30 +459,182 @@ app.get(['/api/health', '/api/health/db'], async (req, res) => {
       ...(supabaseHealth.error ? { error: supabaseHealth.error } : {}),
       ...(supabaseHealth.note ? { note: supabaseHealth.note } : {}),
     },
+
+    // ── Auth & Identity ────────────────────────────────────────────────
+    auth: {
+      supabase: {
+        configured: supabaseConfigured,
+        url_set: supabaseUrlSet,
+        anon_key_set: supabaseAnonKeySet,
+        service_role_set: supabaseServiceRoleSet,
+        connected: supabaseHealth.connected,
+        latency_ms: supabaseHealth.latency_ms ?? null,
+      },
+      google_oauth: {
+        configured: googleClientIdSet && googleClientSecretSet,
+        client_id_set: googleClientIdSet,
+        client_secret_set: googleClientSecretSet,
+        callback_url: googleCallbackUrl,
+      },
+      jwt: {
+        configured: jwtSecretSet,
+        secret_set: jwtSecretSet,
+        refresh_secret_set: jwtRefreshSecretSet,
+        expires: process.env.JWT_EXPIRES || '30h',
+        refresh_expires: process.env.JWT_REFRESH_EXPIRES || '30d',
+      },
+      nextauth: {
+        configured: nextauthSecretSet,
+        url_set: nextauthUrlSet,
+        secret_set: nextauthSecretSet,
+        url: process.env.NEXTAUTH_URL || null,
+      },
+    },
+
+    // ── Wallet & Web3 Identity ─────────────────────────────────────────
+    wallet: {
+      wallet_connect: {
+        configured: walletConnectSet,
+        project_id_set: walletConnectSet,
+        project_id_preview: walletConnectSet
+          ? maskSecret(process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID, 4, 4)
+          : null,
+      },
+      coinbase: {
+        configured: coinbaseProjectIdSet,
+        project_id_set: coinbaseProjectIdSet,
+      },
+      platform_signer: {
+        configured: platformSignerSet,
+        address: signerAddress,
+        note: platformSignerSet ? 'Private key present (server-side only)' : 'Not configured',
+      },
+    },
+
+    // ── AI Services ────────────────────────────────────────────────────
     ai_services: {
       groq: {
         status: groqConfigured ? 'available' : 'not_configured',
         configured: groqConfigured,
-        model: groqConfigured ? (process.env.GROQ_MODEL || 'llama-3.3-70b-versatile') : null,
+        model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+        api_url: process.env.GROQ_API_URL || 'https://api.groq.com/openai/v1',
       },
       gemini: {
         status: geminiConfigured ? 'available' : 'not_configured',
         configured: geminiConfigured,
-        model: geminiConfigured ? (process.env.GEMINI_MODEL || 'gemini-2.0-flash') : null,
+        model: process.env.GEMINI_MODEL || 'gemini-2.5-pro',
+      },
+      openai: {
+        configured: openaiConfigured,
+        status: openaiConfigured ? 'available' : 'not_configured',
+      },
+      sarvam_tts: {
+        configured: sarvamConfigured,
+        status: sarvamConfigured ? 'available' : 'not_configured',
+        provider: 'Sarvam AI Bulbul v3',
       },
     },
+
+    // ── Blockchain / Web3 ──────────────────────────────────────────────
+    blockchain: {
+      status: blockchainStatus,
+      network: 'eth-mainnet',
+      chain_id: web3Health.chainId ?? null,
+      block_number: web3Health.blockNumber ?? null,
+      connected: web3Health.connected,
+      ...(web3Health.error ? { error: web3Health.error } : {}),
+      alchemy: {
+        api_key_set: alchemyApiKeySet,
+        rpc_url_set: alchemyRpcUrlSet,
+        ws_url_set: alchemyWsUrlSet,
+        etherscan_api_key_set: etherscanKeySet,
+        status: alchemyRpcUrlSet ? 'configured' : 'not_configured',
+      },
+      nft_contracts: {
+        story_nft: {
+          address_set: !!storyNftAddress && storyNftAddress !== '0x...',
+          address: storyNftAddress ? maskAddress(storyNftAddress) : null,
+        },
+        marketplace: {
+          address_set: !!marketplaceAddress && marketplaceAddress !== '0x...',
+          address: marketplaceAddress ? maskAddress(marketplaceAddress) : null,
+        },
+        crafts_token: {
+          address_set: !!craftsTokenAddress && craftsTokenAddress !== '0x...',
+          address: craftsTokenAddress ? maskAddress(craftsTokenAddress) : null,
+        },
+      },
+      signer: {
+        configured: platformSignerSet,
+        address: signerAddress,
+      },
+    },
+
+    // ── Storage ────────────────────────────────────────────────────────
+    storage: {
+      redis: {
+        configured: redisConfigured,
+        status: redisConfigured ? 'configured' : 'not_configured',
+        url_set: redisConfigured,
+      },
+      supabase_storage: {
+        configured: supabaseConfigured,
+        status: supabaseConfigured ? 'configured' : 'not_configured',
+      },
+      ipfs: {
+        pinata: { configured: pinataConfigured },
+        infura: { configured: infuraIpfsConfigured },
+        storacha: { configured: storachaConfigured },
+        any_configured: pinataConfigured || infuraIpfsConfigured || storachaConfigured,
+      },
+    },
+
+    // ── External Integrations ──────────────────────────────────────────
+    integrations: {
+      cloudflare_worker: {
+        configured: cfWorkerConfigured,
+        url: cfWorkerConfigured ? process.env.CF_WORKER_URL : null,
+      },
+      unsplash: { configured: unsplashConfigured },
+      smtp_email: {
+        configured: smtpConfigured,
+        host: smtpConfigured ? process.env.SMTP_HOST : null,
+        port: smtpConfigured ? (process.env.SMTP_PORT || 587) : null,
+      },
+      sendgrid: { configured: sendgridConfigured },
+      analytics: {
+        google_analytics: { configured: gaConfigured },
+        mixpanel: { configured: mixpanelConfigured },
+      },
+      twitter: { configured: twitterConfigured },
+      discord: { configured: discordConfigured },
+    },
+
+    // ── Quick-reference service summary ───────────────────────────────
+    services: {
+      api: 'online',
+      database: supabaseHealth.connected
+        ? 'online'
+        : (supabaseConfigured ? 'offline' : 'not_configured'),
+      ai_generation: groqConfigured || geminiConfigured ? 'online' : 'offline',
+      feed_gallery: feedGalleryStatus,
+      blockchain: blockchainStatus,
+      tts: sarvamConfigured ? 'online' : 'offline',
+      auth: supabaseConfigured ? 'online' : 'offline',
+      google_oauth: googleClientIdSet && googleClientSecretSet ? 'online' : 'not_configured',
+      wallet_connect: walletConnectSet ? 'online' : 'not_configured',
+      nft_minting: (!!storyNftAddress && storyNftAddress !== '0x...' && platformSignerSet && web3Health.connected)
+        ? 'online'
+        : 'not_ready',
+    },
+
+    // ── Process Resources ──────────────────────────────────────────────
     memory: {
       rss: formatBytes(mem.rss),
       heapUsed: formatBytes(mem.heapUsed),
       heapTotal: formatBytes(mem.heapTotal),
       external: formatBytes(mem.external),
       arrayBuffers: formatBytes(mem.arrayBuffers),
-    },
-    services: {
-      api: 'online',
-      database: supabaseHealth.connected ? 'online' : (supabaseConfigured ? 'offline' : 'not configured'),
-      ai_generation: groqConfigured || geminiConfigured ? 'online' : 'offline',
-      feed_gallery: feedGalleryStatus,
     },
     rateLimit: {
       windowMs: 15 * 60 * 1000,

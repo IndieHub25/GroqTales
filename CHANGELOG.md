@@ -7,9 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 1.9.3 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+Active full support: 1.9.5 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+
+## [1.9.5] - 2026-03-10
+
+### Added
+
+- **Comprehensive `/api/health` endpoint** (`server/backend.js`): Completely rewrote the health handler to surface the full live status of every platform service in a single response. Key additions:
+  - **`cors`**: Lists all allowed origins with dynamic wildcard rules (`*.vercel.app`, `*.pages.dev`).
+  - **`auth`**: Reports configured status for Supabase (URL + anon key + service role), Google OAuth (client ID + secret + callback URL), JWT (secret + refresh secret + expiry), and NextAuth (URL + secret).
+  - **`wallet`**: WalletConnect project ID (masked preview), Coinbase project ID, and platform signer configured status + live on-chain address.
+  - **`ai_services`**: Extended to include OpenAI and Sarvam TTS in addition to Groq and Gemini.
+  - **`blockchain`**: Live parallel probe via `checkWeb3Health()` — reports Alchemy RPC/API/WS key presence, live chain ID, live block number, all three NFT contract addresses (masked `0x1234...5678`), and signer address.
+  - **`storage`**: Redis URL, Supabase Storage, and IPFS providers (Pinata, Infura, Storacha).
+  - **`integrations`**: Cloudflare Worker URL, Unsplash, SMTP email (host + port), SendGrid, Google Analytics, Mixpanel, Twitter API, Discord bot.
+  - **`services` summary**: Expanded quick-reference map now includes `blockchain`, `tts`, `auth`, `google_oauth`, `wallet_connect`, and `nft_minting`.
+  - All async probes run in parallel via `Promise.allSettled` with zero blocking.
+  - No secrets are ever leaked — only `configured: true/false` booleans and masked previews.
+- **`maskSecret` / `maskAddress` helpers** (`server/backend.js`): Utility functions that display only the first 6 + last 4 characters of secrets/addresses, keeping diagnostics readable without exposing values.
+
+### Fixed
+
+- **CORS missing origins** (`server/config/cors.js`): Added `https://groqtales.com`, `https://www.groqtales.com`, `https://comicraft.xyz`, `https://www.comicraft.xyz`, `https://groqtales-sdk-service.onrender.com`, and `http://localhost:3002` (SDK dev) to `allowedOrigins`. Previously these origins were blocked in production.
+
+## [1.9.4] - 2026-03-10
+
+### Fixed
+
+- **Gemini "not_configured" in backend health check** (`render.yaml`): Added `GEMINI_API_KEY` (secret, `sync: false`) and `GEMINI_MODEL` (default `gemini-2.5-pro`) environment variable declarations to the `groqtales-backend-api` service in `render.yaml`. Without these entries the Render dashboard never exposes the fields, so `process.env.GEMINI_API_KEY` is always `undefined` at runtime — causing the `/api/health` endpoint to permanently report `gemini.status: "not_configured"`. After setting the actual key value in the Render dashboard, the Gemini service will report `status: "available"` and AI generation will use the Gemini chairman model as intended.
+
+### Changed
+
+- **Gemini model upgraded to `gemini-2.5-pro`** (`render.yaml`, `server/services/geminiService.js`, `server/backend.js`): Changed the default Gemini model from `gemini-2.0-pro-exp-02-05` / `gemini-2.0-flash` to `gemini-2.5-pro` across all three locations — the Render env var default, the in-code `DEFAULT_MODEL` constant in `geminiService.js`, and the health check model display fallback in `backend.js`.
 
 ## [1.9.3] - 2026-03-10
+
 
 ### Changed
 

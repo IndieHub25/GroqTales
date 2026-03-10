@@ -10,7 +10,7 @@
  *  - Fallback to Groq if needed
  */
 
-const DEFAULT_MODEL = 'gemini-2.0-pro-exp-02-05';
+const DEFAULT_MODEL = 'gemini-2.5-pro';
 
 let logger;
 try {

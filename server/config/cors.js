@@ -1,7 +1,7 @@
 /**
  * CORS Configuration
  * Centralized CORS configuration shared by backend.js and sdk-server.js
- * 
+ *
  * Exports the allowedOrigins array and corsOriginCallback function
  * to ensure consistent CORS validation across all servers and tests.
  */
@@ -9,17 +9,32 @@
 const allowedOrigins = [
   process.env.CORS_ORIGIN,
   process.env.FRONTEND_URL,
+  // ── Local development ─────────────────────────────────────────────────
   'http://localhost:3000',
   'http://localhost:3001',
+  'http://localhost:3002',
+  // ── Render (backend) ──────────────────────────────────────────────────
   'https://groqtales-backend-api.onrender.com',
+  'https://groqtales-sdk-service.onrender.com',
+  // ── Vercel ────────────────────────────────────────────────────────────
   'https://groqtales.vercel.app',
   'https://groqtales-git-main-indie-hub25s-projects.vercel.app',
-  'https://www.groqtales.xyz',
+  // ── groqtales.xyz ─────────────────────────────────────────────────────
   'https://groqtales.xyz',
-  'https://www.comiccrafts.xyz',
+  'https://www.groqtales.xyz',
+  // ── groqtales.com ─────────────────────────────────────────────────────
+  'https://groqtales.com',
+  'https://www.groqtales.com',
+  // ── comicraft.xyz ─────────────────────────────────────────────────────
+  'https://comicraft.xyz',
+  'https://www.comicraft.xyz',
+  // ── comiccrafts.xyz ───────────────────────────────────────────────────
   'https://comiccrafts.xyz',
+  'https://www.comiccrafts.xyz',
+  // ── Cloudflare Pages ──────────────────────────────────────────────────
   'https://groqtales.pages.dev',
   'https://drago.groqtales.pages.dev',
+  // ── Netlify ───────────────────────────────────────────────────────────
   'https://groqtales.netlify.app',
 ].filter(Boolean); // Remove undefined/null entries from env vars
 
@@ -37,7 +52,7 @@ function normalizeOrigin(origin) {
  * CORS origin callback for express-cors
  * Uses proper URL parsing and hostname comparison to prevent spoofing attacks
  * (e.g., groqtales.xyz.evil.com, fakevercel.app.attacker.com)
- * 
+ *
  * @param {string|undefined} origin - The origin header from the request
  * @param {function} callback - Express cors callback(err, allow)
  */

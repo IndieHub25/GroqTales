@@ -41,6 +41,10 @@ services:
         value: https://groqtales.xyz
       - key: API_VERSION
         value: v1
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-pro
 
   # SDK Service (for future SDK implementations)
   - type: web
