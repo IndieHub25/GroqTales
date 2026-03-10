@@ -251,15 +251,11 @@ export default function BookView({
   // Reset page when chapter changes
   useEffect(() => { setCurrentPage(0); }, [activeChapter]);
 
-  if (compact) {
-    return <TTSAudioBar storyId={storyId} chapterIndex={0} chapterText={chapters[0]?.content?.slice(0, 500) || ''} compact />;
-  }
-
   const totalPages = pages.length;
   const hasNext = currentPage < totalPages - 1 || activeChapter < chapters.length - 1;
   const hasPrev = currentPage > 0 || activeChapter > 0;
 
-  const goNext = () => {
+  const goNext = useCallback(() => {
     if (isFlipping) return;
     if (currentPage < totalPages - 1) {
       setFlipDirection('right');
@@ -270,9 +266,9 @@ export default function BookView({
       setIsFlipping(true);
       setTimeout(() => { setActiveChapter(c => c + 1); setCurrentPage(0); setIsFlipping(false); }, 350);
     }
-  };
+  }, [isFlipping, currentPage, totalPages, activeChapter, chapters.length]);
 
-  const goPrev = () => {
+  const goPrev = useCallback(() => {
     if (isFlipping) return;
     if (currentPage > 0) {
       setFlipDirection('left');
@@ -282,13 +278,14 @@ export default function BookView({
       setFlipDirection('left');
       setIsFlipping(true);
       setTimeout(() => {
+        const prevChapterContent = chapters[activeChapter - 1]?.content || '';
+        const prevPages = paginateContent(prevChapterContent, 1200);
         setActiveChapter(c => c - 1);
-        // We'll set page to last page of previous chapter after state updates
-        setCurrentPage(9999); // Will be clamped in render
+        setCurrentPage(Math.max(0, prevPages.length - 1));
         setIsFlipping(false);
       }, 350);
     }
-  };
+  }, [isFlipping, currentPage, activeChapter, chapters]);
 
   // Clamp page for when going backwards to a previous chapter
   const safeCurrentPage = Math.min(currentPage, totalPages - 1);
@@ -297,12 +294,18 @@ export default function BookView({
   // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // Don't handle keys if in compact mode to avoid side-effects
+      if (compact) return;
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goNext(); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [currentPage, activeChapter, totalPages, isFlipping]);
+  }, [goNext, goPrev, compact]);
+
+  if (compact) {
+    return <TTSAudioBar storyId={storyId} chapterIndex={0} chapterText={chapters[0]?.content?.slice(0, 500) || ''} compact />;
+  }
 
   return (
     <div className={`w-full space-y-6 ${className}`}>

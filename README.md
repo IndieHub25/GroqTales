@@ -178,7 +178,7 @@ To run this project locally, you must set up your environment variables. Create 
 | `GROQ_API_KEY`                      | **Required** | Powers the AI story generation engine via Groq LPU.                  |
 | `NEXT_PUBLIC_SUPABASE_URL`          | **Required** | Your Supabase project URL for database and authentication.           |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY`     | **Required** | Supabase anonymous/public API key for client-side access.            |
-| `MONAD_RPC_URL`                     | **Required** | The RPC endpoint for interacting with the Monad Testnet.             |
+| `ALCHEMY_ETH_MAINNET_HTTP_URL`      | **Required** | The Alchemy RPC endpoint for interacting with Ethereum Mainnet.      |
 | `NEXT_PUBLIC_API_URL`               | **Required** | Backend API URL (e.g., `https://groqtales-backend-api.onrender.com`).|
 | `NEXT_PUBLIC_UNSPLASH_API_KEY`          |  _Optional_  | API key used for fetching high-quality cover images for stories.     |
 | `NEXT_PUBLIC_CONTRACT_ADDR`         | **Required** | The smart contract address for the deployed NFT collection.          |
@@ -189,8 +189,7 @@ To run this project locally, you must set up your environment variables. Create 
 1. **Groq API:** Generate a key at [Groq Cloud Console](https://console.groq.com/).
 2. **Supabase:** Create a free project at [Supabase](https://supabase.com/) and copy the project URL
    and anon key from Settings → API.
-3. **Monad RPC:** Use the official [Monad Testnet docs](https://docs.monad.xyz/) to find the latest
-   RPC URL.
+3. **Ethereum RPC:** Create a free project at [Alchemy](https://alchemy.com/) to get your `ALCHEMY_ETH_MAINNET_HTTP_URL`.
 4. **Unsplash:** Register an application on the
    [Unsplash Developer Portal](https://unsplash.com/developers).
 5. **WalletConnect:** Create a project at [WalletConnect Cloud](https://cloud.walletconnect.com/).
@@ -255,11 +254,11 @@ Docker Compose sets these automatically. Override them in a `.env` file or in
 | ------------------------- | ----------------------------------- |
 | `NEXT_PUBLIC_SUPABASE_URL` | `http://supabase:54321`             |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `your-anon-key`                |
-| `NEXT_PUBLIC_RPC_URL`     | `http://anvil:8545`                 |
+| `ALCHEMY_ETH_MAINNET_HTTP_URL` | `https://eth-mainnet.g.alchemy.com/v2/YOUR_API_KEY` |
 | `NODE_ENV`                | `development`                       |
 
 > [!TIP]
-> For production, set `NODE_ENV=production` and add your `GROQ_API_KEY`, `MONAD_RPC_URL`, and other
+> For production, set `NODE_ENV=production` and add your `GROQ_API_KEY`, `ALCHEMY_ETH_MAINNET_HTTP_URL`, and other
 > secrets via environment variables — never bake them into the image.
 
 ### References
@@ -322,7 +321,7 @@ graph TD
 - **Environment Variables:**
   - `GROQ_API_KEY` – Your Groq AI API key
   - `NEXT_PUBLIC_UNSPLASH_API_KEY` – (Optional) for placeholder visuals
-  - `MONAD_RPC_URL` – Monad blockchain RPC endpoint
+  - `ALCHEMY_ETH_MAINNET_HTTP_URL` – Alchemy Ethereum Mainnet RPC endpoint
 
 - **Smart Contract Deployment:**
   - Contracts are written in Solidity and can be deployed to Monad Testnet/Mainnet.

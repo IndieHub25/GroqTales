@@ -45,6 +45,7 @@ export default function StoryEngagement({ storyId }: StoryEngagementProps) {
     supabase.auth.getSession().then(({ data }) => {
       setUserId(data.session?.user?.id ?? null);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ---------- Load engagement data ----------
@@ -113,7 +114,9 @@ export default function StoryEngagement({ storyId }: StoryEngagementProps) {
       .limit(50);
     
     setComments((data as any) || []);
-    setCommentCount((data as any)?.length ?? 0);
+    // Note: Intentionally NOT updating setCommentCount here because the paginated 
+    // result length would overwrite the true total count fetched on initial load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storyId]);
 
   useEffect(() => {
@@ -125,23 +128,36 @@ export default function StoryEngagement({ storyId }: StoryEngagementProps) {
     if (!userId) return;
     setVoteLoading(true);
 
+    const prevVoteScore = voteScore;
+    const prevUserVote = userVote;
+
+    // Optimistic UI Update
+    if (userVote === direction) {
+      setVoteScore(prev => prev - direction);
+      setUserVote(null);
+    } else {
+      setVoteScore(prev => prev - (userVote ?? 0) + direction);
+      setUserVote(direction);
+    }
+
     try {
-      if (userVote === direction) {
+      if (prevUserVote === direction) {
         // Remove vote
-        await supabase.from('story_votes').delete().eq('story_id', storyId).eq('user_id', userId);
-        setVoteScore(prev => prev - direction);
-        setUserVote(null);
+        const { error } = await supabase.from('story_votes').delete().eq('story_id', storyId).eq('user_id', userId);
+        if (error) throw error;
       } else {
         // Upsert vote
-        await supabase.from('story_votes').upsert(
+        const { error } = await supabase.from('story_votes').upsert(
           { story_id: storyId, user_id: userId, vote: direction },
           { onConflict: 'story_id,user_id' }
         );
-        setVoteScore(prev => prev - (userVote ?? 0) + direction);
-        setUserVote(direction);
+        if (error) throw error;
       }
     } catch (err) {
       console.error('Vote error:', err);
+      // Revert optimistic update on failure
+      setVoteScore(prevVoteScore);
+      setUserVote(prevUserVote);
     }
     setVoteLoading(false);
   };

@@ -12,6 +12,7 @@
 #   - Groq / Gemini AI
 #   - Sarvam TTS
 #   - Redis (Render-managed or local)
+#   - MongoDB (Optional: Required only for Vector Search)
 
 services:
   # ---------------------------------------------------------------------------

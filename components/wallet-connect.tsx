@@ -40,8 +40,8 @@ export default function WalletConnect() {
     disconnectWallet,
     networkName,
     ensName,
+    setWalletConnection,
   } = useWeb3();
-
   const { toast } = useToast();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
@@ -142,6 +142,7 @@ export default function WalletConnect() {
       });
       
       if (authRes.ok) {
+        setWalletConnection(selectedAccount, 1);
         const authData = await authRes.json();
         if (authData.data?.tokens?.accessToken && typeof window !== 'undefined') {
           localStorage.setItem('accessToken', authData.data.tokens.accessToken);
