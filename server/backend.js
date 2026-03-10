@@ -12,7 +12,8 @@ const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-const { corsOriginCallback } = require('./config/cors');
+const { corsOriginCallback, allowedOrigins } = require('./config/cors');
+const { checkWeb3Health } = require('./services/web3Service');
 // MongoDB is now required again for Vector Search
 const mongoose = require('mongoose');
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -324,7 +325,6 @@ const maskAddress = (addr) => {
 
 // Health check endpoint — comprehensive real-time diagnostics
 app.get(['/api/health', '/api/health/db'], async (req, res) => {
-  const { allowedOrigins } = require('./config/cors');
   const { supabaseAdmin: _supabaseAdminCheck } = require('./config/supabase');
 
   // ── Run all async probes in parallel ──────────────────────────────────
@@ -336,7 +336,6 @@ app.get(['/api/health', '/api/health/db'], async (req, res) => {
       : Promise.resolve({ connected: false, latency_ms: null, note: 'Supabase env vars not set' }),
     (async () => {
       try {
-        const { checkWeb3Health } = require('./services/web3Service');
         return await checkWeb3Health();
       } catch (e) {
         return { configured: false, connected: false, error: e.message };
