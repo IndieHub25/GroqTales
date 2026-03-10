@@ -1,32 +1,79 @@
+# GroqTales / Comicraft — Docker Compose
+# v2.0.0 — Supabase-backed, Ethereum Mainnet via Alchemy
+#
+# Usage:
+#   cp .env.example .env.local
+#   # Fill in all required env vars
+#   docker compose up --build
+#
+# The app connects to external managed services:
+#   - Supabase (PostgreSQL + Auth + Storage)
+#   - Alchemy (Ethereum RPC)
+#   - Groq / Gemini AI
+#   - Sarvam TTS
+#   - Redis (Render-managed or local)
+
 services:
-  mongo:
-    image: mongo:7
-    restart: always
+  # ---------------------------------------------------------------------------
+  # Redis — local cache (optional; production uses Render Redis)
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "6379:6379"
     volumes:
-      - mongo_data:/data/db
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
-  anvil:
-    image: ghcr.io/foundry-rs/foundry:v1.0.0
-    command: anvil --host 0.0.0.0 --port 8545
-    ports:
-      - "8545:8545"
-
-  server:
+  # ---------------------------------------------------------------------------
+  # GroqTales App — Next.js frontend + Express backend
+  # ---------------------------------------------------------------------------
+  app:
     build:
       context: .
+      dockerfile: Dockerfile
     depends_on:
-      - mongo
-      - anvil
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env.local
     environment:
-      NODE_ENV: development
-      MONGODB_URI: mongodb://mongo:27017/groqtales
-      NEXT_PUBLIC_RPC_URL: http://anvil:8545
-    command: sh -c "node scripts/seed.js && npm start"
+      NODE_ENV: production
+      REDIS_URL: redis://redis:6379
+
+      # ── Supabase (required) ──
+      # NEXT_PUBLIC_SUPABASE_URL: (set in .env.local)
+      # NEXT_PUBLIC_SUPABASE_ANON_KEY: (set in .env.local)
+      # SUPABASE_SERVICE_ROLE_KEY: (set in .env.local)
+
+      # ── AI Services (required) ──
+      # GEMINI_API_KEY: (set in .env.local)
+      # GROQ_API_KEY: (set in .env.local)
+
+      # ── Blockchain (required for NFT minting) ──
+      # ALCHEMY_ETH_MAINNET_HTTP_URL: (set in .env.local)
+      # PLATFORM_SIGNER_KEY: (set in .env.local)
+
+      # ── WalletConnect (optional) ──
+      # NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: (set in .env.local)
+
+      # ── TTS (optional) ──
+      # SARVAM_API_KEY: (set in .env.local)
     ports:
       - "3000:3000"
       - "3001:3001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:3001/healthz"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
 
 volumes:
-  mongo_data:
+  redis_data:

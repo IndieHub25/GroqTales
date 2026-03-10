@@ -176,6 +176,7 @@ export default function RootLayout({
       </head>
       <body
         className={`${inter.className} ${comicNeue.variable} optimize-paint`}
+        suppressHydrationWarning
       >
         {/* Skip link for keyboard users to jump to main content */}
         <a

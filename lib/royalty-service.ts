@@ -30,7 +30,7 @@ export async function configureRoyalty(params: ConfigureRoyaltyParams) {
     throw new Error('storyId is required for Supabase royalty configs');
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('royalty_configs')
     .upsert(
@@ -69,7 +69,7 @@ export async function recordRoyaltyTransaction(params: RecordTransactionParams) 
     throw new Error('Sale price must be greater than 0');
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Look up royalty config for this story (mapping nftId to storyId temporarily)
   const { data: config, error: configError } = await (supabase
@@ -146,7 +146,7 @@ export async function getCreatorEarnings(walletAddress: string) {
     throw new Error('Invalid wallet address');
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('creator_earnings')
     .select('*')
@@ -187,7 +187,7 @@ export async function getCreatorTransactions(
   const limit = Math.min(100, Math.max(1, options.limit || 10));
   const skip = (page - 1) * limit;
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   let query = supabase
     .from('royalty_transactions')
@@ -226,7 +226,7 @@ interface GetConfigParams {
 }
 
 export async function getRoyaltyConfig(params: GetConfigParams) {
-  const supabase = createClient();
+  const supabase = await createClient();
   let query = supabase.from('royalty_configs').select('*');
 
   if (params.storyId || params.nftId) {

@@ -78,7 +78,7 @@ You can contribute in several ways:
 - **Reporting Bugs:** Use the `bug_report.md` template and provide detailed steps to reproduce.
 - **Suggesting Features:** Use the `feature.md` template to propose new ideas.
 - **Code Contributions:** Pick up issues labeled `good first issue`.
-- **Web3/Blockchain:** Use the `web3_issue.md` template for Monad/NFT-related contributions.
+- **Web3/Blockchain:** Use the `web3_issue.md` template for Ethereum/NFT-related contributions.
 - **Security:** Use the `security.md` template for vulnerabilities.
 - **Documentation:** Help improve the README, Wiki, or code comments.
 
@@ -129,8 +129,13 @@ To get started with development:
 3. **Environment Variables:**
 Copy `.env.example` to `.env.local` and fill in:
 * `GROQ_API_KEY` – Groq AI key (required)
-* `MONAD_RPC_URL` – Monad blockchain endpoint
-* `UNSPLASH_API_KEY` – (Optional) for placeholder visuals
+* `GEMINI_API_KEY` – Google Gemini AI key (required)
+* `NEXT_PUBLIC_SUPABASE_URL` – Supabase project URL
+* `NEXT_PUBLIC_SUPABASE_ANON_KEY` – Supabase anon key
+* `SUPABASE_SERVICE_ROLE_KEY` – Supabase service role key
+* `ALCHEMY_ETH_MAINNET_HTTP_URL` – Alchemy Ethereum RPC (for NFT minting)
+* `SARVAM_API_KEY` – Sarvam AI TTS key (optional, for audiobook narration)
+* `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` – WalletConnect project ID (optional)
 
 4. **Run Development Server:**
    ```bash
@@ -174,10 +179,10 @@ GroqTales/
 ## Architecture Notes
 
 - **Frontend:** Built with Next.js, React, TailwindCSS, and shadcn/ui for a modern, responsive UI.
-- **Backend:** Node.js API routes handle authentication, story generation, and blockchain interactions.
-- **Blockchain:** Monad SDK and Solidity smart contracts manage NFT minting and ownership.
-- **AI:** Groq API powers story and comic generation.
-- **Database:** MongoDB stores user data, stories, and metadata.
+- **Backend:** Node.js + Express.js API handles authentication, story generation, TTS, and blockchain interactions.
+- **Blockchain:** Ethereum Mainnet via Alchemy and Solidity smart contracts manage NFT minting and ownership.
+- **AI:** Google Gemini (chairman model) + Groq LPU (narrow tasks) + Sarvam AI (TTS audiobook narration).
+- **Database & Storage:** Supabase (PostgreSQL) with Row Level Security, Supabase Storage (avatars, story-covers, comic-panels, nft-metadata).
 - **Testing:** Jest/React Testing Library for frontend; Hardhat/Foundry for smart contracts.
 
 ---

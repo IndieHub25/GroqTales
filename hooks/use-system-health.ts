@@ -47,7 +47,7 @@ export function useSystemHealth(): HealthStatus {
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    api = data.status === 'healthy' || data.status === 'degraded';
+                    api = data.status === 'healthy' || data.status === 'operational' || data.status === 'degraded' || data.status === 'partial';
                     // The backend returns database info nested under data.database
                     db = data.database?.connected === true;
                 }

@@ -7,7 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 1.9.7 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+Active full support: 2.0.2 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+
+## [2.0.2] - 2026-03-11
+
+### Fixed
+
+- **Supabase URL** (`lib/supabase/client.ts`, `lib/supabase/server.ts`): Replaced `dummy.supabase.co` fallback with actual project URL — fixes `ERR_NAME_NOT_RESOLVED` for all engagement/vote/comment queries.
+- **TTS Endpoint 404** (`hooks/use-tts.ts`, `app/api/tts/generate/route.ts`, `app/api/tts/audio/route.ts`): Created local Next.js API routes for TTS generation via Sarvam API, replacing non-existent backend endpoints (`/api/v1/tts/generate` and `/api/v1/tts/audio`).
+- **Hydration Mismatch** (`app/stories/[id]/page.tsx`): Changed page from `force-static` with `generateStaticParams` to `force-dynamic`, eliminating server/client rendering inconsistencies.
+- **Hydration Warnings** (`app/layout.tsx`): Added `suppressHydrationWarning` to the `<body>` tag to prevent errors caused by the theme provider and external scripts modifying body attributes before Next.js hydrates.
+- **Supabase SSR Client** (`lib/supabase/server.ts`, `lib/feedService.ts`, `lib/royalty-service.ts`): Refactored `createClient` to be asynchronous (`await cookies()`) and use `getAll()`/`setAll()` to comply with Next.js 15+ and the latest `@supabase/ssr` library requirements.
+- **TTS Dropdown Clipping** (`components/book-view.tsx`): Removed `overflow-hidden` from the audio bar's root container so the speaker/language settings popups are no longer clipped when opened inside the story view.
+
+## [2.0.1] - 2026-03-11
+
+### Changed
+
+- **Interactive Book Preview** (`components/book-view.tsx`): Complete rebuild — the story reader is now a page-flipping book with paragraph-aware pagination, keyboard navigation (←/→/Space), amber parchment color scheme, drop-cap on first paragraphs, running headers (title + author), page numbers, and chapter tabs.
+- **Story Page Layout** (`app/stories/[id]/client.tsx`): Fixed element collisions — removed overlapping hero cover, added sticky header bar with back nav/genre/stats, centered title section, clean separation between book, TTS bar, and engagement sections.
+- **Book Style Overrides** (`app/globals.css`): Added page-flip keyframe animations and scoped CSS resets to prevent comic global styles (uppercase headings, font-weight 600) from corrupting the book's serif typography.
+
+## [2.0.0] - 2026-03-11
+
+### Added
+
+- **Clickable Gallery Cards** (`app/gallery/page.tsx`): Gallery story cards are now wrapped with `Link` components — clicking a card navigates to `/stories/{id}` with a smooth scale-up hover animation.
+- **Story Engagement System** (`components/story-engagement.tsx`): New component on the story detail page with Reddit-style upvote/downvote, comment section (post + threaded display with avatars), and save/bookmark functionality.
+- **Database Tables**: Created `story_comments`, `story_votes`, `saved_stories` tables with full RLS policies (public read, authenticated write, owner-based update/delete).
+- **Analytics Warehouse**: Configured Supabase S3/Iceberg analytics warehouse (`analytics-groqtales`) with engagement summary view (`analytics.story_engagement_summary`).
+
+### Fixed
+
+- **`user_settings` 406 Error**: Added `service_role` bypass RLS policy to fix REST API queries failing due to missing authenticated session context.
+- **Story Page Navigation**: Back button now points to `/gallery` instead of `/marketplace`.
+
+## [1.9.9] - 2026-03-11
+
+### Added
+
+- **WalletConnect Integration** (`components/wallet-connect.tsx`): WalletConnect v2 is now fully functional — users can connect via the QR modal using any WalletConnect-compatible mobile or desktop wallet. Implements full signature-based authentication flow with backend token issuance.
+- **Supabase Storage Buckets**: Created 4 storage buckets (`avatars`, `story-covers`, `comic-panels`, `nft-metadata`) with appropriate file size limits, MIME type restrictions, and Row Level Security policies (public read, authenticated upload, owner-based update/delete).
+- **Footer Status Page Link** (`components/footer.tsx`): System health indicator in the footer now links to the public [UptimeRobot Status Page](https://stats.uptimerobot.com/PUi1I3YaBH) with hover effects and external link icon.
+- **`@walletconnect/ethereum-provider`** dependency added to `package.json`.
+
+### Fixed
+
+- **Authentication Token Persistence** (`components/auth/sign-in-form.tsx`, `components/auth/sign-up-form.tsx`, `app/auth/callback/page.tsx`): **Critical fix** — all three authentication flows (email/password login, email signup, Google OAuth callback) now correctly persist `accessToken` and `refreshToken` to `localStorage` and dispatch `StorageEvent`. Previously, tokens returned from the backend were discarded, causing dashboard and profile pages to always show "Not Logged In".
+- **Post-Login Redirect**: Sign-in form now redirects to `/dashboard` instead of `/` after successful authentication.
+
+### Changed
+
+- **README.md**: Updated project description, tech stack (Gemini AI, Alchemy, Supabase Storage, WalletConnect, Sarvam TTS), architecture diagram, Quick Start guide, and added uptime monitoring link.
+
+## [1.9.8] - 2026-03-11
+
+### Fixed
+
+- **"System Offline" False Alarm** (`components/footer.tsx`, `hooks/use-system-health.ts`): The backend `/api/health` returns `status: 'operational'` but the footer and system health hook only accepted `'ok'` or `'healthy'`, causing the website to permanently display "System Offline" despite an operational backend. Now accepts `'operational'` and `'partial'` alongside existing values.
+- **AI Endpoint 404** (`lib/api-client.ts`, `lib/gemini-service.ts`): Frontend AI calls (`processAI()` and `GeminiService.generateProse()`) sent `POST /api/v1/ai` but the backend only mounts sub-routes at `/api/v1/ai/generate` and `/api/v1/ai/analyze` — no root handler exists. Changed both callers to use `/api/v1/ai/generate`.
+- **Repeated 401 Console Errors** (`lib/feeds-client.ts`): `fetchNotifications()` was calling the auth-required `/api/feeds/notifications/me` endpoint even when no access token was present in `localStorage`, producing repeated `401 Unauthorized` console errors. Added an early-return guard that skips the request when no token is available.
 
 ## [1.9.7] - 2026-03-10
 

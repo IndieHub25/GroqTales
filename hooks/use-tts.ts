@@ -47,7 +47,6 @@ interface TTSState {
     error: string | null;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
 export const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 export function useTTS(storyId: string, chapterIndex = 0, defaultSpeaker = 'Shubh', defaultLang = 'en-IN') {
@@ -79,7 +78,7 @@ export function useTTS(storyId: string, chapterIndex = 0, defaultSpeaker = 'Shub
                     speaker: state.speaker,
                     languageCode: state.languageCode,
                 });
-                const res = await fetch(`${API_BASE}/api/v1/tts/audio?${params}`);
+                const res = await fetch(`/api/tts/audio?${params}`);
                 if (!cancelled && res.ok) {
                     const data = await res.json();
                     setState(prev => ({
@@ -178,7 +177,7 @@ export function useTTS(storyId: string, chapterIndex = 0, defaultSpeaker = 'Shub
         if (!text || !storyId) return;
         setState(prev => ({ ...prev, isGenerating: true, error: null }));
         try {
-            const res = await fetch(`${API_BASE}/api/v1/tts/generate`, {
+            const res = await fetch(`/api/tts/generate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -70,9 +70,10 @@
 ## What is GroqTales?
 
 GroqTales is an open-source, AI-powered Web3 storytelling platform. Writers and artists can generate
-immersive narratives or comic-style stories using Groq AI, then mint and trade them as NFTs on the
-Monad blockchain. With a focus on ownership, authenticity, and community, GroqTales bridges the
-world of creative writing, generative AI, and decentralized technology.
+immersive narratives or comic-style stories using AI (Google Gemini as the chairman model + Groq for
+narrow tasks), then mint and trade them as NFTs on Ethereum Mainnet via Alchemy. With a focus on
+ownership, authenticity, and community, GroqTales bridges the world of creative writing, generative
+AI, and decentralized technology.
 
 ---
 
@@ -85,16 +86,29 @@ world of creative writing, generative AI, and decentralized technology.
 - **Interactive Story Canvas**: A reusable SVG-based canvas supports drag-and-drop node positioning with grid snapping, zoom controls, and real-time info panel. It includes auto-saving to local storage.
 - **Extensive Story Customization (70+ Parameters)**: Fine-tune every aspect of your story with a powerful Parameter Management System. Includes 70+ parameters across 10 categories, intelligence-level presets, and an advanced UI with search and filtering.
 - **Guided Onboarding Tours**: Interactive guided tours for each creation mode to help new users get started quickly.
-- **NFT Minting on Monad Blockchain** Seamlessly mint your stories as NFTs on Monad (Testnet live,
-  Mainnet coming soon). Each NFT proves authenticity, ownership, and collectibility.
+- **Clickable Gallery → Story Detail Pages** Browse the gallery, click any story card to open a
+  dedicated story page with a full book-like reading experience.
+- **Book-Style Reader with TTS Audiobook** Each story page features a Kindle-style book view with
+  chapter navigation, serif typography, and an integrated Sarvam AI Bulbul v3 text-to-speech
+  audiobook player. Choose speaker, language (English default), and playback speed.
+- **Reddit-Style Story Engagement** Upvote/downvote stories, post and read comments (with avatars
+  and timestamps), and bookmark stories to your "Saved Creations" collection.
+- **NFT Minting on Ethereum Mainnet** Mint your stories as NFTs on Ethereum Mainnet via Alchemy
+  with a server-side platform signer. Each NFT proves authenticity, ownership, and collectibility.
 - **Community Gallery** Publish your stories publicly, browse the gallery, and interact with other
   creators. Stories can be shared freely or as NFTs.
-- **Wallet Integration** Connect with MetaMask, WalletConnect, or Ledger for secure publishing and
-  minting. Wallet is required for NFT actions.
+- **Wallet Integration** Connect with MetaMask or WalletConnect v2 (QR code modal) for secure
+  publishing and minting. Signature-based authentication with backend token issuance.
+- **Supabase Storage** Cloud storage for avatars, story covers, comic panels, and NFT metadata
+  with Row Level Security policies.
+- **Analytics Warehouse** Supabase S3/Iceberg analytics integration with pre-built engagement
+  summary views for tracking votes, comments, and saves per story.
 - **Real-Time Story Streaming** Watch your story unfold in real-time as Groq AI generates each
   segment.
 - **Mobile-Friendly & Responsive UI** Built with modern web technologies for a seamless experience
   on any device.
+- **Docker Support** Multi-stage Dockerfile with Redis caching + Docker Compose for local
+  development.
 - **Extensible & Open Source** Modular codebase with clear separation of frontend, backend, and
   smart contract logic. Contributions are welcome!
 
@@ -104,10 +118,11 @@ world of creative writing, generative AI, and decentralized technology.
 
 - **Frontend:** Next.js, React, TailwindCSS, shadcn/ui
 - **Backend:** Node.js, Express.js API (Render), Cloudflare Workers
-- **AI:** Groq API (story generation with 70+ configurable parameters), Unsplash API (optional visuals)
-- **Blockchain:** Monad SDK, Solidity Smart Contracts
-- **Database:** Supabase (PostgreSQL) with Row Level Security
+- **AI:** Google Gemini (chairman model for story generation), Groq LPU (narrow tasks — parameter validation, classification, outlines), Sarvam AI (Text-to-Speech)
+- **Blockchain:** Ethereum Mainnet via Alchemy, Solidity Smart Contracts, WalletConnect, MetaMask
+- **Database & Storage:** Supabase (PostgreSQL) with Row Level Security, Supabase Storage (avatars, story-covers, comic-panels, nft-metadata), IPFS via Pinata
 - **Hosting:** Cloudflare Pages (frontend), Render (backend API)
+- **Monitoring:** [UptimeRobot Status Page](https://stats.uptimerobot.com/PUi1I3YaBH)
 
 ---
 
@@ -118,8 +133,16 @@ git clone https://github.com/IndieHub25/GroqTales
 cd GroqTales
 npm install
 cp .env.example .env.local
-# Add GROQ_API_KEY, UNSPLASH key, Monad network if needed
+# Fill in GROQ_API_KEY, GEMINI_API_KEY, Supabase keys, SARVAM_API_KEY, and wallet config
 npm run dev
+```
+
+### Docker (Optional)
+
+```bash
+cp .env.example .env.local
+# Fill in all environment variables
+docker compose up --build
 ```
 
 1. Visit [http://localhost:3000](http://localhost:3000)
@@ -139,6 +162,7 @@ For continuous uptime monitoring (e.g., UptimeRobot, Render Health Checks, Datad
 
 - **Liveness Probe**: `GET /healthz` — Returns an instant `200 OK` bypassing all middleware, rate limiters, and external database latency. Use this for raw "is the server running?" checks.
 - **Deep Diagnostics**: `GET /api/health` — Returns extremely detailed server diagnostics including Supabase connectivity, process memory usage, and uptime. (Subject to rate limits).
+- **Status Page**: [https://stats.uptimerobot.com/PUi1I3YaBH](https://stats.uptimerobot.com/PUi1I3YaBH) — Public uptime monitoring dashboard.
 
 ---
 
@@ -271,12 +295,15 @@ ownership.
 ```mermaid
 graph TD
     A[User Interface - Next.js] -->|Prompt with 70+ Params| B[Backend API - Node.js]
-    B -->|Inference Request| C[Groq AI LPU Engine]
+    B -->|Story Generation| C[Google Gemini Chairman]
+    B -->|Validation & Outlines| D[Groq LPU Engine]
     C -->|Structured JSON Story| B
-    B -->|Metadata| D[Supabase PostgreSQL]
-    B -->|IPFS Upload| E[Story/Image Data]
-    A -->|Mint NFT| F[Monad Testnet Blockchain]
-    F --- G[Smart Contracts - Solidity]
+    D -->|Classification Data| B
+    B -->|Metadata & Auth| E[Supabase PostgreSQL]
+    B -->|Media Files| F[Supabase Storage]
+    B -->|NFT Metadata| G[IPFS via Pinata]
+    A -->|MetaMask / WalletConnect| H[Ethereum Mainnet via Alchemy]
+    H --- I[Smart Contracts - Solidity]
 ```
 
 ---

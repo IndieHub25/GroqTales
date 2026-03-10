@@ -1,12 +1,14 @@
 # syntax=docker/dockerfile:1
 
 ARG NODE_VERSION=22
-FROM node:${NODE_VERSION}-bookworm as base
+FROM node:${NODE_VERSION}-bookworm AS base
 
 WORKDIR /usr/src/app
 
 ################################################################################
-FROM base as deps
+# Install dependencies
+################################################################################
+FROM base AS deps
 
 RUN --mount=type=bind,source=package.json,target=package.json \
     --mount=type=bind,source=package-lock.json,target=package-lock.json \
@@ -14,22 +16,24 @@ RUN --mount=type=bind,source=package.json,target=package.json \
     npm ci
 
 ################################################################################
-FROM deps as build
+# Build the application
+################################################################################
+FROM deps AS build
 
-ENV MONGODB_URI="mongodb://mongo:27017/groqtales"
-ENV NEXT_PUBLIC_RPC_URL="http://anvil:8545"
+# Build-time env vars (no secrets — those come from runtime)
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NEXT_IGNORE_TYPE_ERRORS=1
+ENV NEXT_PUBLIC_BUILD_MODE=true
 
 COPY . .
 RUN npm run build
 
 ################################################################################
-FROM base as final
+# Production image
+################################################################################
+FROM base AS final
 
-ENV NODE_ENV development
-ENV MONGODB_URI="mongodb://mongo:27017/groqtales"
-ENV NEXT_PUBLIC_RPC_URL="http://anvil:8545"
+ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 USER node
@@ -42,7 +46,13 @@ COPY --chown=node:node --from=build /usr/src/app/server ./server
 COPY --chown=node:node --from=build /usr/src/app/scripts ./scripts
 COPY --chown=node:node --from=build /usr/src/app/next.config.js ./next.config.js
 
+# Frontend (Next.js)
 EXPOSE 3000
+# Backend API (Express)
 EXPOSE 3001
 
-CMD npm start
+# Health check — uses the lightweight liveness probe
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -fs http://localhost:3001/healthz || exit 1
+
+CMD ["npm", "start"]

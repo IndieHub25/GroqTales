@@ -55,6 +55,16 @@ export function SignInForm({ onToggleMode }: { onToggleMode: () => void }) {
       if (result.error) {
         throw new Error(result.error);
       }
+
+      // Persist tokens so dashboard, profile, and API calls can authenticate
+      if (result.data?.tokens?.accessToken && typeof window !== 'undefined') {
+        localStorage.setItem('accessToken', result.data.tokens.accessToken);
+        if (result.data.tokens.refreshToken) {
+          localStorage.setItem('refreshToken', result.data.tokens.refreshToken);
+        }
+        // Notify other tabs/hooks that auth state changed
+        window.dispatchEvent(new StorageEvent('storage', { key: 'accessToken' }));
+      }
       
       setSuccess(true);
       toast({
@@ -63,7 +73,7 @@ export function SignInForm({ onToggleMode }: { onToggleMode: () => void }) {
       });
       
       setTimeout(() => {
-        router.push('/');
+        router.push('/dashboard');
         router.refresh();
       }, 800);
       

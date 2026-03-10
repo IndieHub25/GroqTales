@@ -54,7 +54,7 @@ export class GeminiService {
                 model?: string;
                 error?: string;
                 details?: string;
-            }>('/api/v1/ai', {
+            }>('/api/v1/ai/generate', {
                 method: 'POST',
                 headers: authHeaders(),
                 body: JSON.stringify({
