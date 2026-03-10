@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Supported Versions
 
-Active full support: 2.0.2 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+Active full support: 2.0.3 (latest). Security maintenance (critical fixes only): 1.1.0. All versions < 1.1.0 are End of Security Support (EoSS). See `SECURITY.md` for the evolving support policy.
+
+## [2.0.3] - 2026-03-11
+
+### Fixed
+
+- **Cloudflare Pages Build Error** (`app/genres/[slug]/page.tsx`, `app/stories/[id]/page.tsx`): Fixed `Invalid prerender config` and `routes were not configured to run with the Edge Runtime` errors by explicitly exporting `runtime = 'edge'` and removing conflicting static configs.
 
 ## [2.0.2] - 2026-03-11
 
