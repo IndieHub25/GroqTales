@@ -24,7 +24,6 @@ import { fetchPopularStoriesByGenre } from '@/lib/mock-data';
  * Keep this list in sync with components/genre-selector.tsx.
  */
 export const dynamicParams = false;
-export const runtime = 'edge';
 
 export function generateStaticParams() {
   return [
