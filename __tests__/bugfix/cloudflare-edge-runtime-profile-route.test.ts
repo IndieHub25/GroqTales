@@ -69,6 +69,7 @@ describe('Cloudflare Edge Runtime Profile Route - Bug Condition Exploration', ()
     // Confirm the profile page source no longer declares the Edge runtime
     const routeContent = fs.readFileSync(profileRoutePath, 'utf-8');
     expect(routeContent).not.toContain("runtime = 'edge'");
+  });
 
   /**
    * Additional verification: Check that the profile route file exists
