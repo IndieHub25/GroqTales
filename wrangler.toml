@@ -5,24 +5,23 @@
 #
 # HOW THIS WORKS
 # ─────────────────────────────────────────────────────────────
-# This project uses @cloudflare/next-on-pages to transform the
-# Next.js build output into Cloudflare Pages Functions.
-# Dynamic routes (like /profile/[slug]) are handled by Cloudflare
-# Functions at runtime, not pre-rendered as static HTML.
+# The frontend is deployed as a *static export* using Next.js' built-in
+# `output: 'export'` mode. All dynamic server logic (API routes, database
+# queries, authentication) runs on our backend service (Render / Cloudflare
+# Worker). Cloudflare Pages simply serves the files produced in the `out/`
+# directory. This allows us to avoid the @cloudflare/next-on-pages adapter
+# (which required Edge runtime for every route) and simplifies the build.
 #
 # Build command (set in Cloudflare Pages dashboard):
 #   npm run cf-build
 #
 # Build output directory (set in Cloudflare Pages dashboard):
-#   .vercel/output/static
+#   out
 #
-# The @cloudflare/next-on-pages adapter transforms the Next.js
-# build into a format compatible with Cloudflare Pages, placing
-# the output in .vercel/output/static (Vercel Build Output API format).
 # ============================================================
 
 name = "groqtales"
-pages_build_output_dir = ".vercel/output/static"
+pages_build_output_dir = "out"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 

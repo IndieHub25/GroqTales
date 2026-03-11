@@ -8,14 +8,14 @@ considered End of Security Support (EoSS).
 
 | Version | Status               | Support Level                 | Notes                               |
 | ------- | -------------------- | ----------------------------- | ----------------------------------- |
-| 1.3.104 | ✅ Active (Latest)   | Full (features + security)    | Current production release          |
-| 1.3.103 | ✅ Active (Previous) | Security & critical bug fixes | Upgrade recommended                 |
-| > 1.1.0 | ⚠️ Maintenance       | Critical security only        | Security maintenance — upgrade ASAP |
-| < 1.1.0 | ❌ EoSS              | No updates                    | Please upgrade immediately          |
+| 2.0.2   | ✅ Active (Latest)   | Full (features + security)    | Current production release          |
+| 2.0.1   | ✅ Active (Previous) | Security & critical bug fixes | Upgrade recommended                 |
+| 2.0.0   | ⚠️ Maintenance       | Critical security only        | Security maintenance — upgrade ASAP |
+| < 2.0.0 | ❌ EoSS              | No updates                    | Please upgrade immediately          |
 
 > [!IMPORTANT]
-> Version 1.3.7 introduces major cinematic UI/UX overhauls, Supabase interactive authentication flows, global emote removal, and on-chain action steppers with off-chain access control rules.
-> Upgrading to **1.3.101** is strongly recommended.
+> Version 2.0.2 introduces critical fixes for hydration mismatches, Next.js 15+ async `cookies()` requirement compliance for Supabase `@supabase/ssr` server-side clients, and local TTS generation endpoints.
+> Upgrading to **2.0.2** is strongly recommended.
 
 ## Reporting a Vulnerability
 
@@ -85,8 +85,10 @@ We welcome reports regarding our backend, smart contracts, AI implementation, an
 - Rate limiting (`express-rate-limit`) on public API endpoints
 - Input validation via `express-validator` and Zod schemas
 - CORS configured to restrict cross-origin access
-- Environment secrets managed via `.env` (never committed to version control)
+- Environment secrets managed via `.env.local` (never committed to version control)
 - WCAG 2.1 AA accessibility compliance reduces attack surface from misleading UI
+- Supabase Row Level Security (RLS) enforced on all tables
+- WalletConnect signature verification for wallet-based authentication
 
 ## Protecting Your Data
 
@@ -97,7 +99,10 @@ protect data both in transit and at rest:
 - PostgreSQL/Supabase DB connections authenticated and encrypted with Row Level Security (RLS)
 - Secure session management with encrypted JWT tokens managed via Supabase Auth
 - No secrets exposed in client-side bundles
-- Wallet signatures verified server-side (SIWE/Monad)
+- Wallet signatures verified server-side (Ethereum `personal_sign`)
+- Platform signer private key isolated to server-side only (never exposed to client)
+- Supabase Storage buckets with RLS policies (public read, authenticated upload, owner-only delete)
+- Story engagement data (votes, comments, saves) protected by per-user RLS policies
 
 ## Third-Party & Dependency Security
 
@@ -119,21 +124,30 @@ still report it — include the upstream advisory if available.
 - Content Security Policy headers via Helmet
 - Server-side rendering (SSR) safe patterns — no raw `document`/`window` access without guards
 - Worker endpoints protected by shared `WORKER_SECRET` for internal-only access
-- Outbound Groq API calls protected with 30-second `AbortController` timeout
+- Outbound AI API calls (Gemini, Groq) protected with 30-second `AbortController` timeout
+- Sarvam TTS API calls gated behind authentication middleware
+- Docker health checks using `/healthz` liveness probe
 
 ## Current Technology Stack (Security-Relevant)
 
-| Component      | Technology                | Version    |
-| -------------- | ------------------------- | ---------- |
-| Runtime        | Node.js                   | ≥ 20.0.0   |
-| Framework      | Next.js                   | 14.1.0     |
-| Backend        | Express.js                | 5.1.0      |
-| Database       | Supabase (PostgreSQL)     | latest     |
-| Auth           | Supabase Auth + SIWE      | 2.x        |
-| HTTP Security  | Helmet                    | 8.x        |
-| Rate Limiting  | express-rate-limit        | 8.x        |
-| Validation     | Zod + express-validator   | 3.x / 7.x  |
-| TypeScript     | TypeScript (strict)       | 5.8.x      |
+| Component      | Technology                        | Version    |
+| -------------- | --------------------------------- | ---------- |
+| Runtime        | Node.js                           | ≥ 22.0.0   |
+| Framework      | Next.js                           | 14.1.0     |
+| Backend        | Express.js                        | 5.1.0      |
+| Database       | Supabase (PostgreSQL)             | latest     |
+| Storage        | Supabase Storage (S3-compatible)  | latest     |
+| Auth           | Supabase Auth + Wallet Signatures | 2.x        |
+| AI (Chairman)  | Google Gemini                     | latest     |
+| AI (Tasks)     | Groq LPU                         | latest     |
+| TTS            | Sarvam AI Bulbul v3               | latest     |
+| Blockchain     | Ethereum Mainnet via Alchemy      | latest     |
+| Wallet         | WalletConnect v2 + MetaMask       | latest     |
+| HTTP Security  | Helmet                            | 8.x        |
+| Rate Limiting  | express-rate-limit                | 8.x        |
+| Validation     | Zod + express-validator           | 3.x / 7.x |
+| TypeScript     | TypeScript (strict)               | 5.8.x      |
+| Container      | Docker (multi-stage build)        | latest     |
 
 ---
 

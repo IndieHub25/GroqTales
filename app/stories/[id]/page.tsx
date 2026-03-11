@@ -1,20 +1,17 @@
 import StoryClient from './client';
 
-export const dynamic = 'force-static';
-export const dynamicParams = true;
-
-/**
- * Pre-render a few known IDs at build time;
- * `dynamicParams = true` means unknown IDs still fallback to CSR (the 'use client' child handles data fetching).
- */
+// A minimal list of params is required when `output: 'export'` is set, otherwise
+// Next.js will abort the build with a missing generateStaticParams error. We
+// supply a dummy id so one static page is generated; additional story IDs will
+// be handled by the client router at runtime thanks to `dynamicParams = true`.
+// With Cloudflare Pages a non-prerendered `/stories/<id>` request will fall
+// through to the SPA fallback if you've configured one; otherwise the page may
+// 404 on direct access but will still work via client-side navigation.
 export function generateStaticParams() {
-  const params: { id: string }[] = [];
-  // Top mock IDs kept for backward compat
-  for (const id of ['top-1', 'top-2', 'top-3']) params.push({ id });
-  // Numeric story IDs
-  for (let i = 1; i <= 90; i++) params.push({ id: `story-${i}` });
-  return params;
+  return [{ id: 'default' }];
 }
+
+export const dynamicParams = true;
 
 export default function StoryPage({ params }: { params: { id: string } }) {
   return <StoryClient id={params.id} />;

@@ -118,6 +118,16 @@ export function SignUpForm({ onToggleMode }: { onToggleMode: () => void }) {
       });
 
       if (error) throw error;
+
+      // Persist tokens so user is immediately authenticated if auto-confirmed
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token && typeof window !== 'undefined') {
+        localStorage.setItem('accessToken', session.access_token);
+        if (session.refresh_token) {
+          localStorage.setItem('refreshToken', session.refresh_token);
+        }
+        window.dispatchEvent(new StorageEvent('storage', { key: 'accessToken' }));
+      }
       
       setSuccess(true);
       toast({

@@ -152,7 +152,7 @@ export interface AIProcessingRequest {
 
 export async function processAI(request: AIProcessingRequest) {
     return withRetry(() =>
-        apiFetch('/api/v1/ai', {
+        apiFetch('/api/v1/ai/generate', {
             method: 'POST',
             headers: authHeaders(),
             body: JSON.stringify(request),

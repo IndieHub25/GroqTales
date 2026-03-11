@@ -238,10 +238,24 @@ const nextConfig = {
   }),
 
   // Output configuration
-  // For Cloudflare Pages: use undefined to allow @cloudflare/next-on-pages to handle dynamic routes
-  // 'standalone' = self-contained Node.js server for Render
-  // undefined = default Next.js behavior with dynamic routes and SSR
-  output: isCfBuild ? undefined : (process.env.BUILD_STANDALONE === 'true' ? 'standalone' : undefined),
+  // When building for Cloudflare Pages we deploy a *static export* (output: 'export').
+  // This is essential because the frontend is served as static assets and any
+  // dynamic behavior (API routes, server rendering) happens on the separate
+  // backend service. The previous behavior (undefined) caused a build that
+  // generated no `out/` directory and triggered export errors such as
+  // "Export encountered errors on following paths" in our CI logs.
+  //
+  // Fallbacks:
+  //   - 'standalone' = self-contained Node.js server for Render
+  //   - undefined  = default Next.js behavior with dynamic routes and SSR
+  //
+  // The bug-exploration test ensures this value switches to 'export' when
+  // NEXT_PUBLIC_BUILD_MODE=true (isCfBuild).
+  output: isCfBuild
+    ? 'export'
+    : process.env.BUILD_STANDALONE === 'true'
+    ? 'standalone'
+    : undefined,
 
   // Experimental features
   experimental: {

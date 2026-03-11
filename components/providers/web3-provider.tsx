@@ -16,6 +16,7 @@ interface Web3ContextType {
   connecting: boolean;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => Promise<void>;
+  setWalletConnection: (account: string, chainId?: number) => void;
   networkName: string;
   ensName: string | null;
 }
@@ -186,7 +187,22 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   };
 
 
-  // const disconnectWallet = () => {
+  const setWalletConnection = useCallback((newAccount: string, newChainId?: number) => {
+    setAccount(newAccount);
+    setConnected(true);
+    if (newChainId) {
+      setChainId(newChainId);
+      if (newChainId === 1) setNetworkName('Ethereum Mainnet');
+      else if (newChainId === 5) setNetworkName('Goerli Testnet');
+      else if (newChainId === 11155111) setNetworkName('Sepolia Testnet');
+      else if (newChainId === 137) setNetworkName('Polygon');
+      else if (newChainId === 8453) setNetworkName('Base');
+      else if (newChainId === 42161) setNetworkName('Arbitrum');
+      else if (newChainId === 10) setNetworkName('Optimism');
+      else setNetworkName(`Chain ${newChainId}`);
+    }
+  }, []);
+
   const contextValue: Web3ContextType = {
     account,
     chainId,
@@ -195,6 +211,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     connecting,
     connectWallet,
     disconnectWallet,
+    setWalletConnection,
     networkName,
     ensName,
     // buyNFT,

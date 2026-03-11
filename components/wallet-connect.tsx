@@ -40,8 +40,8 @@ export default function WalletConnect() {
     disconnectWallet,
     networkName,
     ensName,
+    setWalletConnection,
   } = useWeb3();
-
   const { toast } = useToast();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
@@ -88,13 +88,83 @@ export default function WalletConnect() {
 
   const handleWalletConnect = async () => {
     setShowWalletModal(false);
-    // Placeholder for actual WalletConnect v2 initialization
-    toast({
-      title: 'WalletConnect Initialization',
-      description: 'Opening mobile QR scan modal...',
-    });
-    console.log("Initiating WalletConnect mobile flow...");
-    // await initiateWalletConnectFlow()
+    
+    const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID;
+    if (!projectId || projectId === 'your_wallet_connect_project_id_here') {
+      toast({
+        title: 'WalletConnect Not Configured',
+        description: 'WalletConnect Project ID is not set. Please configure NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const { default: EthereumProvider } = await import('@walletconnect/ethereum-provider');
+      
+      const provider = await EthereumProvider.init({
+        projectId,
+        chains: [1], // Ethereum Mainnet
+        showQrModal: true,
+        optionalChains: [137, 8453, 42161, 10], // Polygon, Base, Arbitrum, Optimism
+      });
+
+      await provider.connect();
+      
+      const accounts = provider.accounts;
+      if (!accounts || accounts.length === 0) {
+        toast({ title: 'Connection Failed', description: 'No accounts returned from WalletConnect.', variant: 'destructive' });
+        return;
+      }
+
+      const selectedAccount: string = accounts[0]!;
+      
+      // Authenticate via backend wallet-login with signature verification
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com';
+      
+      // Step 1: Get nonce from backend
+      const nonceRes = await fetch(`${baseUrl}/api/v1/auth/nonce?address=${selectedAccount}`);
+      if (!nonceRes.ok) {
+        toast({ title: 'Auth Failed', description: 'Failed to get authentication nonce.', variant: 'destructive' });
+        return;
+      }
+      const { nonce } = await nonceRes.json();
+      
+      // Step 2: Sign the message
+      const message = `Sign this message to authenticate with Comicraft. Nonce: ${nonce}`;
+      const signature = await provider.request({ method: 'personal_sign', params: [message, selectedAccount] });
+      
+      // Step 3: Send to backend for verification and token issuance
+      const authRes = await fetch(`${baseUrl}/api/v1/auth/wallet-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: selectedAccount, signature }),
+      });
+      
+      if (authRes.ok) {
+        // use the chain id returned by the provider instead of hardcoding
+        const connectedChain = typeof provider.chainId === 'string' ? parseInt(provider.chainId, 16) : provider.chainId;
+        setWalletConnection(selectedAccount, connectedChain || 1);
+        const authData = await authRes.json();
+        if (authData.data?.tokens?.accessToken && typeof window !== 'undefined') {
+          localStorage.setItem('accessToken', authData.data.tokens.accessToken);
+          if (authData.data.tokens.refreshToken) {
+            localStorage.setItem('refreshToken', authData.data.tokens.refreshToken);
+          }
+          window.dispatchEvent(new StorageEvent('storage', { key: 'accessToken' }));
+        }
+        toast({ title: 'Wallet Connected', description: `Connected via WalletConnect: ${selectedAccount.slice(0, 6)}...${selectedAccount.slice(-4)}` });
+      } else {
+        toast({ title: 'Auth Failed', description: 'Wallet authentication failed.', variant: 'destructive' });
+      }
+    } catch (err: any) {
+      if (err?.message?.includes('User rejected') || err?.message?.includes('cancelled')) {
+        // User cancelled — no toast needed
+        return;
+      }
+      console.error('WalletConnect error:', err);
+      toast({ title: 'WalletConnect Error', description: err?.message || 'Failed to connect via WalletConnect.', variant: 'destructive' });
+    }
   };
 
   if (!connected) {
@@ -151,10 +221,8 @@ export default function WalletConnect() {
               </button>
 
               <button 
-                disabled
-                aria-disabled="true"
-                title="Coming Soon"
-                className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 opacity-50 cursor-not-allowed transition-all group"
+                onClick={handleWalletConnect}
+                className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
@@ -162,10 +230,10 @@ export default function WalletConnect() {
                   </div>
                   <div className="text-left">
                     <h3 className="font-semibold text-white">WalletConnect</h3>
-                    <p className="text-xs text-white/40">Coming Soon</p>
+                    <p className="text-xs text-white/40">Mobile & Desktop wallets</p>
                   </div>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center opacity-50">
+                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
                   <ChevronDown className="w-4 h-4 -rotate-90 text-white/50" />
                 </div>
               </button>

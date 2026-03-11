@@ -1527,3 +1527,49 @@
     animation: none !important;
   }
 }
+
+/* ═══════════════════════════════════════
+   INTERACTIVE BOOK — Page Flip Animations
+   ═══════════════════════════════════════ */
+@keyframes page-flip-right {
+  0%   { transform: perspective(2000px) rotateY(0deg); opacity: 1; }
+  50%  { transform: perspective(2000px) rotateY(-15deg); opacity: 0.6; }
+  100% { transform: perspective(2000px) rotateY(0deg); opacity: 1; }
+}
+
+@keyframes page-flip-left {
+  0%   { transform: perspective(2000px) rotateY(0deg); opacity: 1; }
+  50%  { transform: perspective(2000px) rotateY(15deg); opacity: 0.6; }
+  100% { transform: perspective(2000px) rotateY(0deg); opacity: 1; }
+}
+
+.animate-page-flip-right {
+  animation: page-flip-right 0.35s ease-in-out;
+}
+
+.animate-page-flip-left {
+  animation: page-flip-left 0.35s ease-in-out;
+}
+
+/* ═══════════════════════════════════════
+   BOOK STYLE OVERRIDES
+   Prevents comic global styles (uppercase headings,
+   font-weight:600, Comic Neue font) from corrupting
+   the book's serif reading experience.
+   ═══════════════════════════════════════ */
+[style*="perspective"] h1,
+[style*="perspective"] h2,
+[style*="perspective"] h3,
+[style*="perspective"] h4,
+[style*="perspective"] p,
+[style*="perspective"] span,
+[style*="perspective"] div,
+[style*="perspective"] button {
+  text-transform: none;
+  letter-spacing: normal;
+  font-family: inherit;
+}
+
+[style*="perspective"] p {
+  font-weight: 300;
+}

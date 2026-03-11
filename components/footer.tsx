@@ -34,7 +34,11 @@ export function Footer({ version }: { version?: string }) {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://groqtales-backend-api.onrender.com'}/api/health`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
-          setHealthStatus((data.status === 'ok' || data.status === 'healthy') ? 'ok' : data.status === 'degraded' ? 'degraded' : 'down');
+          setHealthStatus(
+            (data.status === 'ok' || data.status === 'healthy' || data.status === 'operational') ? 'ok'
+            : (data.status === 'degraded' || data.status === 'partial') ? 'degraded'
+            : 'down'
+          );
         } else {
           setHealthStatus('down');
         }
@@ -235,7 +239,12 @@ export function Footer({ version }: { version?: string }) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 border border-white/10 rounded-full">
+            <a
+              href="https://stats.uptimerobot.com/PUi1I3YaBH"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-white/5 px-3 py-1.5 border border-white/10 rounded-full hover:bg-white/10 hover:border-white/20 transition-colors cursor-pointer group"
+            >
               <span
                 className={`w-1.5 h-1.5 rounded-full ${healthStatus === 'ok'
                   ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse'
@@ -246,10 +255,11 @@ export function Footer({ version }: { version?: string }) {
                       : 'bg-white/30'
                   }`}
               />
-              <span className="text-xs font-medium text-white/50 tracking-wider uppercase">
+              <span className="text-xs font-medium text-white/50 tracking-wider uppercase group-hover:text-white/70 transition-colors">
                 {healthStatus === 'ok' ? 'System Operational' : healthStatus === 'degraded' ? 'Degraded Performance' : healthStatus === 'down' ? 'System Offline' : 'Checking Status...'}
               </span>
-            </div>
+              <ExternalLink className="w-3 h-3 text-white/30 group-hover:text-white/60 transition-opacity" />
+            </a>
 
             <div className="text-right">
               <Link

@@ -31,6 +31,16 @@ function CallbackContent() {
           return;
         }
 
+        // Persist session tokens to localStorage so dashboard/API calls can authenticate
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token && typeof window !== 'undefined') {
+          localStorage.setItem('accessToken', session.access_token);
+          if (session.refresh_token) {
+            localStorage.setItem('refreshToken', session.refresh_token);
+          }
+          window.dispatchEvent(new StorageEvent('storage', { key: 'accessToken' }));
+        }
+
         console.log("Supabase Auth successful, redirecting to", next);
         // Successful login! Redirect the user
         router.push(next);

@@ -2,14 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import BookView from '@/components/book-view';
+import StoryEngagement from '@/components/story-engagement';
 import { ArrowLeft, BookOpen, Eye, Heart, Loader2, Tag } from 'lucide-react';
 import Link from 'next/link';
 
-interface Chapter {
-  index: number;
-  title: string;
-  content: string;
-}
+interface Chapter { index: number; title: string; content: string; }
 
 interface Story {
   id: string;
@@ -49,7 +46,6 @@ export default function StoryClient({ id }: { id: string }) {
 
   useEffect(() => {
     let cancelled = false;
-
     async function fetchStory() {
       setNotFound(false);
       setLoading(true);
@@ -67,10 +63,7 @@ export default function StoryClient({ id }: { id: string }) {
       setLoading(false);
     }
     fetchStory();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [id]);
 
   if (loading) {
@@ -85,13 +78,12 @@ export default function StoryClient({ id }: { id: string }) {
     return (
       <div className="min-h-screen bg-[#080b11] flex items-center justify-center text-white">
         <div className="text-center space-y-4">
-          <h2 className="text-3xl font-bold">Signal Lost</h2>
-          <p className="text-white/40">Story not found.</p>
-          <Link
-            href="/marketplace"
+          <h2 className="text-3xl font-bold" style={{ textTransform: 'none' }}>Story Not Found</h2>
+          <p className="text-white/40" style={{ fontWeight: 400 }}>This story may have been removed or doesn't exist.</p>
+          <Link href="/gallery"
             className="inline-block mt-4 px-6 py-3 border border-white/20 rounded-full text-sm hover:bg-white/5 transition-colors"
-          >
-            ← Return to Marketplace
+            style={{ fontWeight: 500 }}>
+            ← Back to Gallery
           </Link>
         </div>
       </div>
@@ -103,68 +95,72 @@ export default function StoryClient({ id }: { id: string }) {
 
   return (
     <div className="min-h-screen bg-[#080b11] text-white">
-      {/* Hero cover image */}
-      {story.cover_image && (
-        <div className="relative h-64 md:h-80 w-full overflow-hidden">
-          <img
-            src={story.cover_image}
-            alt={story.title}
-            className="absolute inset-0 w-full h-full object-cover opacity-30"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#080b11]/60 to-[#080b11]" />
-        </div>
-      )}
 
-      <div className="container mx-auto px-4 md:px-8 max-w-5xl pb-24">
-        {/* Back nav */}
-        <nav className="py-6">
-          <Link
-            href="/marketplace"
-            className="inline-flex items-center gap-2 text-white/50 hover:text-white text-sm transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Marketplace
-          </Link>
-        </nav>
+      {/* ── Compact Header Bar ───────────────────────────────── */}
+      <div className="sticky top-0 z-50 bg-[#080b11]/90 backdrop-blur-xl border-b border-white/[0.06]">
+        <div className="container mx-auto max-w-6xl px-4 md:px-8">
+          <div className="flex items-center gap-4 h-14">
+            <Link href="/gallery"
+              className="inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-colors shrink-0"
+              style={{ fontWeight: 500 }}>
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Gallery</span>
+            </Link>
 
-        {/* Story header */}
-        <header className={`mb-10 ${story.cover_image ? '-mt-20 relative z-10' : ''}`}>
-          {story.genre && (
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-emerald-500/40 text-emerald-400 bg-emerald-500/10 mb-4">
-              <Tag className="w-3 h-3" />
-              {story.genre}
-            </span>
-          )}
+            <div className="h-5 w-px bg-white/10" />
 
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 leading-tight">
-            {story.title}
-          </h1>
-
-          <div className="flex items-center gap-4 text-white/40 text-sm flex-wrap">
-            {story.author_name && <span>By {story.author_name}</span>}
-            {story.views != null && (
-              <span className="flex items-center gap-1">
-                <Eye className="w-3.5 h-3.5" /> {story.views.toLocaleString()} views
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              {story.genre && (
+                <span className="px-2 py-0.5 rounded text-[10px] uppercase tracking-wider border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 shrink-0"
+                  style={{ fontWeight: 700 }}>
+                  {story.genre}
+                </span>
+              )}
+              <span className="text-sm text-white/60 truncate" style={{ fontWeight: 500, textTransform: 'none' }}>
+                {story.title}
               </span>
-            )}
-            {story.likes != null && (
+            </div>
+
+            <div className="flex items-center gap-3 text-white/30 text-xs shrink-0" style={{ fontWeight: 400 }}>
+              {story.views != null && (
+                <span className="hidden md:flex items-center gap-1">
+                  <Eye className="w-3 h-3" /> {story.views.toLocaleString()}
+                </span>
+              )}
+              {story.likes != null && (
+                <span className="hidden md:flex items-center gap-1">
+                  <Heart className="w-3 h-3" /> {story.likes.toLocaleString()}
+                </span>
+              )}
               <span className="flex items-center gap-1">
-                <Heart className="w-3.5 h-3.5" /> {story.likes.toLocaleString()} likes
+                <BookOpen className="w-3 h-3" /> {chapters.length}
               </span>
-            )}
-            <span className="flex items-center gap-1">
-              <BookOpen className="w-3.5 h-3.5" /> {chapters.length} chapter{chapters.length !== 1 ? 's' : ''}
-            </span>
+            </div>
           </div>
+        </div>
+      </div>
 
-          {story.description && (
-            <p className="mt-5 text-lg text-white/50 leading-relaxed max-w-3xl">
-              {story.description}
-            </p>
-          )}
-        </header>
+      {/* ── Story Title Section ──────────────────────────────── */}
+      <section className="container mx-auto max-w-4xl px-4 md:px-8 pt-10 pb-6 text-center">
+        <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-3"
+          style={{ fontFamily: "'Georgia', serif", textTransform: 'none', lineHeight: 1.2 }}>
+          {story.title}
+        </h1>
+        {story.author_name && (
+          <p className="text-base text-white/40 mb-2" style={{ fontWeight: 400, textTransform: 'none' }}>
+            by {story.author_name}
+          </p>
+        )}
+        {story.description && (
+          <p className="text-sm text-white/30 leading-relaxed max-w-2xl mx-auto mt-4"
+            style={{ fontWeight: 400, textTransform: 'none' }}>
+            {story.description}
+          </p>
+        )}
+      </section>
 
-        {/* ── BOOK VIEW with TTS audio controls ──────────────────────────── */}
+      {/* ── Interactive Book ──────────────────────────────────── */}
+      <section className="container mx-auto max-w-6xl px-4 md:px-16 pb-10">
         <BookView
           storyId={story.id}
           title={story.title}
@@ -174,7 +170,14 @@ export default function StoryClient({ id }: { id: string }) {
           defaultLanguage={ttsSettings.defaultLanguage || 'en-IN'}
           defaultPace={ttsSettings.defaultPace || 1}
         />
-      </div>
+      </section>
+
+      {/* ── Engagement Section ───────────────────────────────── */}
+      <section className="border-t border-white/[0.06] bg-[#060912]">
+        <div className="container mx-auto max-w-4xl px-4 md:px-8 py-10">
+          <StoryEngagement storyId={story.id} />
+        </div>
+      </section>
     </div>
   );
 }

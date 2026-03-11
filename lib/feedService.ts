@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 
 export async function getPersonalizedFeed(userId: string, page = 1, limit = 10) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const skip = (page - 1) * limit;
 
   // We fetch interactions directly using Supabase
@@ -66,7 +66,7 @@ export async function getPersonalizedFeed(userId: string, page = 1, limit = 10) 
 }
 
 async function getTrendingFeed(page: number, limit: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const skip = (page - 1) * limit;
 
   const { data, error } = await supabase

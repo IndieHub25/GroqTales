@@ -5,6 +5,7 @@ import {
   Heart, MessageCircle, Share2, ChevronUp, ChevronDown, Book, Layers, ShieldCheck, Hexagon, ChevronRight
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,10 +31,10 @@ function GalleryCard({ post, onVote }: { post: GalleryPost; onVote: (id: string,
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="group relative break-inside-avoid mb-6">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl blur-xl -z-10" />
-      <div className="bg-black/80 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-md transition-colors hover:border-white/30 h-full flex flex-col justify-between">
+      <div className="bg-black/80 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-md transition-all hover:border-white/30 hover:scale-[1.02] h-full flex flex-col justify-between relative">
         
         {/* Cover Image */}
-        <div className="w-full h-48 bg-white/5 relative overflow-hidden group-hover:opacity-90 transition-opacity">
+        <Link href={`/stories/${post.id}`} className="w-full h-48 bg-white/5 relative overflow-hidden group-hover:opacity-90 transition-opacity block">
            {post.cover_image ? (
               <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover" />
            ) : (
@@ -50,9 +51,9 @@ function GalleryCard({ post, onVote }: { post: GalleryPost; onVote: (id: string,
                  </Badge>
                )}
            </div>
-        </div>
+        </Link>
 
-        <div className="p-6">
+        <Link href={`/stories/${post.id}`} className="p-6 block flex-grow">
           <div className="flex justify-between items-start mb-4">
             <div className="flex gap-3 items-center">
               <Avatar className="h-10 w-10 border-2 border-emerald-500/30">
@@ -80,26 +81,35 @@ function GalleryCard({ post, onVote }: { post: GalleryPost; onVote: (id: string,
           <p className="text-white/60 leading-relaxed text-sm mb-4 line-clamp-4 italic">
             "{post.content}"
           </p>
-        </div>
+        </Link>
 
         <div className="flex items-center justify-between text-white/50 px-6 pb-6 pt-2">
-          <div className="flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/10">
+          <div className="flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/10 relative z-10">
             <button
-              onClick={() => onVote(post.id, post.userVote === 'up' ? null : 'up')}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onVote(post.id, post.userVote === 'up' ? null : 'up'); }}
               className={`p-1.5 rounded-full hover:bg-white/10 hover:text-emerald-400 transition-colors ${post.userVote === 'up' ? 'text-emerald-400 bg-emerald-400/10' : ''}`}
             >
               <ChevronUp className="w-4 h-4" />
             </button>
             <span className={`text-sm font-semibold min-w-[2ch] text-center ${post.userVote === 'up' ? 'text-emerald-400' : post.userVote === 'down' ? 'text-rose-400' : 'text-white/70'}`}>{post.likes}</span>
             <button
-              onClick={() => onVote(post.id, post.userVote === 'down' ? null : 'down')}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onVote(post.id, post.userVote === 'down' ? null : 'down'); }}
               className={`p-1.5 rounded-full hover:bg-white/10 hover:text-rose-400 transition-colors ${post.userVote === 'down' ? 'text-rose-400 bg-rose-400/10' : ''}`}
             >
               <ChevronDown className="w-4 h-4" />
             </button>
           </div>
           {post.file_url ? (
-             <Button variant="ghost" size="sm" className="rounded-full hover:bg-emerald-500/20 hover:text-emerald-400" onClick={() => window.open(post.file_url, '_blank')}>
+             <Button
+               variant="ghost"
+               size="sm"
+               className="rounded-full hover:bg-emerald-500/20 hover:text-emerald-400 relative z-10"
+               onClick={() => {
+                 // open in new tab safely: prevent access to window.opener
+                 const w = window.open(post.file_url, '_blank', 'noopener,noreferrer');
+                 if (w) w.opener = null;
+               }}
+             >
                 Read File <ChevronRight className="w-4 h-4 ml-1" />
              </Button>
           ) : (

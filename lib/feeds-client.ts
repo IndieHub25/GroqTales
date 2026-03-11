@@ -66,6 +66,7 @@ export async function fetchNotifications(
 ): Promise<Notification[]> {
     try {
         const token = getAuthToken();
+        if (!token) return [];
         const res = await fetch(
             `${feedsBase()}/api/feeds/notifications/me?unread=${unreadOnly ? 50 : 0}&limit=${limit}`,
             {
