@@ -142,7 +142,9 @@ export default function WalletConnect() {
       });
       
       if (authRes.ok) {
-        setWalletConnection(selectedAccount, 1);
+        // use the chain id returned by the provider instead of hardcoding
+        const connectedChain = typeof provider.chainId === 'string' ? parseInt(provider.chainId, 16) : provider.chainId;
+        setWalletConnection(selectedAccount, connectedChain || 1);
         const authData = await authRes.json();
         if (authData.data?.tokens?.accessToken && typeof window !== 'undefined') {
           localStorage.setItem('accessToken', authData.data.tokens.accessToken);

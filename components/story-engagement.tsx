@@ -41,10 +41,55 @@ export default function StoryEngagement({ storyId }: StoryEngagementProps) {
   const [saveLoading, setSaveLoading] = useState(false);
 
   // ---------- Auth ----------
+  
+  // Bootstraps Supabase auth state by checking for a persisted access token in
+  // localStorage.  This mirrors the pattern used in other components (header,
+  // user-nav, etc.) so that when a user logs in/out anywhere in the app the
+  // session is restored immediately and `onAuthStateChange` will fire.  We
+  // also listen for storage events so that changes originating in other tabs
+  // are handled.
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    let subscription: any;
+    let storageListener: (e: StorageEvent) => void;
+
+    const init = async () => {
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('accessToken');
+        const refresh = localStorage.getItem('refreshToken');
+        if (token) {
+          try {
+            await supabase.auth.setSession({ access_token: token, refresh_token: refresh || undefined });
+          } catch (err) {
+            console.error('Failed to restore supabase session from localStorage', err);
+          }
+        }
+      }
+
+      // grab whatever session Supabase currently has (may be empty)
+      const { data } = await supabase.auth.getSession();
       setUserId(data.session?.user?.id ?? null);
-    });
+
+      // subscribe to later changes
+      const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUserId(session?.user?.id ?? null);
+      });
+      subscription = sub.subscription;
+    };
+
+    init();
+
+    storageListener = (e: StorageEvent) => {
+      if (e.key === 'accessToken') {
+        // token changed (login/logout elsewhere) – re-bootstrap session
+        init();
+      }
+    };
+    window.addEventListener('storage', storageListener);
+
+    return () => {
+      if (subscription) subscription.unsubscribe();
+      window.removeEventListener('storage', storageListener);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -143,15 +188,13 @@ export default function StoryEngagement({ storyId }: StoryEngagementProps) {
     try {
       if (prevUserVote === direction) {
         // Remove vote
-        const { error } = await supabase.from('story_votes').delete().eq('story_id', storyId).eq('user_id', userId);
-        if (error) throw error;
+        await supabase.from('story_votes').delete().eq('story_id', storyId).eq('user_id', userId).throwOnError();
       } else {
         // Upsert vote
-        const { error } = await supabase.from('story_votes').upsert(
+        await supabase.from('story_votes').upsert(
           { story_id: storyId, user_id: userId, vote: direction },
           { onConflict: 'story_id,user_id' }
-        );
-        if (error) throw error;
+        ).throwOnError();
       }
     } catch (err) {
       console.error('Vote error:', err);
@@ -172,8 +215,11 @@ export default function StoryEngagement({ storyId }: StoryEngagementProps) {
         story_id: storyId,
         user_id: userId,
         content: commentText.trim(),
-      });
+      }).throwOnError();
       setCommentText('');
+      // increment the count immediately so the toggle button reflects the
+      // new comment without waiting for `loadComments` to refresh the list
+      setCommentCount(c => c + 1); // TODO: keep this in sync with loadComments
       await loadComments();
     } catch (err) {
       console.error('Comment error:', err);
@@ -188,10 +234,10 @@ export default function StoryEngagement({ storyId }: StoryEngagementProps) {
 
     try {
       if (isSaved) {
-        await supabase.from('saved_stories').delete().eq('story_id', storyId).eq('user_id', userId);
+        await supabase.from('saved_stories').delete().eq('story_id', storyId).eq('user_id', userId).throwOnError();
         setIsSaved(false);
       } else {
-        await supabase.from('saved_stories').insert({ story_id: storyId, user_id: userId });
+        await supabase.from('saved_stories').insert({ story_id: storyId, user_id: userId }).throwOnError();
         setIsSaved(true);
       }
     } catch (err) {

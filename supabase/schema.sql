@@ -61,6 +61,54 @@ CREATE TABLE IF NOT EXISTS stories (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- --------------------------------------------------------
+-- 2.5 STORY_VOTES TABLE
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS story_votes (
+  story_id UUID REFERENCES stories(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  vote SMALLINT NOT NULL CHECK (vote IN (1, -1)),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  PRIMARY KEY (story_id, user_id)
+);
+
+ALTER TABLE story_votes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view votes for a story" ON story_votes FOR SELECT USING (true);
+CREATE POLICY "Users can insert/update their own vote" ON story_votes FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update their own vote" ON story_votes FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own vote" ON story_votes FOR DELETE USING (auth.uid() = user_id);
+
+-- --------------------------------------------------------
+-- 2.6 STORY_COMMENTS TABLE
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS story_comments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  story_id UUID REFERENCES stories(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  content TEXT NOT NULL CHECK (char_length(content) <= 1000),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE story_comments ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view comments" ON story_comments FOR SELECT USING (true);
+CREATE POLICY "Users can insert their own comment" ON story_comments FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own comment" ON story_comments FOR DELETE USING (auth.uid() = user_id);
+
+-- --------------------------------------------------------
+-- 2.7 SAVED_STORIES TABLE
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS saved_stories (
+  story_id UUID REFERENCES stories(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  saved_at TIMESTAMPTZ DEFAULT now(),
+  PRIMARY KEY (story_id, user_id)
+);
+
+ALTER TABLE saved_stories ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view their saved stories" ON saved_stories FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert a saved story" ON saved_stories FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete their saved story" ON saved_stories FOR DELETE USING (auth.uid() = user_id);
+
 ALTER TABLE stories ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Stories are viewable by everyone"

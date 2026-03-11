@@ -183,6 +183,11 @@ To run this project locally, you must set up your environment variables. Create 
 | `NEXT_PUBLIC_UNSPLASH_API_KEY`          |  _Optional_  | API key used for fetching high-quality cover images for stories.     |
 | `NEXT_PUBLIC_CONTRACT_ADDR`         | **Required** | The smart contract address for the deployed NFT collection.          |
 | `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | **Required** | WalletConnect project ID for wallet integration.                 |
+| `UPSTASH_REDIS_REST_URL`             |  _Optional_  | URL for Upstash Redis (used for AI cache & rate limiting).      |
+| `UPSTASH_REDIS_REST_TOKEN`           |  _Optional_  | Token for Upstash Redis REST API.                               |
+| `REDIS_URL`                          |  _Optional_  | Alternate Redis connection string (used by notifications/cache if not using Upstash). |
+| `MONGODB_URI`                        |  _Optional_  | MongoDB connection string (required for local Mongo-based features). |
+| `NEXT_PUBLIC_URL`                    |  _Optional_  | Public base URL of the frontend (used when constructing links in emails, etc.). |
 
 ### 🔑 How to get these keys:
 

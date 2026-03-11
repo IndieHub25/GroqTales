@@ -4,7 +4,9 @@ module.exports = {
 		'./pages/**/*.{js,ts,jsx,tsx,mdx}',
 		'./components/**/*.{js,ts,jsx,tsx,mdx}',
 		'./app/**/*.{js,ts,jsx,tsx,mdx}',
-		'./src/**/*.{js,ts,jsx,tsx,mdx}',
+		// scan src for TS/JSX/MDX only; excluding plain .js avoids the
+		// `./src/**/*.js` warning that can unintentionally match node_modules
+		'./src/**/*.{ts,tsx,jsx,mdx}',
 	],
 	darkMode: ['class'],
 	theme: {
@@ -135,8 +137,18 @@ module.exports = {
 				shimmer: {
 					'0%': { backgroundPosition: '-200% 0' },
 					'100%': { backgroundPosition: '200% 0' }
+				},
+				/* page flip animation used by BookView */
+				'page-flip-right': {
+					from: { transform: 'rotateY(0deg)' },
+					to: { transform: 'rotateY(-180deg)' }
+				},
+				'page-flip-left': {
+					from: { transform: 'rotateY(0deg)' },
+					to: { transform: 'rotateY(180deg)' }
 				}
 			},
+
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
@@ -145,7 +157,10 @@ module.exports = {
 				'float-delayed': 'float-delayed 5s ease-in-out infinite 1s',
 				'float-slow': 'float-slow 6s ease-in-out infinite',
 				'shimmer_1.5s_infinite': 'shimmer 1.5s infinite linear',
-				'shimmer_2s_infinite': 'shimmer 2s infinite linear'
+				'shimmer_2s_infinite': 'shimmer 2s infinite linear',
+				/* book page flip */
+				'page-flip-right': 'page-flip-right 0.35s ease-in-out forwards',
+				'page-flip-left': 'page-flip-left 0.35s ease-in-out forwards'
 			}
 		}
 	},

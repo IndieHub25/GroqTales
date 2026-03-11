@@ -100,7 +100,16 @@ function GalleryCard({ post, onVote }: { post: GalleryPost; onVote: (id: string,
             </button>
           </div>
           {post.file_url ? (
-             <Button variant="ghost" size="sm" className="rounded-full hover:bg-emerald-500/20 hover:text-emerald-400 relative z-10" onClick={() => window.open(post.file_url, '_blank')}>
+             <Button
+               variant="ghost"
+               size="sm"
+               className="rounded-full hover:bg-emerald-500/20 hover:text-emerald-400 relative z-10"
+               onClick={() => {
+                 // open in new tab safely: prevent access to window.opener
+                 const w = window.open(post.file_url, '_blank', 'noopener,noreferrer');
+                 if (w) w.opener = null;
+               }}
+             >
                 Read File <ChevronRight className="w-4 h-4 ml-1" />
              </Button>
           ) : (
